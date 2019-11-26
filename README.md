@@ -1,0 +1,1 @@
+# scandit-cordova-datacapture-core
