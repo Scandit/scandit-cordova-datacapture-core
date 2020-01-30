@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "lib": ["es2016", "dom"],
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "target": "es2016",
+
+    "outDir": "www/js",
+
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "alwaysStrict": true,
+    "skipLibCheck": true,
+    "experimentalDecorators": true
+  },
+  "include": [
+    "www/ts/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/tests/**/*.ts"
+  ]
+}
