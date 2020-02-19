@@ -1,7 +1,6 @@
 /// <amd-module name="scandit-cordova-datacapture-core.Camera+Related"/>
 // ^ needed because Cordova can't resolve "../xx" style dependencies
 import { Cordova } from './Cordova/Cordova';
-import { CameraSettingsDefaultsJSON } from './Cordova/Defaults';
 import { DefaultSerializeable, Serializeable } from './Serializeable';
 
 export enum FrameSourceState {
@@ -35,6 +34,10 @@ export enum FocusRange {
   Far = 'far',
 }
 
+enum PrivateCameraProperty {
+  CameraAPI = 'api',
+}
+
 export interface FrameSourceListener {
   didChangeState(frameSource: FrameSource, newState: FrameSourceState): void;
 
@@ -52,7 +55,13 @@ export interface FrameSource extends Serializeable {
   removeListener(listener: FrameSourceListener): void;
 }
 
-export type CameraSettingsJSON = CameraSettingsDefaultsJSON;
+export interface CameraSettingsJSON {
+  preferredResolution: string;
+  maxFrameRate: number;
+  zoomFactor: number;
+  focusRange: string;
+  api: number;
+}
 
 export interface PrivateCameraSettings {
   fromJSON(json: CameraSettingsJSON): CameraSettings;
@@ -62,6 +71,8 @@ export class CameraSettings extends DefaultSerializeable {
   public preferredResolution: VideoResolution = Cordova.defaults.Camera.Settings.preferredResolution;
   public maxFrameRate: number = Cordova.defaults.Camera.Settings.maxFrameRate;
   public zoomFactor: number = Cordova.defaults.Camera.Settings.zoomFactor;
+
+  private api: number = 1;
 
   private focus = {
     range: Cordova.defaults.Camera.Settings.focusRange,
@@ -81,6 +92,9 @@ export class CameraSettings extends DefaultSerializeable {
     settings.maxFrameRate = json.maxFrameRate;
     settings.zoomFactor = json.zoomFactor;
     settings.focusRange = json.focusRange as FocusRange;
+    if (json.api !== undefined && json.api !== null) {
+      settings.api = json.api;
+    }
     return settings;
   }
 
@@ -92,6 +106,21 @@ export class CameraSettings extends DefaultSerializeable {
       Object.getOwnPropertyNames(settings).forEach(propertyName => {
         (this as any)[propertyName] = (settings as any)[propertyName];
       });
+    }
+  }
+
+  public setProperty(name: string, value: any): void {
+    switch (name) {
+      case PrivateCameraProperty.CameraAPI:
+        this.api = value as number;
+        break;
+    }
+  }
+
+  public getProperty(name: string): any {
+    switch (name) {
+      case PrivateCameraProperty.CameraAPI:
+        return this.api;
     }
   }
 }

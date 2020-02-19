@@ -1,6 +1,6 @@
 /// <amd-module name="scandit-cordova-datacapture-core.Defaults"/>
 // ^ needed because Cordova can't resolve "../xx" style dependencies
-import { CameraPosition, FocusRange, VideoResolution } from '../Camera+Related';
+import { CameraPosition, CameraSettings, FocusRange, VideoResolution } from '../Camera+Related';
 import {
   Color,
   MarginsWithUnit,
@@ -68,6 +68,10 @@ export interface CameraSettingsDefaultsJSON {
   maxFrameRate: number;
   zoomFactor: number;
   focusRange: string;
+}
+
+export interface PrivateCameraSettingsDefaults {
+  fromJSON(json: CameraSettingsDefaultsJSON): CameraSettings;
 }
 
 export interface DefaultsJSON {
