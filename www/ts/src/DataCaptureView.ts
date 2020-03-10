@@ -93,7 +93,7 @@ export class DataCaptureView extends DefaultSerializeable {
 
     this._htmlElementState = newState;
 
-    if (didChangePositionOrSize) {
+    if (this._htmlElementState.isShown && didChangePositionOrSize) {
       this.updatePositionAndSize();
     }
 
@@ -253,6 +253,7 @@ export class DataCaptureView extends DefaultSerializeable {
 
     this.privateContext.initialize();
 
+    this.updatePositionAndSize();
     this.viewProxy.show();
   }
 
