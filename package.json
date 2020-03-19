@@ -1,6 +1,6 @@
 {
   "name": "scandit-cordova-datacapture-core",
-  "version": "6.2.0-beta.7",
+  "version": "6.2.0",
   "description": "Scandit Data Capture SDK for Cordova",
   "license": "Apache-2.0",
   "keywords": [

@@ -2,7 +2,9 @@ const fs = require('fs')
 const path = require('path')
 
 function cpFolderSync(from, to) {
-    fs.mkdirSync(to, { recursive: true });
+    if (!fs.existsSync(to)) {
+        fs.mkdirSync(to, { recursive: true });
+    }
     const files = fs.readdirSync(from)
     for (let element of files) {
         if (fs.lstatSync(path.join(from, element)).isFile()) {
