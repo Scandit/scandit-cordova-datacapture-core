@@ -34,11 +34,13 @@ module.exports = function (context) {
   return new Promise((resolve, reject) => {
     myProj.parse(function (err) {
       if (err) {
+        console.log('Something went wrong while adding script to strip frameworks.');
         reject(err);
       }
 
       myProj.addBuildPhase([], 'PBXShellScriptBuildPhase', 'Strip Frameworks', myProj.getFirstTarget().uuid, options);
       fs.writeFileSync(projectPath, myProj.writeSync());
+      console.log('Script to strip frameworks added.');
       resolve();
     })
   });
