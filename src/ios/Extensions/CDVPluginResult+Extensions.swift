@@ -2,6 +2,7 @@ struct ListenerEvent {
     enum Name: String, Decodable {
         // Context listener
         case didChangeContextStatus = "didChangeStatus"
+        case didStartObservingContext = "didStartObservingContext"
 
         // Context frame listener
         case willProcessFrame = "willProcessFrame"
@@ -20,6 +21,12 @@ struct ListenerEvent {
         // Barcode Tracking Basic Overlay listener
         case brushForTrackedBarcode = "brushForTrackedBarcode"
         case didTapTrackedBarcode = "didTapTrackedBarcode"
+
+        // Barcode Tracking Advanced Overlay listener
+        case viewForTrackedBarcode = "viewForTrackedBarcode"
+        case anchorForTrackedBarcode = "anchorForTrackedBarcode"
+        case offsetForTrackedBarcode = "offsetForTrackedBarcode"
+        case didTapViewForTrackedBarcode = "didTapViewForTrackedBarcode"
     }
 
     let name: Name
@@ -58,6 +65,10 @@ struct CommandError {
         case couldNotSwitchCamera = 10043
 
         case trackedBarcodeNotFound = 10051
+
+        case parserNotFound = 10061
+        case couldNotParseString = 10062
+        case couldNotParseRawString = 10063
     }
 
     public static let invalidJSON = CommandError(code: .invalidJSON,
@@ -89,6 +100,19 @@ struct CommandError {
 
     public static let trackedBarcodeNotFound = CommandError(code: .trackedBarcodeNotFound,
                                                             message: "Passed tracked barcode not found in current session")
+
+    public static let parserNotFound = CommandError(code: .parserNotFound,
+                                                    message: "A parser with the passed component identifier was not found")
+
+    public static func couldNotParseString(reason additionalInformation: String) -> CommandError {
+        return CommandError(code: .couldNotParseString,
+                            message: "Could not parse string: \(additionalInformation)")
+    }
+
+    public static func couldNotParseRawData(reason additionalInformation: String) -> CommandError {
+        return CommandError(code: .couldNotParseRawString,
+                            message: "Could not parse raw string: \(additionalInformation)")
+    }
 
     public let code: Code
     public let message: String

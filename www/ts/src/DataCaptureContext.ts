@@ -16,13 +16,16 @@ export interface DataCaptureMode extends Serializeable {
 }
 
 export interface PrivateDataCaptureContext {
+  proxy: DataCaptureContextProxy;
   modes: [DataCaptureMode];
+  components: [DataCaptureComponent];
   initialize: () => void;
   update: () => Promise<void>;
+  addComponent: (component: DataCaptureComponent) => void;
 }
 
 export interface DataCaptureContextCreationOptions {
-  deviceName: Optional<string>;
+  deviceName?: Optional<string>;
 }
 
 export class DataCaptureContext extends DefaultSerializeable {
@@ -34,6 +37,8 @@ export class DataCaptureContext extends DefaultSerializeable {
   private view: Optional<DataCaptureView> = null;
 
   private modes: DataCaptureMode[] = [];
+
+  private components: DataCaptureComponent[] = [];
 
   @ignoreFromSerialization
   private proxy: DataCaptureContextProxy;
@@ -48,13 +53,23 @@ export class DataCaptureContext extends DefaultSerializeable {
     return this._frameSource;
   }
 
+  @ignoreFromSerialization
+  private _deviceID: Optional<string> = null;
+
+  public get deviceID(): Optional<string> {
+    return this._deviceID;
+  }
+
   public static forLicenseKey(licenseKey: string): DataCaptureContext {
     return DataCaptureContext.forLicenseKeyWithOptions(licenseKey, null);
   }
 
   public static forLicenseKeyWithOptions(
     licenseKey: string, options: Optional<DataCaptureContextCreationOptions>): DataCaptureContext {
-    return new DataCaptureContext(licenseKey, (options || {}).deviceName || '');
+    if (options == null) {
+      options = { deviceName: null };
+    }
+    return new DataCaptureContext(licenseKey, options.deviceName || '');
   }
 
   private constructor(
@@ -141,4 +156,20 @@ export class DataCaptureContext extends DefaultSerializeable {
     }
     return this.proxy.updateContextFromJSON();
   }
+
+  private addComponent(component: DataCaptureComponent) {
+    if (!this.components.includes(component)) {
+      this.components.push(component);
+      (component as any as PrivateDataCaptureComponent)._context = this;
+      this.update();
+    }
+  }
+}
+
+export interface PrivateDataCaptureComponent {
+  _context: DataCaptureContext;
+}
+
+export interface DataCaptureComponent {
+  readonly id: string;
 }

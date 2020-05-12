@@ -6,31 +6,30 @@
 
 package com.scandit.datacapture.cordova.core.actions
 
-import com.scandit.datacapture.cordova.core.data.ResizeAndMoveInfo
+import com.scandit.datacapture.core.common.feedback.Feedback
 import org.apache.cordova.CallbackContext
 import org.json.JSONArray
 import org.json.JSONException
 
-class ActionViewResizeMove(
+class ActionEmitFeedback(
         private val listener: ResultListener
 ) : Action {
 
     override fun run(args: JSONArray, callbackContext: CallbackContext) {
         try {
-            val infoJsonObject = args.getJSONObject(0)
-            listener.onResizeAndMoveDataCaptureView(
-                    ResizeAndMoveInfo(infoJsonObject), callbackContext
-            )
+            val jsonObject = args.getJSONObject(0)
+            val feedback = Feedback.fromJson(jsonObject.toString())
+            listener.onEmitFeedback(feedback, callbackContext)
         } catch (e: JSONException) {
+            e.printStackTrace()
+            listener.onJsonParseError(e, callbackContext)
+        } catch (e: RuntimeException) {// TODO [SDC-1851] - fine-catch deserializer exceptions
             e.printStackTrace()
             listener.onJsonParseError(e, callbackContext)
         }
     }
 
     interface ResultListener : ActionJsonParseErrorResultListener {
-        fun onResizeAndMoveDataCaptureView(
-                info: ResizeAndMoveInfo, callbackContext: CallbackContext
-        )
+        fun onEmitFeedback(feedback: Feedback, callbackContext: CallbackContext)
     }
 }
-

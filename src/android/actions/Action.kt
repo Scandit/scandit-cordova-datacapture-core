@@ -10,5 +10,15 @@ import org.apache.cordova.CallbackContext
 import org.json.JSONArray
 
 interface Action {
-    fun run(args: JSONArray, callbackContext: CallbackContext): Boolean
+    fun run(args: JSONArray, callbackContext: CallbackContext)
+}
+
+interface ActionJsonParseErrorResultListener {
+    fun onJsonParseError(error: Throwable, callbackContext: CallbackContext)
+}
+
+interface AdditionalActionRequiredResultListener {
+    fun onAdditionalActionRequired(
+            actionName: String, args: JSONArray, callbackContext: CallbackContext
+    )
 }

@@ -13,6 +13,7 @@ export enum FrameSourceState {
 export enum TorchState {
   On = 'on',
   Off = 'off',
+  Auto = 'auto',
 }
 
 export enum CameraPosition {
@@ -39,7 +40,7 @@ enum PrivateCameraProperty {
 }
 
 export interface FrameSourceListener {
-  didChangeState(frameSource: FrameSource, newState: FrameSourceState): void;
+  didChangeState?(frameSource: FrameSource, newState: FrameSourceState): void;
 
   // TODO: adjust when readding framedata to the api https://jira.scandit.com/browse/SDC-1159
   // didOutputFrame: (frameSource: FrameSource, frameData: FrameData) => void;

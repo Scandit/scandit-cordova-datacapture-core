@@ -10,25 +10,30 @@ import com.scandit.datacapture.cordova.core.data.SerializableViewState
 import com.scandit.datacapture.cordova.core.factories.CaptureCoreActionFactory
 import com.scandit.datacapture.cordova.core.handlers.ActionsHandler
 import com.scandit.datacapture.cordova.core.testing.OpenForTesting
+import com.scandit.datacapture.cordova.core.workers.Worker
 import org.apache.cordova.CallbackContext
 import org.json.JSONArray
 
 @OpenForTesting
 class DataCaptureViewCallback(
         private val actionsHandler: ActionsHandler,
-        callbackContext: CallbackContext
+        callbackContext: CallbackContext,
+        private val uiWorker: Worker
 ) : Callback(callbackContext) {
 
     fun onSizeChanged(width: Int, height: Int, screenOrientation: Int) {
         if (disposed.get()) return
-        actionsHandler.addAction(
-                CaptureCoreActionFactory.SEND_VIEW_SIZE_CHANGED_EVENT,
-                JSONArray().apply {
-                    put(
-                            SerializableViewState(width, height, screenOrientation).toJson()
-                    )
-                },
-                callbackContext
-        )
+
+        uiWorker.post {
+            actionsHandler.addAction(
+                    CaptureCoreActionFactory.SEND_VIEW_SIZE_CHANGED_EVENT,
+                    JSONArray().apply {
+                        put(
+                                SerializableViewState(width, height, screenOrientation).toJson()
+                        )
+                    },
+                    callbackContext
+            )
+        }
     }
 }

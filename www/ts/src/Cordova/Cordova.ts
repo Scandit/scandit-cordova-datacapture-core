@@ -19,6 +19,8 @@ export enum CordovaFunction {
   SubscribeViewListener = 'subscribeViewListener',
 
   GetCurrentCameraState = 'getCurrentCameraState',
+
+  EmitFeedback = 'emitFeedback',
 }
 
 // tslint:disable-next-line:variable-name

@@ -7,6 +7,7 @@ declare type DataCaptureContext = any; // To avoid a circular dependency. DataCa
 
 enum DataCaptureContextListenerEvent {
   DidChangeContextStatus = 'didChangeStatus',
+  DidStartObservingContext = 'didStartObservingContext',
 }
 
 // TODO: adjust when readding framedata to the api https://jira.scandit.com/browse/SDC-1159
@@ -88,12 +89,22 @@ export class DataCaptureContextProxy {
       return;
     }
 
+    if (event.name === DataCaptureContextListenerEvent.DidStartObservingContext) {
+      this.context._deviceID = event.argument.deviceID;
+    }
+
     (this.context as any).listeners.forEach((listener: DataCaptureContextListener) => {
       switch (event.name) {
         case DataCaptureContextListenerEvent.DidChangeContextStatus:
           if (listener.didChangeStatus) {
             const contextStatus = (ContextStatus as any as PrivateContextStatus).fromJSON(event.argument);
             listener.didChangeStatus(this.context, contextStatus);
+          }
+          break;
+
+        case DataCaptureContextListenerEvent.DidStartObservingContext:
+          if (listener.didStartObservingContext) {
+            listener.didStartObservingContext(this.context);
           }
           break;
       }

@@ -11,12 +11,11 @@ import org.json.JSONArray
 
 class ActionViewShow(private val listener: ResultListener) : Action {
 
-    override fun run(args: JSONArray, callbackContext: CallbackContext): Boolean {
-        listener.onViewShowActionExecuted(callbackContext)
-        return true
+    override fun run(args: JSONArray, callbackContext: CallbackContext) {
+        listener.onShowDataCaptureView(callbackContext)
     }
 
     interface ResultListener {
-        fun onViewShowActionExecuted(callbackContext: CallbackContext)
+        fun onShowDataCaptureView(callbackContext: CallbackContext)
     }
 }

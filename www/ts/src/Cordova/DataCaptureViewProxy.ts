@@ -19,12 +19,12 @@ export class DataCaptureViewProxy {
     return viewProxy;
   }
 
-  public setPositionAndSize(top: number, left: number, width: number, height: number) {
+  public setPositionAndSize(top: number, left: number, width: number, height: number, shouldBeUnderWebView: boolean) {
     DataCaptureViewProxy.cordovaExec(
       null,
       null,
       CordovaFunction.SetViewPositionAndSize,
-      [{ top, left, width, height }],
+      [{ top, left, width, height, shouldBeUnderWebView }],
     );
   }
 
@@ -49,7 +49,7 @@ export class DataCaptureViewProxy {
   public viewPointForFramePoint(point: Point): Promise<Point> {
     return new Promise((resolve, reject) => {
       DataCaptureViewProxy.cordovaExec(
-        (convertedPoint: any) => resolve((Point as any as PrivatePoint).fromJSON(convertedPoint)),
+        (convertedPoint: string) => resolve((Point as any as PrivatePoint).fromJSON(JSON.parse(convertedPoint))),
         reject,
         CordovaFunction.ViewPointForFramePoint,
         [point.toJSON()],
@@ -60,8 +60,8 @@ export class DataCaptureViewProxy {
   public viewQuadrilateralForFrameQuadrilateral(quadrilateral: Quadrilateral): Promise<Quadrilateral> {
     return new Promise((resolve, reject) => {
       DataCaptureViewProxy.cordovaExec(
-        (convertedQuadrilateral: any) => resolve(
-          (Quadrilateral as any as PrivateQuadrilateral).fromJSON(convertedQuadrilateral)),
+        (convertedQuadrilateral: string) => resolve(
+          (Quadrilateral as any as PrivateQuadrilateral).fromJSON(JSON.parse(convertedQuadrilateral))),
         reject,
         CordovaFunction.ViewQuadrilateralForFrameQuadrilateral,
         [quadrilateral.toJSON()],

@@ -9,14 +9,16 @@ package com.scandit.datacapture.cordova.core.deserializers
 import android.content.Context
 import com.scandit.datacapture.core.capture.serialization.DataCaptureContextDeserializer
 import com.scandit.datacapture.core.capture.serialization.DataCaptureModeDeserializer
-import com.scandit.datacapture.core.source.FrameSourceDeserializer
-import com.scandit.datacapture.core.source.FrameSourceDeserializerListener
+import com.scandit.datacapture.core.component.serialization.DataCaptureComponentDeserializer
+import com.scandit.datacapture.core.source.serialization.FrameSourceDeserializer
+import com.scandit.datacapture.core.source.serialization.FrameSourceDeserializerListener
 import com.scandit.datacapture.core.ui.serialization.DataCaptureViewDeserializer
 
 class Deserializers(
-        context: Context,
-        modeDeserializers: List<DataCaptureModeDeserializer>,
-        frameSourceDeserializerListener: FrameSourceDeserializerListener// TODO [SDC-1339] deserialization of desiredTorchState and desiredState
+    context: Context,
+    modeDeserializers: List<DataCaptureModeDeserializer>,
+    componentDeserializers: List<DataCaptureComponentDeserializer>,
+    frameSourceDeserializerListener: FrameSourceDeserializerListener// TODO [SDC-1339] deserialization of desiredTorchState and desiredState
 ) {
     private val frameSourceDeserializer: FrameSourceDeserializer
     private val dataCaptureViewDeserializer: DataCaptureViewDeserializer
@@ -28,7 +30,10 @@ class Deserializers(
         }
         dataCaptureViewDeserializer = DataCaptureViewDeserializer(context, modeDeserializers)
         dataCaptureContextDeserializer = DataCaptureContextDeserializer(
-                frameSourceDeserializer, dataCaptureViewDeserializer, modeDeserializers
+            frameSourceDeserializer,
+            dataCaptureViewDeserializer,
+            modeDeserializers,
+            componentDeserializers
         )
         dataCaptureContextDeserializer.avoidThreadDependencies = true
     }

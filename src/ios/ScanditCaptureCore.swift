@@ -10,14 +10,16 @@ class ScanditCaptureCoreCallbacks {
 
 protocol DataCapturePlugin where Self: CDVPlugin {
     var modeDeserializers: [DataCaptureModeDeserializer] { get }
+    var componentDeserializers: [DataCaptureComponentDeserializer] { get }
+    var components: [DataCaptureComponent] { get }
 }
 
 @objc(ScanditCaptureCore)
-class ScanditCaptureCore: CDVPlugin {
+public class ScanditCaptureCore: CDVPlugin {
 
     static var dataCapturePlugins = [DataCapturePlugin]()
 
-    private var context: DataCaptureContext?
+    public var context: DataCaptureContext?
 
     var captureView: DataCaptureView? {
         didSet {
@@ -62,17 +64,37 @@ class ScanditCaptureCore: CDVPlugin {
         }
     }
 
-    lazy var deserializer: DataCaptureContextDeserializer = {
+    private var componentDeserializers: [DataCaptureComponentDeserializer] {
+        return ScanditCaptureCore.dataCapturePlugins.reduce(into: []) { deserializers, plugin in
+            deserializers.append(contentsOf: plugin.componentDeserializers)
+        }
+    }
+
+    private var components: [DataCaptureComponent] {
+        return ScanditCaptureCore.dataCapturePlugins.reduce(into: []) { components, plugin in
+            components.append(contentsOf: plugin.components)
+        }
+    }
+
+    public lazy var deserializer: DataCaptureContextDeserializer = {
         let deserializer = DataCaptureContextDeserializer(frameSourceDeserializer: self.frameSourceDeserializer,
                                                           viewDeserializer: viewDeserializer,
-                                                          modeDeserializers: modeDeserializers)
+                                                          modeDeserializers: modeDeserializers,
+                                                          componentDeserializers: componentDeserializers)
         deserializer.avoidThreadDependencies = true
         return deserializer
     }()
 
     lazy var callbacks = ScanditCaptureCoreCallbacks()
 
-    override func onReset() {
+    public override func pluginInitialize() {
+        // Make the WebView transparent, so we can see views behind
+        webView.isOpaque = false
+        webView.backgroundColor = .clear
+        webView.scrollView.backgroundColor = .clear
+    }
+
+    public override func onReset() {
         super.onReset()
 
         // Remove the data capture view
@@ -93,7 +115,7 @@ class ScanditCaptureCore: CDVPlugin {
     // MARK: Context deserialization
 
     @objc(contextFromJSON:)
-    func contextFromJSON(command: CDVInvokedUrlCommand) {
+    public func contextFromJSON(command: CDVInvokedUrlCommand) {
         guard let jsonString = command.defaultArgumentAsString else {
             commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
             return
@@ -127,7 +149,7 @@ class ScanditCaptureCore: CDVPlugin {
         }
 
         do {
-            try deserializer.update(context, view: captureView, fromJSON: jsonString)
+            try deserializer.update(context, view: captureView, components: components, fromJSON: jsonString)
         } catch let error {
             commandDelegate.send(.failure(with: error), callbackId: command.callbackId)
             contextDeserializationFailed(with: error)
@@ -281,5 +303,17 @@ class ScanditCaptureCore: CDVPlugin {
                                                   spotlightViewfinder: SpotlightViewfinder(),
                                                   brush: Brush())
         commandDelegate.send(.success(message: defaults), callbackId: command.callbackId)
+    }
+
+    // MARK: - FeedbackProxy
+
+    @objc(emitFeedback:)
+    func emitFeedback(command: CDVInvokedUrlCommand) {
+        guard let jsonString = command.defaultArgumentAsString, let feedback = try? Feedback(fromJSONString: jsonString) else {
+            commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
+            return
+        }
+
+        feedback.emit()
     }
 }

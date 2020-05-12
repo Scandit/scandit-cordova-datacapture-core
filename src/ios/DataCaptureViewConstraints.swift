@@ -6,7 +6,7 @@ class DataCaptureViewConstraints {
     var captureView: UIView? {
         didSet {
             resetConstraints()
-            updateConstraints()
+            update()
         }
     }
 
@@ -17,6 +17,7 @@ class DataCaptureViewConstraints {
 
     private var position: CGPoint = .zero
     private var size: CGSize = .zero
+    private var shouldBeUnderWebView: Bool = false
 
     private var constraints: [NSLayoutConstraint] {
         return [top, left, width, height].compactMap({ $0 })
@@ -36,7 +37,13 @@ class DataCaptureViewConstraints {
     func updatePositionAndSize(fromJSON positionAndSizeJSON: ViewPositionAndSizeJSON) {
         position = positionAndSizeJSON.position
         size = positionAndSizeJSON.size
+        shouldBeUnderWebView = positionAndSizeJSON.shouldBeUnderWebView
+        update()
+    }
+
+    private func update() {
         updateConstraints()
+        updatePosition()
     }
 
     private func activate() {
@@ -87,5 +94,17 @@ class DataCaptureViewConstraints {
         }
 
         captureView.superview?.layoutIfNeeded()
+    }
+
+    private func updatePosition() {
+        guard let captureView = captureView else {
+            return
+        }
+
+        if shouldBeUnderWebView {
+            captureView.superview?.sendSubview(toBack: captureView)
+        } else {
+            captureView.superview?.bringSubview(toFront: captureView)
+        }
     }
 }

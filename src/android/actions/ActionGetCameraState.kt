@@ -16,19 +16,16 @@ class ActionGetCameraState(
         private val listener: ResultListener
 ) : Action {
 
-    override fun run(args: JSONArray, callbackContext: CallbackContext): Boolean {
+    override fun run(args: JSONArray, callbackContext: CallbackContext) {
         if (camera == null) {
             listener.onNoCameraError(callbackContext)
         } else {
-            listener.onGetCameraStateActionExecuted(camera.currentState, callbackContext)
+            listener.onGetCameraState(camera.currentState, callbackContext)
         }
-        return true
     }
 
     interface ResultListener {
-        fun onGetCameraStateActionExecuted(
-                cameraState: FrameSourceState, callbackContext: CallbackContext
-        )
+        fun onGetCameraState(cameraState: FrameSourceState, callbackContext: CallbackContext)
         fun onNoCameraError(callbackContext: CallbackContext)
     }
 }

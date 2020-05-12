@@ -7,9 +7,15 @@
 package com.scandit.datacapture.cordova.core.utils
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.util.Base64
 import android.view.View
 import android.view.ViewGroup
+import org.apache.cordova.CallbackContext
+import org.apache.cordova.PluginResult
+import org.json.JSONObject
 
 fun Int.dpToPx(context: Context) = this * context.resources.displayMetrics.density
 
@@ -40,3 +46,33 @@ val String.colorInt: Int
                         substring(0, 6)
         )
     }
+
+fun bitmapFromBase64String(string: String?): Bitmap? {
+    string ?: return null
+
+    val index = string.indexOf(",")
+    return try {
+        val trimmedString = string.removeRange(0, index)
+        val bytes = Base64.decode(trimmedString, Base64.DEFAULT)
+        BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
+
+fun CallbackContext.successAndKeepCallback() {
+    sendPluginResult(
+            PluginResult(PluginResult.Status.OK).apply {
+                keepCallback = true
+            }
+    )
+}
+
+fun CallbackContext.successAndKeepCallback(message: JSONObject) {
+    sendPluginResult(
+            PluginResult(PluginResult.Status.OK, message).apply {
+                keepCallback = true
+            }
+    )
+}

@@ -7,31 +7,58 @@
 package com.scandit.datacapture.cordova.core.handlers
 
 import android.app.Activity
+import android.content.Context
+import android.graphics.Color
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import com.scandit.datacapture.cordova.core.data.ResizeAndMoveInfo
 import com.scandit.datacapture.cordova.core.testing.OpenForTesting
 import com.scandit.datacapture.cordova.core.utils.dpToPx
 import com.scandit.datacapture.cordova.core.utils.removeFromParent
+import com.scandit.datacapture.cordova.core.workers.Worker
 import com.scandit.datacapture.core.ui.DataCaptureView
 import com.scandit.datacapture.core.ui.DataCaptureViewListener
 import java.lang.ref.WeakReference
 
 @OpenForTesting
 class DataCaptureViewHandler(
-        private val viewListener: DataCaptureViewListener
+        private val viewListener: DataCaptureViewListener,
+        private val uiWorker: Worker
 ) {
-    private var latestInfo: ResizeAndMoveInfo = ResizeAndMoveInfo(0, 0, 0, 0)
+    private var latestInfo: ResizeAndMoveInfo = ResizeAndMoveInfo(0, 0, 0, 0, false)
     private var isVisible: Boolean = false
     private var dataCaptureViewReference: WeakReference<DataCaptureView>? = null
+    private var webViewReference: WeakReference<View>? = null
+    private var backgroundViewReference: WeakReference<View>? = null
 
     val dataCaptureView: DataCaptureView?
         get() = dataCaptureViewReference?.get()
+    private val webView: View?
+        get() = webViewReference?.get()
+    private val backgroundView: View?
+        get() = backgroundViewReference?.get()
 
     fun attachDataCaptureView(dataCaptureView: DataCaptureView, activity: Activity) {
         if (this.dataCaptureView != dataCaptureView) {
-            disposeCurrent()
-            addView(dataCaptureView, activity)
+            disposeCurrentDataCaptureView()
+            addDataCaptureView(dataCaptureView, activity)
+        }
+    }
+
+    fun attachWebView(webView: View, activity: Activity) {
+        if (this.webView != webView) {
+            webViewReference = WeakReference(webView)
+            uiWorker.post {
+                val backgroundView = createBackgroundView(activity)
+                backgroundViewReference = WeakReference(backgroundView)
+                activity.addContentView(
+                        backgroundView,
+                        ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+                )
+                webView.bringToFront()
+                webView.setBackgroundColor(Color.TRANSPARENT)
+            }
         }
     }
 
@@ -50,16 +77,36 @@ class DataCaptureViewHandler(
         render()
     }
 
-    // Remove the current dataCaptureView from hierarchy.
+    // Remove the current dataCaptureView and backgroundView from hierarchy, and clear all references.
     fun disposeCurrent() {
-        val dataCaptureView = dataCaptureView ?: return
-        removeView(dataCaptureView)
+        disposeCurrentDataCaptureView()
+        disposeCurrentWebView()
+        disposeCurrentBackgroundView()
     }
 
-    private fun addView(dataCaptureView: DataCaptureView, activity: Activity) {
+    private fun disposeCurrentDataCaptureView() {
+        val dataCaptureView = dataCaptureView ?: return
+        removeDataCaptureView(dataCaptureView)
+    }
+
+    private fun disposeCurrentWebView() {
+        webViewReference = null
+    }
+
+    private fun disposeCurrentBackgroundView() {
+        val backgroundView = backgroundView ?: return
+        backgroundViewReference = null
+        removeView(backgroundView)
+    }
+
+    private fun createBackgroundView(context: Context): View = View(context).apply {
+        setBackgroundColor(Color.WHITE)
+    }
+
+    private fun addDataCaptureView(dataCaptureView: DataCaptureView, activity: Activity) {
         dataCaptureViewReference = WeakReference(dataCaptureView)
         dataCaptureView.addListener(viewListener)
-        activity.runOnUiThread {
+        uiWorker.post {
             activity.addContentView(
                     dataCaptureView,
                     ViewGroup.LayoutParams(latestInfo.width, latestInfo.height)
@@ -68,12 +115,18 @@ class DataCaptureViewHandler(
         }
     }
 
-    private fun removeView(dataCaptureView: DataCaptureView) {
-        dataCaptureView.post {
-            dataCaptureView.removeListener(viewListener)
-            dataCaptureView.removeFromParent()
-        }
+    private fun removeDataCaptureView(dataCaptureView: DataCaptureView) {
         dataCaptureViewReference = null
+        removeView(dataCaptureView) {
+            dataCaptureView.removeListener(viewListener)
+        }
+    }
+
+    private fun removeView(view: View, uiBlock: (() -> Unit)? = null) {
+        uiWorker.post {
+            view.removeFromParent()
+            uiBlock?.invoke()
+        }
     }
 
     // Update the view visibility, position and size.
@@ -91,6 +144,11 @@ class DataCaptureViewHandler(
             dataCaptureView.layoutParams.apply {
                 width = latestInfo.width.dpToPx(context).toInt()
                 height = latestInfo.height.dpToPx(context).toInt()
+            }
+            if (latestInfo.shouldBeUnderWebView) {
+                webView?.bringToFront()
+            } else {
+                dataCaptureView.bringToFront()
             }
             dataCaptureView.requestLayout()
         }

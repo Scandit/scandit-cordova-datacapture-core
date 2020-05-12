@@ -1,6 +1,7 @@
 /// <amd-module name="scandit-cordova-datacapture-core.Feedback"/>
 // ^ needed because Cordova can't resolve "../xx" style dependencies
-import { DefaultSerializeable, ignoreFromSerializationIfNull, nameForSerialization } from './Serializeable';
+import { FeedbackProxy } from './Cordova/FeedbackProxy';
+import { DefaultSerializeable, ignoreFromSerialization, ignoreFromSerializationIfNull, nameForSerialization } from './Serializeable';
 
 export class Vibration extends DefaultSerializeable {
   public static get defaultVibration(): Vibration {
@@ -34,6 +35,9 @@ export class Feedback extends DefaultSerializeable {
   @nameForSerialization('sound')
   private _sound: Optional<Sound> = null;
 
+  @ignoreFromSerialization
+  private proxy: FeedbackProxy;
+
   public get vibration(): Optional<Vibration> {
     return this._vibration;
   }
@@ -45,5 +49,21 @@ export class Feedback extends DefaultSerializeable {
     super();
     this._vibration = vibration;
     this._sound = sound;
+
+    this.initialize();
+  }
+
+  public emit(): void {
+    if (!this.proxy) {
+      return;
+    }
+    this.proxy.emit();
+  }
+
+  private initialize(): void {
+    if (this.proxy) {
+      return;
+    }
+    this.proxy = FeedbackProxy.forFeedback(this);
   }
 }

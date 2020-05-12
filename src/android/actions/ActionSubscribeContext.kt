@@ -11,12 +11,11 @@ import org.json.JSONArray
 
 class ActionSubscribeContext(private val listener: ResultListener) : Action {
 
-    override fun run(args: JSONArray, callbackContext: CallbackContext): Boolean {
-        listener.onContextSubscribeActionExecuted(callbackContext)
-        return true
+    override fun run(args: JSONArray, callbackContext: CallbackContext) {
+        listener.onSubscribeToDataCaptureContext(callbackContext)
     }
 
     interface ResultListener {
-        fun onContextSubscribeActionExecuted(callbackContext: CallbackContext)
+        fun onSubscribeToDataCaptureContext(callbackContext: CallbackContext)
     }
 }

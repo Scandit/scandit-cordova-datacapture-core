@@ -28,7 +28,7 @@ class ActionsHandler(
 
     private fun addAction(actionData: ActionData): Boolean {
         try {
-            if (actionsHandlerHelper.canBeRan(actionData.actionName)) {
+            if (actionsHandlerHelper.canBeRun(actionData.actionName)) {
                 // We are ready to run this action.
                 executeSyncAction(actionData)
             } else {

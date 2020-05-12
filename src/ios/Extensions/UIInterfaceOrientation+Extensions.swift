@@ -6,6 +6,7 @@ extension UIInterfaceOrientation: CustomStringConvertible {
         case .portraitUpsideDown: return "portraitUpsideDown"
         case .landscapeLeft: return "landscapeLeft"
         case .landscapeRight: return "landscapeRight"
+        @unknown default: return "unknown"
         }
     }
 }

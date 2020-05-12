@@ -33,13 +33,35 @@ extension FrameSourceState {
     }
 }
 
+extension Anchor {
+    init?(JSONString: String) {
+        var anchor = Anchor.center
+        if SDCAnchorFromJSONString(JSONString, &anchor) {
+            self = anchor
+        } else {
+            return nil
+        }
+    }
+}
+
+extension PointWithUnit {
+    init?(JSONString: String) {
+        var point = PointWithUnit.zero
+        if SDCPointWithUnitFromJSONString(JSONString, &point) {
+            self = point
+        } else {
+            return nil
+        }
+    }
+}
+
 extension ScanditCaptureCore: FrameSourceDeserializerDelegate {
 
-    func frameSourceDeserializer(_ deserializer: FrameSourceDeserializer,
+    public func frameSourceDeserializer(_ deserializer: FrameSourceDeserializer,
                                  didStartDeserializingFrameSource frameSource: FrameSource,
                                  from JSONValue: JSONValue) { }
 
-    func frameSourceDeserializer(_ deserializer: FrameSourceDeserializer,
+    public func frameSourceDeserializer(_ deserializer: FrameSourceDeserializer,
                                  didFinishDeserializingFrameSource frameSource: FrameSource,
                                  from JSONValue: JSONValue) {
         guard let camera = frameSource as? Camera else {
@@ -57,11 +79,11 @@ extension ScanditCaptureCore: FrameSourceDeserializerDelegate {
         }
     }
 
-    func frameSourceDeserializer(_ deserializer: FrameSourceDeserializer,
+    public func frameSourceDeserializer(_ deserializer: FrameSourceDeserializer,
                                  didStartDeserializingCameraSettings settings: CameraSettings,
                                  from JSONValue: JSONValue) { }
 
-    func frameSourceDeserializer(_ deserializer: FrameSourceDeserializer,
+    public func frameSourceDeserializer(_ deserializer: FrameSourceDeserializer,
                                  didFinishDeserializingCameraSettings settings: CameraSettings,
                                  from JSONValue: JSONValue) { }
 

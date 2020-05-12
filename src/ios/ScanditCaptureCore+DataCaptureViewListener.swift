@@ -1,7 +1,7 @@
 import ScanditCaptureCore
 
 extension ScanditCaptureCore: DataCaptureViewListener {
-    func dataCaptureView(_ view: DataCaptureView, didChange size: CGSize, orientation: UIInterfaceOrientation) {
+    public func dataCaptureView(_ view: DataCaptureView, didChange size: CGSize, orientation: UIInterfaceOrientation) {
         guard let callback = callbacks.viewListener else {
             return
         }

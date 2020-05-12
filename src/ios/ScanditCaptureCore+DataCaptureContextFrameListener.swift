@@ -1,7 +1,7 @@
 import ScanditCaptureCore
 
 extension ScanditCaptureCore: DataCaptureContextFrameListener {
-    func context(_ context: DataCaptureContext, willProcessFrame frame: FrameData) {
+    public func context(_ context: DataCaptureContext, willProcessFrame frame: FrameData) {
         guard let callback = callbacks.contextFrameListener else {
             return
         }
@@ -11,7 +11,7 @@ extension ScanditCaptureCore: DataCaptureContextFrameListener {
                              callbackId: callback.id)
     }
 
-    func context(_ context: DataCaptureContext, didProcessFrame frame: FrameData) {
+    public func context(_ context: DataCaptureContext, didProcessFrame frame: FrameData) {
         guard let callback = callbacks.contextFrameListener else {
             return
         }

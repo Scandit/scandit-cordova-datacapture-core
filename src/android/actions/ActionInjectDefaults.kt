@@ -7,7 +7,6 @@
 package com.scandit.datacapture.cordova.core.actions
 
 import android.content.Context
-import android.graphics.Color
 import com.scandit.datacapture.cordova.core.data.defaults.SerializableBrushDefaults
 import com.scandit.datacapture.cordova.core.data.defaults.SerializableCameraDefaults
 import com.scandit.datacapture.cordova.core.data.defaults.SerializableCameraSettingsDefault
@@ -30,14 +29,13 @@ import com.scandit.datacapture.core.ui.viewfinder.SpotlightViewfinder
 import org.apache.cordova.CallbackContext
 import org.json.JSONArray
 import org.json.JSONException
-import org.json.JSONObject
 
 class ActionInjectDefaults(
         private val context: Context,
         private val listener: ResultListener
 ) : Action {
 
-    override fun run(args: JSONArray, callbackContext: CallbackContext): Boolean {
+    override fun run(args: JSONArray, callbackContext: CallbackContext) {
         try {
             val cameraSettings = CameraSettings()
             val dataCaptureview = DataCaptureView.newInstance(context, null)
@@ -83,17 +81,15 @@ class ActionInjectDefaults(
                     brushDefaults = SerializableBrushDefaults(
                             brush = brush
                     )
-            ).toJson()
-            listener.onInjectDefaultsActionExecuted(defaults, callbackContext)
+            )
+            listener.onCoreDefaults(defaults, callbackContext)
         } catch (e: JSONException) {
             e.printStackTrace()
             listener.onJsonParseError(e, callbackContext)
         }
-        return true
     }
 
-    interface ResultListener {
-        fun onInjectDefaultsActionExecuted(default: JSONObject, callbackContext: CallbackContext)
-        fun onJsonParseError(error: Throwable, callbackContext: CallbackContext)
+    interface ResultListener : ActionJsonParseErrorResultListener{
+        fun onCoreDefaults(defaults: SerializableCoreDefaults, callbackContext: CallbackContext)
     }
 }

@@ -63,6 +63,8 @@ const downloadFile = (url, destFolder, filename) => {
           response.pipe(destFileStream);
           destFileStream.on('finish', resolve);
         } else {
+          destFileStream.destroy()
+          fs.unlinkSync(`${destFolder}/${filename}`)
           reject(new Error(`File to be downloaded not found, maybe the version does not exist yet (${url})`));
         }
       }).on('error', error => {
@@ -140,6 +142,8 @@ const sdcModuleFromFrameworkName = (name) => {
   // Already assumes that we know it's a Scandit framework name
   if (name.includes('Core')) {
     return 'core';
+  } else if (name.includes('Parser')) {
+    return 'parser';
   } else {
     // e.g. ScanditBarcodeCapture => barcode
     return /^Scandit(\w*)Capture/.exec(name)[1].toLowerCase();
@@ -166,8 +170,10 @@ const frameworkFromElementAndParent = (element, parent) => {
 
 const addFramework = (framework, pluginDirectory) => {
   const frameworkDestination = `${pluginDirectory}/${framework.pluginRelativePath}`;
+  const frameworkFilePath = `${frameworkDestination}/${framework.name}`
+  const isNotEmpty = path => fs.statSync(path).size != 0
 
-  if (fs.existsSync(`${frameworkDestination}/${framework.name}`)) {
+  if (fs.existsSync(frameworkFilePath) && isNotEmpty(frameworkFilePath)) {
     console.log(`${framework.name} already exists in ${pluginDirectory} - SKIPPING DOWNLOAD`)
     return Promise.resolve();
   }

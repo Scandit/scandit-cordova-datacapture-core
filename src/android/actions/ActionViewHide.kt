@@ -11,12 +11,11 @@ import org.json.JSONArray
 
 class ActionViewHide(private val listener: ResultListener) : Action {
 
-    override fun run(args: JSONArray, callbackContext: CallbackContext): Boolean {
-        listener.onViewHideActionExecuted(callbackContext)
-        return true
+    override fun run(args: JSONArray, callbackContext: CallbackContext) {
+        listener.onHideDataCaptureView(callbackContext)
     }
 
     interface ResultListener {
-        fun onViewHideActionExecuted(callbackContext: CallbackContext)
+        fun onHideDataCaptureView(callbackContext: CallbackContext)
     }
 }

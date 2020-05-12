@@ -26,22 +26,21 @@ module.exports = function (context) {
   const projectPath = xcodeProjPath + '/project.pbxproj';
   const myProj = xcode.project(projectPath);
 
+  myProj.buildPhases = () => Object.values(myProj.hash.project.objects['PBXShellScriptBuildPhase']).filter(o => o && o.name);
+  myProj.buildPhaseNames = () => myProj.buildPhases().map(o => o.name);
+  myProj.hasBuildPhaseWithName = name => myProj.buildPhaseNames().indexOf(JSON.stringify(name)) > -1;
+
   var options = {
     shellPath: '/bin/sh',
     shellScript: 'bash "$BUILT_PRODUCTS_DIR/$FRAMEWORKS_FOLDER_PATH/ScanditCaptureCore.framework/strip-frameworks.sh"'
   };
+  var buildPhaseName = 'Strip Frameworks';
 
-  return new Promise((resolve, reject) => {
-    myProj.parse(function (err) {
-      if (err) {
-        console.log('Something went wrong while adding script to strip frameworks.');
-        reject(err);
-      }
+  myProj.parseSync();
 
-      myProj.addBuildPhase([], 'PBXShellScriptBuildPhase', 'Strip Frameworks', myProj.getFirstTarget().uuid, options);
-      fs.writeFileSync(projectPath, myProj.writeSync());
-      console.log('Script to strip frameworks added.');
-      resolve();
-    })
-  });
+  if (!myProj.hasBuildPhaseWithName(buildPhaseName)) {
+    myProj.addBuildPhase([], 'PBXShellScriptBuildPhase', buildPhaseName, myProj.getFirstTarget().uuid, options);
+    fs.writeFileSync(projectPath, myProj.writeSync());
+    console.log('Build phase to strip frameworks added.');
+  }
 }

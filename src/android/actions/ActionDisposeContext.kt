@@ -11,12 +11,11 @@ import org.json.JSONArray
 
 class ActionDisposeContext(private val listener: ResultListener) : Action {
 
-    override fun run(args: JSONArray, callbackContext: CallbackContext): Boolean {
-        listener.onContextDisposeActionExecuted(callbackContext)
-        return true
+    override fun run(args: JSONArray, callbackContext: CallbackContext) {
+        listener.onDisposeDataCaptureContext(callbackContext)
     }
 
     interface ResultListener {
-        fun onContextDisposeActionExecuted(callbackContext: CallbackContext)
+        fun onDisposeDataCaptureContext(callbackContext: CallbackContext)
     }
 }

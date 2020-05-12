@@ -8,32 +8,22 @@ package com.scandit.datacapture.cordova.core.factories
 
 import android.content.Context
 import com.scandit.datacapture.cordova.core.CoreActionsListeners
-import com.scandit.datacapture.cordova.core.actions.Action
-import com.scandit.datacapture.cordova.core.actions.ActionConvertPointCoordinates
-import com.scandit.datacapture.cordova.core.actions.ActionConvertQuadrilateralCoordinates
-import com.scandit.datacapture.cordova.core.actions.ActionCreateContextAndView
-import com.scandit.datacapture.cordova.core.actions.ActionDisposeContext
-import com.scandit.datacapture.cordova.core.actions.ActionGetCameraState
-import com.scandit.datacapture.cordova.core.actions.ActionInjectDefaults
-import com.scandit.datacapture.cordova.core.actions.ActionSendContextStatusUpdate
-import com.scandit.datacapture.cordova.core.actions.ActionSendViewSizeChanged
-import com.scandit.datacapture.cordova.core.actions.ActionSubscribeContext
-import com.scandit.datacapture.cordova.core.actions.ActionSubscribeView
-import com.scandit.datacapture.cordova.core.actions.ActionUpdateContextAndView
-import com.scandit.datacapture.cordova.core.actions.ActionViewHide
-import com.scandit.datacapture.cordova.core.actions.ActionViewResizeMove
-import com.scandit.datacapture.cordova.core.actions.ActionViewShow
-import com.scandit.datacapture.cordova.core.deserializers.Deserializers
+import com.scandit.datacapture.cordova.core.deserializers.DeserializersProvider
+import com.scandit.datacapture.cordova.core.actions.*
 import com.scandit.datacapture.cordova.core.errors.InvalidActionNameError
+import com.scandit.datacapture.cordova.core.handlers.DataCaptureComponentsHandler
 import com.scandit.datacapture.cordova.core.handlers.DataCaptureContextHandler
 import com.scandit.datacapture.cordova.core.handlers.DataCaptureViewHandler
+import com.scandit.datacapture.cordova.core.workers.Worker
 
 class CaptureCoreActionFactory(
-        private val context: Context,
-        private val listener: CoreActionsListeners,
-        private val deserializers: Deserializers,
-        private val captureContextHandler: DataCaptureContextHandler,
-        private val captureViewHandler: DataCaptureViewHandler
+    private val context: Context,
+    private val listener: CoreActionsListeners,
+    private val deserializersProvider: DeserializersProvider,
+    private val captureContextHandler: DataCaptureContextHandler,
+    private val captureComponenentsHandler: DataCaptureComponentsHandler,
+    private val captureViewHandler: DataCaptureViewHandler,
+    private val uiWorker: Worker
 ) : ActionFactory {
 
     override val actionsNotDependentOnCameraPermission = ACTIONS_NOT_DEPENDING_ON_CAMERA
@@ -54,7 +44,9 @@ class CaptureCoreActionFactory(
             CONVERT_QUAD_COORDINATES -> createActionConvertQuadrilateralCoordinates()
             GET_CAMERA_STATE -> createActionGetCameraState()
             SEND_CONTEXT_STATUS_UPDATE_EVENT -> createActionContextStatusUpdate()
+            SEND_CONTEXT_OBSERVATION_STARTED_EVENT -> createActionContextObservationStarted()
             SEND_VIEW_SIZE_CHANGED_EVENT -> createActionViewSizeChanged()
+            ACTION_EMIT_FEEDBACK -> createActionEmitFeedback()
             else -> throw InvalidActionNameError(actionName)
         }
     }
@@ -62,15 +54,17 @@ class CaptureCoreActionFactory(
     private fun createActionInjectDefaults() = ActionInjectDefaults(context, listener)
 
     private fun createActionCreateContextAndView() = ActionCreateContextAndView(
-            deserializers.dataCaptureContextDeserializer, listener
+        deserializersProvider.deserializers.dataCaptureContextDeserializer, listener
     )
 
     private fun createActionUpdateContextAndView() = ActionUpdateContextAndView(
-            deserializers.dataCaptureContextDeserializer,
-            captureContextHandler.dataCaptureContext,
-            captureViewHandler.dataCaptureView,
-            CREATE_CONTEXT,
-            listener
+        deserializersProvider.deserializers.dataCaptureContextDeserializer,
+        captureContextHandler.dataCaptureContext,
+        captureViewHandler.dataCaptureView,
+        captureComponenentsHandler.dataCaptureComponents,
+        CREATE_CONTEXT,
+        listener,
+        uiWorker
     )
 
     private fun createActionViewShow() = ActionViewShow(listener)
@@ -86,19 +80,24 @@ class CaptureCoreActionFactory(
     private fun createActionSubscribeView() = ActionSubscribeView(listener)
 
     private fun createActionConvertPointCoordinates() = ActionConvertPointCoordinates(
-            captureViewHandler.dataCaptureView, listener
+        captureViewHandler.dataCaptureView, listener
     )
 
     private fun createActionConvertQuadrilateralCoordinates() =
-            ActionConvertQuadrilateralCoordinates(captureViewHandler.dataCaptureView, listener)
+        ActionConvertQuadrilateralCoordinates(captureViewHandler.dataCaptureView, listener)
 
     private fun createActionGetCameraState() = ActionGetCameraState(
-            captureContextHandler.camera, listener
+        captureContextHandler.camera, listener
     )
 
-    private fun createActionContextStatusUpdate() = ActionSendContextStatusUpdate(listener)
+    private fun createActionContextStatusUpdate() = ActionSend(ACTION_STATUS_CHANGED, listener)
 
-    private fun createActionViewSizeChanged() = ActionSendViewSizeChanged(listener)
+    private fun createActionContextObservationStarted() =
+        ActionSend(ACTION_CONTEXT_OBSERVATION_STARTED, listener)
+
+    private fun createActionViewSizeChanged() = ActionSend(ACTION_VIEW_SIZE_CHANGED, listener)
+
+    private fun createActionEmitFeedback() = ActionEmitFeedback(listener)
 
     companion object {
         private const val INJECT_DEFAULTS = "getDefaults"
@@ -113,11 +112,18 @@ class CaptureCoreActionFactory(
         private const val CONVERT_POINT_COORDINATES = "viewPointForFramePoint"
         private const val CONVERT_QUAD_COORDINATES = "viewQuadrilateralForFrameQuadrilateral"
         private const val GET_CAMERA_STATE = "getCurrentCameraState"
+        private const val ACTION_EMIT_FEEDBACK = "emitFeedback"
+
         const val SEND_CONTEXT_STATUS_UPDATE_EVENT = "sendContextStatusUpdateEvent"
+        const val SEND_CONTEXT_OBSERVATION_STARTED_EVENT = "sendContextObservationStartedEvent"
         const val SEND_VIEW_SIZE_CHANGED_EVENT = "sendViewSizeChangedEvent"
 
+        const val ACTION_STATUS_CHANGED = "didChangeStatus"
+        const val ACTION_CONTEXT_OBSERVATION_STARTED = "didStartObservingContext"
+        const val ACTION_VIEW_SIZE_CHANGED = "didChangeSizeOrientation"
+
         private val ACTIONS_NOT_DEPENDING_ON_CAMERA = setOf(
-                INJECT_DEFAULTS, SEND_CONTEXT_STATUS_UPDATE_EVENT
+            INJECT_DEFAULTS, SEND_CONTEXT_STATUS_UPDATE_EVENT
         )
     }
 }

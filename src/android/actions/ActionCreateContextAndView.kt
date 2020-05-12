@@ -8,19 +8,18 @@ package com.scandit.datacapture.cordova.core.actions
 
 import com.scandit.datacapture.core.capture.DataCaptureContext
 import com.scandit.datacapture.core.capture.serialization.DataCaptureContextDeserializer
-import com.scandit.datacapture.core.json.JsonValue
+import com.scandit.datacapture.core.component.DataCaptureComponent
 import com.scandit.datacapture.core.ui.DataCaptureView
 import org.apache.cordova.CallbackContext
 import org.json.JSONArray
 import org.json.JSONException
-import java.lang.RuntimeException
 
 class ActionCreateContextAndView(
         private val dataCaptureContextDeserializer: DataCaptureContextDeserializer,
         private val listener: ResultListener
 ) : Action {
 
-    override fun run(args: JSONArray, callbackContext: CallbackContext): Boolean {
+    override fun run(args: JSONArray, callbackContext: CallbackContext) {
         try {
             val jsonString = args.getJSONObject(0).toString()
             val deserializationResult = dataCaptureContextDeserializer.contextFromJson(
@@ -28,8 +27,14 @@ class ActionCreateContextAndView(
             )
             val view = deserializationResult.view
             val dataCaptureContext = deserializationResult.dataCaptureContext
+            val dataCaptureComponents = deserializationResult.components
 
-            listener.onCreateContextAndViewActionExecuted(dataCaptureContext, view, callbackContext)
+            listener.onCreateContextAndView(
+                dataCaptureContext,
+                view,
+                dataCaptureComponents,
+                callbackContext
+            )
         } catch (e: JSONException) {
             e.printStackTrace()
             listener.onJsonParseError(e, callbackContext)
@@ -38,18 +43,17 @@ class ActionCreateContextAndView(
             listener.onJsonParseError(e, callbackContext)
         } catch (e: Exception) {
             e.printStackTrace()
-            listener.onCreateContextAndViewActionError(e, callbackContext)
+            listener.onCreateContextAndViewError(e, callbackContext)
         }
-        return true
     }
 
-    interface ResultListener {
-        fun onCreateContextAndViewActionExecuted(
-                dataCaptureContext: DataCaptureContext,
-                dataCaptureView: DataCaptureView,
-                callbackContext: CallbackContext
+    interface ResultListener : ActionJsonParseErrorResultListener {
+        fun onCreateContextAndView(
+            dataCaptureContext: DataCaptureContext,
+            dataCaptureView: DataCaptureView,
+            dataCaptureComponents: List<DataCaptureComponent>,
+            callbackContext: CallbackContext
         )
-        fun onCreateContextAndViewActionError(error: Throwable, callbackContext: CallbackContext)
-        fun onJsonParseError(error: Throwable, callbackContext: CallbackContext)
+        fun onCreateContextAndViewError(error: Throwable, callbackContext: CallbackContext)
     }
 }

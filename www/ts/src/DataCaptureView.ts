@@ -7,10 +7,10 @@ import { DataCaptureContext, PrivateDataCaptureContext } from './DataCaptureCont
 import { DefaultSerializeable, ignoreFromSerialization, Serializeable } from './Serializeable';
 
 // tslint:disable-next-line:no-empty-interface
-export interface DataCaptureOverlay {}
+export interface DataCaptureOverlay { }
 
 // tslint:disable-next-line:no-empty-interface
-export interface Control extends Serializeable {}
+export interface Control extends Serializeable { }
 
 // TODO: add back torch switch control https://jira.scandit.com/browse/SDC-1771
 class TorchSwitchControl extends DefaultSerializeable implements Control {
@@ -18,7 +18,7 @@ class TorchSwitchControl extends DefaultSerializeable implements Control {
 }
 
 export interface DataCaptureViewListener {
-  didChangeSize(view: DataCaptureView, size: Size, orientation: Orientation): void;
+  didChangeSize?(view: DataCaptureView, size: Size, orientation: Orientation): void;
 }
 
 export enum Anchor {
@@ -37,11 +37,44 @@ export class HTMLElementState {
   public isShown = false;
   public position: Optional<{ top: number, left: number }> = null;
   public size: Optional<{ width: number, height: number }> = null;
+  public shouldBeUnderWebView = false;
+
+  public get isValid(): boolean {
+    return this.isShown !== undefined && this.isShown !== null
+      && this.position !== undefined && this.position !== null
+      && this.size !== undefined && this.size !== null
+      && this.shouldBeUnderWebView !== undefined && this.shouldBeUnderWebView !== null;
+  }
+
+  public didChangeComparedTo(other: HTMLElementState): boolean {
+    return this.position !== other.position
+      || this.size !== other.size
+      || this.shouldBeUnderWebView !== other.shouldBeUnderWebView;
+  }
 }
 
 export interface PrivateDataCaptureView {
+  htmlElement: Optional<HTMLElement>;
+  _htmlElementState: HTMLElementState;
+  htmlElementState: HTMLElementState;
+
+  readonly viewProxy: DataCaptureViewProxy;
+  _viewProxy: DataCaptureViewProxy;
+
+  overlays: DataCaptureOverlay[];
+  controls: Control[];
+  listeners: DataCaptureViewListener[];
+
   addControl(control: Control): void;
   removeControl(control: Control): void;
+
+  initialize(): void;
+  updatePositionAndSize(): void;
+  show(): void;
+  hide(): void;
+
+  elementDidChange(): void;
+  subscribeToChangesOnHTMLElement(): void;
 }
 
 export class DataCaptureView extends DefaultSerializeable {
@@ -88,12 +121,11 @@ export class DataCaptureView extends DefaultSerializeable {
 
   private set htmlElementState(newState: HTMLElementState) {
     const didChangeShown = this._htmlElementState.isShown !== newState.isShown;
-    const didChangePositionOrSize = this._htmlElementState.position !== newState.position
-      || this._htmlElementState.size !== newState.size;
+    const didChangePositionOrSize = this._htmlElementState.didChangeComparedTo(newState);
 
     this._htmlElementState = newState;
 
-    if (this._htmlElementState.isShown && didChangePositionOrSize) {
+    if (didChangePositionOrSize) {
       this.updatePositionAndSize();
     }
 
@@ -225,8 +257,12 @@ export class DataCaptureView extends DefaultSerializeable {
     const boundingRect = this.htmlElement.getBoundingClientRect();
     newState.position = { top: boundingRect.top, left: boundingRect.left };
     newState.size = { width: boundingRect.width, height: boundingRect.height };
+    newState.shouldBeUnderWebView = parseInt(this.htmlElement.style.zIndex || '1', 10) < 0
+      || parseInt(getComputedStyle(this.htmlElement).zIndex || '1', 10) < 0;
 
-    const isDisplayed = getComputedStyle(this.htmlElement).display !== 'none';
+    const isDisplayed = getComputedStyle(this.htmlElement).display !== 'none'
+      && this.htmlElement.style.display !== 'none';
+
     const isInDOM = document.body.contains(this.htmlElement);
     newState.isShown = isDisplayed && isInDOM && !this.htmlElement.hidden;
 
@@ -234,15 +270,16 @@ export class DataCaptureView extends DefaultSerializeable {
   }
 
   private updatePositionAndSize(): void {
-    if (!this.htmlElementState || !this.htmlElementState.position || !this.htmlElementState.size) {
+    if (!this.htmlElementState || !this.htmlElementState.isValid) {
       return;
     }
 
     this.viewProxy.setPositionAndSize(
-      this.htmlElementState.position.top,
-      this.htmlElementState.position.left,
-      this.htmlElementState.size.width,
-      this.htmlElementState.size.height,
+      this.htmlElementState.position!.top,
+      this.htmlElementState.position!.left,
+      this.htmlElementState.size!.width,
+      this.htmlElementState.size!.height,
+      this.htmlElementState.shouldBeUnderWebView,
     );
   }
 
@@ -253,7 +290,6 @@ export class DataCaptureView extends DefaultSerializeable {
 
     this.privateContext.initialize();
 
-    this.updatePositionAndSize();
     this.viewProxy.show();
   }
 

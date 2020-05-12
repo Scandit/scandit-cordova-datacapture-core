@@ -3,7 +3,8 @@
 import { DataCaptureContext } from './DataCaptureContext';
 
 export interface DataCaptureContextListener {
-  didChangeStatus(context: DataCaptureContext, contextStatus: ContextStatus): void;
+  didChangeStatus?(context: DataCaptureContext, contextStatus: ContextStatus): void;
+  didStartObservingContext?(context: DataCaptureContext): void;
 }
 
 // TODO: adjust when readding framedata to the api https://jira.scandit.com/browse/SDC-1159

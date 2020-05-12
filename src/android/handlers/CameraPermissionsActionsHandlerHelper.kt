@@ -15,7 +15,7 @@ class CameraPermissionsActionsHandlerHelper(private val actionFactory: ActionFac
 
     private val cameraPermissionsGranted: AtomicBoolean = AtomicBoolean(false)
 
-    fun canBeRan(actionName: String): Boolean {
+    fun canBeRun(actionName: String): Boolean {
         return cameraPermissionsGranted.get() ||
                 actionFactory.actionsNotDependentOnCameraPermission.contains(actionName)
     }
