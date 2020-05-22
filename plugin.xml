@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <plugin id="scandit-cordova-datacapture-core"
-        version="6.3.0"
+        version="6.3.1"
         xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -13,6 +13,7 @@
   <js-module src="www/js/Cordova/DataCaptureViewProxy.js" name="DataCaptureViewProxy"></js-module>
   <js-module src="www/js/Cordova/CameraProxy.js" name="CameraProxy"></js-module>
   <js-module src="www/js/Cordova/FeedbackProxy.js" name="FeedbackProxy"></js-module>
+  <js-module name="VolumeButtonObserverProxy" src="www/js/Cordova/VolumeButtonObserverProxy.js"></js-module>
 
   <js-module src="www/js/Camera.js" name="Camera">
       <merges target="Scandit" />
@@ -41,6 +42,9 @@
       <merges target="Scandit" />
   </js-module>
   <js-module src="www/js/DataCaptureVersion.js" name="DataCaptureVersion">
+      <merges target="Scandit" />
+  </js-module>
+  <js-module name="VolumeButtonObserver" src="www/js/VolumeButtonObserver.js">
       <merges target="Scandit" />
   </js-module>
 
@@ -87,10 +91,12 @@
     <source-file src="src/ios/Extensions/CDVPluginResult+Extensions.swift" />
     <source-file src="src/ios/Extensions/UIInterfaceOrientation+Extensions.swift" />
 
+    <source-file src="src/ios/SDCVolumeButtonObserver.h" />
+
     <dependency id="cordova-plugin-add-swift-support" version="2.0.2"/>
     <dependency id="cordova-plugin-wkwebview-engine" version="1.1.4"/>
 
-    <framework src="src/ios/framework/ScanditCaptureCore.framework" version="6.3.0"
+    <framework src="src/ios/framework/ScanditCaptureCore.framework" version="6.3.1"
                custom="true" embed="true" />
 
     <hook type="before_plugin_install" src="src/hooks/build.js" />
@@ -191,8 +197,9 @@
 
     <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
     <framework src="com.squareup.okhttp3:okhttp:3.12.10" />
+    <framework src="androidx.appcompat:appcompat:1.1.0" />
 
-    <resource-file src="src/android/library/ScanditCaptureCore.aar" target="libs/ScanditCaptureCore.aar" version="6.3.0" custom="true"/>
+    <resource-file src="src/android/library/ScanditCaptureCore.aar" target="libs/ScanditCaptureCore.aar" version="6.3.1" custom="true"/>
 
     <hook type="before_plugin_install" src="src/hooks/build.js" />
     <hook type="before_plugin_install" src="src/hooks/add-frameworks.js" />

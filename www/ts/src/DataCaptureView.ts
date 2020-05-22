@@ -1,6 +1,6 @@
 /// <amd-module name="scandit-cordova-datacapture-core.DataCaptureView"/>
 // ^ needed because Cordova can't resolve "../xx" style dependencies
-import { MarginsWithUnit, Orientation, Point, PointWithUnit, Quadrilateral, Size } from './Common';
+import { MarginsWithUnit, Orientation, Point, PointWithUnit, Quadrilateral, Rect, Size } from './Common';
 import { Cordova } from './Cordova/Cordova';
 import { DataCaptureViewProxy } from './Cordova/DataCaptureViewProxy';
 import { DataCaptureContext, PrivateDataCaptureContext } from './DataCaptureContext';
@@ -37,19 +37,19 @@ export class HTMLElementState {
   public isShown = false;
   public position: Optional<{ top: number, left: number }> = null;
   public size: Optional<{ width: number, height: number }> = null;
-  public shouldBeUnderWebView = false;
+  public shouldBeUnderContent = false;
 
   public get isValid(): boolean {
     return this.isShown !== undefined && this.isShown !== null
       && this.position !== undefined && this.position !== null
       && this.size !== undefined && this.size !== null
-      && this.shouldBeUnderWebView !== undefined && this.shouldBeUnderWebView !== null;
+      && this.shouldBeUnderContent !== undefined && this.shouldBeUnderContent !== null;
   }
 
   public didChangeComparedTo(other: HTMLElementState): boolean {
     return this.position !== other.position
       || this.size !== other.size
-      || this.shouldBeUnderWebView !== other.shouldBeUnderWebView;
+      || this.shouldBeUnderContent !== other.shouldBeUnderContent;
   }
 }
 
@@ -70,8 +70,8 @@ export interface PrivateDataCaptureView {
 
   initialize(): void;
   updatePositionAndSize(): void;
-  show(): void;
-  hide(): void;
+  _show(): void;
+  _hide(): void;
 
   elementDidChange(): void;
   subscribeToChangesOnHTMLElement(): void;
@@ -131,9 +131,9 @@ export class DataCaptureView extends DefaultSerializeable {
 
     if (didChangeShown) {
       if (this._htmlElementState.isShown) {
-        this.show();
+        this._show();
       } else {
-        this.hide();
+        this._hide();
       }
     }
   }
@@ -167,6 +167,32 @@ export class DataCaptureView extends DefaultSerializeable {
     this.elementDidChange();
 
     this.subscribeToChangesOnHTMLElement();
+  }
+
+  public setFrame(frame: Rect, isUnderContent: boolean = false): Promise<void> {
+    return this.viewProxy.setPositionAndSize(
+      frame.origin.y,
+      frame.origin.x,
+      frame.size.width,
+      frame.size.height,
+      isUnderContent,
+    );
+  }
+
+  public show(): Promise<void> {
+    if (this.htmlElement) {
+      throw new Error("Views should only be manually shown if they're manually sized using setFrame");
+    }
+
+    return this._show();
+  }
+
+  public hide(): Promise<void> {
+    if (this.htmlElement) {
+      throw new Error("Views should only be manually hidden if they're manually sized using setFrame");
+    }
+
+    return this._hide();
   }
 
   public addOverlay(overlay: DataCaptureOverlay): void {
@@ -257,7 +283,7 @@ export class DataCaptureView extends DefaultSerializeable {
     const boundingRect = this.htmlElement.getBoundingClientRect();
     newState.position = { top: boundingRect.top, left: boundingRect.left };
     newState.size = { width: boundingRect.width, height: boundingRect.height };
-    newState.shouldBeUnderWebView = parseInt(this.htmlElement.style.zIndex || '1', 10) < 0
+    newState.shouldBeUnderContent = parseInt(this.htmlElement.style.zIndex || '1', 10) < 0
       || parseInt(getComputedStyle(this.htmlElement).zIndex || '1', 10) < 0;
 
     const isDisplayed = getComputedStyle(this.htmlElement).display !== 'none'
@@ -279,21 +305,25 @@ export class DataCaptureView extends DefaultSerializeable {
       this.htmlElementState.position!.left,
       this.htmlElementState.size!.width,
       this.htmlElementState.size!.height,
-      this.htmlElementState.shouldBeUnderWebView,
+      this.htmlElementState.shouldBeUnderContent,
     );
   }
 
-  private show(): void {
+  private _show(): Promise<void> {
     if (!this.context) {
       throw new Error('There should be a context attached to a view that should be shown');
     }
 
     this.privateContext.initialize();
 
-    this.viewProxy.show();
+    return this.viewProxy.show();
   }
 
-  private hide(): void {
-    this.viewProxy.hide();
+  private _hide(): Promise<void> {
+    if (!this.context) {
+      throw new Error('There should be a context attached to a view that should be shown');
+    }
+
+    return this.viewProxy.hide();
   }
 }

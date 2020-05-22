@@ -26,10 +26,7 @@ export class Point extends DefaultSerializeable {
     return new Point(json.x, json.y);
   }
 
-  constructor(
-    x: number,
-    y: number,
-  ) {
+  public constructor(x: number, y: number) {
     super();
     this._x = x;
     this._y = y;
@@ -181,6 +178,26 @@ export class PointWithUnit extends DefaultSerializeable {
   }
 }
 
+export class Rect extends DefaultSerializeable {
+  @nameForSerialization('origin')
+  private _origin: Point;
+  @nameForSerialization('size')
+  private _size: Size;
+
+  public get origin(): Point {
+    return this._origin;
+  }
+  public get size(): Size {
+    return this._size;
+  }
+
+  public constructor(origin: Point, size: Size) {
+    super();
+    this._origin = origin;
+    this._size = size;
+  }
+}
+
 export class RectWithUnit extends DefaultSerializeable {
   @nameForSerialization('origin')
   private _origin: PointWithUnit;
@@ -243,10 +260,7 @@ export class Size extends DefaultSerializeable {
     return new Size(json.width, json.height);
   }
 
-  constructor(
-    width: number,
-    height: number,
-  ) {
+  public constructor(width: number, height: number) {
     super();
     this._width = width;
     this._height = height;

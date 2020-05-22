@@ -6,6 +6,7 @@ class ScanditCaptureCoreCallbacks {
     var contextListener: Callback?
     var contextFrameListener: Callback?
     var viewListener: Callback?
+    var volumeButtonObserver: Callback?
 }
 
 protocol DataCapturePlugin where Self: CDVPlugin {
@@ -43,6 +44,8 @@ public class ScanditCaptureCore: CDVPlugin {
             captureViewConstraints.captureView = captureView
         }
     }
+
+    private var volumeButtonObserver: VolumeButtonObserver?
 
     private lazy var captureViewConstraints = DataCaptureViewConstraints(relativeTo: webView as! WKWebView)
 
@@ -108,6 +111,9 @@ public class ScanditCaptureCore: CDVPlugin {
         callbacks.contextFrameListener = nil
         callbacks.contextListener = nil
         callbacks.viewListener = nil
+        callbacks.volumeButtonObserver = nil
+
+        volumeButtonObserver = nil
     }
 
     // MARK: - DataCaptureContextProxy
@@ -198,6 +204,26 @@ public class ScanditCaptureCore: CDVPlugin {
         commandDelegate.send(.keepCallback, callbackId: command.callbackId)
     }
 
+    @objc(subscribeVolumeButtonObserver:)
+    func subscribeVolumeButtonObserver(command: CDVInvokedUrlCommand) {
+        callbacks.volumeButtonObserver = Callback(id: command.callbackId)
+        volumeButtonObserver = VolumeButtonObserver(handler: { [weak self] in
+            guard let self = self else {
+                return
+            }
+            self.commandDelegate.send(.listenerCallback(ListenerEvent(name: .didChangeVolume)),
+                                      callbackId: self.callbacks.volumeButtonObserver!.id)
+        })
+        commandDelegate.send(.keepCallback, callbackId: command.callbackId)
+    }
+
+    @objc(unsubscribeVolumeButtonObserver:)
+    func unsubscribeVolumeButtonObserver(command: CDVInvokedUrlCommand) {
+        callbacks.volumeButtonObserver?.dispose(by: commandDelegate)
+        volumeButtonObserver = nil
+        commandDelegate.send(.success, callbackId: command.callbackId)
+    }
+
     // MARK: Context related
 
     @objc(disposeContext:)
@@ -226,6 +252,7 @@ public class ScanditCaptureCore: CDVPlugin {
             commandDelegate.send(.failure(with: .noViewToBeShown), callbackId: command.callbackId)
             return
         }
+
         captureView.isHidden = false
 
         commandDelegate.send(.success, callbackId: command.callbackId)
@@ -237,7 +264,9 @@ public class ScanditCaptureCore: CDVPlugin {
             commandDelegate.send(.failure(with: .noViewToBeHidden), callbackId: command.callbackId)
             return
         }
+
         captureView.isHidden = true
+
         commandDelegate.send(.success, callbackId: command.callbackId)
     }
 
@@ -256,7 +285,8 @@ public class ScanditCaptureCore: CDVPlugin {
         }
 
         let convertedPoint = captureView.viewPoint(forFramePoint: pointJSON.cgPoint)
-        commandDelegate.send(.success(message: convertedPoint.json), callbackId: command.callbackId)
+
+        commandDelegate.send(.success(message: convertedPoint.jsonString), callbackId: command.callbackId)
     }
 
     @objc(viewQuadrilateralForFrameQuadrilateral:)

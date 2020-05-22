@@ -27,6 +27,9 @@ struct ListenerEvent {
         case anchorForTrackedBarcode = "anchorForTrackedBarcode"
         case offsetForTrackedBarcode = "offsetForTrackedBarcode"
         case didTapViewForTrackedBarcode = "didTapViewForTrackedBarcode"
+
+        // VolumeButtonObserver
+        case didChangeVolume = "didChangeVolume"
     }
 
     let name: Name

@@ -5,6 +5,10 @@ extension CGPoint {
             "y": y
         ]
     }
+
+    var jsonString: String {
+        return String(data: try! JSONSerialization.data(withJSONObject: json), encoding: .utf8)!
+    }
 }
 
 struct PointJSON: CommandJSONArgument {

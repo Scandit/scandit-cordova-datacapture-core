@@ -19,31 +19,38 @@ export class DataCaptureViewProxy {
     return viewProxy;
   }
 
-  public setPositionAndSize(top: number, left: number, width: number, height: number, shouldBeUnderWebView: boolean) {
-    DataCaptureViewProxy.cordovaExec(
-      null,
-      null,
-      CordovaFunction.SetViewPositionAndSize,
-      [{ top, left, width, height, shouldBeUnderWebView }],
-    );
+  public setPositionAndSize(
+    top: number, left: number, width: number, height: number, shouldBeUnderWebView: boolean): Promise<void> {
+    return new Promise((resolve, reject) => {
+      DataCaptureViewProxy.cordovaExec(
+        resolve,
+        reject,
+        CordovaFunction.SetViewPositionAndSize,
+        [{ top, left, width, height, shouldBeUnderWebView }],
+      );
+    });
   }
 
-  public show() {
-    DataCaptureViewProxy.cordovaExec(
-      null,
-      null,
-      CordovaFunction.ShowView,
-      null,
-    );
+  public show(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      DataCaptureViewProxy.cordovaExec(
+        null,
+        null,
+        CordovaFunction.ShowView,
+        null,
+      );
+    });
   }
 
-  public hide() {
-    DataCaptureViewProxy.cordovaExec(
-      null,
-      null,
-      CordovaFunction.HideView,
-      null,
-    );
+  public hide(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      DataCaptureViewProxy.cordovaExec(
+        null,
+        null,
+        CordovaFunction.HideView,
+        null,
+      );
+    });
   }
 
   public viewPointForFramePoint(point: Point): Promise<Point> {
