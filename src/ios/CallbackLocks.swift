@@ -7,10 +7,11 @@ class CallbackLock {
     var isCallbackFinished = true
     var result: BlockingListenerCallbackResult? = nil
 
-    func wait() {
-        condition.lock()
+    func wait(afterDoing block: () -> Void) {
         isCallbackFinished = false
+        block()
 
+        condition.lock()
         while !isCallbackFinished {
             condition.wait()
         }
@@ -27,8 +28,8 @@ class CallbackLock {
 class CallbackLocks {
     var locks: [ListenerEvent.Name: CallbackLock] = [ListenerEvent.Name: CallbackLock]()
 
-    func wait(for eventName: ListenerEvent.Name) {
-        getLock(for: eventName).wait()
+    func wait(for eventName: ListenerEvent.Name, afterDoing block: () -> Void) {
+        getLock(for: eventName).wait(afterDoing: block)
     }
 
     func release(for eventName: ListenerEvent.Name) {
