@@ -94,7 +94,6 @@
     <source-file src="src/ios/SDCVolumeButtonObserver.h" />
 
     <dependency id="cordova-plugin-add-swift-support" version="2.0.2"/>
-    <dependency id="cordova-plugin-wkwebview-engine" version="1.1.4"/>
 
     <framework src="src/ios/framework/ScanditCaptureCore.framework" version="6.3.2"
                custom="true" embed="true" />
