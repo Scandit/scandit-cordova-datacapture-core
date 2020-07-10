@@ -18,7 +18,7 @@ class Deserializers(
     context: Context,
     modeDeserializers: List<DataCaptureModeDeserializer>,
     componentDeserializers: List<DataCaptureComponentDeserializer>,
-    frameSourceDeserializerListener: FrameSourceDeserializerListener// TODO [SDC-1339] deserialization of desiredTorchState and desiredState
+    frameSourceDeserializerListener: FrameSourceDeserializerListener
 ) {
     private val frameSourceDeserializer: FrameSourceDeserializer
     private val dataCaptureViewDeserializer: DataCaptureViewDeserializer

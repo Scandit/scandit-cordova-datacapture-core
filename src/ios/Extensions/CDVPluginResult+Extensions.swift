@@ -28,6 +28,9 @@ struct ListenerEvent {
         case offsetForTrackedBarcode = "offsetForTrackedBarcode"
         case didTapViewForTrackedBarcode = "didTapViewForTrackedBarcode"
 
+        // Text Capture Listener
+        case didCaptureInTextCapture = "didCaptureInTextCapture"
+
         // VolumeButtonObserver
         case didChangeVolume = "didChangeVolume"
     }
@@ -141,8 +144,8 @@ extension CDVPluginResult {
         return CDVPluginResult(status: CDVCommandStatus_OK, messageAs: message)
     }
 
-    /// Success result with defaults.
-    static func success(message: ScanditCaptureCoreDefaults) -> CDVPluginResult {
+    /// Success result with an encodable object as JSON.
+    static func success<T: Encodable>(message: T) -> CDVPluginResult {
         guard let data = try? JSONEncoder().encode(message),
             let object = try? JSONSerialization.jsonObject(with: data) as? JSONMessage else {
                 return .failure(with: "Could not serialize message")

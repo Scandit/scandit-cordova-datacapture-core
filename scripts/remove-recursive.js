@@ -2,7 +2,7 @@ const fs = require('fs')
 
 const rmDirRecursive = (dirPath) => {
     if (!fs.existsSync(dirPath)) {
-        console.log(`${dirPath} does not exist, no need to remove it`);
+        console.log(`${dirPath} is already removed or didn't exist`);
         return;
     }
     const files = fs.readdirSync(dirPath)

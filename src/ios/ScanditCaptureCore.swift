@@ -298,8 +298,8 @@ public class ScanditCaptureCore: CDVPlugin {
 
         guard let jsonString = command.defaultArgumentAsString,
             let quad = Quadrilateral(JSONString: jsonString) else {
-                    commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
-                    return
+                commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
+                return
         }
 
         let convertedQuadrilateral = captureView.viewQuadrilateral(forFrameQuadrilateral: quad)

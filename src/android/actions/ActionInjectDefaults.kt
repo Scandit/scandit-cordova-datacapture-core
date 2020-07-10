@@ -38,7 +38,7 @@ class ActionInjectDefaults(
     override fun run(args: JSONArray, callbackContext: CallbackContext) {
         try {
             val cameraSettings = CameraSettings()
-            val dataCaptureview = DataCaptureView.newInstance(context, null)
+            val dataCaptureView = DataCaptureView.newInstance(context, null)
             val laserViewfinder = LaserlineViewfinder()
             val rectangularViewfinder = RectangularViewfinder()
             val spotlightViewfinder = SpotlightViewfinder()
@@ -58,10 +58,10 @@ class ActionInjectDefaults(
                             defaultPosition = Camera.getDefaultCamera()?.position?.toJson()
                     ),
                     dataCaptureViewDefaults = SerializableDataCaptureViewDefaults(
-                            scanAreaMargins = dataCaptureview.scanAreaMargins.toJson(),
-                            pointOfInterest = dataCaptureview.pointOfInterest.toJson(),
-                            logoAnchor = dataCaptureview.logoAnchor.toJson(),
-                            logoOffset = dataCaptureview.logoOffset.toJson()
+                            scanAreaMargins = dataCaptureView.scanAreaMargins.toJson(),
+                            pointOfInterest = dataCaptureView.pointOfInterest.toJson(),
+                            logoAnchor = dataCaptureView.logoAnchor.toJson(),
+                            logoOffset = dataCaptureView.logoOffset.toJson()
                     ),
                     laserlineViewfinderDefaults = SerializableLaserlineViewfinderDefaults(
                             width = laserViewfinder.width.toJson(),

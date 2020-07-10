@@ -2,10 +2,24 @@ protocol BlockingListenerCallbackResult: Decodable {
     var finishCallbackID: ListenerEvent.Name { get }
 }
 
+extension BlockingListenerCallbackResult {
+    func isForListenerEvent(_ listenerEventName: ListenerEvent.Name) -> Bool {
+        return finishCallbackID == listenerEventName
+    }
+
+    static func from(_ command: CDVInvokedUrlCommand) -> Self? {
+        guard let data = command.defaultArgumentAsString?.data(using: .utf8) else {
+            return nil
+        }
+        let decoder = JSONDecoder()
+        return try? decoder.decode(Self.self, from: data)
+    }
+}
+
 class CallbackLock {
     let condition = NSCondition()
     var isCallbackFinished = true
-    var result: BlockingListenerCallbackResult? = nil
+    var result: BlockingListenerCallbackResult?
 
     func wait(afterDoing block: () -> Void) {
         isCallbackFinished = false

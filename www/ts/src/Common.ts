@@ -589,3 +589,13 @@ export enum Orientation {
   LandscapeRight = 'landscapeRight',
   LandscapeLeft = 'landscapeLeft',
 }
+
+export enum Direction {
+  None = 'none',
+  Horizontal = 'horizontal',
+  LeftToRight = 'leftToRight',
+  RightToLeft = 'rightToLeft',
+  Vertical = 'vertical',
+  TopToBottom = 'topToBottom',
+  BottomToTop = 'bottomToTop',
+}

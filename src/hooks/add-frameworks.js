@@ -143,7 +143,11 @@ const sdcModuleFromFrameworkName = (name) => {
   if (name.includes('Core')) {
     return 'core';
   } else if (name.includes('Parser')) {
+    // ScanditParser
     return 'parser';
+  } else if (name.includes('OCR')) {
+    // ScanditOCR, part of TextCapture
+    return 'text';
   } else {
     // e.g. ScanditBarcodeCapture => barcode
     return /^Scandit(\w*)Capture/.exec(name)[1].toLowerCase();

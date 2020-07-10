@@ -12,7 +12,15 @@ export interface PrivateDataCaptureMode {
 
 export interface DataCaptureMode extends Serializeable {
   isEnabled: boolean;
-  readonly context: DataCaptureContext | null;
+  readonly context: Optional<DataCaptureContext>;
+}
+
+export interface PrivateDataCaptureComponent {
+  _context: DataCaptureContext;
+}
+
+export interface DataCaptureComponent {
+  readonly id: string;
 }
 
 export interface PrivateDataCaptureContext {
@@ -164,12 +172,4 @@ export class DataCaptureContext extends DefaultSerializeable {
       this.update();
     }
   }
-}
-
-export interface PrivateDataCaptureComponent {
-  _context: DataCaptureContext;
-}
-
-export interface DataCaptureComponent {
-  readonly id: string;
 }

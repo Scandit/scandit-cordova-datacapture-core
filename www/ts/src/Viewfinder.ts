@@ -50,6 +50,9 @@ export class Brush extends DefaultSerializeable {
 // tslint:disable-next-line:no-empty-interface
 export interface Viewfinder { }
 
+// tslint:disable-next-line:variable-name
+export const NoViewfinder = { type: 'none' };
+
 export class LaserlineViewfinder extends DefaultSerializeable implements Viewfinder {
   private type = 'laserline';
 
