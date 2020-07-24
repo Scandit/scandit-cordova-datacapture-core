@@ -8,6 +8,7 @@ package com.scandit.datacapture.cordova.core.actions
 
 import com.scandit.datacapture.cordova.core.data.SerializablePoint
 import com.scandit.datacapture.cordova.core.testing.OpenForTesting
+import com.scandit.datacapture.cordova.core.utils.dpFromPx
 import com.scandit.datacapture.core.common.geometry.Point
 import com.scandit.datacapture.core.ui.DataCaptureView
 import org.apache.cordova.CallbackContext
@@ -25,10 +26,10 @@ class ActionConvertPointCoordinates(
                 listener.onConvertPointCoordinatesNoViewError(callbackContext)
             } else {
                 val point = SerializablePoint(args.getJSONObject(0)).toScanditPoint()
-                listener.onConvertPointCoordinates(
-                    dataCaptureView.mapFramePointToView(point),
-                    callbackContext
-                )
+                val mappedPoint = dataCaptureView
+                    .mapFramePointToView(point)
+                    .dpFromPx()
+                listener.onConvertPointCoordinates(mappedPoint, callbackContext)
             }
         } catch (e: Exception) {// TODO SDC-1851 fine-catch deserializer exceptions
             e.printStackTrace()

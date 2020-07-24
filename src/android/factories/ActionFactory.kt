@@ -10,5 +10,5 @@ import com.scandit.datacapture.cordova.core.actions.Action
 
 interface ActionFactory {
     fun provideAction(actionName: String): Action
-    val actionsNotDependentOnCameraPermission: Set<String>
+    fun canBeRunWithoutCameraPermission(actionName: String): Boolean
 }

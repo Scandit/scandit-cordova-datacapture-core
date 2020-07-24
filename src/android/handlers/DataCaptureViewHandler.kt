@@ -14,7 +14,7 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import com.scandit.datacapture.cordova.core.data.ResizeAndMoveInfo
 import com.scandit.datacapture.cordova.core.testing.OpenForTesting
-import com.scandit.datacapture.cordova.core.utils.dpToPx
+import com.scandit.datacapture.cordova.core.utils.pxFromDp
 import com.scandit.datacapture.cordova.core.utils.removeFromParent
 import com.scandit.datacapture.cordova.core.workers.Worker
 import com.scandit.datacapture.core.ui.DataCaptureView
@@ -109,7 +109,10 @@ class DataCaptureViewHandler(
         uiWorker.post {
             activity.addContentView(
                     dataCaptureView,
-                    ViewGroup.LayoutParams(latestInfo.width, latestInfo.height)
+                    ViewGroup.LayoutParams(
+                        latestInfo.width.pxFromDp().toInt(),
+                        latestInfo.height.pxFromDp().toInt()
+                    )
             )
             render()
         }
@@ -139,11 +142,11 @@ class DataCaptureViewHandler(
         dataCaptureView.post {
             val context = dataCaptureView.context
             dataCaptureView.visibility = if (isVisible) View.VISIBLE else View.GONE
-            dataCaptureView.x = latestInfo.left.dpToPx(context)
-            dataCaptureView.y = latestInfo.top.dpToPx(context)
+            dataCaptureView.x = latestInfo.left.pxFromDp()
+            dataCaptureView.y = latestInfo.top.pxFromDp()
             dataCaptureView.layoutParams.apply {
-                width = latestInfo.width.dpToPx(context).toInt()
-                height = latestInfo.height.dpToPx(context).toInt()
+                width = latestInfo.width.pxFromDp().toInt()
+                height = latestInfo.height.pxFromDp().toInt()
             }
             if (latestInfo.shouldBeUnderWebView) {
                 webView?.bringToFront()

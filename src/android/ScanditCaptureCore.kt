@@ -8,7 +8,20 @@ package com.scandit.datacapture.cordova.core
 
 import android.Manifest
 import android.content.pm.PackageManager
-import com.scandit.datacapture.cordova.core.actions.*
+import com.scandit.datacapture.cordova.core.actions.ActionConvertPointCoordinates
+import com.scandit.datacapture.cordova.core.actions.ActionConvertQuadrilateralCoordinates
+import com.scandit.datacapture.cordova.core.actions.ActionCreateContextAndView
+import com.scandit.datacapture.cordova.core.actions.ActionDisposeContext
+import com.scandit.datacapture.cordova.core.actions.ActionEmitFeedback
+import com.scandit.datacapture.cordova.core.actions.ActionGetCameraState
+import com.scandit.datacapture.cordova.core.actions.ActionInjectDefaults
+import com.scandit.datacapture.cordova.core.actions.ActionSend
+import com.scandit.datacapture.cordova.core.actions.ActionSubscribeContext
+import com.scandit.datacapture.cordova.core.actions.ActionSubscribeView
+import com.scandit.datacapture.cordova.core.actions.ActionUpdateContextAndView
+import com.scandit.datacapture.cordova.core.actions.ActionViewHide
+import com.scandit.datacapture.cordova.core.actions.ActionViewResizeMove
+import com.scandit.datacapture.cordova.core.actions.ActionViewShow
 import com.scandit.datacapture.cordova.core.callbacks.CoreCallbackContainer
 import com.scandit.datacapture.cordova.core.callbacks.DataCaptureContextCallback
 import com.scandit.datacapture.cordova.core.callbacks.DataCaptureViewCallback
@@ -19,10 +32,19 @@ import com.scandit.datacapture.cordova.core.data.ResizeAndMoveInfo
 import com.scandit.datacapture.cordova.core.data.defaults.SerializableCoreDefaults
 import com.scandit.datacapture.cordova.core.deserializers.Deserializers
 import com.scandit.datacapture.cordova.core.deserializers.DeserializersProvider
-import com.scandit.datacapture.cordova.core.errors.*
+import com.scandit.datacapture.cordova.core.errors.ContextDeserializationError
+import com.scandit.datacapture.cordova.core.errors.InvalidActionNameError
+import com.scandit.datacapture.cordova.core.errors.JsonParseError
+import com.scandit.datacapture.cordova.core.errors.NoCameraAvailableError
+import com.scandit.datacapture.cordova.core.errors.NoViewToConvertPointError
+import com.scandit.datacapture.cordova.core.errors.NoViewToConvertQuadrilateralError
 import com.scandit.datacapture.cordova.core.factories.ActionFactory
 import com.scandit.datacapture.cordova.core.factories.CaptureCoreActionFactory
-import com.scandit.datacapture.cordova.core.handlers.*
+import com.scandit.datacapture.cordova.core.handlers.ActionsHandler
+import com.scandit.datacapture.cordova.core.handlers.CameraPermissionsActionsHandlerHelper
+import com.scandit.datacapture.cordova.core.handlers.DataCaptureComponentsHandler
+import com.scandit.datacapture.cordova.core.handlers.DataCaptureContextHandler
+import com.scandit.datacapture.cordova.core.handlers.DataCaptureViewHandler
 import com.scandit.datacapture.cordova.core.utils.successAndKeepCallback
 import com.scandit.datacapture.cordova.core.workers.UiWorker
 import com.scandit.datacapture.core.capture.DataCaptureContext
@@ -36,9 +58,14 @@ import com.scandit.datacapture.core.common.geometry.toJson
 import com.scandit.datacapture.core.component.DataCaptureComponent
 import com.scandit.datacapture.core.component.serialization.DataCaptureComponentDeserializer
 import com.scandit.datacapture.core.json.JsonValue
-import com.scandit.datacapture.core.source.*
+import com.scandit.datacapture.core.source.Camera
+import com.scandit.datacapture.core.source.FrameSource
+import com.scandit.datacapture.core.source.FrameSourceState
+import com.scandit.datacapture.core.source.FrameSourceStateDeserializer
+import com.scandit.datacapture.core.source.TorchStateDeserializer
 import com.scandit.datacapture.core.source.serialization.FrameSourceDeserializer
 import com.scandit.datacapture.core.source.serialization.FrameSourceDeserializerListener
+import com.scandit.datacapture.core.source.toJson
 import com.scandit.datacapture.core.ui.DataCaptureView
 import com.scandit.datacapture.core.ui.DataCaptureViewListener
 import org.apache.cordova.CallbackContext
@@ -97,7 +124,10 @@ class ScanditCaptureCore : CordovaPlugin(),
         )
     }
     private val actionsHandler: ActionsHandler by lazy {
-        ActionsHandler(actionFactory, CameraPermissionsActionsHandlerHelper(actionFactory))
+        ActionsHandler(
+            actionFactory,
+            CameraPermissionsActionsHandlerHelper(actionFactory, ::checkOrRequestCameraPermission)
+        )
     }
 
     private fun retrieveAllModeDeserializers(): List<DataCaptureModeDeserializer> =
@@ -114,12 +144,7 @@ class ScanditCaptureCore : CordovaPlugin(),
 
     override fun pluginInitialize() {
         captureViewHandler.attachWebView(webView.view, cordova.activity)
-
-        if (cordova.hasPermission(Manifest.permission.CAMERA)) {
-            actionsHandler.onCameraPermissionGranted()
-        } else {
-            cordova.requestPermission(this, CODE_CAMERA_PERMISSIONS, Manifest.permission.CAMERA)
-        }
+        checkCameraPermission()
     }
 
     override fun onStop() {
@@ -129,7 +154,9 @@ class ScanditCaptureCore : CordovaPlugin(),
     }
 
     override fun onStart() {
-        captureContextHandler.camera?.switchToDesiredState(lastFrameSourceState)
+        if (checkCameraPermission()) {
+            captureContextHandler.camera?.switchToDesiredState(lastFrameSourceState)
+        }
     }
 
     override fun onReset() {
@@ -152,13 +179,27 @@ class ScanditCaptureCore : CordovaPlugin(),
         }
     }
 
+    private fun checkCameraPermission(): Boolean {
+        val hasPermission = cordova.hasPermission(Manifest.permission.CAMERA)
+        if (hasPermission) actionsHandler.onCameraPermissionGranted()
+        return hasPermission
+    }
+
+    private fun checkOrRequestCameraPermission() {
+        if (checkCameraPermission().not()) {
+            cordova.requestPermission(this, CODE_CAMERA_PERMISSIONS, Manifest.permission.CAMERA)
+        }
+    }
+
     override fun onRequestPermissionResult(
         requestCode: Int, permissions: Array<out String>?, grantResults: IntArray?
     ) {
         if (requestCode == CODE_CAMERA_PERMISSIONS) {
-            if (grantResults?.getOrNull(0) == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults?.firstOrNull() == PackageManager.PERMISSION_GRANTED) {
                 actionsHandler.onCameraPermissionGranted()
                 notifyCameraPermissionGrantedToPlugins()
+            } else {
+                actionsHandler.onCameraPermissionDenied()
             }
         }
     }

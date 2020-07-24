@@ -8,8 +8,22 @@ package com.scandit.datacapture.cordova.core.factories
 
 import android.content.Context
 import com.scandit.datacapture.cordova.core.CoreActionsListeners
+import com.scandit.datacapture.cordova.core.actions.Action
+import com.scandit.datacapture.cordova.core.actions.ActionConvertPointCoordinates
+import com.scandit.datacapture.cordova.core.actions.ActionConvertQuadrilateralCoordinates
+import com.scandit.datacapture.cordova.core.actions.ActionCreateContextAndView
+import com.scandit.datacapture.cordova.core.actions.ActionDisposeContext
+import com.scandit.datacapture.cordova.core.actions.ActionEmitFeedback
+import com.scandit.datacapture.cordova.core.actions.ActionGetCameraState
+import com.scandit.datacapture.cordova.core.actions.ActionInjectDefaults
+import com.scandit.datacapture.cordova.core.actions.ActionSend
+import com.scandit.datacapture.cordova.core.actions.ActionSubscribeContext
+import com.scandit.datacapture.cordova.core.actions.ActionSubscribeView
+import com.scandit.datacapture.cordova.core.actions.ActionUpdateContextAndView
+import com.scandit.datacapture.cordova.core.actions.ActionViewHide
+import com.scandit.datacapture.cordova.core.actions.ActionViewResizeMove
+import com.scandit.datacapture.cordova.core.actions.ActionViewShow
 import com.scandit.datacapture.cordova.core.deserializers.DeserializersProvider
-import com.scandit.datacapture.cordova.core.actions.*
 import com.scandit.datacapture.cordova.core.errors.InvalidActionNameError
 import com.scandit.datacapture.cordova.core.handlers.DataCaptureComponentsHandler
 import com.scandit.datacapture.cordova.core.handlers.DataCaptureContextHandler
@@ -25,8 +39,6 @@ class CaptureCoreActionFactory(
     private val captureViewHandler: DataCaptureViewHandler,
     private val uiWorker: Worker
 ) : ActionFactory {
-
-    override val actionsNotDependentOnCameraPermission = ACTIONS_NOT_DEPENDING_ON_CAMERA
 
     @Throws(InvalidActionNameError::class)
     override fun provideAction(actionName: String): Action {
@@ -50,6 +62,9 @@ class CaptureCoreActionFactory(
             else -> throw InvalidActionNameError(actionName)
         }
     }
+
+    override fun canBeRunWithoutCameraPermission(actionName: String): Boolean =
+        actionName !in ACTIONS_REQUIRING_CAMERA
 
     private fun createActionInjectDefaults() = ActionInjectDefaults(context, listener)
 
@@ -122,8 +137,7 @@ class CaptureCoreActionFactory(
         const val ACTION_CONTEXT_OBSERVATION_STARTED = "didStartObservingContext"
         const val ACTION_VIEW_SIZE_CHANGED = "didChangeSizeOrientation"
 
-        private val ACTIONS_NOT_DEPENDING_ON_CAMERA = setOf(
-            INJECT_DEFAULTS, SEND_CONTEXT_STATUS_UPDATE_EVENT
-        )
+        private val ACTIONS_REQUIRING_CAMERA =
+            setOf(CREATE_CONTEXT, UPDATE_CONTEXT, VIEW_SHOW, VIEW_HIDE)
     }
 }

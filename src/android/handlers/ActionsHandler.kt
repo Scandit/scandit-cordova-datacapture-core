@@ -50,6 +50,10 @@ class ActionsHandler(
         }
     }
 
+    fun onCameraPermissionDenied() {
+        actionsHandlerHelper.onCameraPermissionDenied()
+    }
+
     private fun executeSyncAction(actionData: ActionData) = runAction(actionData)
 
     private fun runAction(actionData: ActionData) {
