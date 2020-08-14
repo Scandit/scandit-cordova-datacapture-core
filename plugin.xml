@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <plugin id="scandit-cordova-datacapture-core"
-        version="6.4.1"
+        version="6.4.2"
         xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -99,7 +99,7 @@
         <dependency id="cordova-plugin-wkwebview-engine" version="1.1.4" />
 
         <framework custom="true" embed="true"
-            src="src/ios/framework/ScanditCaptureCore.framework" version="6.4.1" />
+            src="src/ios/framework/ScanditCaptureCore.framework" version="6.4.2" />
 
         <hook src="src/hooks/build.js" type="before_plugin_install" />
         <hook src="src/hooks/add-frameworks.js" type="before_plugin_install" />
@@ -263,7 +263,7 @@
         <framework src="com.squareup.okhttp3:okhttp:3.12.10" />
 
         <resource-file custom="true"
-            src="src/android/library/ScanditCaptureCore.aar" target="libs/ScanditCaptureCore.aar" version="6.4.1" />
+            src="src/android/library/ScanditCaptureCore.aar" target="libs/ScanditCaptureCore.aar" version="6.4.2" />
 
         <hook src="src/hooks/build.js" type="before_plugin_install" />
         <hook src="src/hooks/add-frameworks.js" type="before_plugin_install" />
