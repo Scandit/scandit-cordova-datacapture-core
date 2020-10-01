@@ -16,9 +16,9 @@ import org.json.JSONArray
 
 @OpenForTesting
 class DataCaptureViewCallback(
-        private val actionsHandler: ActionsHandler,
-        callbackContext: CallbackContext,
-        private val uiWorker: Worker
+    private val actionsHandler: ActionsHandler,
+    callbackContext: CallbackContext,
+    private val uiWorker: Worker
 ) : Callback(callbackContext) {
 
     fun onSizeChanged(width: Int, height: Int, screenOrientation: Int) {

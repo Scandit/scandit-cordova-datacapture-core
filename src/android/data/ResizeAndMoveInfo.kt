@@ -9,11 +9,11 @@ package com.scandit.datacapture.cordova.core.data
 import org.json.JSONObject
 
 data class ResizeAndMoveInfo(
-        val top: Int,
-        val left: Int,
-        val width: Int,
-        val height: Int,
-        val shouldBeUnderWebView: Boolean
+    val top: Int,
+    val left: Int,
+    val width: Int,
+    val height: Int,
+    val shouldBeUnderWebView: Boolean
 ) {
 
     constructor(json: JSONObject) : this(

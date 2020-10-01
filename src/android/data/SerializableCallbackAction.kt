@@ -9,10 +9,10 @@ package com.scandit.datacapture.cordova.core.data
 import org.json.JSONObject
 
 class SerializableCallbackAction(
-        private val callbackName: String,
-        private val argument: JSONObject,
-        private val finishCallbackId: String? = null,
-        private val shouldNotifyWhenFinished: Boolean = false
+    private val callbackName: String,
+    private val argument: JSONObject,
+    private val finishCallbackId: String? = null,
+    private val shouldNotifyWhenFinished: Boolean = false
 ) : SerializableData {
 
     override fun toJson(): JSONObject = JSONObject(

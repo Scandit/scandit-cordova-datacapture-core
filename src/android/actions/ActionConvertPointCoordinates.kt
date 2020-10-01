@@ -31,7 +31,7 @@ class ActionConvertPointCoordinates(
                     .dpFromPx()
                 listener.onConvertPointCoordinates(mappedPoint, callbackContext)
             }
-        } catch (e: Exception) {// TODO SDC-1851 fine-catch deserializer exceptions
+        } catch (e: Exception) { // TODO SDC-1851 fine-catch deserializer exceptions
             e.printStackTrace()
             listener.onJsonParseError(e, callbackContext)
         }

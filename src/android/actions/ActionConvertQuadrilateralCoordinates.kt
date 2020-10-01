@@ -31,7 +31,7 @@ class ActionConvertQuadrilateralCoordinates(
                     .dpFromPx()
                 listener.onConvertQuadrilateralCoordinates(mappedQuadrilateral, callbackContext)
             }
-        } catch (e: Exception) {// TODO SDC-1851 fine-catch deserializer exceptions
+        } catch (e: Exception) { // TODO SDC-1851 fine-catch deserializer exceptions
             e.printStackTrace()
             listener.onJsonParseError(e, callbackContext)
         }
@@ -39,7 +39,8 @@ class ActionConvertQuadrilateralCoordinates(
 
     interface ResultListener : ActionJsonParseErrorResultListener {
         fun onConvertQuadrilateralCoordinates(
-            quadrilateral: Quadrilateral, callbackContext: CallbackContext
+            quadrilateral: Quadrilateral,
+            callbackContext: CallbackContext
         )
         fun onConvertQuadrilateralCoordinatesNoViewError(callbackContext: CallbackContext)
     }

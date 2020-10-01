@@ -12,7 +12,7 @@ import org.json.JSONArray
 import org.json.JSONException
 
 class ActionViewResizeMove(
-        private val listener: ResultListener
+    private val listener: ResultListener
 ) : Action {
 
     override fun run(args: JSONArray, callbackContext: CallbackContext) {
@@ -29,8 +29,8 @@ class ActionViewResizeMove(
 
     interface ResultListener : ActionJsonParseErrorResultListener {
         fun onResizeAndMoveDataCaptureView(
-                info: ResizeAndMoveInfo, callbackContext: CallbackContext
+            info: ResizeAndMoveInfo,
+            callbackContext: CallbackContext
         )
     }
 }
-

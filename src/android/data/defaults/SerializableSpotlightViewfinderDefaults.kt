@@ -7,13 +7,15 @@
 package com.scandit.datacapture.cordova.core.data.defaults
 
 import com.scandit.datacapture.cordova.core.data.SerializableData
+import com.scandit.datacapture.cordova.core.testing.OpenForTesting
 import org.json.JSONObject
 
+@OpenForTesting
 data class SerializableSpotlightViewfinderDefaults(
-        private val size: String,
-        private val enabledBorderColor: String,
-        private val disabledBorderColor: String,
-        private val backgroundColor: String
+    private val size: String,
+    private val enabledBorderColor: String,
+    private val disabledBorderColor: String,
+    private val backgroundColor: String
 ) : SerializableData {
 
     override fun toJson(): JSONObject = JSONObject(

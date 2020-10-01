@@ -13,10 +13,10 @@ import org.json.JSONException
 import org.json.JSONObject
 
 class ActionSend(
-        private val actionName: String,
-        private val listener: ResultListener,
-        private val finishCallbackId: String? = null,
-        private val shouldNotifyWhenFinished: Boolean = false
+    private val actionName: String,
+    private val listener: ResultListener,
+    private val finishCallbackId: String? = null,
+    private val shouldNotifyWhenFinished: Boolean = false
 ) : Action {
 
     override fun run(args: JSONArray, callbackContext: CallbackContext) {
@@ -35,7 +35,9 @@ class ActionSend(
 
     interface ResultListener : ActionJsonParseErrorResultListener {
         fun onSendAction(
-                actionName: String, message: JSONObject, callbackContext: CallbackContext
+            actionName: String,
+            message: JSONObject,
+            callbackContext: CallbackContext
         )
     }
 }

@@ -7,11 +7,13 @@
 package com.scandit.datacapture.cordova.core.data.defaults
 
 import com.scandit.datacapture.cordova.core.data.SerializableData
+import com.scandit.datacapture.cordova.core.testing.OpenForTesting
 import org.json.JSONObject
 
+@OpenForTesting
 data class SerializableRectangularViewfinderDefaults(
-        private val size: String,
-        private val color: String
+    private val size: String,
+    private val color: String
 ) : SerializableData {
 
     override fun toJson(): JSONObject = JSONObject(

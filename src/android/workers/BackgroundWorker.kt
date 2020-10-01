@@ -10,7 +10,7 @@ import android.os.Handler
 import android.os.HandlerThread
 
 class BackgroundWorker(
-        workerName: String
+    workerName: String
 ) : Worker() {
 
     override val handler: Handler

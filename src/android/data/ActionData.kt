@@ -10,7 +10,7 @@ import org.apache.cordova.CallbackContext
 import org.json.JSONArray
 
 data class ActionData(
-        val actionName: String,
-        val args: JSONArray,
-        val callback: CallbackContext
+    val actionName: String,
+    val args: JSONArray,
+    val callback: CallbackContext
 )

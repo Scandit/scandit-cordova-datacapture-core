@@ -11,14 +11,14 @@ import com.scandit.datacapture.cordova.core.errors.ActionError
 import com.scandit.datacapture.cordova.core.errors.InvalidActionNameError
 import com.scandit.datacapture.cordova.core.factories.ActionFactory
 import com.scandit.datacapture.cordova.core.testing.OpenForTesting
+import java.util.*
 import org.apache.cordova.CallbackContext
 import org.json.JSONArray
-import java.util.*
 
 @OpenForTesting
 class ActionsHandler(
-        private val actionFactory: ActionFactory,
-        private val actionsHandlerHelper: CameraPermissionsActionsHandlerHelper
+    private val actionFactory: ActionFactory,
+    private val actionsHandlerHelper: CameraPermissionsActionsHandlerHelper
 ) {
     private val actions: MutableList<ActionData> = Collections.synchronizedList(mutableListOf())
 

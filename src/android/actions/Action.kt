@@ -19,6 +19,8 @@ interface ActionJsonParseErrorResultListener {
 
 interface AdditionalActionRequiredResultListener {
     fun onAdditionalActionRequired(
-            actionName: String, args: JSONArray, callbackContext: CallbackContext
+        actionName: String,
+        args: JSONArray,
+        callbackContext: CallbackContext
     )
 }

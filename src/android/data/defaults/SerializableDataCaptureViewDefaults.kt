@@ -7,13 +7,15 @@
 package com.scandit.datacapture.cordova.core.data.defaults
 
 import com.scandit.datacapture.cordova.core.data.SerializableData
+import com.scandit.datacapture.cordova.core.testing.OpenForTesting
 import org.json.JSONObject
 
+@OpenForTesting
 data class SerializableDataCaptureViewDefaults(
-        private val scanAreaMargins: String,
-        private val pointOfInterest: String,
-        private val logoAnchor: String,
-        private val logoOffset: String
+    private val scanAreaMargins: String,
+    private val pointOfInterest: String,
+    private val logoAnchor: String,
+    private val logoOffset: String
 ) : SerializableData {
 
     override fun toJson(): JSONObject = JSONObject(

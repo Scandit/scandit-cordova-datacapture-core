@@ -56,7 +56,7 @@ class ActionUpdateContextAndView(
         } catch (e: JSONException) {
             e.printStackTrace()
             listener.onJsonParseError(e, callbackContext)
-        } catch (e: RuntimeException) {// TODO SDC-1851 fine-catch deserializer exceptions
+        } catch (e: RuntimeException) { // TODO SDC-1851 fine-catch deserializer exceptions
             e.printStackTrace()
             listener.onJsonParseError(e, callbackContext)
         } catch (e: Exception) {

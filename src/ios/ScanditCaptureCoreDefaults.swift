@@ -53,6 +53,8 @@ struct ScanditCaptureCoreDefaults: Encodable {
     let SpotlightViewfinder: SpotlightViewfinderDefaults
     let Brush: BrushDefaults
 
+    let deviceID: String?
+
     init(cameraSettings: CameraSettings,
          dataCaptureView: DataCaptureView,
          laserlineViewfinder: LaserlineViewfinder,
@@ -65,6 +67,7 @@ struct ScanditCaptureCoreDefaults: Encodable {
         self.RectangularViewfinder = RectangularViewfinderDefaults.from(rectangularViewfinder)
         self.SpotlightViewfinder = SpotlightViewfinderDefaults.from(spotlightViewfinder)
         self.Brush = BrushDefaults.from(brush)
+        self.deviceID = DataCaptureContext.deviceID
     }
 }
 
@@ -113,8 +116,8 @@ extension ScanditCaptureCoreDefaults.LaserlineViewfinderDefaults {
 
     static func from(_ viewfinder: LaserlineViewfinder) -> Defaults {
         return Defaults(width: viewfinder.width.jsonString,
-                        enabledColor: viewfinder.enabledColor.hexString,
-                        disabledColor: viewfinder.disabledColor.hexString)
+                        enabledColor: viewfinder.enabledColor.sdcHexString,
+                        disabledColor: viewfinder.disabledColor.sdcHexString)
     }
 }
 
@@ -123,7 +126,7 @@ extension ScanditCaptureCoreDefaults.RectangularViewfinderDefaults {
 
     static func from(_ viewfinder: RectangularViewfinder) -> Defaults {
         return Defaults(size: viewfinder.sizeWithUnitAndAspect.jsonString,
-                        color: viewfinder.color.hexString)
+                        color: viewfinder.color.sdcHexString)
     }
 }
 
@@ -132,9 +135,9 @@ extension ScanditCaptureCoreDefaults.SpotlightViewfinderDefaults {
 
     static func from(_ viewfinder: SpotlightViewfinder) -> Defaults {
         return Defaults(size: viewfinder.sizeWithUnitAndAspect.jsonString,
-                        enabledBorderColor: viewfinder.enabledBorderColor.hexString,
-                        disabledBorderColor: viewfinder.disabledBorderColor.hexString,
-                        backgroundColor: viewfinder.backgroundColor.hexString)
+                        enabledBorderColor: viewfinder.enabledBorderColor.sdcHexString,
+                        disabledBorderColor: viewfinder.disabledBorderColor.sdcHexString,
+                        backgroundColor: viewfinder.backgroundColor.sdcHexString)
     }
 }
 
@@ -142,8 +145,8 @@ extension ScanditCaptureCoreDefaults.BrushDefaults {
     typealias Defaults = ScanditCaptureCoreDefaults.BrushDefaults
 
     static func from(_ brush: Brush) -> Defaults {
-        return Defaults(fillColor: brush.fillColor.hexString,
-                        strokeColor: brush.strokeColor.hexString,
+        return Defaults(fillColor: brush.fillColor.sdcHexString,
+                        strokeColor: brush.strokeColor.sdcHexString,
                         strokeWidth: Int(brush.strokeWidth))
     }
 }

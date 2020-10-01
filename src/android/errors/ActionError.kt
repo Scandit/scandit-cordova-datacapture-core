@@ -10,7 +10,8 @@ import org.apache.cordova.CallbackContext
 import org.json.JSONObject
 
 abstract class ActionError(
-        private val errorCode: Int, private val errorMessage: String
+    private val errorCode: Int,
+    private val errorMessage: String
 ) : Exception(errorMessage) {
 
     companion object {

@@ -20,8 +20,8 @@ class CameraPermissionsActionsHandlerHelper(
     private val cameraPermissionsRequested: AtomicBoolean = AtomicBoolean(false)
 
     fun canBeRun(actionName: String): Boolean =
-        actionFactory.canBeRunWithoutCameraPermission(actionName)
-            || cameraPermissionsGranted.get().also {
+        actionFactory.canBeRunWithoutCameraPermission(actionName) ||
+            cameraPermissionsGranted.get().also {
             if (it.not() && cameraPermissionsRequested.getAndSet(true).not()) {
                 permissionRequest()
             }

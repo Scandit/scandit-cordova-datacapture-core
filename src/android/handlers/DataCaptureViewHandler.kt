@@ -23,8 +23,8 @@ import java.lang.ref.WeakReference
 
 @OpenForTesting
 class DataCaptureViewHandler(
-        private val viewListener: DataCaptureViewListener,
-        private val uiWorker: Worker
+    private val viewListener: DataCaptureViewListener,
+    private val uiWorker: Worker
 ) {
     private var latestInfo: ResizeAndMoveInfo = ResizeAndMoveInfo(0, 0, 0, 0, false)
     private var isVisible: Boolean = false

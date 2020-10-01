@@ -7,12 +7,14 @@
 package com.scandit.datacapture.cordova.core.data.defaults
 
 import com.scandit.datacapture.cordova.core.data.SerializableData
+import com.scandit.datacapture.cordova.core.testing.OpenForTesting
 import org.json.JSONObject
 
+@OpenForTesting
 data class SerializableLaserlineViewfinderDefaults(
-        private val width: String,
-        private val enabledColor: String,
-        private val disabledColor: String
+    private val width: String,
+    private val enabledColor: String,
+    private val disabledColor: String
 ) : SerializableData {
 
     override fun toJson(): JSONObject = JSONObject(

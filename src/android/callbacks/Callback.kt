@@ -6,8 +6,8 @@
 
 package com.scandit.datacapture.cordova.core.callbacks
 
-import org.apache.cordova.CallbackContext
 import java.util.concurrent.atomic.AtomicBoolean
+import org.apache.cordova.CallbackContext
 
 abstract class Callback(protected val callbackContext: CallbackContext) {
 
@@ -15,6 +15,6 @@ abstract class Callback(protected val callbackContext: CallbackContext) {
 
     open fun dispose() {
         disposed.set(true)
-        callbackContext.success()// This is to let Cordova know that we're not using this callback anymore.
+        callbackContext.success() // This is to let Cordova know that we're not using this callback anymore.
     }
 }

@@ -12,10 +12,10 @@ import com.scandit.datacapture.core.source.toJson
 import org.json.JSONObject
 
 data class SerializableCameraSettingsDefault(
-        private val prefResolution: String,
-        private val maxFrameRate: Float,
-        private val zoomFactor: Float,
-        private val focusRange: String
+    private val prefResolution: String,
+    private val maxFrameRate: Float,
+    private val zoomFactor: Float,
+    private val focusRange: String
 ) : SerializableData {
 
     constructor(settings: CameraSettings) : this(

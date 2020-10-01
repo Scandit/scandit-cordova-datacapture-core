@@ -33,13 +33,8 @@ extension ScanditCaptureCore: DataCaptureContextListener {
             return
         }
 
-        guard let deviceID = context.deviceID else {
-            /// The native SDK guarantees that at this point `deviceID` will be set. See iOS docs.
-            return
-        }
-
         let event = ListenerEvent(name: .didStartObservingContext,
-                                  argument: [ "deviceID": deviceID ])
+                                  argument: [:])
         commandDelegate.send(.listenerCallback(event), callbackId: callback.id)
     }
 

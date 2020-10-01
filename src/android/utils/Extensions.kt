@@ -57,15 +57,15 @@ val Enum<*>.camelCaseName: String
 val Int.hexString: String
     get() {
         val hex = String.format("%08X", this)
-        return "#" +// ts is expecting the color in format #RRGGBBAA, we need to move the alpha.
-            hex.substring(2) +// RRGGBB
-            hex.substring(0, 2)// AA
+        return "#" + // ts is expecting the color in format #RRGGBBAA, we need to move the alpha.
+            hex.substring(2) + // RRGGBB
+            hex.substring(0, 2) // AA
     }
 
 val String.colorInt: Int
     get() {
         return Color.parseColor(
-            "#" +// ts is giving the color in format RRGGBBAA, we need to move the alpha and add the #.
+            "#" + // ts is giving the color in format RRGGBBAA, we need to move the alpha and add the #.
                 substring(6, 8) +
                 substring(0, 6)
         )

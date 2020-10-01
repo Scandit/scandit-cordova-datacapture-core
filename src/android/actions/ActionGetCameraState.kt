@@ -12,8 +12,8 @@ import org.apache.cordova.CallbackContext
 import org.json.JSONArray
 
 class ActionGetCameraState(
-        private val camera: Camera?,
-        private val listener: ResultListener
+    private val camera: Camera?,
+    private val listener: ResultListener
 ) : Action {
 
     override fun run(args: JSONArray, callbackContext: CallbackContext) {

@@ -11,9 +11,9 @@ import com.scandit.datacapture.core.internal.sdk.extensions.toAngle
 import org.json.JSONObject
 
 class SerializableViewState(
-        private val width: Int,
-        private val height: Int,
-        screenOrientation: Int
+    private val width: Int,
+    private val height: Int,
+    screenOrientation: Int
 ) {
 
     private val orientation = ScreenOrientation.fromOrientationInt(screenOrientation.toAngle())

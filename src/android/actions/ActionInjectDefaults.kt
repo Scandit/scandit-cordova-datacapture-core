@@ -31,8 +31,8 @@ import org.json.JSONArray
 import org.json.JSONException
 
 class ActionInjectDefaults(
-        private val context: Context,
-        private val listener: ResultListener
+    private val context: Context,
+    private val listener: ResultListener
 ) : Action {
 
     override fun run(args: JSONArray, callbackContext: CallbackContext) {
@@ -89,7 +89,7 @@ class ActionInjectDefaults(
         }
     }
 
-    interface ResultListener : ActionJsonParseErrorResultListener{
+    interface ResultListener : ActionJsonParseErrorResultListener {
         fun onCoreDefaults(defaults: SerializableCoreDefaults, callbackContext: CallbackContext)
     }
 }

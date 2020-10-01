@@ -102,7 +102,7 @@ class ScanditCaptureCore : CordovaPlugin(),
 
     private var latestFeedback: Feedback? = null
 
-    private val plugins: MutableMap<String, CordovaPlugin> = mutableMapOf()
+    private val plugins: MutableMap<String, CordovaPlugin?> = mutableMapOf()
 
     override val deserializers: Deserializers by lazy {
         Deserializers(
@@ -167,7 +167,9 @@ class ScanditCaptureCore : CordovaPlugin(),
     }
 
     override fun execute(
-        action: String, args: JSONArray, callbackContext: CallbackContext
+        action: String,
+        args: JSONArray,
+        callbackContext: CallbackContext
     ): Boolean {
         return try {
             actionsHandler.addAction(action, args, callbackContext)
@@ -192,7 +194,9 @@ class ScanditCaptureCore : CordovaPlugin(),
     }
 
     override fun onRequestPermissionResult(
-        requestCode: Int, permissions: Array<out String>?, grantResults: IntArray?
+        requestCode: Int,
+        permissions: Array<out String>?,
+        grantResults: IntArray?
     ) {
         if (requestCode == CODE_CAMERA_PERMISSIONS) {
             if (grantResults?.firstOrNull() == PackageManager.PERMISSION_GRANTED) {
@@ -212,26 +216,30 @@ class ScanditCaptureCore : CordovaPlugin(),
 
     //region FrameSourceDeserializerListener
     override fun onFrameSourceDeserializationFinished(
-        deserializer: FrameSourceDeserializer, frameSource: FrameSource, json: JsonValue
+        deserializer: FrameSourceDeserializer,
+        frameSource: FrameSource,
+        json: JsonValue
     ) {
-        super.onFrameSourceDeserializationFinished(deserializer, frameSource, json)
+        (frameSource as? Camera)?.apply {
+            if (json.contains("desiredTorchState")) {
+                desiredTorchState = TorchStateDeserializer.fromJson(
+                    json.requireByKeyAsString("desiredTorchState")
+                )
+            }
 
-        val camera = frameSource as? Camera ?: return
-
-        val torchState = TorchStateDeserializer.fromJson(
-            json.getByKeyAsString("desiredTorchState", "off")
-        )
-        val frameSourceState = FrameSourceStateDeserializer.fromJson(
-            json.getByKeyAsString("desiredState", "off")
-        )
-        camera.desiredTorchState = torchState
-        camera.switchToDesiredState(frameSourceState)
+            if (json.contains("desiredState")) {
+                switchToDesiredState(FrameSourceStateDeserializer.fromJson(
+                    json.requireByKeyAsString("desiredState")
+                ))
+            }
+        }
     }
     //endregion
 
     //region DataCaptureContextListener
     override fun onStatusChanged(
-        dataCaptureContext: DataCaptureContext, contextStatus: ContextStatus
+        dataCaptureContext: DataCaptureContext,
+        contextStatus: ContextStatus
     ) {
         coreCallbacks.contextCallback?.onStatusChanged(contextStatus)
     }
@@ -253,14 +261,17 @@ class ScanditCaptureCore : CordovaPlugin(),
     }
 
     override fun onAdditionalActionRequired(
-        actionName: String, args: JSONArray, callbackContext: CallbackContext
+        actionName: String,
+        args: JSONArray,
+        callbackContext: CallbackContext
     ) {
         execute(actionName, args, callbackContext)
     }
 
     //region ActionInjectDefaults.ResultListener
     override fun onCoreDefaults(
-        defaults: SerializableCoreDefaults, callbackContext: CallbackContext
+        defaults: SerializableCoreDefaults,
+        callbackContext: CallbackContext
     ) {
         callbackContext.success(defaults.toJson())
     }
@@ -280,7 +291,8 @@ class ScanditCaptureCore : CordovaPlugin(),
     }
 
     override fun onCreateContextAndViewError(
-        error: Throwable, callbackContext: CallbackContext
+        error: Throwable,
+        callbackContext: CallbackContext
     ) {
         ContextDeserializationError(error.message).sendResult(callbackContext)
     }
@@ -300,14 +312,10 @@ class ScanditCaptureCore : CordovaPlugin(),
     }
 
     override fun onUpdateContextAndViewError(
-        error: Throwable, callbackContext: CallbackContext
+        error: Throwable,
+        callbackContext: CallbackContext
     ) {
         ContextDeserializationError(error.message).sendResult(callbackContext)
-        coreCallbacks.contextCallback?.onStatusChanged(
-            code = -1,
-            isValid = true,
-            message = "Could not deserialize context: ${error.message}"
-        )
     }
     //endregion
 
@@ -318,7 +326,6 @@ class ScanditCaptureCore : CordovaPlugin(),
     }
     //endregion
 
-
     //region ActionViewHide.ResultListener
     override fun onHideDataCaptureView(callbackContext: CallbackContext) {
         captureViewHandler.setInvisible()
@@ -328,7 +335,8 @@ class ScanditCaptureCore : CordovaPlugin(),
 
     //region ActionViewResizeMove.ResultListener
     override fun onResizeAndMoveDataCaptureView(
-        info: ResizeAndMoveInfo, callbackContext: CallbackContext
+        info: ResizeAndMoveInfo,
+        callbackContext: CallbackContext
     ) {
         captureViewHandler.setResizeAndMoveInfo(info)
         callbackContext.success()
@@ -363,7 +371,8 @@ class ScanditCaptureCore : CordovaPlugin(),
 
     //region ActionConvertPointCoordinates.ResultListener
     override fun onConvertPointCoordinates(
-        point: Point, callbackContext: CallbackContext
+        point: Point,
+        callbackContext: CallbackContext
     ) {
         callbackContext.success(point.toJson())
     }
@@ -375,7 +384,8 @@ class ScanditCaptureCore : CordovaPlugin(),
 
     //region ActionConvertQuadrilateralCoordinates.ResultListener
     override fun onConvertQuadrilateralCoordinates(
-        quadrilateral: Quadrilateral, callbackContext: CallbackContext
+        quadrilateral: Quadrilateral,
+        callbackContext: CallbackContext
     ) {
         callbackContext.success(quadrilateral.toJson())
     }
@@ -397,7 +407,9 @@ class ScanditCaptureCore : CordovaPlugin(),
 
     //region ActionSend.ResultListener
     override fun onSendAction(
-        actionName: String, message: JSONObject, callbackContext: CallbackContext
+        actionName: String,
+        message: JSONObject,
+        callbackContext: CallbackContext
     ) {
         callbackContext.successAndKeepCallback(message)
     }

@@ -12,7 +12,7 @@ import org.json.JSONArray
 import org.json.JSONException
 
 class ActionEmitFeedback(
-        private val listener: ResultListener
+    private val listener: ResultListener
 ) : Action {
 
     override fun run(args: JSONArray, callbackContext: CallbackContext) {
@@ -23,7 +23,7 @@ class ActionEmitFeedback(
         } catch (e: JSONException) {
             e.printStackTrace()
             listener.onJsonParseError(e, callbackContext)
-        } catch (e: RuntimeException) {// TODO [SDC-1851] - fine-catch deserializer exceptions
+        } catch (e: RuntimeException) { // TODO [SDC-1851] - fine-catch deserializer exceptions
             e.printStackTrace()
             listener.onJsonParseError(e, callbackContext)
         }

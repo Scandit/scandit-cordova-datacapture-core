@@ -7,13 +7,15 @@
 package com.scandit.datacapture.cordova.core.data.defaults
 
 import com.scandit.datacapture.cordova.core.data.SerializableData
+import com.scandit.datacapture.cordova.core.testing.OpenForTesting
 import org.json.JSONArray
 import org.json.JSONObject
 
+@OpenForTesting
 data class SerializableCameraDefaults(
-        private val cameraSettingsDefault: SerializableCameraSettingsDefault,
-        private val defaultPosition: String?,
-        private val availablePositions: JSONArray
+    private val cameraSettingsDefault: SerializableCameraSettingsDefault,
+    private val defaultPosition: String?,
+    private val availablePositions: JSONArray
 ) : SerializableData {
 
     override fun toJson(): JSONObject = JSONObject(

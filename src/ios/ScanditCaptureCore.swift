@@ -95,6 +95,10 @@ public class ScanditCaptureCore: CDVPlugin {
         webView.isOpaque = false
         webView.backgroundColor = .clear
         webView.scrollView.backgroundColor = .clear
+
+        guard webView is WKWebView else {
+            fatalError("The Scandit Data Capture SDK requires the Cordova WebView to be a WKWebView. For more information, see the Scandit documentation about how to add the Data Capture SDK to your app.")
+        }
     }
 
     public override func onReset() {
