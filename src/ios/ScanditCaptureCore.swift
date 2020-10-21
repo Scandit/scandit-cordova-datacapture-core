@@ -91,11 +91,6 @@ public class ScanditCaptureCore: CDVPlugin {
     lazy var callbacks = ScanditCaptureCoreCallbacks()
 
     public override func pluginInitialize() {
-        // Make the WebView transparent, so we can see views behind
-        webView.isOpaque = false
-        webView.backgroundColor = .clear
-        webView.scrollView.backgroundColor = .clear
-
         guard webView is WKWebView else {
             fatalError("The Scandit Data Capture SDK requires the Cordova WebView to be a WKWebView. For more information, see the Scandit documentation about how to add the Data Capture SDK to your app.")
         }
@@ -246,6 +241,13 @@ public class ScanditCaptureCore: CDVPlugin {
         }
 
         captureViewConstraints.updatePositionAndSize(fromJSON: viewPositionAndSizeJSON)
+
+        if viewPositionAndSizeJSON.shouldBeUnderWebView {
+            // Make the WebView transparent, so we can see views behind
+            webView.isOpaque = false
+            webView.backgroundColor = .clear
+            webView.scrollView.backgroundColor = .clear
+        }
 
         commandDelegate.send(.success, callbackId: command.callbackId)
     }

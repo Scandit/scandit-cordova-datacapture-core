@@ -22,12 +22,12 @@ class DataCaptureViewProxy {
     }
     show() {
         return new Promise((resolve, reject) => {
-            DataCaptureViewProxy.cordovaExec(null, null, Cordova_1.CordovaFunction.ShowView, null);
+            DataCaptureViewProxy.cordovaExec(resolve, reject, Cordova_1.CordovaFunction.ShowView, null);
         });
     }
     hide() {
         return new Promise((resolve, reject) => {
-            DataCaptureViewProxy.cordovaExec(null, null, Cordova_1.CordovaFunction.HideView, null);
+            DataCaptureViewProxy.cordovaExec(resolve, reject, Cordova_1.CordovaFunction.HideView, null);
         });
     }
     viewPointForFramePoint(point) {
