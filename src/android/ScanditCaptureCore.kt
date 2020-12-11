@@ -14,6 +14,7 @@ import com.scandit.datacapture.cordova.core.actions.ActionCreateContextAndView
 import com.scandit.datacapture.cordova.core.actions.ActionDisposeContext
 import com.scandit.datacapture.cordova.core.actions.ActionEmitFeedback
 import com.scandit.datacapture.cordova.core.actions.ActionGetCameraState
+import com.scandit.datacapture.cordova.core.actions.ActionGetIsTorchAvailable
 import com.scandit.datacapture.cordova.core.actions.ActionInjectDefaults
 import com.scandit.datacapture.cordova.core.actions.ActionSend
 import com.scandit.datacapture.cordova.core.actions.ActionSubscribeContext
@@ -32,10 +33,12 @@ import com.scandit.datacapture.cordova.core.data.ResizeAndMoveInfo
 import com.scandit.datacapture.cordova.core.data.defaults.SerializableCoreDefaults
 import com.scandit.datacapture.cordova.core.deserializers.Deserializers
 import com.scandit.datacapture.cordova.core.deserializers.DeserializersProvider
+import com.scandit.datacapture.cordova.core.errors.CameraPositionDeserializationError
 import com.scandit.datacapture.cordova.core.errors.ContextDeserializationError
 import com.scandit.datacapture.cordova.core.errors.InvalidActionNameError
 import com.scandit.datacapture.cordova.core.errors.JsonParseError
 import com.scandit.datacapture.cordova.core.errors.NoCameraAvailableError
+import com.scandit.datacapture.cordova.core.errors.NoCameraWithPositionError
 import com.scandit.datacapture.cordova.core.errors.NoViewToConvertPointError
 import com.scandit.datacapture.cordova.core.errors.NoViewToConvertQuadrilateralError
 import com.scandit.datacapture.cordova.core.factories.ActionFactory
@@ -70,6 +73,7 @@ import com.scandit.datacapture.core.ui.DataCaptureView
 import com.scandit.datacapture.core.ui.DataCaptureViewListener
 import org.apache.cordova.CallbackContext
 import org.apache.cordova.CordovaPlugin
+import org.apache.cordova.PluginResult
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -423,6 +427,27 @@ class ScanditCaptureCore : CordovaPlugin(),
 
         callbackContext.success()
     }
+
+    //endregion
+
+    //region ActionGetIsTorchAvailable.ResultListener
+    override fun onGetIsTorchAvailable(
+        isTorchAvailable: Boolean,
+        callbackContext: CallbackContext
+    ) {
+        callbackContext.sendPluginResult(PluginResult(PluginResult.Status.OK, isTorchAvailable))
+    }
+
+    override fun onUnableToDeserializePositionError(
+        action: String,
+        callbackContext: CallbackContext
+    ) {
+        CameraPositionDeserializationError(action).sendResult(callbackContext)
+    }
+
+    override fun onWrongCameraPositionError(position: String, callbackContext: CallbackContext) {
+        NoCameraWithPositionError(position).sendResult(callbackContext)
+    }
     //endregion
     //endregion
 }
@@ -440,4 +465,5 @@ interface CoreActionsListeners : ActionInjectDefaults.ResultListener,
     ActionConvertQuadrilateralCoordinates.ResultListener,
     ActionGetCameraState.ResultListener,
     ActionSend.ResultListener,
-    ActionEmitFeedback.ResultListener
+    ActionEmitFeedback.ResultListener,
+    ActionGetIsTorchAvailable.ResultListener

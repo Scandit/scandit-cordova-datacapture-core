@@ -15,6 +15,7 @@ import android.view.ViewGroup
 import com.scandit.datacapture.core.common.geometry.Point
 import com.scandit.datacapture.core.common.geometry.Quadrilateral
 import com.scandit.datacapture.core.internal.sdk.AppAndroidEnvironment
+import java.util.*
 import org.apache.cordova.CallbackContext
 import org.apache.cordova.PluginResult
 import org.json.JSONObject
@@ -49,27 +50,26 @@ fun View.removeFromParent() {
 }
 
 val Enum<*>.camelCaseName: String
-    get() = name.toLowerCase()
+    get() = name.toLowerCase(Locale.ROOT)
         .split("_")
         .joinToString(separator = "") { it.capitalize() }
         .decapitalize()
 
 val Int.hexString: String
     get() {
-        val hex = String.format("%08X", this)
+        val hex = String.format(Locale.US, "%08X", this)
         return "#" + // ts is expecting the color in format #RRGGBBAA, we need to move the alpha.
             hex.substring(2) + // RRGGBB
             hex.substring(0, 2) // AA
     }
 
 val String.colorInt: Int
-    get() {
-        return Color.parseColor(
-            "#" + // ts is giving the color in format RRGGBBAA, we need to move the alpha and add the #.
+    get() = Color.parseColor(
+            // ts is giving the color in format RRGGBBAA, we need to move the alpha and add the #.
+            "#" +
                 substring(6, 8) +
                 substring(0, 6)
-        )
-    }
+    )
 
 fun bitmapFromBase64String(string: String?): Bitmap? {
     string ?: return null

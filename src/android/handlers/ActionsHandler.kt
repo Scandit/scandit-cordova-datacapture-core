@@ -22,9 +22,8 @@ class ActionsHandler(
 ) {
     private val actions: MutableList<ActionData> = Collections.synchronizedList(mutableListOf())
 
-    fun addAction(actionName: String, args: JSONArray, callbackContext: CallbackContext): Boolean {
-        return addAction(ActionData(actionName, args, callbackContext))
-    }
+    fun addAction(actionName: String, args: JSONArray, callbackContext: CallbackContext): Boolean =
+            addAction(ActionData(actionName, args, callbackContext))
 
     private fun addAction(actionData: ActionData): Boolean {
         try {

@@ -15,6 +15,7 @@ abstract class Callback(protected val callbackContext: CallbackContext) {
 
     open fun dispose() {
         disposed.set(true)
-        callbackContext.success() // This is to let Cordova know that we're not using this callback anymore.
+        // This is to let Cordova know that we're not using this callback anymore.
+        callbackContext.success()
     }
 }

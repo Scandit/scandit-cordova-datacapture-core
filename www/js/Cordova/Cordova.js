@@ -19,6 +19,7 @@ var CordovaFunction;
     CordovaFunction["ViewQuadrilateralForFrameQuadrilateral"] = "viewQuadrilateralForFrameQuadrilateral";
     CordovaFunction["SubscribeViewListener"] = "subscribeViewListener";
     CordovaFunction["GetCurrentCameraState"] = "getCurrentCameraState";
+    CordovaFunction["GetIsTorchAvailable"] = "getIsTorchAvailable";
     CordovaFunction["EmitFeedback"] = "emitFeedback";
     CordovaFunction["SubscribeVolumeButtonObserver"] = "subscribeVolumeButtonObserver";
     CordovaFunction["UnsubscribeVolumeButtonObserver"] = "unsubscribeVolumeButtonObserver";

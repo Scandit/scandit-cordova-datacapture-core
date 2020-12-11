@@ -15,7 +15,8 @@ import com.scandit.datacapture.core.source.Camera
 class DataCaptureContextHandler(
     private val contextListener: DataCaptureContextListener
 ) {
-    // We need to mark as final, otherwise with the kotlin-allopen plugin the private setter would not be allowed.
+    // We need to mark as final, otherwise with the kotlin-allopen plugin the private setter
+    // would not be allowed.
     final var dataCaptureContext: DataCaptureContext? = null
         private set
 

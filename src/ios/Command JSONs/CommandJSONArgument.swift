@@ -4,10 +4,15 @@ extension CDVInvokedUrlCommand {
     }
 
     var defaultArgumentAsString: String? {
+        if let defaultArgument = defaultArgument as? String {
+            return defaultArgument
+        }
+
         guard let defaultArgument = defaultArgument,
             let data = try? JSONSerialization.data(withJSONObject: defaultArgument) else {
             return nil
         }
+
         return String(data: data, encoding: .utf8)
     }
 }

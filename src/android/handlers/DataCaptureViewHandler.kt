@@ -77,7 +77,7 @@ class DataCaptureViewHandler(
         render()
     }
 
-    // Remove the current dataCaptureView and backgroundView from hierarchy, and clear all references.
+    // Remove current dataCaptureView and backgroundView from hierarchy, and clear all references.
     fun disposeCurrent() {
         disposeCurrentDataCaptureView()
         disposeCurrentWebView()
@@ -106,6 +106,10 @@ class DataCaptureViewHandler(
     private fun addDataCaptureView(dataCaptureView: DataCaptureView, activity: Activity) {
         dataCaptureViewReference = WeakReference(dataCaptureView)
         dataCaptureView.addListener(viewListener)
+
+        dataCaptureView.focusGesture = null
+        dataCaptureView.zoomGesture = null
+
         uiWorker.post {
             activity.addContentView(
                     dataCaptureView,

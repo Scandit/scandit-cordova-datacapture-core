@@ -325,6 +325,23 @@ public class ScanditCaptureCore: CDVPlugin {
         commandDelegate.send(.success(message: camera.currentState.jsonString), callbackId: command.callbackId)
     }
 
+    @objc(getIsTorchAvailable:)
+    func getIsTorchAvailable(command: CDVInvokedUrlCommand) {
+        guard let jsonString = command.defaultArgumentAsString,
+              let cameraPosition = CameraPosition(JSONString: jsonString) else {
+            commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
+            return
+        }
+
+        guard let camera = Camera(position: cameraPosition) else {
+            commandDelegate.send(.failure(with: .noCamera(withPosition: cameraPosition.jsonString)),
+                                 callbackId: command.callbackId)
+            return
+        }
+
+        commandDelegate.send(.success(message: camera.isTorchAvailable), callbackId: command.callbackId)
+    }
+
     // MARK: - Defaults
 
     @objc(getDefaults:)

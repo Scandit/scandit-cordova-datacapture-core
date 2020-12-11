@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <plugin id="scandit-cordova-datacapture-core"
-        version="6.5.3"
+        version="6.6.0"
         xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -96,7 +96,7 @@
         <dependency id="cordova-plugin-add-swift-support" version="2.0.2" />
 
         <framework custom="true" embed="true"
-            src="src/ios/framework/ScanditCaptureCore.framework" version="6.5.3" />
+            src="src/ios/framework/ScanditCaptureCore.framework" version="6.6.0" />
 
         <hook src="src/hooks/add-frameworks.js" type="before_plugin_install" />
 
@@ -177,6 +177,10 @@
             target-dir="kotlin/com/scandit/datacapture/cordova/core/errors" />
         <source-file src="src/android/errors/NoCameraAvailableError.kt"
             target-dir="kotlin/com/scandit/datacapture/cordova/core/errors" />
+        <source-file src="src/android/errors/CameraPositionDeserializationError.kt"
+            target-dir="kotlin/com/scandit/datacapture/cordova/core/errors" />
+        <source-file src="src/android/errors/NoCameraWithPositionError.kt"
+            target-dir="kotlin/com/scandit/datacapture/cordova/core/errors" />
         <!-- Actions -->
         <source-file src="src/android/actions/Action.kt"
             target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
@@ -207,6 +211,8 @@
         <source-file src="src/android/actions/ActionSend.kt"
             target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
         <source-file src="src/android/actions/ActionEmitFeedback.kt"
+            target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionGetIsTorchAvailable.kt"
             target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
         <!-- Workers -->
         <source-file src="src/android/workers/Worker.kt"
@@ -259,7 +265,7 @@
         <framework src="com.squareup.okhttp3:okhttp:3.12.10" />
 
         <resource-file custom="true"
-            src="src/android/library/ScanditCaptureCore.aar" target="libs/ScanditCaptureCore.aar" version="6.5.3" />
+            src="src/android/library/ScanditCaptureCore.aar" target="libs/ScanditCaptureCore.aar" version="6.6.0" />
 
         <hook src="src/hooks/add-frameworks.js" type="before_plugin_install" />
 

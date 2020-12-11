@@ -12,7 +12,6 @@ struct ScanditCaptureCoreDefaults: Encodable {
         let Settings: CameraSettingsDefaults
         let defaultPosition: String?
         let availablePositions: [String]
-        let torchAvailability: [String: Bool]
     }
 
     struct DataCaptureViewDefaults: Encodable {
@@ -80,12 +79,10 @@ extension ScanditCaptureCoreDefaults.CameraDefaults {
             CameraPosition.worldFacing.jsonString: Camera(position: .worldFacing)
         ]
         let availablePositions = Array(availableCameras.keys)
-        let torchAvailability = availableCameras.mapValues({ $0?.isTorchAvailable ?? false})
 
         return Defaults(Settings: ScanditCaptureCoreDefaults.CameraSettingsDefaults.from(cameraSettings),
                         defaultPosition: Camera.default?.position.jsonString,
-                        availablePositions: availablePositions,
-                        torchAvailability: torchAvailability)
+                        availablePositions: availablePositions)
     }
 }
 

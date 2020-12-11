@@ -22,6 +22,17 @@ extension TorchState {
     }
 }
 
+extension CameraPosition {
+    init?(JSONString: String) {
+        var position = CameraPosition.worldFacing
+        if SDCCameraPositionFromJSONString(JSONString, &position) {
+            self = position
+        } else {
+            return nil
+        }
+    }
+}
+
 extension FrameSourceState {
     init?(JSONString: String) {
         var state = FrameSourceState.on

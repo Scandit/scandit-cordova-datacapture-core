@@ -31,6 +31,10 @@ struct ListenerEvent {
         // Text Capture Listener
         case didCaptureInTextCapture = "didCaptureInTextCapture"
 
+        // ID Capture Listener
+        case didCaptureInIdCapture = "didCaptureInIdCapture"
+        case didFailInIdCapture = "didFailInIdCapture"
+
         // VolumeButtonObserver
         case didChangeVolume = "didChangeVolume"
     }
@@ -69,6 +73,7 @@ struct CommandError {
 
         case noCamera = 10042
         case couldNotSwitchCamera = 10043
+        case noCameraWithPosition = 10044
 
         case trackedBarcodeNotFound = 10051
 
@@ -103,6 +108,10 @@ struct CommandError {
                                               message: "No camera available or not yet initialized")
     public static let couldNotSwitchCamera = CommandError(code: .couldNotSwitchCamera,
                                                           message: "Could not switch camera to desired state")
+    public static func noCamera(withPosition position: String) -> CommandError {
+        return CommandError(code: .noCameraWithPosition,
+                            message: "No camera available with position \(position)")
+    }
 
     public static let trackedBarcodeNotFound = CommandError(code: .trackedBarcodeNotFound,
                                                             message: "Passed tracked barcode not found in current session")
@@ -147,8 +156,8 @@ extension CDVPluginResult {
     /// Success result with an encodable object as JSON.
     static func success<T: Encodable>(message: T) -> CDVPluginResult {
         guard let data = try? JSONEncoder().encode(message),
-            let object = try? JSONSerialization.jsonObject(with: data) as? JSONMessage else {
-                return .failure(with: "Could not serialize message")
+              let object = try? JSONSerialization.jsonObject(with: data) as? JSONMessage else {
+            return .failure(with: "Could not serialize message")
         }
         return CDVPluginResult(status: CDVCommandStatus_OK, messageAs: object)
     }
@@ -214,5 +223,13 @@ extension CDVPluginResult {
     static func failure(with error: CommandError) -> CDVPluginResult {
         return .failure(with: error.toJSON())
     }
+}
 
+extension NSError {
+    var jsonMessage: CDVPluginResult.JSONMessage {
+        return [
+            "code": code,
+            "message": description
+        ]
+    }
 }

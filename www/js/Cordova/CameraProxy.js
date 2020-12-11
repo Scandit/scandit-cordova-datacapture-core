@@ -12,6 +12,11 @@ class CameraProxy {
             CameraProxy.cordovaExec(resolve, reject, Cordova_1.CordovaFunction.GetCurrentCameraState, null);
         });
     }
+    getIsTorchAvailable() {
+        return new Promise((resolve, reject) => {
+            CameraProxy.cordovaExec(resolve, reject, Cordova_1.CordovaFunction.GetIsTorchAvailable, [this.camera.position]);
+        });
+    }
 }
 exports.CameraProxy = CameraProxy;
 CameraProxy.cordovaExec = Cordova_1.Cordova.exec;

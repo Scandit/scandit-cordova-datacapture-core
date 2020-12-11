@@ -9,5 +9,8 @@ extension ScanditCaptureCore: DataCaptureViewDeserializerDelegate {
                           didFinishDeserializingView view: DataCaptureView,
                           from JSONValue: JSONValue) {
         captureView = view
+
+        captureView?.focusGesture = nil
+        captureView?.zoomGesture = nil
     }
 }

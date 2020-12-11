@@ -74,17 +74,10 @@ class CameraSettings extends Serializeable_1.DefaultSerializeable {
         return settings;
     }
     setProperty(name, value) {
-        switch (name) {
-            case PrivateCameraProperty.CameraAPI:
-                this.api = value;
-                break;
-        }
+        this[name] = value;
     }
     getProperty(name) {
-        switch (name) {
-            case PrivateCameraProperty.CameraAPI:
-                return this.api;
-        }
+        return this[name];
     }
 }
 exports.CameraSettings = CameraSettings;

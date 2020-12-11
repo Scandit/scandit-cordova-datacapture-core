@@ -52,7 +52,9 @@ class Camera extends Serializeable_1.DefaultSerializeable {
         return this._desiredState;
     }
     get isTorchAvailable() {
-        return Cordova_1.Cordova.defaults.Camera.torchAvailability[this.position];
+        // tslint:disable-next-line:no-console
+        console.warn('isTorchAvailable is deprecated. Use getIsTorchAvailable instead.');
+        return false;
     }
     set desiredTorchState(desiredTorchState) {
         this._desiredTorchState = desiredTorchState;
@@ -67,6 +69,9 @@ class Camera extends Serializeable_1.DefaultSerializeable {
     }
     getCurrentState() {
         return this.proxy.getCurrentState();
+    }
+    getIsTorchAvailable() {
+        return this.proxy.getIsTorchAvailable();
     }
     addListener(listener) {
         if (listener == null) {

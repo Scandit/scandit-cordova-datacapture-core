@@ -15,6 +15,7 @@ import com.scandit.datacapture.cordova.core.actions.ActionCreateContextAndView
 import com.scandit.datacapture.cordova.core.actions.ActionDisposeContext
 import com.scandit.datacapture.cordova.core.actions.ActionEmitFeedback
 import com.scandit.datacapture.cordova.core.actions.ActionGetCameraState
+import com.scandit.datacapture.cordova.core.actions.ActionGetIsTorchAvailable
 import com.scandit.datacapture.cordova.core.actions.ActionInjectDefaults
 import com.scandit.datacapture.cordova.core.actions.ActionSend
 import com.scandit.datacapture.cordova.core.actions.ActionSubscribeContext
@@ -59,6 +60,7 @@ class CaptureCoreActionFactory(
             SEND_CONTEXT_OBSERVATION_STARTED_EVENT -> createActionContextObservationStarted()
             SEND_VIEW_SIZE_CHANGED_EVENT -> createActionViewSizeChanged()
             ACTION_EMIT_FEEDBACK -> createActionEmitFeedback()
+            GET_IS_TORCH_AVAILABLE -> createActionGetIsTorchAvailable()
             else -> throw InvalidActionNameError(actionName)
         }
     }
@@ -114,6 +116,10 @@ class CaptureCoreActionFactory(
 
     private fun createActionEmitFeedback() = ActionEmitFeedback(listener)
 
+    private fun createActionGetIsTorchAvailable() = ActionGetIsTorchAvailable(
+        captureContextHandler.camera, listener
+    )
+
     companion object {
         private const val INJECT_DEFAULTS = "getDefaults"
         private const val CREATE_CONTEXT = "contextFromJSON"
@@ -128,6 +134,7 @@ class CaptureCoreActionFactory(
         private const val CONVERT_QUAD_COORDINATES = "viewQuadrilateralForFrameQuadrilateral"
         private const val GET_CAMERA_STATE = "getCurrentCameraState"
         private const val ACTION_EMIT_FEEDBACK = "emitFeedback"
+        private const val GET_IS_TORCH_AVAILABLE = "getIsTorchAvailable"
 
         const val SEND_CONTEXT_STATUS_UPDATE_EVENT = "sendContextStatusUpdateEvent"
         const val SEND_CONTEXT_OBSERVATION_STARTED_EVENT = "sendContextObservationStartedEvent"
