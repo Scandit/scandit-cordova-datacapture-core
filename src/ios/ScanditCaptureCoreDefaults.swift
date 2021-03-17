@@ -3,9 +3,10 @@ import ScanditCaptureCore
 struct ScanditCaptureCoreDefaults: Encodable {
     struct CameraSettingsDefaults: Encodable {
         let preferredResolution: String
-        let maxFrameRate: Float
         let zoomFactor: Float
         let focusRange: String
+        let zoomGestureZoomFactor: Float
+        let focusGestureStrategy: String
     }
 
     struct CameraDefaults: Encodable {
@@ -19,6 +20,8 @@ struct ScanditCaptureCoreDefaults: Encodable {
         let pointOfInterest: String
         let logoAnchor: String
         let logoOffset: String
+        let focusGesture: String?
+        let zoomGesture: String?
     }
 
     struct LaserlineViewfinderDefaults: Encodable {
@@ -39,6 +42,11 @@ struct ScanditCaptureCoreDefaults: Encodable {
         let backgroundColor: String
     }
 
+    struct AimerViewfinderDefaults: Encodable {
+        let frameColor: String
+        let dotColor: String
+    }
+
     struct BrushDefaults: Encodable {
         let fillColor: String
         let strokeColor: String
@@ -50,6 +58,7 @@ struct ScanditCaptureCoreDefaults: Encodable {
     let LaserlineViewfinder: LaserlineViewfinderDefaults
     let RectangularViewfinder: RectangularViewfinderDefaults
     let SpotlightViewfinder: SpotlightViewfinderDefaults
+    let AimerViewfinder: AimerViewfinderDefaults
     let Brush: BrushDefaults
 
     let deviceID: String?
@@ -59,12 +68,14 @@ struct ScanditCaptureCoreDefaults: Encodable {
          laserlineViewfinder: LaserlineViewfinder,
          rectangularViewfinder: RectangularViewfinder,
          spotlightViewfinder: SpotlightViewfinder,
+         aimerViewfinder: AimerViewfinder,
          brush: Brush) {
         self.Camera = CameraDefaults.from(cameraSettings)
         self.DataCaptureView = DataCaptureViewDefaults.from(dataCaptureView)
         self.LaserlineViewfinder = LaserlineViewfinderDefaults.from(laserlineViewfinder)
         self.RectangularViewfinder = RectangularViewfinderDefaults.from(rectangularViewfinder)
         self.SpotlightViewfinder = SpotlightViewfinderDefaults.from(spotlightViewfinder)
+        self.AimerViewfinder = AimerViewfinderDefaults.from(aimerViewfinder)
         self.Brush = BrushDefaults.from(brush)
         self.deviceID = DataCaptureContext.deviceID
     }
@@ -91,9 +102,10 @@ extension ScanditCaptureCoreDefaults.CameraSettingsDefaults {
 
     static func from(_ cameraSettings: CameraSettings) -> Defaults {
         return Defaults(preferredResolution: cameraSettings.preferredResolution.jsonString,
-                        maxFrameRate: Float(cameraSettings.maxFrameRate),
                         zoomFactor: Float(cameraSettings.zoomFactor),
-                        focusRange: cameraSettings.focusRange.jsonString)
+                        focusRange: cameraSettings.focusRange.jsonString,
+                        zoomGestureZoomFactor: Float(cameraSettings.zoomGestureZoomFactor),
+                        focusGestureStrategy: cameraSettings.focusGestureStrategy.jsonString)
     }
 }
 
@@ -104,7 +116,9 @@ extension ScanditCaptureCoreDefaults.DataCaptureViewDefaults {
         return Defaults(scanAreaMargins: dataCaptureView.scanAreaMargins.jsonString,
                         pointOfInterest: dataCaptureView.pointOfInterest.jsonString,
                         logoAnchor: dataCaptureView.logoAnchor.jsonString,
-                        logoOffset: dataCaptureView.logoOffset.jsonString)
+                        logoOffset: dataCaptureView.logoOffset.jsonString,
+                        focusGesture: dataCaptureView.focusGesture?.jsonString,
+                        zoomGesture: dataCaptureView.zoomGesture?.jsonString)
     }
 }
 
@@ -115,6 +129,15 @@ extension ScanditCaptureCoreDefaults.LaserlineViewfinderDefaults {
         return Defaults(width: viewfinder.width.jsonString,
                         enabledColor: viewfinder.enabledColor.sdcHexString,
                         disabledColor: viewfinder.disabledColor.sdcHexString)
+    }
+}
+
+extension ScanditCaptureCoreDefaults.AimerViewfinderDefaults {
+    typealias Defaults = ScanditCaptureCoreDefaults.AimerViewfinderDefaults
+
+    static func from(_ viewfinder: AimerViewfinder) -> Defaults {
+        return Defaults(frameColor: viewfinder.frameColor.sdcHexString,
+                        dotColor: viewfinder.dotColor.sdcHexString)
     }
 }
 

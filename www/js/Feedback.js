@@ -10,9 +10,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // ^ needed because Cordova can't resolve "../xx" style dependencies
 const FeedbackProxy_1 = require("scandit-cordova-datacapture-core.FeedbackProxy");
 const Serializeable_1 = require("scandit-cordova-datacapture-core.Serializeable");
+var VibrationType;
+(function (VibrationType) {
+    VibrationType["default"] = "default";
+    VibrationType["selectionHaptic"] = "selectionHaptic";
+    VibrationType["successHaptic"] = "successHaptic";
+})(VibrationType || (VibrationType = {}));
 class Vibration extends Serializeable_1.DefaultSerializeable {
+    constructor(type) {
+        super();
+        this.type = type;
+    }
     static get defaultVibration() {
-        return new Vibration();
+        return new Vibration(VibrationType.default);
+    }
+    static get selectionHapticFeedback() {
+        return new Vibration(VibrationType.selectionHaptic);
+    }
+    static get successHapticFeedback() {
+        return new Vibration(VibrationType.successHaptic);
     }
 }
 exports.Vibration = Vibration;

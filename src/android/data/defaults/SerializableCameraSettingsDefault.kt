@@ -13,31 +13,35 @@ import org.json.JSONObject
 
 data class SerializableCameraSettingsDefault(
     private val prefResolution: String,
-    private val maxFrameRate: Float,
     private val zoomFactor: Float,
-    private val focusRange: String
+    private val focusRange: String,
+    private val zoomGestureZoomFactor: Float,
+    private val focusGestureStrategy: String
 ) : SerializableData {
 
     constructor(settings: CameraSettings) : this(
             prefResolution = settings.preferredResolution.toJson(),
-            maxFrameRate = settings.maxFrameRate,
             zoomFactor = settings.zoomFactor,
-            focusRange = "full"
+            focusRange = "full",
+            zoomGestureZoomFactor = settings.zoomGestureZoomFactor,
+            focusGestureStrategy = settings.focusGestureStrategy.toJson()
     )
 
     override fun toJson(): JSONObject = JSONObject(
             mapOf(
                     FIELD_PREFERRED_RESOLUTION to prefResolution,
-                    FIELD_MAX_FRAME_RATE to maxFrameRate,
                     FIELD_ZOOM_FACTOR to zoomFactor,
-                    FIELD_FOCUS_RANGE to focusRange
+                    FIELD_FOCUS_RANGE to focusRange,
+                    FIELD_ZOOM_GESTURE_ZOOM_FACTOR to zoomGestureZoomFactor,
+                    FIELD_FOCUS_GESTURE_STRATEGY to focusGestureStrategy
             )
     )
 
     companion object {
         private const val FIELD_PREFERRED_RESOLUTION = "preferredResolution"
-        private const val FIELD_MAX_FRAME_RATE = "maxFrameRate"
         private const val FIELD_ZOOM_FACTOR = "zoomFactor"
         private const val FIELD_FOCUS_RANGE = "focusRange"
+        private const val FIELD_ZOOM_GESTURE_ZOOM_FACTOR = "zoomGestureZoomFactor"
+        private const val FIELD_FOCUS_GESTURE_STRATEGY = "focusGestureStrategy"
     }
 }

@@ -11,8 +11,7 @@ repositories {
 }
 
 dependencies {
-    api(name: 'ScanditCaptureCore', ext: 'aar')
-}
+   }
 
 allOpen {
     // allows mocking for classes w/o directly opening them for release builds

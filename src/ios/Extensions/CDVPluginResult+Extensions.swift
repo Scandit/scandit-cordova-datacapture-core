@@ -4,12 +4,11 @@ struct ListenerEvent {
         case didChangeContextStatus = "didChangeStatus"
         case didStartObservingContext = "didStartObservingContext"
 
-        // Context frame listener
-        case willProcessFrame = "willProcessFrame"
-        case didProcessFrame = "didProcessFrame"
-
         // View listener
         case didChangeSize = "didChangeSizeOrientation"
+
+        // Frame Source listener
+        case didChangeState = "didChangeState"
 
         // Barcode Capture listener
         case didScanInBarcodeCapture = "didScanInBarcodeCapture"
@@ -80,6 +79,8 @@ struct CommandError {
         case parserNotFound = 10061
         case couldNotParseString = 10062
         case couldNotParseRawString = 10063
+
+        case noOverlay = 10071
     }
 
     public static let invalidJSON = CommandError(code: .invalidJSON,
@@ -128,6 +129,9 @@ struct CommandError {
         return CommandError(code: .couldNotParseRawString,
                             message: "Could not parse raw string: \(additionalInformation)")
     }
+
+    public static let noOverlay = CommandError(code: .noOverlay,
+                                               message: "There was no overlay to execute the command on")
 
     public let code: Code
     public let message: String

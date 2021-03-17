@@ -16,6 +16,7 @@ data class SerializableCoreDefaults(
     private val laserlineViewfinderDefaults: SerializableLaserlineViewfinderDefaults,
     private val rectangularViewfinderDefaults: SerializableRectangularViewfinderDefaults,
     private val spotlightViewfinderDefaults: SerializableSpotlightViewfinderDefaults,
+    private val aimerViewfinderDefaults: SerializableAimerViewfinderDefaults,
     private val brushDefaults: SerializableBrushDefaults
 ) : SerializableData {
 
@@ -26,6 +27,7 @@ data class SerializableCoreDefaults(
             FIELD_LASERLINE_VIEWFINDER_DEFAULTS to laserlineViewfinderDefaults.toJson(),
             FIELD_RECTANGULAR_VIEWFINDER_DEFAULTS to rectangularViewfinderDefaults.toJson(),
             FIELD_SPOTLIGHT_VIEWFINDER_DEFAULTS to spotlightViewfinderDefaults.toJson(),
+            FIELD_AIMER_VIEWFINDER_DEFAULTS to aimerViewfinderDefaults.toJson(),
             FIELD_BRUSH_DEFAULTS to brushDefaults.toJson(),
             FIELD_DEVICE_ID_DEFAULTS to DataCaptureContext.DEVICE_ID
         )
@@ -37,6 +39,7 @@ data class SerializableCoreDefaults(
         const val FIELD_LASERLINE_VIEWFINDER_DEFAULTS = "LaserlineViewfinder"
         const val FIELD_RECTANGULAR_VIEWFINDER_DEFAULTS = "RectangularViewfinder"
         const val FIELD_SPOTLIGHT_VIEWFINDER_DEFAULTS = "SpotlightViewfinder"
+        const val FIELD_AIMER_VIEWFINDER_DEFAULTS = "AimerViewfinder"
         const val FIELD_BRUSH_DEFAULTS = "Brush"
         const val FIELD_DEVICE_ID_DEFAULTS = "deviceID"
     }

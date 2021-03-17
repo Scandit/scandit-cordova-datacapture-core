@@ -9,21 +9,31 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const Cordova_1 = require("scandit-cordova-datacapture-core.Cordova");
 const DataCaptureContextProxy_1 = require("scandit-cordova-datacapture-core.DataCaptureContextProxy");
 const Serializeable_1 = require("scandit-cordova-datacapture-core.Serializeable");
+class DataCaptureContextSettings extends Serializeable_1.DefaultSerializeable {
+    constructor() {
+        super();
+    }
+    setProperty(name, value) {
+        this[name] = value;
+    }
+    getProperty(name) {
+        return this[name];
+    }
+}
+exports.DataCaptureContextSettings = DataCaptureContextSettings;
 class DataCaptureContext extends Serializeable_1.DefaultSerializeable {
     constructor(licenseKey, deviceName) {
         super();
         this.licenseKey = licenseKey;
         this.deviceName = deviceName;
         this.framework = 'cordova';
+        this.settings = new DataCaptureContextSettings();
         this._frameSource = null;
         this.view = null;
         this.modes = [];
         this.components = [];
         this.listeners = [];
     }
-    // TODO: adjust when readding framedata to the api https://jira.scandit.com/browse/SDC-1159
-    // @ignoreFromSerialization
-    // private frameListeners: DataCaptureContextFrameListener[] = [];
     get frameSource() {
         return this._frameSource;
     }
@@ -38,6 +48,13 @@ class DataCaptureContext extends Serializeable_1.DefaultSerializeable {
     }
     static forLicenseKey(licenseKey) {
         return DataCaptureContext.forLicenseKeyWithOptions(licenseKey, null);
+    }
+    static forLicenseKeyWithSettings(licenseKey, settings) {
+        const context = this.forLicenseKey(licenseKey);
+        if (settings !== null) {
+            context.applySettings(settings);
+        }
+        return context;
     }
     static forLicenseKeyWithOptions(licenseKey, options) {
         if (options == null) {
@@ -64,20 +81,6 @@ class DataCaptureContext extends Serializeable_1.DefaultSerializeable {
         }
         this.listeners.splice(this.listeners.indexOf(listener), 1);
     }
-    // TODO: adjust when readding framedata to the api https://jira.scandit.com/browse/SDC-1159
-    // public addFrameListener(frameListener: DataCaptureContextFrameListener) {
-    //   if (this.frameListeners.includes(frameListener)) {
-    //     return;
-    //   }
-    //   this.frameListeners.push(frameListener);
-    // }
-    // TODO: adjust when readding framedata to the api https://jira.scandit.com/browse/SDC-1159
-    // public removeFrameListener(frameListener: DataCaptureContextFrameListener) {
-    //   if (!this.frameListeners.includes(frameListener)) {
-    //     return;
-    //   }
-    //   this.frameListeners.splice(this.frameListeners.indexOf(frameListener), 1);
-    // }
     addMode(mode) {
         if (!this.modes.includes(mode)) {
             this.modes.push(mode);
@@ -101,6 +104,10 @@ class DataCaptureContext extends Serializeable_1.DefaultSerializeable {
             return;
         }
         this.proxy.dispose();
+    }
+    applySettings(settings) {
+        this.settings = settings;
+        return this.update();
     }
     initialize() {
         if (this.proxy) {
