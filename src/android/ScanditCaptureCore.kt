@@ -212,6 +212,7 @@ class ScanditCaptureCore : CordovaPlugin(),
                 notifyCameraPermissionGrantedToPlugins()
             } else {
                 actionsHandler.onCameraPermissionDenied()
+                notifyCameraPermissionDenied()
             }
         }
     }
@@ -220,6 +221,18 @@ class ScanditCaptureCore : CordovaPlugin(),
         getPlugins().filterIsInstance(CameraPermissionGrantedListener::class.java).forEach {
             it.onCameraPermissionGranted()
         }
+    }
+
+    private fun notifyCameraPermissionDenied() {
+        coreCallbacks.contextCallback?.onStatusChanged(
+            JSONObject(
+                mapOf(
+                    "code" to 1032,
+                    "isValid" to true,
+                    "message" to "Camera Authorization Required"
+                )
+            )
+        )
     }
 
     //region FrameSourceDeserializerListener
