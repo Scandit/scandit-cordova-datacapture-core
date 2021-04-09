@@ -11,7 +11,7 @@ var CordovaFunction;
     CordovaFunction["DisposeContext"] = "disposeContext";
     CordovaFunction["UpdateContextFromJSON"] = "updateContextFromJSON";
     CordovaFunction["SubscribeContextListener"] = "subscribeContextListener";
-    CordovaFunction["SubscribeFrameSourceListener"] = "subscribeFrameSourceListener";
+    CordovaFunction["SubscribeContextFrameListener"] = "subscribeContextFrameListener";
     CordovaFunction["SetViewPositionAndSize"] = "setViewPositionAndSize";
     CordovaFunction["ShowView"] = "showView";
     CordovaFunction["HideView"] = "hideView";

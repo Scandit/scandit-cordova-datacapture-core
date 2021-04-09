@@ -9,6 +9,11 @@ var DataCaptureContextListenerEvent;
     DataCaptureContextListenerEvent["DidChangeContextStatus"] = "didChangeStatus";
     DataCaptureContextListenerEvent["DidStartObservingContext"] = "didStartObservingContext";
 })(DataCaptureContextListenerEvent || (DataCaptureContextListenerEvent = {}));
+// TODO: adjust when readding framedata to the api https://jira.scandit.com/browse/SDC-1159
+// enum DataCaptureContextFrameListenerEvent {
+//   WillProcessFrame = 'willProcessFrame',
+//   DidProcessFrame = 'didProcessFrame',
+// }
 class DataCaptureContextProxy {
     static forDataCaptureContext(context) {
         const contextProxy = new DataCaptureContextProxy();
@@ -26,6 +31,8 @@ class DataCaptureContextProxy {
     }
     initialize() {
         this.subscribeListener();
+        // TODO: adjust when readding framedata to the api https://jira.scandit.com/browse/SDC-1159
+        // this.subscribeFrameListener();
         this.initializeContextFromJSON();
     }
     initializeContextFromJSON() {
@@ -36,6 +43,15 @@ class DataCaptureContextProxy {
     subscribeListener() {
         DataCaptureContextProxy.cordovaExec(this.notifyListeners.bind(this), null, Cordova_1.CordovaFunction.SubscribeContextListener, null);
     }
+    // TODO: adjust when readding framedata to the api https://jira.scandit.com/browse/SDC-1159
+    // private subscribeFrameListener() {
+    //   DataCaptureContextProxy.cordovaExec(
+    //     this.notifyFrameListeners.bind(this),
+    //     null,
+    //     CordovaFunction.SubscribeContextFrameListener,
+    //     null,
+    //   );
+    // }
     notifyListeners(event) {
         if (!event) {
             // The event could be undefined/null in case the plugin result did not pass a "message",

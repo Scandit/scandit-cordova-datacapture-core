@@ -10,11 +10,6 @@ var FrameSourceState;
     FrameSourceState["Off"] = "off";
     FrameSourceState["Starting"] = "starting";
     FrameSourceState["Stopping"] = "stopping";
-    FrameSourceState["Standby"] = "standby";
-    FrameSourceState["BootingUp"] = "bootingUp";
-    FrameSourceState["WakingUp"] = "wakingUp";
-    FrameSourceState["GoingToSleep"] = "goingToSleep";
-    FrameSourceState["ShuttingDown"] = "shuttingDown";
 })(FrameSourceState = exports.FrameSourceState || (exports.FrameSourceState = {}));
 var TorchState;
 (function (TorchState) {
@@ -41,13 +36,6 @@ var FocusRange;
     FocusRange["Near"] = "near";
     FocusRange["Far"] = "far";
 })(FocusRange = exports.FocusRange || (exports.FocusRange = {}));
-var FocusGestureStrategy;
-(function (FocusGestureStrategy) {
-    FocusGestureStrategy["None"] = "none";
-    FocusGestureStrategy["Manual"] = "manual";
-    FocusGestureStrategy["ManualUntilCapture"] = "manualUntilCapture";
-    FocusGestureStrategy["AutoOnLocation"] = "autoOnLocation";
-})(FocusGestureStrategy = exports.FocusGestureStrategy || (exports.FocusGestureStrategy = {}));
 var PrivateCameraProperty;
 (function (PrivateCameraProperty) {
     PrivateCameraProperty["CameraAPI"] = "api";
@@ -56,12 +44,11 @@ class CameraSettings extends Serializeable_1.DefaultSerializeable {
     constructor(settings) {
         super();
         this.preferredResolution = Cordova_1.Cordova.defaults.Camera.Settings.preferredResolution;
+        this.maxFrameRate = Cordova_1.Cordova.defaults.Camera.Settings.maxFrameRate;
         this.zoomFactor = Cordova_1.Cordova.defaults.Camera.Settings.zoomFactor;
-        this.zoomGestureZoomFactor = Cordova_1.Cordova.defaults.Camera.Settings.zoomGestureZoomFactor;
-        this.api = 0;
+        this.api = 1;
         this.focus = {
             range: Cordova_1.Cordova.defaults.Camera.Settings.focusRange,
-            focusGestureStrategy: Cordova_1.Cordova.defaults.Camera.Settings.focusGestureStrategy,
         };
         if (settings !== undefined && settings !== null) {
             Object.getOwnPropertyNames(settings).forEach(propertyName => {
@@ -75,28 +62,12 @@ class CameraSettings extends Serializeable_1.DefaultSerializeable {
     set focusRange(newRange) {
         this.focus.range = newRange;
     }
-    get focusGestureStrategy() {
-        return this.focus.focusGestureStrategy;
-    }
-    set focusGestureStrategy(newStrategy) {
-        this.focus.focusGestureStrategy = newStrategy;
-    }
-    get maxFrameRate() {
-        // tslint:disable-next-line:no-console
-        console.warn('maxFrameRate is deprecated');
-        return 0;
-    }
-    set maxFrameRate(newValue) {
-        // tslint:disable-next-line:no-console
-        console.warn('maxFrameRate is deprecated');
-    }
     static fromJSON(json) {
         const settings = new CameraSettings();
         settings.preferredResolution = json.preferredResolution;
+        settings.maxFrameRate = json.maxFrameRate;
         settings.zoomFactor = json.zoomFactor;
         settings.focusRange = json.focusRange;
-        settings.zoomGestureZoomFactor = json.zoomGestureZoomFactor;
-        settings.focusGestureStrategy = json.focusGestureStrategy;
         if (json.api !== undefined && json.api !== null) {
             settings.api = json.api;
         }

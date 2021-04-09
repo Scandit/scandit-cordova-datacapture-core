@@ -50,7 +50,7 @@ class ActionCreateContextAndView(
     interface ResultListener : ActionJsonParseErrorResultListener {
         fun onCreateContextAndView(
             dataCaptureContext: DataCaptureContext,
-            dataCaptureView: DataCaptureView?,
+            dataCaptureView: DataCaptureView,
             dataCaptureComponents: List<DataCaptureComponent>,
             callbackContext: CallbackContext
         )

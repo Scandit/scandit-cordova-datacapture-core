@@ -1,16 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Common_1 = require("scandit-cordova-datacapture-core.Common");
-const DataCaptureView_Related_1 = require("scandit-cordova-datacapture-core.DataCaptureView+Related");
 exports.defaultsFromJSON = (json) => {
     return {
         Camera: {
             Settings: {
                 preferredResolution: json.Camera.Settings.preferredResolution,
+                maxFrameRate: json.Camera.Settings.maxFrameRate,
                 zoomFactor: json.Camera.Settings.zoomFactor,
                 focusRange: json.Camera.Settings.focusRange,
-                zoomGestureZoomFactor: json.Camera.Settings.zoomGestureZoomFactor,
-                focusGestureStrategy: json.Camera.Settings.focusGestureStrategy,
             },
             defaultPosition: (json.Camera.defaultPosition || null),
             availablePositions: json.Camera.availablePositions,
@@ -23,8 +21,6 @@ exports.defaultsFromJSON = (json) => {
             logoAnchor: json.DataCaptureView.logoAnchor,
             logoOffset: Common_1.PointWithUnit
                 .fromJSON(JSON.parse(json.DataCaptureView.logoOffset)),
-            focusGesture: DataCaptureView_Related_1.PrivateFocusGestureDeserializer.fromJSON(JSON.parse(json.DataCaptureView.focusGesture)),
-            zoomGesture: DataCaptureView_Related_1.PrivateZoomGestureDeserializer.fromJSON(JSON.parse(json.DataCaptureView.zoomGesture)),
         },
         LaserlineViewfinder: {
             width: Common_1.NumberWithUnit
@@ -49,10 +45,6 @@ exports.defaultsFromJSON = (json) => {
                 .fromJSON(json.SpotlightViewfinder.disabledBorderColor),
             backgroundColor: Common_1.Color
                 .fromJSON(json.SpotlightViewfinder.backgroundColor),
-        },
-        AimerViewfinder: {
-            frameColor: Common_1.Color.fromJSON(json.AimerViewfinder.frameColor),
-            dotColor: Common_1.Color.fromJSON(json.AimerViewfinder.dotColor),
         },
         Brush: {
             fillColor: Common_1.Color

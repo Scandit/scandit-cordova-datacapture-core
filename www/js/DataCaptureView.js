@@ -56,8 +56,6 @@ class DataCaptureView extends Serializeable_1.DefaultSerializeable {
         this.pointOfInterest = Cordova_1.Cordova.defaults.DataCaptureView.pointOfInterest;
         this.logoAnchor = Cordova_1.Cordova.defaults.DataCaptureView.logoAnchor;
         this.logoOffset = Cordova_1.Cordova.defaults.DataCaptureView.logoOffset;
-        this.focusGesture = Cordova_1.Cordova.defaults.DataCaptureView.focusGesture;
-        this.zoomGesture = Cordova_1.Cordova.defaults.DataCaptureView.zoomGesture;
         this.overlays = [];
         this.controls = [];
         this.listeners = [];

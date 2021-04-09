@@ -79,16 +79,12 @@ extension ScanditCaptureCore: FrameSourceDeserializerDelegate {
             return
         }
 
-        camera.addListener(self)
-
-        if JSONValue.containsKey("desiredTorchState"),
-           let desiredTorchState = TorchState(JSONString: JSONValue.string(forKey: "desiredTorchState",
+        if let desiredTorchState = TorchState(JSONString: JSONValue.string(forKey: "desiredTorchState",
                                                                            default: TorchState.off.jsonString)) {
             camera.desiredTorchState = desiredTorchState
         }
 
-        if JSONValue.containsKey("desiredState"),
-           let desiredState = FrameSourceState(JSONString: JSONValue.string(forKey: "desiredState",
+        if let desiredState = FrameSourceState(JSONString: JSONValue.string(forKey: "desiredState",
                                                                             default: FrameSourceState.off.jsonString)) {
             camera.switch(toDesiredState: desiredState)
         }

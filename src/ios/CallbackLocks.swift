@@ -40,11 +40,6 @@ class CallbackLock {
 }
 
 class CallbackLocks {
-    /// The unfair lock to be used for accessing the locks dictionary.
-    private var locksUnfairLock = os_unfair_lock()
-
-    /// Dictionary holding the callback locks.
-    /// You need to acquire `locksUnfairLock` before reading/writing the dictionary.
     var locks: [ListenerEvent.Name: CallbackLock] = [ListenerEvent.Name: CallbackLock]()
 
     func wait(for eventName: ListenerEvent.Name, afterDoing block: () -> Void) {
@@ -68,14 +63,10 @@ class CallbackLocks {
     }
 
     func releaseAll() {
-        os_unfair_lock_lock(&locksUnfairLock)
-        defer { os_unfair_lock_unlock(&locksUnfairLock) }
         locks.values.forEach({ $0.release() })
     }
 
     private func getLock(for eventName: ListenerEvent.Name) -> CallbackLock {
-        os_unfair_lock_lock(&locksUnfairLock)
-        defer { os_unfair_lock_unlock(&locksUnfairLock) }
         if locks[eventName] == nil {
             locks[eventName] = CallbackLock()
         }

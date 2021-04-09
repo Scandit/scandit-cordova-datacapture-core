@@ -11,9 +11,7 @@
     "strictNullChecks": true,
     "alwaysStrict": true,
     "skipLibCheck": true,
-    "experimentalDecorators": true,
-
-    "declaration": true
+    "experimentalDecorators": true
   },
   "include": [
     "www/ts/**/*"

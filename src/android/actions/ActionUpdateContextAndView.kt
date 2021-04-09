@@ -69,7 +69,7 @@ class ActionUpdateContextAndView(
         AdditionalActionRequiredResultListener, ActionJsonParseErrorResultListener {
         fun onUpdateContextAndView(
             dataCaptureContext: DataCaptureContext,
-            dataCaptureView: DataCaptureView?,
+            dataCaptureView: DataCaptureView,
             dataCaptureComponents: List<DataCaptureComponent>,
             callbackContext: CallbackContext
         )

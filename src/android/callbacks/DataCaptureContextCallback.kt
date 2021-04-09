@@ -14,7 +14,6 @@ import com.scandit.datacapture.core.common.ContextStatus
 import com.scandit.datacapture.core.common.toJson
 import org.apache.cordova.CallbackContext
 import org.json.JSONArray
-import org.json.JSONObject
 
 @OpenForTesting
 class DataCaptureContextCallback(
@@ -24,14 +23,10 @@ class DataCaptureContextCallback(
 ) : Callback(callbackContext) {
 
     fun onStatusChanged(contextStatus: ContextStatus) {
-        onStatusChanged(JSONObject(serializer.serialize(contextStatus)))
-    }
-
-    fun onStatusChanged(contextStatus: JSONObject) {
         if (disposed.get()) return
         actionsHandler.addAction(
             CaptureCoreActionFactory.SEND_CONTEXT_STATUS_UPDATE_EVENT,
-            JSONArray().apply { put(contextStatus) },
+            JSONArray().apply { put(serializer.serialize(contextStatus)) },
             callbackContext
         )
     }

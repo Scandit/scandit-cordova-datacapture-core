@@ -7,7 +7,6 @@
 package com.scandit.datacapture.cordova.core.actions
 
 import android.content.Context
-import com.scandit.datacapture.cordova.core.data.defaults.SerializableAimerViewfinderDefaults
 import com.scandit.datacapture.cordova.core.data.defaults.SerializableBrushDefaults
 import com.scandit.datacapture.cordova.core.data.defaults.SerializableCameraDefaults
 import com.scandit.datacapture.cordova.core.data.defaults.SerializableCameraSettingsDefault
@@ -24,7 +23,6 @@ import com.scandit.datacapture.core.source.CameraSettings
 import com.scandit.datacapture.core.source.toJson
 import com.scandit.datacapture.core.ui.DataCaptureView
 import com.scandit.datacapture.core.ui.style.Brush
-import com.scandit.datacapture.core.ui.viewfinder.AimerViewfinder
 import com.scandit.datacapture.core.ui.viewfinder.LaserlineViewfinder
 import com.scandit.datacapture.core.ui.viewfinder.RectangularViewfinder
 import com.scandit.datacapture.core.ui.viewfinder.SpotlightViewfinder
@@ -44,7 +42,6 @@ class ActionInjectDefaults(
             val laserViewfinder = LaserlineViewfinder()
             val rectangularViewfinder = RectangularViewfinder()
             val spotlightViewfinder = SpotlightViewfinder()
-            val aimerViewfinder = AimerViewfinder()
             val brush = Brush.transparent()
             val availableCameraPositions = listOfNotNull(
                     Camera.getCamera(CameraPosition.USER_FACING)?.position,
@@ -64,9 +61,7 @@ class ActionInjectDefaults(
                             scanAreaMargins = dataCaptureView.scanAreaMargins.toJson(),
                             pointOfInterest = dataCaptureView.pointOfInterest.toJson(),
                             logoAnchor = dataCaptureView.logoAnchor.toJson(),
-                            logoOffset = dataCaptureView.logoOffset.toJson(),
-                            focusGesture = dataCaptureView.focusGesture?.toJson(),
-                            zoomGesture = dataCaptureView.zoomGesture?.toJson()
+                            logoOffset = dataCaptureView.logoOffset.toJson()
                     ),
                     laserlineViewfinderDefaults = SerializableLaserlineViewfinderDefaults(
                             width = laserViewfinder.width.toJson(),
@@ -82,10 +77,6 @@ class ActionInjectDefaults(
                             enabledBorderColor = spotlightViewfinder.enabledBorderColor.hexString,
                             disabledBorderColor = spotlightViewfinder.disabledBorderColor.hexString,
                             backgroundColor = spotlightViewfinder.backgroundColor.hexString
-                    ),
-                    aimerViewfinderDefaults = SerializableAimerViewfinderDefaults(
-                            frameColor = aimerViewfinder.frameColor.hexString,
-                            dotColor = aimerViewfinder.dotColor.hexString
                     ),
                     brushDefaults = SerializableBrushDefaults(
                             brush = brush

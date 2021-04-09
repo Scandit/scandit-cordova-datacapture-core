@@ -19,7 +19,6 @@ import com.scandit.datacapture.cordova.core.actions.ActionGetIsTorchAvailable
 import com.scandit.datacapture.cordova.core.actions.ActionInjectDefaults
 import com.scandit.datacapture.cordova.core.actions.ActionSend
 import com.scandit.datacapture.cordova.core.actions.ActionSubscribeContext
-import com.scandit.datacapture.cordova.core.actions.ActionSubscribeFrameSource
 import com.scandit.datacapture.cordova.core.actions.ActionSubscribeView
 import com.scandit.datacapture.cordova.core.actions.ActionUpdateContextAndView
 import com.scandit.datacapture.cordova.core.actions.ActionViewHide
@@ -62,8 +61,6 @@ class CaptureCoreActionFactory(
             SEND_VIEW_SIZE_CHANGED_EVENT -> createActionViewSizeChanged()
             ACTION_EMIT_FEEDBACK -> createActionEmitFeedback()
             GET_IS_TORCH_AVAILABLE -> createActionGetIsTorchAvailable()
-            SUBSCRIBE_FRAME_SOURCE -> createSubscribeFrameSource()
-            SEND_ON_FRAME_SOURCE_STATE_CHANGED_EVENT -> createActionFrameSourceStateChanged()
             else -> throw InvalidActionNameError(actionName)
         }
     }
@@ -123,11 +120,6 @@ class CaptureCoreActionFactory(
         captureContextHandler.camera, listener
     )
 
-    private fun createSubscribeFrameSource() = ActionSubscribeFrameSource(listener)
-
-    private fun createActionFrameSourceStateChanged() =
-        ActionSend(ACTION_FRAME_SOURCE_STATE_CHANGED, listener)
-
     companion object {
         private const val INJECT_DEFAULTS = "getDefaults"
         private const val CREATE_CONTEXT = "contextFromJSON"
@@ -143,17 +135,14 @@ class CaptureCoreActionFactory(
         private const val GET_CAMERA_STATE = "getCurrentCameraState"
         private const val ACTION_EMIT_FEEDBACK = "emitFeedback"
         private const val GET_IS_TORCH_AVAILABLE = "getIsTorchAvailable"
-        private const val SUBSCRIBE_FRAME_SOURCE = "subscribeFrameSourceListener"
 
         const val SEND_CONTEXT_STATUS_UPDATE_EVENT = "sendContextStatusUpdateEvent"
         const val SEND_CONTEXT_OBSERVATION_STARTED_EVENT = "sendContextObservationStartedEvent"
         const val SEND_VIEW_SIZE_CHANGED_EVENT = "sendViewSizeChangedEvent"
-        const val SEND_ON_FRAME_SOURCE_STATE_CHANGED_EVENT = "sendFrameSourceOnStateChangedEvent"
 
         const val ACTION_STATUS_CHANGED = "didChangeStatus"
         const val ACTION_CONTEXT_OBSERVATION_STARTED = "didStartObservingContext"
         const val ACTION_VIEW_SIZE_CHANGED = "didChangeSizeOrientation"
-        const val ACTION_FRAME_SOURCE_STATE_CHANGED = "didChangeState"
 
         private val ACTIONS_REQUIRING_CAMERA =
             setOf(CREATE_CONTEXT, UPDATE_CONTEXT, VIEW_SHOW, VIEW_HIDE)

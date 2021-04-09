@@ -11,8 +11,6 @@ import com.scandit.datacapture.cordova.core.factories.CaptureCoreActionFactory
 import com.scandit.datacapture.cordova.core.handlers.ActionsHandler
 import com.scandit.datacapture.cordova.core.testing.OpenForTesting
 import com.scandit.datacapture.cordova.core.workers.Worker
-import com.scandit.datacapture.core.ui.orientation.DeviceOrientationMapper
-import com.scandit.datacapture.core.ui.orientation.toJson
 import org.apache.cordova.CallbackContext
 import org.json.JSONArray
 
@@ -23,28 +21,18 @@ class DataCaptureViewCallback(
     private val uiWorker: Worker
 ) : Callback(callbackContext) {
 
-    fun onSizeChanged(
-        width: Int,
-        height: Int,
-        screenRotation: Int
-    ) {
+    fun onSizeChanged(width: Int, height: Int, screenOrientation: Int) {
         if (disposed.get()) return
 
         uiWorker.post {
             actionsHandler.addAction(
-                CaptureCoreActionFactory.SEND_VIEW_SIZE_CHANGED_EVENT,
-                JSONArray().apply {
-                    put(
-                        SerializableViewState(
-                            width,
-                            height,
-                            DeviceOrientationMapper()
-                                .mapRotationToOrientation(screenRotation)
-                                .toJson()
-                        ).toJson()
-                    )
-                },
-                callbackContext
+                    CaptureCoreActionFactory.SEND_VIEW_SIZE_CHANGED_EVENT,
+                    JSONArray().apply {
+                        put(
+                                SerializableViewState(width, height, screenOrientation).toJson()
+                        )
+                    },
+                    callbackContext
             )
         }
     }

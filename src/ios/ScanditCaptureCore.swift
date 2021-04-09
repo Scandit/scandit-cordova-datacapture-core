@@ -4,8 +4,8 @@ import ScanditCaptureCore
 
 class ScanditCaptureCoreCallbacks {
     var contextListener: Callback?
+    var contextFrameListener: Callback?
     var viewListener: Callback?
-    var frameSourceListener: Callback?
     var volumeButtonObserver: Callback?
 }
 
@@ -107,6 +107,7 @@ public class ScanditCaptureCore: CDVPlugin {
         context = nil
 
         // Reset callbacks that might be stored
+        callbacks.contextFrameListener = nil
         callbacks.contextListener = nil
         callbacks.viewListener = nil
         callbacks.volumeButtonObserver = nil
@@ -136,6 +137,7 @@ public class ScanditCaptureCore: CDVPlugin {
         }
 
         context!.addListener(self)
+        context!.addFrameListener(self)
 
         commandDelegate.send(.success, callbackId: command.callbackId)
     }
@@ -187,17 +189,17 @@ public class ScanditCaptureCore: CDVPlugin {
         commandDelegate.send(.keepCallback, callbackId: command.callbackId)
     }
 
+    @objc(subscribeContextFrameListener:)
+    func subscribeContextFrameListener(command: CDVInvokedUrlCommand) {
+        callbacks.contextFrameListener?.dispose(by: commandDelegate)
+        callbacks.contextFrameListener = Callback(id: command.callbackId)
+        commandDelegate.send(.keepCallback, callbackId: command.callbackId)
+    }
+
     @objc(subscribeViewListener:)
     func subscribeViewListener(command: CDVInvokedUrlCommand) {
         callbacks.viewListener?.dispose(by: commandDelegate)
         callbacks.viewListener = Callback(id: command.callbackId)
-        commandDelegate.send(.keepCallback, callbackId: command.callbackId)
-    }
-
-    @objc(subscribeFrameSourceListener:)
-    func subscribeFrameSourceListener(command: CDVInvokedUrlCommand) {
-        callbacks.frameSourceListener?.dispose(by: commandDelegate)
-        callbacks.frameSourceListener = Callback(id: command.callbackId)
         commandDelegate.send(.keepCallback, callbackId: command.callbackId)
     }
 
@@ -352,7 +354,6 @@ public class ScanditCaptureCore: CDVPlugin {
                                                   laserlineViewfinder: LaserlineViewfinder(),
                                                   rectangularViewfinder: RectangularViewfinder(),
                                                   spotlightViewfinder: SpotlightViewfinder(),
-                                                  aimerViewfinder: AimerViewfinder(),
                                                   brush: Brush())
         commandDelegate.send(.success(message: defaults), callbackId: command.callbackId)
     }

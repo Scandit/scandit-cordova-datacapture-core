@@ -107,6 +107,9 @@ class DataCaptureViewHandler(
         dataCaptureViewReference = WeakReference(dataCaptureView)
         dataCaptureView.addListener(viewListener)
 
+        dataCaptureView.focusGesture = null
+        dataCaptureView.zoomGesture = null
+
         uiWorker.post {
             activity.addContentView(
                     dataCaptureView,

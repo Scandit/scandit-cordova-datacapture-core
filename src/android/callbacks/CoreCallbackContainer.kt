@@ -14,10 +14,6 @@ class CoreCallbackContainer {
     var viewCallback: DataCaptureViewCallback? = null
         private set
 
-    @Volatile
-    var frameSourceCallback: FrameSourceCallback? = null
-        private set
-
     fun setContextCallback(contextCallback: DataCaptureContextCallback) {
         disposeContextCallback()
         this.contextCallback = contextCallback
@@ -26,11 +22,6 @@ class CoreCallbackContainer {
     fun setViewCallback(viewCallback: DataCaptureViewCallback) {
         disposeViewCallback()
         this.viewCallback = viewCallback
-    }
-
-    fun setFrameSourceCallback(fameSourceCallback: FrameSourceCallback) {
-        disposeFrameSourceCallback()
-        this.frameSourceCallback = fameSourceCallback
     }
 
     fun disposeAll() {
@@ -46,10 +37,5 @@ class CoreCallbackContainer {
     private fun disposeViewCallback() {
         viewCallback?.dispose()
         viewCallback = null
-    }
-
-    private fun disposeFrameSourceCallback() {
-        frameSourceCallback?.dispose()
-        frameSourceCallback = null
     }
 }
