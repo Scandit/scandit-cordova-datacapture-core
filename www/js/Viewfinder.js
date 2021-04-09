@@ -94,3 +94,12 @@ __decorate([
     Serializeable_1.nameForSerialization('size')
 ], SpotlightViewfinder.prototype, "_sizeWithUnitAndAspect", void 0);
 exports.SpotlightViewfinder = SpotlightViewfinder;
+class AimerViewfinder extends Serializeable_1.DefaultSerializeable {
+    constructor() {
+        super();
+        this.type = 'aimer';
+        this.frameColor = Cordova_1.Cordova.defaults.AimerViewfinder.frameColor;
+        this.dotColor = Cordova_1.Cordova.defaults.AimerViewfinder.dotColor;
+    }
+}
+exports.AimerViewfinder = AimerViewfinder;

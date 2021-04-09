@@ -18,6 +18,7 @@ import com.scandit.datacapture.cordova.core.actions.ActionGetIsTorchAvailable
 import com.scandit.datacapture.cordova.core.actions.ActionInjectDefaults
 import com.scandit.datacapture.cordova.core.actions.ActionSend
 import com.scandit.datacapture.cordova.core.actions.ActionSubscribeContext
+import com.scandit.datacapture.cordova.core.actions.ActionSubscribeFrameSource
 import com.scandit.datacapture.cordova.core.actions.ActionSubscribeView
 import com.scandit.datacapture.cordova.core.actions.ActionUpdateContextAndView
 import com.scandit.datacapture.cordova.core.actions.ActionViewHide
@@ -26,6 +27,7 @@ import com.scandit.datacapture.cordova.core.actions.ActionViewShow
 import com.scandit.datacapture.cordova.core.callbacks.CoreCallbackContainer
 import com.scandit.datacapture.cordova.core.callbacks.DataCaptureContextCallback
 import com.scandit.datacapture.cordova.core.callbacks.DataCaptureViewCallback
+import com.scandit.datacapture.cordova.core.callbacks.FrameSourceCallback
 import com.scandit.datacapture.cordova.core.communication.CameraPermissionGrantedListener
 import com.scandit.datacapture.cordova.core.communication.ComponentDeserializersProvider
 import com.scandit.datacapture.cordova.core.communication.ModeDeserializersProvider
@@ -63,6 +65,7 @@ import com.scandit.datacapture.core.component.serialization.DataCaptureComponent
 import com.scandit.datacapture.core.json.JsonValue
 import com.scandit.datacapture.core.source.Camera
 import com.scandit.datacapture.core.source.FrameSource
+import com.scandit.datacapture.core.source.FrameSourceListener
 import com.scandit.datacapture.core.source.FrameSourceState
 import com.scandit.datacapture.core.source.FrameSourceStateDeserializer
 import com.scandit.datacapture.core.source.TorchStateDeserializer
@@ -82,7 +85,8 @@ class ScanditCaptureCore : CordovaPlugin(),
     DataCaptureViewListener,
     CoreActionsListeners,
     DeserializersProvider,
-    FrameSourceDeserializerListener {
+    FrameSourceDeserializerListener,
+    FrameSourceListener {
 
     companion object {
         private const val CODE_CAMERA_PERMISSIONS = 200
@@ -208,6 +212,7 @@ class ScanditCaptureCore : CordovaPlugin(),
                 notifyCameraPermissionGrantedToPlugins()
             } else {
                 actionsHandler.onCameraPermissionDenied()
+                notifyCameraPermissionDenied()
             }
         }
     }
@@ -216,6 +221,18 @@ class ScanditCaptureCore : CordovaPlugin(),
         getPlugins().filterIsInstance(CameraPermissionGrantedListener::class.java).forEach {
             it.onCameraPermissionGranted()
         }
+    }
+
+    private fun notifyCameraPermissionDenied() {
+        coreCallbacks.contextCallback?.onStatusChanged(
+            JSONObject(
+                mapOf(
+                    "code" to 1032,
+                    "isValid" to true,
+                    "message" to "Camera Authorization Required"
+                )
+            )
+        )
     }
 
     //region FrameSourceDeserializerListener
@@ -236,7 +253,15 @@ class ScanditCaptureCore : CordovaPlugin(),
                     json.requireByKeyAsString("desiredState")
                 ))
             }
+
+            this.addListener(this@ScanditCaptureCore)
         }
+    }
+    //endregion
+
+    //region FrameSourceListener
+    override fun onStateChanged(frameSource: FrameSource, newState: FrameSourceState) {
+        coreCallbacks.frameSourceCallback?.onStateChanged(frameSource, newState)
     }
     //endregion
 
@@ -254,8 +279,8 @@ class ScanditCaptureCore : CordovaPlugin(),
     //endregion
 
     //region DataCaptureViewListener
-    override fun onSizeChanged(width: Int, height: Int, screenOrientation: Int) {
-        coreCallbacks.viewCallback?.onSizeChanged(width, height, screenOrientation)
+    override fun onSizeChanged(width: Int, height: Int, screenRotation: Int) {
+        coreCallbacks.viewCallback?.onSizeChanged(width, height, screenRotation)
     }
     //endregion
 
@@ -284,12 +309,14 @@ class ScanditCaptureCore : CordovaPlugin(),
     //region ActionCreateContextAndView.ResultListener
     override fun onCreateContextAndView(
         dataCaptureContext: DataCaptureContext,
-        dataCaptureView: DataCaptureView,
+        dataCaptureView: DataCaptureView?,
         dataCaptureComponents: List<DataCaptureComponent>,
         callbackContext: CallbackContext
     ) {
         captureContextHandler.attachDataCaptureContext(dataCaptureContext)
-        captureViewHandler.attachDataCaptureView(dataCaptureView, cordova.activity)
+        dataCaptureView?.let { view ->
+            captureViewHandler.attachDataCaptureView(view, cordova.activity)
+        }
         captureComponentsHandler.attachDataCaptureComponents(dataCaptureComponents)
         callbackContext.success()
     }
@@ -305,12 +332,14 @@ class ScanditCaptureCore : CordovaPlugin(),
     //region ActionUpdateContextAndView.ResultListener
     override fun onUpdateContextAndView(
         dataCaptureContext: DataCaptureContext,
-        dataCaptureView: DataCaptureView,
+        dataCaptureView: DataCaptureView?,
         dataCaptureComponents: List<DataCaptureComponent>,
         callbackContext: CallbackContext
     ) {
         captureContextHandler.attachDataCaptureContext(dataCaptureContext)
-        captureViewHandler.attachDataCaptureView(dataCaptureView, cordova.activity)
+        dataCaptureView?.let { view ->
+            captureViewHandler.attachDataCaptureView(view, cordova.activity)
+        }
         captureComponentsHandler.attachDataCaptureComponents(dataCaptureComponents)
         callbackContext.success()
     }
@@ -449,6 +478,15 @@ class ScanditCaptureCore : CordovaPlugin(),
         NoCameraWithPositionError(position).sendResult(callbackContext)
     }
     //endregion
+
+    //region ActionSubscribeFrameSource.ResultListener
+    override fun onSubscribeFrameSource(callbackContext: CallbackContext) {
+        coreCallbacks.setFrameSourceCallback(
+            FrameSourceCallback(actionsHandler, callbackContext, uiWorker)
+        )
+        callbackContext.successAndKeepCallback()
+    }
+    //endregion
     //endregion
 }
 
@@ -466,4 +504,5 @@ interface CoreActionsListeners : ActionInjectDefaults.ResultListener,
     ActionGetCameraState.ResultListener,
     ActionSend.ResultListener,
     ActionEmitFeedback.ResultListener,
-    ActionGetIsTorchAvailable.ResultListener
+    ActionGetIsTorchAvailable.ResultListener,
+    ActionSubscribeFrameSource.ResultListener

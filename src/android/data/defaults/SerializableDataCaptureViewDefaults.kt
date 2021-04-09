@@ -15,7 +15,9 @@ data class SerializableDataCaptureViewDefaults(
     private val scanAreaMargins: String,
     private val pointOfInterest: String,
     private val logoAnchor: String,
-    private val logoOffset: String
+    private val logoOffset: String,
+    private val focusGesture: String?,
+    private val zoomGesture: String?
 ) : SerializableData {
 
     override fun toJson(): JSONObject = JSONObject(
@@ -23,7 +25,9 @@ data class SerializableDataCaptureViewDefaults(
                     FIELD_MARGINS to scanAreaMargins,
                     FIELD_POI to pointOfInterest,
                     FIELD_LOGO_ANCHOR to logoAnchor,
-                    FIELD_LOGO_OFFSET to logoOffset
+                    FIELD_LOGO_OFFSET to logoOffset,
+                    FIELD_FOCUS_GESTURE to focusGesture,
+                    FIELD_ZOOM_GESTURE to zoomGesture
             )
     )
 
@@ -32,5 +36,7 @@ data class SerializableDataCaptureViewDefaults(
         private const val FIELD_POI = "pointOfInterest"
         private const val FIELD_LOGO_ANCHOR = "logoAnchor"
         private const val FIELD_LOGO_OFFSET = "logoOffset"
+        private const val FIELD_FOCUS_GESTURE = "focusGesture"
+        private const val FIELD_ZOOM_GESTURE = "zoomGesture"
     }
 }

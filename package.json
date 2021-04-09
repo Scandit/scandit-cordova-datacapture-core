@@ -1,6 +1,6 @@
 {
   "name": "scandit-cordova-datacapture-core",
-  "version": "6.6.4",
+  "version": "6.7.2",
   "description": "Scandit Data Capture SDK for Cordova",
   "license": "Apache-2.0",
   "keywords": [
@@ -8,8 +8,11 @@
     "cordova-ios",
     "cordova-android"
   ],
+  "types": "www/js/index.d.ts",
   "scripts": {
+    "prebuild": "node ./scripts/prep-d-ts.js",
     "build": "tsc",
+    "postbuild": "node ./scripts/normalize-d-ts.js",
     "test": "npm run lint && jest",
     "lint": "tslint --project .",
     "paramedic:ios": "cordova-paramedic --verbose --platform ios@5.1.1 --plugin ./ --skipAppiumTests --cleanUpAfterRun",

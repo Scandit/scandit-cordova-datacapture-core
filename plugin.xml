@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <plugin id="scandit-cordova-datacapture-core"
-        version="6.6.4"
+        version="6.7.2"
         xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -28,9 +28,13 @@
     <js-module name="DataCaptureContext" src="www/js/DataCaptureContext.js">
         <merges target="Scandit" />
     </js-module>
-    <js-module name="DataCaptureContext+Related"
-        src="www/js/DataCaptureContext+Related.js"></js-module>
+    <js-module name="DataCaptureContext+Related" src="www/js/DataCaptureContext+Related.js">
+        <merges target="Scandit" />
+    </js-module>
     <js-module name="DataCaptureView" src="www/js/DataCaptureView.js">
+        <merges target="Scandit" />
+    </js-module>
+    <js-module name="DataCaptureView+Related" src="www/js/DataCaptureView+Related.js">
         <merges target="Scandit" />
     </js-module>
     <js-module name="Serializeable" src="www/js/Serializeable.js"></js-module>
@@ -79,8 +83,8 @@
         <source-file src="src/ios/ScanditCaptureCore+DataCaptureViewDeserializerDelegate.swift" />
         <source-file src="src/ios/ScanditCaptureCore+FrameSourceDeserializerListener.swift" />
         <source-file src="src/ios/ScanditCaptureCore+DataCaptureContextListener.swift" />
-        <source-file src="src/ios/ScanditCaptureCore+DataCaptureContextFrameListener.swift" />
         <source-file src="src/ios/ScanditCaptureCore+DataCaptureViewListener.swift" />
+        <source-file src="src/ios/ScanditCaptureCore+FrameSourceListener.swift" />
 
         <source-file src="src/ios/Command JSONs/CommandJSONArgument.swift" />
         <source-file src="src/ios/Command JSONs/ViewPositionAndSizeJSON.swift" />
@@ -95,16 +99,7 @@
 
         <dependency id="cordova-plugin-add-swift-support" version="2.0.2" />
 
-        <framework custom="true" embed="true"
-            src="src/ios/framework/ScanditCaptureCore.framework" version="6.6.4" />
-
-        <hook src="src/hooks/add-frameworks.js" type="before_plugin_install" />
-
-        <hook src="src/hooks/strip-frameworks.js" type="after_prepare" />
-        <hook src="src/hooks/strip-frameworks.js" type="after_plugin_install" />
-        <hook src="src/hooks/strip-frameworks.js" type="after_platform_add" />
-        <hook src="src/hooks/strip-frameworks.js" type="before_compile" />
-
+        <framework src="ScanditCaptureCore" spec="= 6.7.2" type="podspec" />
     </platform>
 
     <!-- Android -->
@@ -115,6 +110,7 @@
                 <param name="android-package"
                     value="com.scandit.datacapture.cordova.core.ScanditCaptureCore" />
             </feature>
+            <preference name="AndroidXEnabled" value="true" />
         </config-file>
 
         <!-- add permissions in AndroidManifest.xml file-->
@@ -145,6 +141,8 @@
         <source-file src="src/android/callbacks/DataCaptureContextCallback.kt"
             target-dir="kotlin/com/scandit/datacapture/cordova/core/callbacks" />
         <source-file src="src/android/callbacks/DataCaptureViewCallback.kt"
+            target-dir="kotlin/com/scandit/datacapture/cordova/core/callbacks" />
+        <source-file src="src/android/callbacks/FrameSourceCallback.kt"
             target-dir="kotlin/com/scandit/datacapture/cordova/core/callbacks" />
         <!-- Handlers -->
         <source-file src="src/android/handlers/DataCaptureViewHandler.kt"
@@ -214,6 +212,8 @@
             target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
         <source-file src="src/android/actions/ActionGetIsTorchAvailable.kt"
             target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionSubscribeFrameSource.kt"
+            target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
         <!-- Workers -->
         <source-file src="src/android/workers/Worker.kt"
             target-dir="kotlin/com/scandit/datacapture/cordova/core/workers" />
@@ -246,6 +246,8 @@
             target-dir="kotlin/com/scandit/datacapture/cordova/core/data/defaults" />
         <source-file src="src/android/data/defaults/SerializableDataCaptureViewDefaults.kt"
             target-dir="kotlin/com/scandit/datacapture/cordova/core/data/defaults" />
+        <source-file src="src/android/data/defaults/SerializableAimerViewfinderDefaults.kt"
+            target-dir="kotlin/com/scandit/datacapture/cordova/core/data/defaults" />
         <source-file src="src/android/data/defaults/SerializableLaserlineViewfinderDefaults.kt"
             target-dir="kotlin/com/scandit/datacapture/cordova/core/data/defaults" />
         <source-file src="src/android/data/defaults/SerializableRectangularViewfinderDefaults.kt"
@@ -264,10 +266,8 @@
         <framework custom="true" src="src/android/build.gradle" type="gradleReference" />
         <framework src="com.squareup.okhttp3:okhttp:3.12.10" />
 
-        <resource-file custom="true"
-            src="src/android/library/ScanditCaptureCore.aar" target="libs/ScanditCaptureCore.aar" version="6.6.4" />
+        <framework src="com.scandit.datacapture:core:6.7.2" />
 
-        <hook src="src/hooks/add-frameworks.js" type="before_plugin_install" />
 
         <!-- Add Kotlin support -->
         <hook src="src/hooks/support-kotlin.js" type="after_plugin_install" />
