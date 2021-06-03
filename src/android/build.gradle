@@ -1,4 +1,8 @@
 android {
+    // use same NDK version as the main android project
+    // this version is included in the docker image used for cordova build
+    ndkVersion "21.4.7075529"
+    
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
   }

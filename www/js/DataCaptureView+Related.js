@@ -39,3 +39,8 @@ class SwipeToZoom extends Serializeable_1.DefaultSerializeable {
     }
 }
 exports.SwipeToZoom = SwipeToZoom;
+var LogoStyle;
+(function (LogoStyle) {
+    LogoStyle["Minimal"] = "minimal";
+    LogoStyle["Extended"] = "extended";
+})(LogoStyle = exports.LogoStyle || (exports.LogoStyle = {}));

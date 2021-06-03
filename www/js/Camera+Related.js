@@ -62,6 +62,7 @@ class CameraSettings extends Serializeable_1.DefaultSerializeable {
         this.focus = {
             range: Cordova_1.Cordova.defaults.Camera.Settings.focusRange,
             focusGestureStrategy: Cordova_1.Cordova.defaults.Camera.Settings.focusGestureStrategy,
+            shouldPreferSmoothAutoFocus: Cordova_1.Cordova.defaults.Camera.Settings.shouldPreferSmoothAutoFocus,
         };
         if (settings !== undefined && settings !== null) {
             Object.getOwnPropertyNames(settings).forEach(propertyName => {
@@ -81,6 +82,12 @@ class CameraSettings extends Serializeable_1.DefaultSerializeable {
     set focusGestureStrategy(newStrategy) {
         this.focus.focusGestureStrategy = newStrategy;
     }
+    get shouldPreferSmoothAutoFocus() {
+        return this.focus.shouldPreferSmoothAutoFocus;
+    }
+    set shouldPreferSmoothAutoFocus(newShouldPreferSmoothAutoFocus) {
+        this.focus.shouldPreferSmoothAutoFocus = newShouldPreferSmoothAutoFocus;
+    }
     get maxFrameRate() {
         // tslint:disable-next-line:no-console
         console.warn('maxFrameRate is deprecated');
@@ -97,6 +104,7 @@ class CameraSettings extends Serializeable_1.DefaultSerializeable {
         settings.focusRange = json.focusRange;
         settings.zoomGestureZoomFactor = json.zoomGestureZoomFactor;
         settings.focusGestureStrategy = json.focusGestureStrategy;
+        settings.shouldPreferSmoothAutoFocus = json.shouldPreferSmoothAutoFocus;
         if (json.api !== undefined && json.api !== null) {
             settings.api = json.api;
         }

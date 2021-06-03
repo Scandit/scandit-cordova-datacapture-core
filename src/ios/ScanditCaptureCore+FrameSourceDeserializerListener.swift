@@ -69,12 +69,12 @@ extension PointWithUnit {
 extension ScanditCaptureCore: FrameSourceDeserializerDelegate {
 
     public func frameSourceDeserializer(_ deserializer: FrameSourceDeserializer,
-                                 didStartDeserializingFrameSource frameSource: FrameSource,
-                                 from JSONValue: JSONValue) { }
+                                        didStartDeserializingFrameSource frameSource: FrameSource,
+                                        from JSONValue: JSONValue) { }
 
     public func frameSourceDeserializer(_ deserializer: FrameSourceDeserializer,
-                                 didFinishDeserializingFrameSource frameSource: FrameSource,
-                                 from JSONValue: JSONValue) {
+                                        didFinishDeserializingFrameSource frameSource: FrameSource,
+                                        from JSONValue: JSONValue) {
         guard let camera = frameSource as? Camera else {
             return
         }
@@ -95,11 +95,11 @@ extension ScanditCaptureCore: FrameSourceDeserializerDelegate {
     }
 
     public func frameSourceDeserializer(_ deserializer: FrameSourceDeserializer,
-                                 didStartDeserializingCameraSettings settings: CameraSettings,
-                                 from JSONValue: JSONValue) { }
+                                        didStartDeserializingCameraSettings settings: CameraSettings,
+                                        from JSONValue: JSONValue) { }
 
     public func frameSourceDeserializer(_ deserializer: FrameSourceDeserializer,
-                                 didFinishDeserializingCameraSettings settings: CameraSettings,
-                                 from JSONValue: JSONValue) { }
+                                        didFinishDeserializingCameraSettings settings: CameraSettings,
+                                        from JSONValue: JSONValue) { }
 
 }

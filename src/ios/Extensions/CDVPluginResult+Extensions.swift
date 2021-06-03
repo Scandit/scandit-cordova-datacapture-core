@@ -115,10 +115,14 @@ struct CommandError {
     }
 
     public static let trackedBarcodeNotFound = CommandError(code: .trackedBarcodeNotFound,
-                                                            message: "Passed tracked barcode not found in current session")
+                                                            message: """
+        Passed tracked barcode not found in current session
+        """)
 
     public static let parserNotFound = CommandError(code: .parserNotFound,
-                                                    message: "A parser with the passed component identifier was not found")
+                                                    message: """
+        A parser with the passed component identifier was not found
+        """)
 
     public static func couldNotParseString(reason additionalInformation: String) -> CommandError {
         return CommandError(code: .couldNotParseString,

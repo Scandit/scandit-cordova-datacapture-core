@@ -27,6 +27,7 @@ class DataCaptureContext extends Serializeable_1.DefaultSerializeable {
         this.licenseKey = licenseKey;
         this.deviceName = deviceName;
         this.framework = 'cordova';
+        this.frameworkVersion = (window.cordova && window.cordova.version) || undefined;
         this.settings = new DataCaptureContextSettings();
         this._frameSource = null;
         this.view = null;

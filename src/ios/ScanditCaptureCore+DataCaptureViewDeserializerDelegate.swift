@@ -2,12 +2,12 @@ import ScanditCaptureCore
 
 extension ScanditCaptureCore: DataCaptureViewDeserializerDelegate {
     public func viewDeserializer(_ deserializer: DataCaptureViewDeserializer,
-                          didStartDeserializingView view: DataCaptureView,
-                          from JSONValue: JSONValue) { }
+                                 didStartDeserializingView view: DataCaptureView,
+                                 from JSONValue: JSONValue) { }
 
     public func viewDeserializer(_ deserializer: DataCaptureViewDeserializer,
-                          didFinishDeserializingView view: DataCaptureView,
-                          from JSONValue: JSONValue) {
+                                 didFinishDeserializingView view: DataCaptureView,
+                                 from JSONValue: JSONValue) {
         captureView = view
     }
 }

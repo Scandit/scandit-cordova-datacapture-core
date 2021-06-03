@@ -11,6 +11,6 @@ extension ScanditCaptureCore: FrameSourceListener {
     }
 
     public func frameSource(_ source: FrameSource, didOutputFrame frame: FrameData) {
-        //pass
+        // pass
     }
 }

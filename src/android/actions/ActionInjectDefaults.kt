@@ -17,7 +17,6 @@ import com.scandit.datacapture.cordova.core.data.defaults.SerializableLaserlineV
 import com.scandit.datacapture.cordova.core.data.defaults.SerializableRectangularViewfinderDefaults
 import com.scandit.datacapture.cordova.core.data.defaults.SerializableSpotlightViewfinderDefaults
 import com.scandit.datacapture.cordova.core.utils.hexString
-import com.scandit.datacapture.core.common.geometry.toJson
 import com.scandit.datacapture.core.source.Camera
 import com.scandit.datacapture.core.source.CameraPosition
 import com.scandit.datacapture.core.source.CameraSettings
@@ -27,7 +26,6 @@ import com.scandit.datacapture.core.ui.style.Brush
 import com.scandit.datacapture.core.ui.viewfinder.AimerViewfinder
 import com.scandit.datacapture.core.ui.viewfinder.LaserlineViewfinder
 import com.scandit.datacapture.core.ui.viewfinder.RectangularViewfinder
-import com.scandit.datacapture.core.ui.viewfinder.SpotlightViewfinder
 import org.apache.cordova.CallbackContext
 import org.json.JSONArray
 import org.json.JSONException
@@ -43,7 +41,9 @@ class ActionInjectDefaults(
             val dataCaptureView = DataCaptureView.newInstance(context, null)
             val laserViewfinder = LaserlineViewfinder()
             val rectangularViewfinder = RectangularViewfinder()
-            val spotlightViewfinder = SpotlightViewfinder()
+            @Suppress("DEPRECATION")
+            val spotlightViewfinder =
+                com.scandit.datacapture.core.ui.viewfinder.SpotlightViewfinder()
             val aimerViewfinder = AimerViewfinder()
             val brush = Brush.transparent()
             val availableCameraPositions = listOfNotNull(
@@ -61,21 +61,13 @@ class ActionInjectDefaults(
                             defaultPosition = Camera.getDefaultCamera()?.position?.toJson()
                     ),
                     dataCaptureViewDefaults = SerializableDataCaptureViewDefaults(
-                            scanAreaMargins = dataCaptureView.scanAreaMargins.toJson(),
-                            pointOfInterest = dataCaptureView.pointOfInterest.toJson(),
-                            logoAnchor = dataCaptureView.logoAnchor.toJson(),
-                            logoOffset = dataCaptureView.logoOffset.toJson(),
-                            focusGesture = dataCaptureView.focusGesture?.toJson(),
-                            zoomGesture = dataCaptureView.zoomGesture?.toJson()
+                        dataCaptureView
                     ),
                     laserlineViewfinderDefaults = SerializableLaserlineViewfinderDefaults(
-                            width = laserViewfinder.width.toJson(),
-                            enabledColor = laserViewfinder.enabledColor.hexString,
-                            disabledColor = laserViewfinder.disabledColor.hexString
+                        laserViewfinder
                     ),
                     rectangularViewfinderDefaults = SerializableRectangularViewfinderDefaults(
-                            size = rectangularViewfinder.sizeWithUnitAndAspect.toJson(),
-                            color = rectangularViewfinder.color.hexString
+                        rectangularViewfinder
                     ),
                     spotlightViewfinderDefaults = SerializableSpotlightViewfinderDefaults(
                             size = spotlightViewfinder.sizeWithUnitAndAspect.toJson(),

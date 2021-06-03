@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const Common_1 = require("scandit-cordova-datacapture-core.Common");
 const DataCaptureView_Related_1 = require("scandit-cordova-datacapture-core.DataCaptureView+Related");
+const Viewfinder_Related_1 = require("scandit-cordova-datacapture-core.Viewfinder+Related");
 exports.defaultsFromJSON = (json) => {
     return {
         Camera: {
@@ -11,6 +12,7 @@ exports.defaultsFromJSON = (json) => {
                 focusRange: json.Camera.Settings.focusRange,
                 zoomGestureZoomFactor: json.Camera.Settings.zoomGestureZoomFactor,
                 focusGestureStrategy: json.Camera.Settings.focusGestureStrategy,
+                shouldPreferSmoothAutoFocus: json.Camera.Settings.shouldPreferSmoothAutoFocus,
             },
             defaultPosition: (json.Camera.defaultPosition || null),
             availablePositions: json.Camera.availablePositions,
@@ -25,21 +27,40 @@ exports.defaultsFromJSON = (json) => {
                 .fromJSON(JSON.parse(json.DataCaptureView.logoOffset)),
             focusGesture: DataCaptureView_Related_1.PrivateFocusGestureDeserializer.fromJSON(JSON.parse(json.DataCaptureView.focusGesture)),
             zoomGesture: DataCaptureView_Related_1.PrivateZoomGestureDeserializer.fromJSON(JSON.parse(json.DataCaptureView.zoomGesture)),
+            logoStyle: json.DataCaptureView.logoStyle.toLowerCase(),
         },
-        LaserlineViewfinder: {
-            width: Common_1.NumberWithUnit
-                .fromJSON(JSON.parse(json.LaserlineViewfinder.width)),
-            enabledColor: Common_1.Color
-                .fromJSON(json.LaserlineViewfinder.enabledColor),
-            disabledColor: Common_1.Color
-                .fromJSON(json.LaserlineViewfinder.disabledColor),
-        },
-        RectangularViewfinder: {
-            size: Common_1.SizeWithUnitAndAspect
-                .fromJSON(JSON.parse(json.RectangularViewfinder.size)),
-            color: Common_1.Color
-                .fromJSON(json.RectangularViewfinder.color),
-        },
+        LaserlineViewfinder: Object
+            .keys(json.LaserlineViewfinder.styles)
+            .reduce((acc, key) => {
+            const viewfinder = json.LaserlineViewfinder.styles[key];
+            acc.styles[key] = {
+                width: Common_1.NumberWithUnit
+                    .fromJSON(JSON.parse(viewfinder.width)),
+                enabledColor: Common_1.Color
+                    .fromJSON(viewfinder.enabledColor),
+                disabledColor: Common_1.Color
+                    .fromJSON(viewfinder.disabledColor),
+                style: viewfinder.style,
+            };
+            return acc;
+        }, { defaultStyle: json.LaserlineViewfinder.defaultStyle, styles: {} }),
+        RectangularViewfinder: Object
+            .keys(json.RectangularViewfinder.styles)
+            .reduce((acc, key) => {
+            const viewfinder = json.RectangularViewfinder.styles[key];
+            acc.styles[key] = {
+                size: Common_1.SizeWithUnitAndAspect
+                    .fromJSON(JSON.parse(viewfinder.size)),
+                color: Common_1.Color
+                    .fromJSON(viewfinder.color),
+                style: viewfinder.style,
+                lineStyle: viewfinder.lineStyle,
+                dimming: parseFloat(viewfinder.dimming.toString()),
+                animation: Viewfinder_Related_1.RectangularViewfinderAnimation
+                    .fromJSON(JSON.parse(viewfinder.animation)),
+            };
+            return acc;
+        }, { defaultStyle: json.RectangularViewfinder.defaultStyle, styles: {} }),
         SpotlightViewfinder: {
             size: Common_1.SizeWithUnitAndAspect
                 .fromJSON(JSON.parse(json.SpotlightViewfinder.size)),

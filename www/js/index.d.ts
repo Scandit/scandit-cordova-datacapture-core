@@ -92,6 +92,7 @@ export interface CameraSettingsJSON {
     focusRange: string;
     zoomGestureZoomFactor: number;
     focusGestureStrategy: string;
+    shouldPreferSmoothAutoFocus: boolean;
     api: number;
 }
 interface PrivateCameraSettings {
@@ -105,6 +106,7 @@ export class CameraSettings {
     private focus;
     focusRange: FocusRange;
     focusGestureStrategy: FocusGestureStrategy;
+    shouldPreferSmoothAutoFocus: boolean;
     maxFrameRate: number;
     private static fromJSON;
     constructor();
@@ -230,11 +232,13 @@ export class SizeWithAspect {
 export enum SizingMode {
     WidthAndHeight = "widthAndHeight",
     WidthAndAspectRatio = "widthAndAspectRatio",
-    HeightAndAspectRatio = "heightAndAspectRatio"
+    HeightAndAspectRatio = "heightAndAspectRatio",
+    ShorterDimensionAndAspectRatio = "shorterDimensionAndAspectRatio"
 }
 export interface SizeWithUnitAndAspectJSON {
     width?: NumberWithUnitJSON;
     height?: NumberWithUnitJSON;
+    shorterDimension?: NumberWithUnitJSON;
     aspect?: number;
 }
 interface PrivateSizeWithUnitAndAspect {
@@ -244,13 +248,16 @@ export class SizeWithUnitAndAspect {
     private _widthAndHeight;
     private _widthAndAspectRatio;
     private _heightAndAspectRatio;
+    private _shorterDimensionAndAspectRatio;
     readonly widthAndHeight: SizeWithUnit | null;
     readonly widthAndAspectRatio: SizeWithAspect | null;
     readonly heightAndAspectRatio: SizeWithAspect | null;
+    readonly shorterDimensionAndAspectRatio: SizeWithAspect | null;
     readonly sizingMode: SizingMode;
     private static sizeWithWidthAndHeight;
     private static sizeWithWidthAndAspectRatio;
     private static sizeWithHeightAndAspectRatio;
+    private static sizeWithShorterDimensionAndAspectRatio;
     private static fromJSON;
     toJSON(): object;
 }
@@ -352,6 +359,7 @@ export class DataCaptureContext {
     private licenseKey;
     private deviceName;
     private framework;
+    private frameworkVersion;
     private settings;
     private _frameSource;
     private view;
@@ -407,6 +415,15 @@ export interface DataCaptureOverlay {
 }
 export interface Control {
 }
+export class TorchSwitchControl implements Control {
+    private type;
+    private icon;
+    private view;
+    torchOffImage: string | null;
+    torchOffPressedImage: string | null;
+    torchOnImage: string | null;
+    torchOnPressedImage: string | null;
+}
 export interface DataCaptureViewListener {
     didChangeSize?(view: DataCaptureView, size: Size, orientation: Orientation): void;
 }
@@ -452,6 +469,7 @@ interface PrivateDataCaptureView {
     _hide(): void;
     elementDidChange(): void;
     subscribeToChangesOnHTMLElement(): void;
+    controlUpdated(): void;
 }
 export class DataCaptureView {
     private _context;
@@ -462,6 +480,7 @@ export class DataCaptureView {
     logoOffset: PointWithUnit;
     focusGesture: FocusGesture | null;
     zoomGesture: ZoomGesture | null;
+    logoStyle: LogoStyle;
     private overlays;
     private controls;
     private _viewProxy;
@@ -486,8 +505,9 @@ export class DataCaptureView {
     removeListener(listener: DataCaptureViewListener): void;
     viewPointForFramePoint(point: Point): Promise<Point>;
     viewQuadrilateralForFrameQuadrilateral(quadrilateral: Quadrilateral): Promise<Quadrilateral>;
-    private addControl;
-    private removeControl;
+    addControl(control: Control): void;
+    removeControl(control: Control): void;
+    private controlUpdated;
     private initialize;
     private subscribeToChangesOnHTMLElement;
     private elementDidChange;
@@ -520,6 +540,10 @@ class PrivateZoomGestureDeserializer {
 export class SwipeToZoom implements ZoomGesture {
     private type;
     constructor();
+}
+export enum LogoStyle {
+    Minimal = "minimal",
+    Extended = "extended"
 }
 
 
@@ -573,20 +597,34 @@ export const NoViewfinder: {
 };
 export class LaserlineViewfinder implements Viewfinder {
     private type;
+    private readonly _style;
     width: NumberWithUnit;
     enabledColor: Color;
     disabledColor: Color;
     constructor();
+    constructor(style: LaserlineViewfinderStyle);
+    readonly style: LaserlineViewfinderStyle;
 }
 export class RectangularViewfinder implements Viewfinder {
     private type;
+    private readonly _style;
+    private readonly _lineStyle;
+    private _dimming;
+    private _animation;
     private _sizeWithUnitAndAspect;
     color: Color;
     readonly sizeWithUnitAndAspect: SizeWithUnitAndAspect;
     constructor();
+    constructor(style: RectangularViewfinderStyle);
+    constructor(style: RectangularViewfinderStyle, lineStyle: RectangularViewfinderLineStyle);
+    readonly style: RectangularViewfinderStyle;
+    readonly lineStyle: RectangularViewfinderLineStyle;
+    dimming: number;
+    animation: RectangularViewfinderAnimation | null;
     setSize(size: SizeWithUnit): void;
     setWidthAndAspectRatio(width: NumberWithUnit, heightToWidthAspectRatio: number): void;
     setHeightAndAspectRatio(height: NumberWithUnit, widthToHeightAspectRatio: number): void;
+    setShorterDimensionAndAspectRatio(fraction: number, aspectRatio: number): void;
 }
 export class SpotlightViewfinder implements Viewfinder {
     private type;
@@ -605,6 +643,33 @@ export class AimerViewfinder implements Viewfinder {
     frameColor: Color;
     dotColor: Color;
     constructor();
+}
+
+
+export enum RectangularViewfinderStyle {
+    Legacy = "legacy",
+    Rounded = "rounded",
+    Square = "square"
+}
+export enum RectangularViewfinderLineStyle {
+    Light = "light",
+    Bold = "bold"
+}
+export enum LaserlineViewfinderStyle {
+    Legacy = "legacy",
+    Animated = "animated"
+}
+interface RectangularViewfinderAnimationJSON {
+    readonly looping: boolean;
+}
+interface PrivateRectangularViewfinderAnimation {
+    fromJSON(json: RectangularViewfinderAnimationJSON): RectangularViewfinderAnimation;
+}
+export class RectangularViewfinderAnimation {
+    private readonly _isLooping;
+    private static fromJSON;
+    readonly isLooping: boolean;
+    constructor(isLooping: boolean);
 }
 
 

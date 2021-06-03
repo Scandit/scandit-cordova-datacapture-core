@@ -231,8 +231,12 @@ var SizingMode;
     SizingMode["WidthAndHeight"] = "widthAndHeight";
     SizingMode["WidthAndAspectRatio"] = "widthAndAspectRatio";
     SizingMode["HeightAndAspectRatio"] = "heightAndAspectRatio";
+    SizingMode["ShorterDimensionAndAspectRatio"] = "shorterDimensionAndAspectRatio";
 })(SizingMode = exports.SizingMode || (exports.SizingMode = {}));
 class SizeWithUnitAndAspect {
+    constructor() {
+        this._shorterDimensionAndAspectRatio = null;
+    }
     get widthAndHeight() {
         return this._widthAndHeight;
     }
@@ -242,12 +246,18 @@ class SizeWithUnitAndAspect {
     get heightAndAspectRatio() {
         return this._heightAndAspectRatio;
     }
+    get shorterDimensionAndAspectRatio() {
+        return this._shorterDimensionAndAspectRatio;
+    }
     get sizingMode() {
         if (this.widthAndAspectRatio) {
             return SizingMode.WidthAndAspectRatio;
         }
         if (this.heightAndAspectRatio) {
             return SizingMode.HeightAndAspectRatio;
+        }
+        if (this.shorterDimensionAndAspectRatio) {
+            return SizingMode.ShorterDimensionAndAspectRatio;
         }
         return SizingMode.WidthAndHeight;
     }
@@ -266,6 +276,11 @@ class SizeWithUnitAndAspect {
         sizeWithUnitAndAspect._heightAndAspectRatio = new SizeWithAspect(height, aspectRatio);
         return sizeWithUnitAndAspect;
     }
+    static sizeWithShorterDimensionAndAspectRatio(shorterDimension, aspectRatio) {
+        const sizeWithUnitAndAspect = new SizeWithUnitAndAspect();
+        sizeWithUnitAndAspect._shorterDimensionAndAspectRatio = new SizeWithAspect(shorterDimension, aspectRatio);
+        return sizeWithUnitAndAspect;
+    }
     static fromJSON(json) {
         if (json.width && json.height) {
             return this.sizeWithWidthAndHeight(new SizeWithUnit(NumberWithUnit.fromJSON(json.width), NumberWithUnit.fromJSON(json.height)));
@@ -275,6 +290,9 @@ class SizeWithUnitAndAspect {
         }
         else if (json.height && json.aspect) {
             return this.sizeWithHeightAndAspectRatio(NumberWithUnit.fromJSON(json.height), json.aspect);
+        }
+        else if (json.shorterDimension && json.aspect) {
+            return this.sizeWithShorterDimensionAndAspectRatio(NumberWithUnit.fromJSON(json.shorterDimension), json.aspect);
         }
         else {
             throw new Error(`SizeWithUnitAndAspectJSON is malformed: ${JSON.stringify(json)}`);
@@ -295,6 +313,11 @@ class SizeWithUnitAndAspect {
                     height: this.heightAndAspectRatio.size.toJSON(),
                     aspect: this.heightAndAspectRatio.aspect,
                 };
+            case SizingMode.ShorterDimensionAndAspectRatio:
+                return {
+                    shorterDimension: this.shorterDimensionAndAspectRatio.size.toJSON(),
+                    aspect: this.shorterDimensionAndAspectRatio.aspect,
+                };
             default:
                 return {
                     width: this.widthAndHeight.width.toJSON(),
@@ -312,6 +335,9 @@ __decorate([
 __decorate([
     Serializeable_1.nameForSerialization('heightAndAspectRatio')
 ], SizeWithUnitAndAspect.prototype, "_heightAndAspectRatio", void 0);
+__decorate([
+    Serializeable_1.nameForSerialization('shorterDimensionAndAspectRatio')
+], SizeWithUnitAndAspect.prototype, "_shorterDimensionAndAspectRatio", void 0);
 exports.SizeWithUnitAndAspect = SizeWithUnitAndAspect;
 class MarginsWithUnit extends Serializeable_1.DefaultSerializeable {
     constructor(left, right, top, bottom) {

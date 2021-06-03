@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <plugin id="scandit-cordova-datacapture-core"
-        version="6.7.3"
+        version="6.8.0"
         xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -44,6 +44,9 @@
     <js-module name="Viewfinder" src="www/js/Viewfinder.js">
         <merges target="Scandit" />
     </js-module>
+    <js-module name="Viewfinder+Related" src="www/js/Viewfinder+Related.js">
+        <merges target="Scandit" />
+    </js-module>
     <js-module name="Feedback" src="www/js/Feedback.js">
         <merges target="Scandit" />
     </js-module>
@@ -55,7 +58,7 @@
     </js-module>
 
     <engines>
-        <engine name="cordova-ios" version=">=4.5.5" />
+        <engine name="cordova-ios" version=">=5.0.0" />
         <engine name="cordova-android" version=">=7.0.0" />
     </engines>
 
@@ -73,7 +76,7 @@
             <string>To scan barcodes.</string>
         </config-file>
 
-        <source-file src="src/ios/ScanditCaptureCore-Bridging-Header.h" />
+        <header-file src="src/ios/ScanditCaptureCore-Bridging-Header.h" type="BridgingHeader" />
         <source-file src="src/ios/ScanditCaptureCore.swift" />
         <source-file src="src/ios/DataCaptureViewConstraints.swift" />
         <source-file src="src/ios/Callbacks.swift" />
@@ -97,9 +100,7 @@
 
         <source-file src="src/ios/SDCVolumeButtonObserver.h" />
 
-        <dependency id="cordova-plugin-add-swift-support" version="2.0.2" />
-
-        <framework src="ScanditCaptureCore" spec="= 6.7.3" type="podspec" />
+        <framework src="ScanditCaptureCore" spec="= 6.8.0" type="podspec" />
     </platform>
 
     <!-- Android -->
@@ -266,7 +267,7 @@
         <framework custom="true" src="src/android/build.gradle" type="gradleReference" />
         <framework src="com.squareup.okhttp3:okhttp:3.12.10" />
 
-        <framework src="com.scandit.datacapture:core:6.7.3" />
+        <framework src="com.scandit.datacapture:core:6.8.0" />
 
 
         <!-- Add Kotlin support -->

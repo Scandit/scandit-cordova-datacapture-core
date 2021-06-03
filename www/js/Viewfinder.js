@@ -35,24 +35,58 @@ exports.Brush = Brush;
 // tslint:disable-next-line:variable-name
 exports.NoViewfinder = { type: 'none' };
 class LaserlineViewfinder extends Serializeable_1.DefaultSerializeable {
-    constructor() {
+    constructor(style) {
         super();
         this.type = 'laserline';
-        this.width = Cordova_1.Cordova.defaults.LaserlineViewfinder.width;
-        this.enabledColor = Cordova_1.Cordova.defaults.LaserlineViewfinder.enabledColor;
-        this.disabledColor = Cordova_1.Cordova.defaults.LaserlineViewfinder.disabledColor;
+        const viewfinderStyle = style || Cordova_1.Cordova.defaults.LaserlineViewfinder.defaultStyle;
+        this._style = Cordova_1.Cordova.defaults.LaserlineViewfinder.styles[viewfinderStyle].style;
+        this.width = Cordova_1.Cordova.defaults.LaserlineViewfinder.styles[viewfinderStyle].width;
+        this.enabledColor = Cordova_1.Cordova.defaults.LaserlineViewfinder.styles[viewfinderStyle].enabledColor;
+        this.disabledColor = Cordova_1.Cordova.defaults.LaserlineViewfinder.styles[viewfinderStyle].disabledColor;
+    }
+    get style() {
+        return this._style;
     }
 }
+__decorate([
+    Serializeable_1.nameForSerialization('style')
+], LaserlineViewfinder.prototype, "_style", void 0);
 exports.LaserlineViewfinder = LaserlineViewfinder;
 class RectangularViewfinder extends Serializeable_1.DefaultSerializeable {
-    constructor() {
+    constructor(style, lineStyle) {
         super();
         this.type = 'rectangular';
-        this._sizeWithUnitAndAspect = Cordova_1.Cordova.defaults.RectangularViewfinder.size;
-        this.color = Cordova_1.Cordova.defaults.RectangularViewfinder.color;
+        const viewfinderStyle = style || Cordova_1.Cordova.defaults.RectangularViewfinder.defaultStyle;
+        this._style = Cordova_1.Cordova.defaults.RectangularViewfinder.styles[viewfinderStyle].style;
+        this._lineStyle = Cordova_1.Cordova.defaults.RectangularViewfinder.styles[viewfinderStyle].lineStyle;
+        this._dimming = Cordova_1.Cordova.defaults.RectangularViewfinder.styles[viewfinderStyle].dimming;
+        this._animation = Cordova_1.Cordova.defaults.RectangularViewfinder.styles[viewfinderStyle].animation;
+        this.color = Cordova_1.Cordova.defaults.RectangularViewfinder.styles[viewfinderStyle].color;
+        this._sizeWithUnitAndAspect = Cordova_1.Cordova.defaults.RectangularViewfinder.styles[viewfinderStyle].size;
+        if (lineStyle !== undefined) {
+            this._lineStyle = lineStyle;
+        }
     }
     get sizeWithUnitAndAspect() {
         return this._sizeWithUnitAndAspect;
+    }
+    get style() {
+        return this._style;
+    }
+    get lineStyle() {
+        return this._lineStyle;
+    }
+    get dimming() {
+        return this._dimming;
+    }
+    set dimming(value) {
+        this._dimming = value;
+    }
+    get animation() {
+        return this._animation;
+    }
+    set animation(animation) {
+        this._animation = animation;
     }
     setSize(size) {
         this._sizeWithUnitAndAspect = Common_1.SizeWithUnitAndAspect.sizeWithWidthAndHeight(size);
@@ -63,7 +97,23 @@ class RectangularViewfinder extends Serializeable_1.DefaultSerializeable {
     setHeightAndAspectRatio(height, widthToHeightAspectRatio) {
         this._sizeWithUnitAndAspect = Common_1.SizeWithUnitAndAspect.sizeWithHeightAndAspectRatio(height, widthToHeightAspectRatio);
     }
+    setShorterDimensionAndAspectRatio(fraction, aspectRatio) {
+        this._sizeWithUnitAndAspect = Common_1.SizeWithUnitAndAspect.sizeWithShorterDimensionAndAspectRatio(new Common_1.NumberWithUnit(fraction, Common_1.MeasureUnit.Fraction), aspectRatio);
+    }
 }
+__decorate([
+    Serializeable_1.nameForSerialization('style')
+], RectangularViewfinder.prototype, "_style", void 0);
+__decorate([
+    Serializeable_1.nameForSerialization('lineStyle')
+], RectangularViewfinder.prototype, "_lineStyle", void 0);
+__decorate([
+    Serializeable_1.nameForSerialization('dimming')
+], RectangularViewfinder.prototype, "_dimming", void 0);
+__decorate([
+    Serializeable_1.nameForSerialization('animation'),
+    Serializeable_1.ignoreFromSerialization
+], RectangularViewfinder.prototype, "_animation", void 0);
 __decorate([
     Serializeable_1.nameForSerialization('size')
 ], RectangularViewfinder.prototype, "_sizeWithUnitAndAspect", void 0);
@@ -76,6 +126,8 @@ class SpotlightViewfinder extends Serializeable_1.DefaultSerializeable {
         this.enabledBorderColor = Cordova_1.Cordova.defaults.SpotlightViewfinder.enabledBorderColor;
         this.disabledBorderColor = Cordova_1.Cordova.defaults.SpotlightViewfinder.disabledBorderColor;
         this.backgroundColor = Cordova_1.Cordova.defaults.SpotlightViewfinder.backgroundColor;
+        // tslint:disable-next-line:no-console
+        console.warn('SpotlightViewfinder is deprecated and will be removed in a future release. Use RectangularViewfinder instead.');
     }
     get sizeWithUnitAndAspect() {
         return this._sizeWithUnitAndAspect;

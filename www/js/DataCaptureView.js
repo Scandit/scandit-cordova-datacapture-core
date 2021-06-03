@@ -9,13 +9,49 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const Cordova_1 = require("scandit-cordova-datacapture-core.Cordova");
 const DataCaptureViewProxy_1 = require("scandit-cordova-datacapture-core.DataCaptureViewProxy");
 const Serializeable_1 = require("scandit-cordova-datacapture-core.Serializeable");
-// TODO: add back torch switch control https://jira.scandit.com/browse/SDC-1771
 class TorchSwitchControl extends Serializeable_1.DefaultSerializeable {
     constructor() {
         super(...arguments);
         this.type = 'torch';
+        this.icon = {
+            on: { default: null, pressed: null },
+            off: { default: null, pressed: null },
+        };
+        this.view = null;
+    }
+    get torchOffImage() {
+        return this.icon.off.default;
+    }
+    set torchOffImage(torchOffImage) {
+        this.icon.off.default = torchOffImage;
+        this.view.controlUpdated();
+    }
+    get torchOffPressedImage() {
+        return this.icon.off.pressed;
+    }
+    set torchOffPressedImage(torchOffPressedImage) {
+        this.icon.off.pressed = torchOffPressedImage;
+        this.view.controlUpdated();
+    }
+    get torchOnImage() {
+        return this.icon.on.default;
+    }
+    set torchOnImage(torchOnImage) {
+        this.icon.on.default = torchOnImage;
+        this.view.controlUpdated();
+    }
+    get torchOnPressedImage() {
+        return this.icon.on.pressed;
+    }
+    set torchOnPressedImage(torchOnPressedImage) {
+        this.icon.on.pressed = torchOnPressedImage;
+        this.view.controlUpdated();
     }
 }
+__decorate([
+    Serializeable_1.ignoreFromSerialization
+], TorchSwitchControl.prototype, "view", void 0);
+exports.TorchSwitchControl = TorchSwitchControl;
 var Anchor;
 (function (Anchor) {
     Anchor["TopLeft"] = "topLeft";
@@ -58,6 +94,7 @@ class DataCaptureView extends Serializeable_1.DefaultSerializeable {
         this.logoOffset = Cordova_1.Cordova.defaults.DataCaptureView.logoOffset;
         this.focusGesture = Cordova_1.Cordova.defaults.DataCaptureView.focusGesture;
         this.zoomGesture = Cordova_1.Cordova.defaults.DataCaptureView.zoomGesture;
+        this.logoStyle = Cordova_1.Cordova.defaults.DataCaptureView.logoStyle;
         this.overlays = [];
         this.controls = [];
         this.listeners = [];
@@ -161,19 +198,22 @@ class DataCaptureView extends Serializeable_1.DefaultSerializeable {
     viewQuadrilateralForFrameQuadrilateral(quadrilateral) {
         return this.viewProxy.viewQuadrilateralForFrameQuadrilateral(quadrilateral);
     }
-    // TODO: add back torch switch control https://jira.scandit.com/browse/SDC-1771
     addControl(control) {
         if (!this.controls.includes(control)) {
+            control.view = this;
             this.controls.push(control);
             this.privateContext.update();
         }
     }
-    // TODO: add back torch switch control https://jira.scandit.com/browse/SDC-1771
     removeControl(control) {
         if (this.controls.includes(control)) {
+            control.view = null;
             this.controls.splice(this.overlays.indexOf(control), 1);
             this.privateContext.update();
         }
+    }
+    controlUpdated() {
+        this.privateContext.update();
     }
     initialize() {
         if (this._viewProxy) {

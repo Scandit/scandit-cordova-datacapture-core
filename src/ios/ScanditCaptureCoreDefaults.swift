@@ -7,6 +7,7 @@ struct ScanditCaptureCoreDefaults: Encodable {
         let focusRange: String
         let zoomGestureZoomFactor: Float
         let focusGestureStrategy: String
+        let shouldPreferSmoothAutoFocus: Bool
     }
 
     struct CameraDefaults: Encodable {
@@ -22,17 +23,17 @@ struct ScanditCaptureCoreDefaults: Encodable {
         let logoOffset: String
         let focusGesture: String?
         let zoomGesture: String?
+        let logoStyle: String
     }
 
-    struct LaserlineViewfinderDefaults: Encodable {
-        let width: String
-        let enabledColor: String
-        let disabledColor: String
+    public struct LaserlineViewfinderDefaults: Encodable {
+        let defaultStyle: String
+        let styles: [String: [String: String]]
     }
 
-    struct RectangularViewfinderDefaults: Encodable {
-        let size: String
-        let color: String
+    public struct RectangularViewfinderDefaults: Encodable {
+        let defaultStyle: String
+        let styles: [String: [String: String?]]
     }
 
     struct SpotlightViewfinderDefaults: Encodable {
@@ -105,7 +106,8 @@ extension ScanditCaptureCoreDefaults.CameraSettingsDefaults {
                         zoomFactor: Float(cameraSettings.zoomFactor),
                         focusRange: cameraSettings.focusRange.jsonString,
                         zoomGestureZoomFactor: Float(cameraSettings.zoomGestureZoomFactor),
-                        focusGestureStrategy: cameraSettings.focusGestureStrategy.jsonString)
+                        focusGestureStrategy: cameraSettings.focusGestureStrategy.jsonString,
+                        shouldPreferSmoothAutoFocus: cameraSettings.shouldPreferSmoothAutoFocus)
     }
 }
 
@@ -118,17 +120,33 @@ extension ScanditCaptureCoreDefaults.DataCaptureViewDefaults {
                         logoAnchor: dataCaptureView.logoAnchor.jsonString,
                         logoOffset: dataCaptureView.logoOffset.jsonString,
                         focusGesture: dataCaptureView.focusGesture?.jsonString,
-                        zoomGesture: dataCaptureView.zoomGesture?.jsonString)
+                        zoomGesture: dataCaptureView.zoomGesture?.jsonString,
+                        logoStyle: dataCaptureView.logoStyle.jsonString)
     }
 }
 
-extension ScanditCaptureCoreDefaults.LaserlineViewfinderDefaults {
-    typealias Defaults = ScanditCaptureCoreDefaults.LaserlineViewfinderDefaults
+public extension ScanditCaptureCoreDefaults.LaserlineViewfinderDefaults {
+    internal typealias Defaults = ScanditCaptureCoreDefaults.LaserlineViewfinderDefaults
 
-    static func from(_ viewfinder: LaserlineViewfinder) -> Defaults {
-        return Defaults(width: viewfinder.width.jsonString,
-                        enabledColor: viewfinder.enabledColor.sdcHexString,
-                        disabledColor: viewfinder.disabledColor.sdcHexString)
+    internal static func from(_ viewfinder: LaserlineViewfinder) -> Defaults {
+        func createViewfinderDefaults(style: LaserlineViewfinderStyle) -> [String: String] {
+            let viewfinder = LaserlineViewfinder(style: style)
+            let defaults = [
+                "style": viewfinder.style.jsonString,
+                "width": viewfinder.width.jsonString,
+                "enabledColor": viewfinder.enabledColor.sdcHexString,
+                "disabledColor": viewfinder.disabledColor.sdcHexString
+            ]
+            return defaults
+        }
+
+        return Defaults(
+            defaultStyle: LaserlineViewfinder().style.jsonString,
+            styles: [
+                LaserlineViewfinderStyle.animated.jsonString: createViewfinderDefaults(style: .animated),
+                LaserlineViewfinderStyle.legacy.jsonString: createViewfinderDefaults(style: .legacy)
+            ]
+        )
     }
 }
 
@@ -141,12 +159,31 @@ extension ScanditCaptureCoreDefaults.AimerViewfinderDefaults {
     }
 }
 
-extension ScanditCaptureCoreDefaults.RectangularViewfinderDefaults {
-    typealias Defaults = ScanditCaptureCoreDefaults.RectangularViewfinderDefaults
+public extension ScanditCaptureCoreDefaults.RectangularViewfinderDefaults {
+    internal typealias Defaults = ScanditCaptureCoreDefaults.RectangularViewfinderDefaults
 
-    static func from(_ viewfinder: RectangularViewfinder) -> Defaults {
-        return Defaults(size: viewfinder.sizeWithUnitAndAspect.jsonString,
-                        color: viewfinder.color.sdcHexString)
+    internal static func from(_ viewfinder: RectangularViewfinder) -> Defaults {
+        func createViewfinderDefaults(style: RectangularViewfinderStyle) -> [String: String?] {
+            let viewfinder = RectangularViewfinder(style: style)
+            let defaults = [
+                "style": viewfinder.style.jsonString,
+                "size": viewfinder.sizeWithUnitAndAspect.jsonString,
+                "color": viewfinder.color.sdcHexString,
+                "lineStyle": viewfinder.lineStyle.jsonString,
+                "dimming": viewfinder.dimming.description,
+                "animation": viewfinder.animation?.jsonString
+            ]
+            return defaults
+        }
+
+        return Defaults(
+            defaultStyle: RectangularViewfinder().style.jsonString,
+            styles: [
+                RectangularViewfinderStyle.square.jsonString: createViewfinderDefaults(style: .square),
+                RectangularViewfinderStyle.rounded.jsonString: createViewfinderDefaults(style: .rounded),
+                RectangularViewfinderStyle.legacy.jsonString: createViewfinderDefaults(style: .legacy)
+            ]
+        )
     }
 }
 

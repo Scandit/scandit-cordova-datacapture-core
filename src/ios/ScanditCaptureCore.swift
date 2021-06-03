@@ -16,6 +16,7 @@ protocol DataCapturePlugin where Self: CDVPlugin {
 }
 
 @objc(ScanditCaptureCore)
+// swiftlint:disable:next type_body_length
 public class ScanditCaptureCore: CDVPlugin {
 
     static var dataCapturePlugins = [DataCapturePlugin]()
@@ -92,7 +93,10 @@ public class ScanditCaptureCore: CDVPlugin {
 
     public override func pluginInitialize() {
         guard webView is WKWebView else {
-            fatalError("The Scandit Data Capture SDK requires the Cordova WebView to be a WKWebView. For more information, see the Scandit documentation about how to add the Data Capture SDK to your app.")
+            fatalError("""
+                The Scandit Data Capture SDK requires the Cordova WebView to be a WKWebView.
+                For more information, see the Scandit documentation about how to add the Data Capture SDK to your app.
+                """)
         }
     }
 
@@ -301,9 +305,9 @@ public class ScanditCaptureCore: CDVPlugin {
         }
 
         guard let jsonString = command.defaultArgumentAsString,
-            let quad = Quadrilateral(JSONString: jsonString) else {
-                commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
-                return
+              let quad = Quadrilateral(JSONString: jsonString) else {
+            commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
+            return
         }
 
         let convertedQuadrilateral = captureView.viewQuadrilateral(forFrameQuadrilateral: quad)
@@ -361,7 +365,8 @@ public class ScanditCaptureCore: CDVPlugin {
 
     @objc(emitFeedback:)
     func emitFeedback(command: CDVInvokedUrlCommand) {
-        guard let jsonString = command.defaultArgumentAsString, let feedback = try? Feedback(fromJSONString: jsonString) else {
+        guard let jsonString = command.defaultArgumentAsString,
+              let feedback = try? Feedback(fromJSONString: jsonString) else {
             commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
             return
         }

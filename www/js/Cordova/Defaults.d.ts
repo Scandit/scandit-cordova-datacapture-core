@@ -1,14 +1,15 @@
 /// <amd-module name="scandit-cordova-datacapture-core.Defaults" />
 import { CameraPosition, CameraSettings, FocusGestureStrategy, FocusRange, VideoResolution } from '../Camera+Related';
-import { Color, MarginsWithUnit, NumberWithUnit, PointWithUnit, SizeWithUnitAndAspect } from '../Common';
+import { Color, MarginsWithUnit, PointWithUnit, SizeWithUnitAndAspect } from '../Common';
 import { Anchor } from '../DataCaptureView';
-import { FocusGesture, ZoomGesture } from '../DataCaptureView+Related';
+import { FocusGesture, LogoStyle, ZoomGesture } from '../DataCaptureView+Related';
 export interface CameraSettingsDefaults {
     preferredResolution: VideoResolution;
     zoomFactor: number;
     focusRange: FocusRange;
     zoomGestureZoomFactor: number;
     focusGestureStrategy: FocusGestureStrategy;
+    shouldPreferSmoothAutoFocus: boolean;
 }
 export interface Defaults {
     Camera: {
@@ -23,15 +24,19 @@ export interface Defaults {
         logoOffset: PointWithUnit;
         focusGesture: FocusGesture | null;
         zoomGesture: ZoomGesture | null;
+        logoStyle: LogoStyle;
     };
     LaserlineViewfinder: {
-        width: NumberWithUnit;
-        enabledColor: Color;
-        disabledColor: Color;
+        defaultStyle: string;
+        styles: {
+            [key: string]: any;
+        };
     };
     RectangularViewfinder: {
-        size: SizeWithUnitAndAspect;
-        color: Color;
+        defaultStyle: string;
+        styles: {
+            [key: string]: any;
+        };
     };
     SpotlightViewfinder: {
         size: SizeWithUnitAndAspect;
@@ -56,9 +61,24 @@ export interface CameraSettingsDefaultsJSON {
     focusRange: string;
     zoomGestureZoomFactor: number;
     focusGestureStrategy: string;
+    shouldPreferSmoothAutoFocus: boolean;
 }
 export interface PrivateCameraSettingsDefaults {
     fromJSON(json: CameraSettingsDefaultsJSON): CameraSettings;
+}
+interface LaserlineViewfinderDefault {
+    width: string;
+    enabledColor: string;
+    disabledColor: string;
+    style: string;
+}
+interface RectangularViewfinderDefault {
+    size: string;
+    color: string;
+    style: string;
+    lineStyle: string;
+    dimming: number;
+    animation: string;
 }
 export interface DefaultsJSON {
     Camera: {
@@ -73,15 +93,19 @@ export interface DefaultsJSON {
         logoOffset: string;
         focusGesture: string;
         zoomGesture: string;
+        logoStyle: string;
     };
     LaserlineViewfinder: {
-        width: string;
-        enabledColor: string;
-        disabledColor: string;
+        defaultStyle: string;
+        styles: {
+            [key: string]: LaserlineViewfinderDefault;
+        };
     };
     RectangularViewfinder: {
-        size: string;
-        color: string;
+        defaultStyle: string;
+        styles: {
+            [key: string]: RectangularViewfinderDefault;
+        };
     };
     SpotlightViewfinder: {
         size: string;
@@ -101,3 +125,4 @@ export interface DefaultsJSON {
     deviceID: string | null;
 }
 export declare const defaultsFromJSON: (json: DefaultsJSON) => Defaults;
+export {};
