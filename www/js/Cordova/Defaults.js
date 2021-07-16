@@ -14,8 +14,9 @@ exports.defaultsFromJSON = (json) => {
                 focusGestureStrategy: json.Camera.Settings.focusGestureStrategy,
                 shouldPreferSmoothAutoFocus: json.Camera.Settings.shouldPreferSmoothAutoFocus,
             },
-            defaultPosition: (json.Camera.defaultPosition || null),
+            defaultPosition: json.Camera.defaultPosition || null,
             availablePositions: json.Camera.availablePositions,
+            defaultSparkCaptureCameraPosition: json.Camera.defaultSparkCaptureCameraPosition || null,
         },
         DataCaptureView: {
             scanAreaMargins: Common_1.MarginsWithUnit

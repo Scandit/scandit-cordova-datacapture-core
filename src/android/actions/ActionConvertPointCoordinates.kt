@@ -7,14 +7,12 @@
 package com.scandit.datacapture.cordova.core.actions
 
 import com.scandit.datacapture.cordova.core.data.SerializablePoint
-import com.scandit.datacapture.cordova.core.testing.OpenForTesting
 import com.scandit.datacapture.cordova.core.utils.dpFromPx
 import com.scandit.datacapture.core.common.geometry.Point
 import com.scandit.datacapture.core.ui.DataCaptureView
 import org.apache.cordova.CallbackContext
 import org.json.JSONArray
 
-@OpenForTesting
 class ActionConvertPointCoordinates(
     private val dataCaptureView: DataCaptureView?,
     private val listener: ResultListener

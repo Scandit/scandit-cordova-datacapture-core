@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <plugin id="scandit-cordova-datacapture-core"
-        version="6.8.1"
+        version="6.9.0-beta.1"
         xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -100,11 +100,11 @@
 
         <source-file src="src/ios/SDCVolumeButtonObserver.h" />
 
-        <framework src="ScanditCaptureCore" spec="= 6.8.1" type="podspec" />
+        <framework src="ScanditCaptureCore" spec="= 6.9.0-beta.1" type="podspec" />
     </platform>
 
     <!-- Android -->
-    <platform name="android" kotlin="1.3.40">
+    <platform name="android" kotlin="1.4.10">
 
         <config-file parent="/*" target="config.xml">
             <feature name="ScanditCaptureCore">
@@ -260,14 +260,11 @@
         <!-- Utils -->
         <source-file src="src/android/utils/Extensions.kt"
             target-dir="kotlin/com/scandit/datacapture/cordova/core/utils" />
-        <!-- Tests -->
-        <source-file src="src/android/testing/TestAnnotations.kt"
-            target-dir="kotlin/com/scandit/datacapture/cordova/core/testing" />
 
         <framework custom="true" src="src/android/build.gradle" type="gradleReference" />
-        <framework src="com.squareup.okhttp3:okhttp:3.12.10" />
+        <framework src="com.squareup.okhttp3:okhttp:4.9.0" />
 
-        <framework src="com.scandit.datacapture:core:6.8.1" />
+        <framework src="com.scandit.datacapture:core:6.9.0-beta.1" />
 
 
         <!-- Add Kotlin support -->
@@ -276,7 +273,6 @@
         <apply-plugin>kotlin-android</apply-plugin>
         <apply-plugin>kotlin-android-extensions</apply-plugin>
         <apply-plugin>kotlin-kapt</apply-plugin>
-        <apply-plugin>kotlin-allopen</apply-plugin>
         <apply-plugin>jacoco</apply-plugin>
 
     </platform>

@@ -6,10 +6,8 @@
 
 package com.scandit.datacapture.cordova.core.handlers
 
-import com.scandit.datacapture.cordova.core.testing.OpenForTesting
 import com.scandit.datacapture.core.component.DataCaptureComponent
 
-@OpenForTesting
 class DataCaptureComponentsHandler {
 
     val dataCaptureComponents: List<DataCaptureComponent>

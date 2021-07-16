@@ -7,12 +7,10 @@
 package com.scandit.datacapture.cordova.core.data.defaults
 
 import com.scandit.datacapture.cordova.core.data.SerializableData
-import com.scandit.datacapture.cordova.core.testing.OpenForTesting
 import com.scandit.datacapture.cordova.core.utils.hexString
 import com.scandit.datacapture.core.ui.style.Brush
 import org.json.JSONObject
 
-@OpenForTesting
 data class SerializableBrushDefaults(
     private val fillColor: String?,
     private val strokeColor: String?,

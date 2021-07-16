@@ -13,7 +13,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import com.scandit.datacapture.cordova.core.data.ResizeAndMoveInfo
-import com.scandit.datacapture.cordova.core.testing.OpenForTesting
 import com.scandit.datacapture.cordova.core.utils.pxFromDp
 import com.scandit.datacapture.cordova.core.utils.removeFromParent
 import com.scandit.datacapture.cordova.core.workers.Worker
@@ -21,7 +20,6 @@ import com.scandit.datacapture.core.ui.DataCaptureView
 import com.scandit.datacapture.core.ui.DataCaptureViewListener
 import java.lang.ref.WeakReference
 
-@OpenForTesting
 class DataCaptureViewHandler(
     private val viewListener: DataCaptureViewListener,
     private val uiWorker: Worker

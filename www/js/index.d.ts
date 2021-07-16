@@ -14,6 +14,7 @@ interface PrivateCamera {
 }
 export class Camera implements FrameSource {
     private type;
+    private cameraType;
     private settings;
     private position;
     private _desiredTorchState;
@@ -23,6 +24,7 @@ export class Camera implements FrameSource {
     private _proxy;
     private readonly proxy;
     static readonly default: Camera | null;
+    static readonly sparkCapture: Camera | null;
     static atPosition(cameraPosition: CameraPosition): Camera | null;
     readonly desiredState: FrameSourceState;
     readonly isTorchAvailable: boolean;
@@ -489,6 +491,9 @@ export class DataCaptureView {
     private htmlElement;
     private _htmlElementState;
     private htmlElementState;
+    private scrollListener;
+    private domObserver;
+    private orientationChangeListener;
     /**
      * The current context as a PrivateDataCaptureContext
      */
@@ -496,6 +501,7 @@ export class DataCaptureView {
     static forContext(context: DataCaptureContext | null): DataCaptureView;
     constructor();
     connectToElement(element: HTMLElement): void;
+    detachFromElement(): void;
     setFrame(frame: Rect, isUnderContent?: boolean): Promise<void>;
     show(): Promise<void>;
     hide(): Promise<void>;
@@ -510,6 +516,7 @@ export class DataCaptureView {
     private controlUpdated;
     private initialize;
     private subscribeToChangesOnHTMLElement;
+    private unsubscribeFromChangesOnHTMLElement;
     private elementDidChange;
     private updatePositionAndSize;
     private _show;
@@ -549,19 +556,40 @@ export enum LogoStyle {
 
 export interface LocationSelection {
 }
+class PrivateLocationSelection {
+    static fromJSON(json: {
+        type: string;
+    }): LocationSelection;
+}
 export const NoneLocationSelection: {
     type: string;
 };
+interface RadiusLocationSelectionJSON {
+    type: string;
+    radius: NumberWithUnitJSON;
+}
+interface PrivateRadiusLocationSelection {
+    fromJSON(json: RadiusLocationSelectionJSON): RadiusLocationSelection;
+}
 export class RadiusLocationSelection implements LocationSelection {
     private type;
     private _radius;
     readonly radius: NumberWithUnit;
+    private static fromJSON;
     constructor(radius: NumberWithUnit);
+}
+interface RectangularLocationSelectionJSON {
+    type: string;
+    size: SizeWithUnitAndAspectJSON;
+}
+interface PrivateRectangularLocationSelection {
+    fromJSON(json: RectangularLocationSelectionJSON): RectangularLocationSelection;
 }
 export class RectangularLocationSelection implements LocationSelection {
     private type;
     private _sizeWithUnitAndAspect;
     readonly sizeWithUnitAndAspect: SizeWithUnitAndAspect;
+    private static fromJSON;
     static withSize(size: SizeWithUnit): RectangularLocationSelection;
     static withWidthAndAspectRatio(width: NumberWithUnit, heightToWidthAspectRatio: number): RectangularLocationSelection;
     static withHeightAndAspectRatio(height: NumberWithUnit, widthToHeightAspectRatio: number): RectangularLocationSelection;
@@ -673,17 +701,39 @@ export class RectangularViewfinderAnimation {
 }
 
 
+export interface VibrationJSON {
+    type: string;
+}
+interface PrivateVibration {
+    fromJSON(json: VibrationJSON): Vibration;
+}
 export class Vibration {
     private type;
     static readonly defaultVibration: Vibration;
     static readonly selectionHapticFeedback: Vibration;
     static readonly successHapticFeedback: Vibration;
+    static readonly impactHapticFeedback: Vibration;
+    private static fromJSON;
     private constructor();
+}
+export interface SoundJSON {
+    resource: string | null;
+}
+interface PrivateSound {
+    fromJSON(json: SoundJSON): Sound;
 }
 export class Sound {
     resource: string | null;
     static readonly defaultSound: Sound;
-    constructor(resource: string | null);
+    private static fromJSON;
+    constructor(resource: Optional<string>);
+}
+export interface FeedbackJSON {
+    vibration: VibrationJSON | null;
+    sound: SoundJSON | null;
+}
+interface PrivateFeedback {
+    fromJSON(json: FeedbackJSON): Feedback;
 }
 export class Feedback {
     static readonly defaultFeedback: Feedback;
@@ -692,7 +742,8 @@ export class Feedback {
     private proxy;
     readonly vibration: Vibration | null;
     readonly sound: Sound | null;
-    constructor(vibration: Vibration | null, sound: Sound | null);
+    private static fromJSON;
+    constructor(vibration: Optional<Vibration>, sound: Optional<Sound>);
     emit(): void;
     private initialize;
 }

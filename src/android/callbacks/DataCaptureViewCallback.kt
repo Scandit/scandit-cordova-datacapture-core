@@ -9,14 +9,12 @@ package com.scandit.datacapture.cordova.core.callbacks
 import com.scandit.datacapture.cordova.core.data.SerializableViewState
 import com.scandit.datacapture.cordova.core.factories.CaptureCoreActionFactory
 import com.scandit.datacapture.cordova.core.handlers.ActionsHandler
-import com.scandit.datacapture.cordova.core.testing.OpenForTesting
 import com.scandit.datacapture.cordova.core.workers.Worker
 import com.scandit.datacapture.core.ui.orientation.DeviceOrientationMapper
 import com.scandit.datacapture.core.ui.orientation.toJson
 import org.apache.cordova.CallbackContext
 import org.json.JSONArray
 
-@OpenForTesting
 class DataCaptureViewCallback(
     private val actionsHandler: ActionsHandler,
     callbackContext: CallbackContext,

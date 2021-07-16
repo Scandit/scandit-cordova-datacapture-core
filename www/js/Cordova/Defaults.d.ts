@@ -16,6 +16,7 @@ export interface Defaults {
         Settings: CameraSettingsDefaults;
         defaultPosition: CameraPosition | null;
         availablePositions: CameraPosition[];
+        defaultSparkCaptureCameraPosition: CameraPosition | null;
     };
     DataCaptureView: {
         scanAreaMargins: MarginsWithUnit;
@@ -85,6 +86,7 @@ export interface DefaultsJSON {
         Settings: CameraSettingsDefaultsJSON;
         defaultPosition: string | null;
         availablePositions: string[];
+        defaultSparkCaptureCameraPosition: string | null | undefined;
     };
     DataCaptureView: {
         scanAreaMargins: string;

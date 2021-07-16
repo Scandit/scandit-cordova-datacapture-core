@@ -27,6 +27,10 @@ struct ListenerEvent {
         case offsetForTrackedBarcode = "offsetForTrackedBarcode"
         case didTapViewForTrackedBarcode = "didTapViewForTrackedBarcode"
 
+        // Spark Capture Listener
+        case didScanInSparkCapture = "didScanInSparkCapture"
+        case didUpdateSessionInSparkCapture = "didUpdateSessionInSparkCapture"
+
         // Text Capture Listener
         case didCaptureInTextCapture = "didCaptureInTextCapture"
 

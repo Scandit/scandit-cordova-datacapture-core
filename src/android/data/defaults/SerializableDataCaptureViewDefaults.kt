@@ -7,13 +7,11 @@
 package com.scandit.datacapture.cordova.core.data.defaults
 
 import com.scandit.datacapture.cordova.core.data.SerializableData
-import com.scandit.datacapture.cordova.core.testing.OpenForTesting
 import com.scandit.datacapture.core.common.geometry.toJson
 import com.scandit.datacapture.core.ui.DataCaptureView
 import com.scandit.datacapture.core.ui.serialization.toJson
 import org.json.JSONObject
 
-@OpenForTesting
 data class SerializableDataCaptureViewDefaults(
     private val scanAreaMargins: String,
     private val pointOfInterest: String,

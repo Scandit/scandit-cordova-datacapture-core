@@ -15,6 +15,7 @@ var VibrationType;
     VibrationType["default"] = "default";
     VibrationType["selectionHaptic"] = "selectionHaptic";
     VibrationType["successHaptic"] = "successHaptic";
+    VibrationType["impactHaptic"] = "impactHaptic";
 })(VibrationType || (VibrationType = {}));
 class Vibration extends Serializeable_1.DefaultSerializeable {
     constructor(type) {
@@ -30,6 +31,12 @@ class Vibration extends Serializeable_1.DefaultSerializeable {
     static get successHapticFeedback() {
         return new Vibration(VibrationType.successHaptic);
     }
+    static get impactHapticFeedback() {
+        return new Vibration(VibrationType.impactHaptic);
+    }
+    static fromJSON(json) {
+        return new Vibration(json.type);
+    }
 }
 exports.Vibration = Vibration;
 class Sound extends Serializeable_1.DefaultSerializeable {
@@ -40,6 +47,9 @@ class Sound extends Serializeable_1.DefaultSerializeable {
     }
     static get defaultSound() {
         return new Sound(null);
+    }
+    static fromJSON(json) {
+        return new Sound(json.resource);
     }
 }
 __decorate([
@@ -63,6 +73,9 @@ class Feedback extends Serializeable_1.DefaultSerializeable {
     }
     get sound() {
         return this._sound;
+    }
+    static fromJSON(json) {
+        return new Feedback(json.vibration ? Vibration.fromJSON(json.vibration) : null, json.sound ? Sound.fromJSON(json.sound) : null);
     }
     emit() {
         if (!this.proxy) {

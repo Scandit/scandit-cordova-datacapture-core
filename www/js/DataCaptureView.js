@@ -100,6 +100,15 @@ class DataCaptureView extends Serializeable_1.DefaultSerializeable {
         this.listeners = [];
         this.htmlElement = null;
         this._htmlElementState = new HTMLElementState();
+        this.scrollListener = this.elementDidChange.bind(this);
+        this.domObserver = new MutationObserver(this.elementDidChange.bind(this));
+        this.orientationChangeListener = (() => {
+            this.elementDidChange();
+            // SDC-1784 -> workaround because at the moment of this callback the element doesn't have the updated size.
+            setTimeout(this.elementDidChange.bind(this), 100);
+            setTimeout(this.elementDidChange.bind(this), 300);
+            setTimeout(this.elementDidChange.bind(this), 1000);
+        });
     }
     get context() {
         return this._context;
@@ -152,6 +161,11 @@ class DataCaptureView extends Serializeable_1.DefaultSerializeable {
         // Initial update
         this.elementDidChange();
         this.subscribeToChangesOnHTMLElement();
+    }
+    detachFromElement() {
+        this.unsubscribeFromChangesOnHTMLElement();
+        this.htmlElement = null;
+        this.elementDidChange();
     }
     setFrame(frame, isUnderContent = false) {
         return this.viewProxy.setPositionAndSize(frame.origin.y, frame.origin.x, frame.size.width, frame.size.height, isUnderContent);
@@ -222,19 +236,14 @@ class DataCaptureView extends Serializeable_1.DefaultSerializeable {
         this._viewProxy = DataCaptureViewProxy_1.DataCaptureViewProxy.forDataCaptureView(this);
     }
     subscribeToChangesOnHTMLElement() {
-        // Scroll events
-        window.addEventListener('scroll', this.elementDidChange.bind(this));
-        // DOM changes
-        const observer = new MutationObserver(this.elementDidChange.bind(this));
-        observer.observe(document, { attributes: true, childList: true, subtree: true });
-        // Orientation changes
-        window.addEventListener('orientationchange', () => {
-            this.elementDidChange();
-            // SDC-1784 -> workaround because at the moment of this callback the element doesn't have the updated size.
-            setTimeout(this.elementDidChange.bind(this), 100);
-            setTimeout(this.elementDidChange.bind(this), 300);
-            setTimeout(this.elementDidChange.bind(this), 1000);
-        });
+        this.domObserver.observe(document, { attributes: true, childList: true, subtree: true });
+        window.addEventListener('scroll', this.scrollListener);
+        window.addEventListener('orientationchange', this.orientationChangeListener);
+    }
+    unsubscribeFromChangesOnHTMLElement() {
+        this.domObserver.disconnect();
+        window.removeEventListener('scroll', this.scrollListener);
+        window.removeEventListener('orientationchange', this.orientationChangeListener);
     }
     elementDidChange() {
         if (!this.htmlElement) {
@@ -288,4 +297,13 @@ __decorate([
 __decorate([
     Serializeable_1.ignoreFromSerialization
 ], DataCaptureView.prototype, "_htmlElementState", void 0);
+__decorate([
+    Serializeable_1.ignoreFromSerialization
+], DataCaptureView.prototype, "scrollListener", void 0);
+__decorate([
+    Serializeable_1.ignoreFromSerialization
+], DataCaptureView.prototype, "domObserver", void 0);
+__decorate([
+    Serializeable_1.ignoreFromSerialization
+], DataCaptureView.prototype, "orientationChangeListener", void 0);
 exports.DataCaptureView = DataCaptureView;

@@ -8,7 +8,6 @@ package com.scandit.datacapture.cordova.core.callbacks
 
 import com.scandit.datacapture.cordova.core.factories.CaptureCoreActionFactory
 import com.scandit.datacapture.cordova.core.handlers.ActionsHandler
-import com.scandit.datacapture.cordova.core.testing.OpenForTesting
 import com.scandit.datacapture.core.capture.DataCaptureContext
 import com.scandit.datacapture.core.common.ContextStatus
 import com.scandit.datacapture.core.common.toJson
@@ -16,7 +15,6 @@ import org.apache.cordova.CallbackContext
 import org.json.JSONArray
 import org.json.JSONObject
 
-@OpenForTesting
 class DataCaptureContextCallback(
     private val actionsHandler: ActionsHandler,
     callbackContext: CallbackContext,
@@ -36,7 +34,7 @@ class DataCaptureContextCallback(
         )
     }
 
-    fun onObservationStarted(dataCaptureContext: DataCaptureContext) {
+    fun onObservationStarted(@Suppress("UNUSED_PARAMETER") dataCaptureContext: DataCaptureContext) {
         if (disposed.get()) return
         actionsHandler.addAction(
             CaptureCoreActionFactory.SEND_CONTEXT_OBSERVATION_STARTED_EVENT,

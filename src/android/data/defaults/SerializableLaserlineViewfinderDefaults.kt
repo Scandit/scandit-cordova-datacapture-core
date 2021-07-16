@@ -7,7 +7,6 @@
 package com.scandit.datacapture.cordova.core.data.defaults
 
 import com.scandit.datacapture.cordova.core.data.SerializableData
-import com.scandit.datacapture.cordova.core.testing.OpenForTesting
 import com.scandit.datacapture.cordova.core.utils.hexString
 import com.scandit.datacapture.core.common.geometry.toJson
 import com.scandit.datacapture.core.ui.viewfinder.LaserlineViewfinder
@@ -15,7 +14,6 @@ import com.scandit.datacapture.core.ui.viewfinder.LaserlineViewfinderStyle
 import com.scandit.datacapture.core.ui.viewfinder.serialization.toJson
 import org.json.JSONObject
 
-@OpenForTesting
 class SerializableLaserlineViewfinderDefaults(
     private val viewFinder: LaserlineViewfinder
 ) : SerializableData {

@@ -7,14 +7,12 @@
 package com.scandit.datacapture.cordova.core.data.defaults
 
 import com.scandit.datacapture.cordova.core.data.SerializableData
-import com.scandit.datacapture.cordova.core.testing.OpenForTesting
 import com.scandit.datacapture.cordova.core.utils.hexString
 import com.scandit.datacapture.core.ui.viewfinder.RectangularViewfinder
 import com.scandit.datacapture.core.ui.viewfinder.RectangularViewfinderStyle
 import com.scandit.datacapture.core.ui.viewfinder.serialization.toJson
 import org.json.JSONObject
 
-@OpenForTesting
 class SerializableRectangularViewfinderDefaults(
     private val viewFinder: RectangularViewfinder
 ) : SerializableData {

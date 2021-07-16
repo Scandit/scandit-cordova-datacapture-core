@@ -6,12 +6,10 @@
 
 package com.scandit.datacapture.cordova.core.handlers
 
-import com.scandit.datacapture.cordova.core.testing.OpenForTesting
 import com.scandit.datacapture.core.capture.DataCaptureContext
 import com.scandit.datacapture.core.capture.DataCaptureContextListener
 import com.scandit.datacapture.core.source.Camera
 
-@OpenForTesting
 class DataCaptureContextHandler(
     private val contextListener: DataCaptureContextListener
 ) {
