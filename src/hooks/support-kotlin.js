@@ -8,7 +8,7 @@ const platformAndroid = 'android'
 const tagApplyPlugin = 'apply-plugin'
 
 const kotlinVariablePositionRegex = /buildscript(\s*)\{\s*/g
-const kotlinClasspathPositionRegex = /classpath\s+(['"])[\w.:]+(['"])/g
+const kotlinClasspathPositionRegex = /classpath\s+(['"]).+(['"])/g
 const kotlinPluginPositionRegex = /com.android.application['"]/g
 
 const classpaths = [
