@@ -1,6 +1,6 @@
 {
   "name": "scandit-cordova-datacapture-core",
-  "version": "6.9.2",
+  "version": "6.10.0",
   "description": "Scandit Data Capture SDK for Cordova",
   "license": "Apache-2.0",
   "keywords": [
@@ -25,7 +25,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "typescript": "^3.4.5",
+    "typescript": "^3.7.7",
     "@types/jest": "^24.0.13",
     "cordova-paramedic": "https://github.com/apache/cordova-paramedic.git",
     "jest": "^24.8.0",

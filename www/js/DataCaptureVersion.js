@@ -2,6 +2,7 @@
 /// <amd-module name="scandit-cordova-datacapture-core.DataCaptureVersion"/>
 // ^ needed because Cordova can't resolve "../xx" style dependencies
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.DataCaptureVersion = void 0;
 const CommonCordova_1 = require("scandit-cordova-datacapture-core.CommonCordova");
 class DataCaptureVersion {
     static get pluginVersion() {

@@ -6,6 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Direction = exports.Orientation = exports.Color = exports.MarginsWithUnit = exports.SizeWithUnitAndAspect = exports.SizingMode = exports.SizeWithAspect = exports.Size = exports.SizeWithUnit = exports.RectWithUnit = exports.Rect = exports.PointWithUnit = exports.NumberWithUnit = exports.MeasureUnit = exports.Quadrilateral = exports.Point = void 0;
 /// <amd-module name="scandit-cordova-datacapture-core.Common"/>
 // ^ needed because Cordova can't resolve "../xx" style dependencies
 const Serializeable_1 = require("scandit-cordova-datacapture-core.Serializeable");

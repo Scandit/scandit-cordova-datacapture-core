@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.DataCaptureViewProxy = void 0;
 /// <amd-module name="scandit-cordova-datacapture-core.DataCaptureViewProxy"/>
 // ^ needed because Cordova can't resolve "../xx" style dependencies
 const Common_1 = require("scandit-cordova-datacapture-core.Common");

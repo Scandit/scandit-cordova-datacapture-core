@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.VolumeButtonObserver = void 0;
 /// <amd-module name="scandit-cordova-datacapture-core.VolumeButtonObserver"/>
 // ^ needed because Cordova can't resolve "../xx" style dependencies
 const VolumeButtonObserverProxy_1 = require("scandit-cordova-datacapture-core.VolumeButtonObserverProxy");

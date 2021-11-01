@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.CameraSettings = exports.FocusGestureStrategy = exports.FocusRange = exports.VideoResolution = exports.CameraPosition = exports.TorchState = exports.FrameSourceState = void 0;
 /// <amd-module name="scandit-cordova-datacapture-core.Camera+Related"/>
 // ^ needed because Cordova can't resolve "../xx" style dependencies
 const Cordova_1 = require("scandit-cordova-datacapture-core.Cordova");

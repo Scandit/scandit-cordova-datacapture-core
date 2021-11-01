@@ -6,6 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.DataCaptureContext = exports.DataCaptureContextSettings = void 0;
 const Cordova_1 = require("scandit-cordova-datacapture-core.Cordova");
 const DataCaptureContextProxy_1 = require("scandit-cordova-datacapture-core.DataCaptureContextProxy");
 const Serializeable_1 = require("scandit-cordova-datacapture-core.Serializeable");

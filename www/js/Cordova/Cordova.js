@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Cordova = exports.CordovaFunction = void 0;
 /// <amd-module name="scandit-cordova-datacapture-core.Cordova"/>
 // ^ needed because Cordova can't resolve "../xx" style dependencies
 const CommonCordova_1 = require("scandit-cordova-datacapture-core.CommonCordova");

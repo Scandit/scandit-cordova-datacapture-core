@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ContextStatus = void 0;
 class ContextStatus {
     static fromJSON(json) {
         const status = new ContextStatus();

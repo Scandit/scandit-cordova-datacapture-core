@@ -27,6 +27,10 @@ struct ListenerEvent {
         case offsetForTrackedBarcode = "offsetForTrackedBarcode"
         case didTapViewForTrackedBarcode = "didTapViewForTrackedBarcode"
 
+        // Barcode Tracking listener
+        case didUpdateSelectionInBarcodeSelection = "didUpdateSelectionInBarcodeSelection"
+        case didUpdateSessionInBarcodeSelection = "didUpdateSessionInBarcodeSelection"
+
         // Spark Capture Listener
         case didScanInSparkCapture = "didScanInSparkCapture"
         case didUpdateSessionInSparkCapture = "didUpdateSessionInSparkCapture"
@@ -85,6 +89,9 @@ struct CommandError {
         case couldNotParseRawString = 10063
 
         case noOverlay = 10071
+        case noBarcodeSelection = 10072
+        case noBarcodeSelectionSession = 10073
+        case noBarcodeSelectionOverlay = 10074
     }
 
     public static let invalidJSON = CommandError(code: .invalidJSON,
@@ -141,6 +148,21 @@ struct CommandError {
     public static let noOverlay = CommandError(code: .noOverlay,
                                                message: "There was no overlay to execute the command on")
 
+    public static let noBarcodeSelection = CommandError(code: .noBarcodeSelection,
+                                               message: """
+                                                There was no BarcodeSelection mode to execute the command on
+                                                """)
+
+    public static let noBarcodeSelectionSession = CommandError(code: .noBarcodeSelectionSession,
+                                               message: """
+                                                There was no BarcodeSelection session to execute the command on
+                                                """)
+
+    public static let noBarcodeSelectionOverlay = CommandError(code: .noBarcodeSelectionOverlay,
+                                               message: """
+                                                There was no BarcodeSelection overlay to execute the command on
+                                                """)
+
     public let code: Code
     public let message: String
 
@@ -181,6 +203,11 @@ extension CDVPluginResult {
 
     /// Success result with some additional information.
     static func success(message: Bool) -> CDVPluginResult {
+        return CDVPluginResult(status: CDVCommandStatus_OK, messageAs: message)
+    }
+
+    /// Success result with some additional information.
+    static func success(message: Int) -> CDVPluginResult {
         return CDVPluginResult(status: CDVCommandStatus_OK, messageAs: message)
     }
 

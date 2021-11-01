@@ -22,13 +22,14 @@ export class Camera implements FrameSource {
     private listeners;
     private context;
     private _proxy;
-    private readonly proxy;
-    static readonly default: Camera | null;
-    static readonly sparkCapture: Camera | null;
+    private get proxy();
+    static get default(): Camera | null;
+    static get sparkCapture(): Camera | null;
     static atPosition(cameraPosition: CameraPosition): Camera | null;
-    readonly desiredState: FrameSourceState;
-    readonly isTorchAvailable: boolean;
-    desiredTorchState: TorchState;
+    get desiredState(): FrameSourceState;
+    get isTorchAvailable(): boolean;
+    set desiredTorchState(desiredTorchState: TorchState);
+    get desiredTorchState(): TorchState;
     switchToDesiredState(state: FrameSourceState): Promise<void>;
     getCurrentState(): Promise<FrameSourceState>;
     getIsTorchAvailable(): Promise<boolean>;
@@ -106,10 +107,14 @@ export class CameraSettings {
     zoomGestureZoomFactor: number;
     private api;
     private focus;
-    focusRange: FocusRange;
-    focusGestureStrategy: FocusGestureStrategy;
-    shouldPreferSmoothAutoFocus: boolean;
-    maxFrameRate: number;
+    get focusRange(): FocusRange;
+    set focusRange(newRange: FocusRange);
+    get focusGestureStrategy(): FocusGestureStrategy;
+    set focusGestureStrategy(newStrategy: FocusGestureStrategy);
+    get shouldPreferSmoothAutoFocus(): boolean;
+    set shouldPreferSmoothAutoFocus(newShouldPreferSmoothAutoFocus: boolean);
+    get maxFrameRate(): number;
+    set maxFrameRate(newValue: number);
     private static fromJSON;
     constructor();
     constructor(settings: CameraSettings);
@@ -128,8 +133,8 @@ interface PrivatePoint {
 export class Point {
     private _x;
     private _y;
-    readonly x: number;
-    readonly y: number;
+    get x(): number;
+    get y(): number;
     private static fromJSON;
     constructor(x: number, y: number);
 }
@@ -147,10 +152,10 @@ export class Quadrilateral {
     private _topRight;
     private _bottomRight;
     private _bottomLeft;
-    readonly topLeft: Point;
-    readonly topRight: Point;
-    readonly bottomRight: Point;
-    readonly bottomLeft: Point;
+    get topLeft(): Point;
+    get topRight(): Point;
+    get bottomRight(): Point;
+    get bottomLeft(): Point;
     private static fromJSON;
     constructor(topLeft: Point, topRight: Point, bottomRight: Point, bottomLeft: Point);
 }
@@ -169,8 +174,8 @@ interface PrivateNumberWithUnit {
 export class NumberWithUnit {
     private _value;
     private _unit;
-    readonly value: number;
-    readonly unit: MeasureUnit;
+    get value(): number;
+    get unit(): MeasureUnit;
     private static fromJSON;
     constructor(value: number, unit: MeasureUnit);
 }
@@ -185,31 +190,31 @@ interface PrivatePointWithUnit {
 export class PointWithUnit {
     private _x;
     private _y;
-    readonly x: NumberWithUnit;
-    readonly y: NumberWithUnit;
+    get x(): NumberWithUnit;
+    get y(): NumberWithUnit;
     private static fromJSON;
-    private static readonly zero;
+    private static get zero();
     constructor(x: NumberWithUnit, y: NumberWithUnit);
 }
 export class Rect {
     private _origin;
     private _size;
-    readonly origin: Point;
-    readonly size: Size;
+    get origin(): Point;
+    get size(): Size;
     constructor(origin: Point, size: Size);
 }
 export class RectWithUnit {
     private _origin;
     private _size;
-    readonly origin: PointWithUnit;
-    readonly size: SizeWithUnit;
+    get origin(): PointWithUnit;
+    get size(): SizeWithUnit;
     constructor(origin: PointWithUnit, size: SizeWithUnit);
 }
 export class SizeWithUnit {
     private _width;
     private _height;
-    readonly width: NumberWithUnit;
-    readonly height: NumberWithUnit;
+    get width(): NumberWithUnit;
+    get height(): NumberWithUnit;
     constructor(width: NumberWithUnit, height: NumberWithUnit);
 }
 export interface SizeJSON {
@@ -219,16 +224,16 @@ export interface SizeJSON {
 export class Size {
     private _width;
     private _height;
-    readonly width: number;
-    readonly height: number;
+    get width(): number;
+    get height(): number;
     private static fromJSON;
     constructor(width: number, height: number);
 }
 export class SizeWithAspect {
     private _size;
     private _aspect;
-    readonly size: NumberWithUnit;
-    readonly aspect: number;
+    get size(): NumberWithUnit;
+    get aspect(): number;
     constructor(size: NumberWithUnit, aspect: number);
 }
 export enum SizingMode {
@@ -251,11 +256,11 @@ export class SizeWithUnitAndAspect {
     private _widthAndAspectRatio;
     private _heightAndAspectRatio;
     private _shorterDimensionAndAspectRatio;
-    readonly widthAndHeight: SizeWithUnit | null;
-    readonly widthAndAspectRatio: SizeWithAspect | null;
-    readonly heightAndAspectRatio: SizeWithAspect | null;
-    readonly shorterDimensionAndAspectRatio: SizeWithAspect | null;
-    readonly sizingMode: SizingMode;
+    get widthAndHeight(): SizeWithUnit | null;
+    get widthAndAspectRatio(): SizeWithAspect | null;
+    get heightAndAspectRatio(): SizeWithAspect | null;
+    get shorterDimensionAndAspectRatio(): SizeWithAspect | null;
+    get sizingMode(): SizingMode;
     private static sizeWithWidthAndHeight;
     private static sizeWithWidthAndAspectRatio;
     private static sizeWithHeightAndAspectRatio;
@@ -278,12 +283,12 @@ export class MarginsWithUnit {
     private _right;
     private _top;
     private _bottom;
-    readonly left: NumberWithUnit;
-    readonly right: NumberWithUnit;
-    readonly top: NumberWithUnit;
-    readonly bottom: NumberWithUnit;
+    get left(): NumberWithUnit;
+    get right(): NumberWithUnit;
+    get top(): NumberWithUnit;
+    get bottom(): NumberWithUnit;
     private static fromJSON;
-    private static readonly zero;
+    private static get zero();
     constructor(left: NumberWithUnit, right: NumberWithUnit, top: NumberWithUnit, bottom: NumberWithUnit);
 } type ColorJSON = string;
 interface PrivateColor {
@@ -291,14 +296,14 @@ interface PrivateColor {
 }
 export class Color {
     private hexadecimalString;
-    readonly redComponent: string;
-    readonly greenComponent: string;
-    readonly blueComponent: string;
-    readonly alphaComponent: string;
-    readonly red: number;
-    readonly green: number;
-    readonly blue: number;
-    readonly alpha: number;
+    get redComponent(): string;
+    get greenComponent(): string;
+    get blueComponent(): string;
+    get alphaComponent(): string;
+    get red(): number;
+    get green(): number;
+    get blue(): number;
+    get alpha(): number;
     static fromHex(hex: string): Color;
     static fromRGBA(red: number, green: number, blue: number, alpha?: number): Color;
     private static hexToNumber;
@@ -369,9 +374,9 @@ export class DataCaptureContext {
     private components;
     private proxy;
     private listeners;
-    readonly frameSource: FrameSource | null;
-    static readonly deviceID: string | null;
-    readonly deviceID: string | null;
+    get frameSource(): FrameSource | null;
+    static get deviceID(): string | null;
+    get deviceID(): string | null;
     static forLicenseKey(licenseKey: string): DataCaptureContext;
     static forLicenseKeyWithSettings(licenseKey: string, settings: DataCaptureContextSettings | null): DataCaptureContext;
     static forLicenseKeyWithOptions(licenseKey: string, options: DataCaptureContextCreationOptions | null): DataCaptureContext;
@@ -407,9 +412,9 @@ export class ContextStatus {
     private _code;
     private _isValid;
     private static fromJSON;
-    readonly message: string;
-    readonly code: number;
-    readonly isValid: boolean;
+    get message(): string;
+    get code(): number;
+    get isValid(): boolean;
 }
 
 
@@ -421,10 +426,27 @@ export class TorchSwitchControl implements Control {
     private type;
     private icon;
     private view;
-    torchOffImage: string | null;
-    torchOffPressedImage: string | null;
-    torchOnImage: string | null;
-    torchOnPressedImage: string | null;
+    get torchOffImage(): string | null;
+    set torchOffImage(torchOffImage: string | null);
+    get torchOffPressedImage(): string | null;
+    set torchOffPressedImage(torchOffPressedImage: string | null);
+    get torchOnImage(): string | null;
+    set torchOnImage(torchOnImage: string | null);
+    get torchOnPressedImage(): string | null;
+    set torchOnPressedImage(torchOnPressedImage: string | null);
+}
+export class ZoomSwitchControl implements Control {
+    private type;
+    private icon;
+    private view;
+    get zoomedOutImage(): string | null;
+    set zoomedOutImage(zoomedOutImage: string | null);
+    get zoomedInImage(): string | null;
+    set zoomedInImage(zoomedInImage: string | null);
+    get zoomedInPressedImage(): string | null;
+    set zoomedInPressedImage(zoomedInPressedImage: string | null);
+    get zoomedOutPressedImage(): string | null;
+    set zoomedOutPressedImage(zoomedOutPressedImage: string | null);
 }
 export interface DataCaptureViewListener {
     didChangeSize?(view: DataCaptureView, size: Size, orientation: Orientation): void;
@@ -451,7 +473,7 @@ export class HTMLElementState {
         height: number;
     } | null;
     shouldBeUnderContent: boolean;
-    readonly isValid: boolean;
+    get isValid(): boolean;
     didChangeComparedTo(other: HTMLElementState): boolean;
 }
 interface PrivateDataCaptureView {
@@ -475,7 +497,8 @@ interface PrivateDataCaptureView {
 }
 export class DataCaptureView {
     private _context;
-    context: DataCaptureContext | null;
+    get context(): DataCaptureContext | null;
+    set context(context: DataCaptureContext | null);
     scanAreaMargins: MarginsWithUnit;
     pointOfInterest: PointWithUnit;
     logoAnchor: Anchor;
@@ -486,18 +509,19 @@ export class DataCaptureView {
     private overlays;
     private controls;
     private _viewProxy;
-    private readonly viewProxy;
+    private get viewProxy();
     private listeners;
     private htmlElement;
     private _htmlElementState;
-    private htmlElementState;
+    private set htmlElementState(value);
+    private get htmlElementState();
     private scrollListener;
     private domObserver;
     private orientationChangeListener;
     /**
      * The current context as a PrivateDataCaptureContext
      */
-    private readonly privateContext;
+    private get privateContext();
     static forContext(context: DataCaptureContext | null): DataCaptureView;
     constructor();
     connectToElement(element: HTMLElement): void;
@@ -574,7 +598,7 @@ interface PrivateRadiusLocationSelection {
 export class RadiusLocationSelection implements LocationSelection {
     private type;
     private _radius;
-    readonly radius: NumberWithUnit;
+    get radius(): NumberWithUnit;
     private static fromJSON;
     constructor(radius: NumberWithUnit);
 }
@@ -588,7 +612,7 @@ interface PrivateRectangularLocationSelection {
 export class RectangularLocationSelection implements LocationSelection {
     private type;
     private _sizeWithUnitAndAspect;
-    readonly sizeWithUnitAndAspect: SizeWithUnitAndAspect;
+    get sizeWithUnitAndAspect(): SizeWithUnitAndAspect;
     private static fromJSON;
     static withSize(size: SizeWithUnit): RectangularLocationSelection;
     static withWidthAndAspectRatio(width: NumberWithUnit, heightToWidthAspectRatio: number): RectangularLocationSelection;
@@ -611,10 +635,10 @@ export interface BrushJSON {
 export class Brush {
     private fill;
     private stroke;
-    static readonly transparent: Brush;
-    readonly fillColor: Color;
-    readonly strokeColor: Color;
-    readonly strokeWidth: number;
+    static get transparent(): Brush;
+    get fillColor(): Color;
+    get strokeColor(): Color;
+    get strokeWidth(): number;
     constructor();
     constructor(fillColor: Color, strokeColor: Color, strokeWidth: number);
 }
@@ -631,7 +655,7 @@ export class LaserlineViewfinder implements Viewfinder {
     disabledColor: Color;
     constructor();
     constructor(style: LaserlineViewfinderStyle);
-    readonly style: LaserlineViewfinderStyle;
+    get style(): LaserlineViewfinderStyle;
 }
 export class RectangularViewfinder implements Viewfinder {
     private type;
@@ -641,14 +665,16 @@ export class RectangularViewfinder implements Viewfinder {
     private _animation;
     private _sizeWithUnitAndAspect;
     color: Color;
-    readonly sizeWithUnitAndAspect: SizeWithUnitAndAspect;
+    get sizeWithUnitAndAspect(): SizeWithUnitAndAspect;
     constructor();
     constructor(style: RectangularViewfinderStyle);
     constructor(style: RectangularViewfinderStyle, lineStyle: RectangularViewfinderLineStyle);
-    readonly style: RectangularViewfinderStyle;
-    readonly lineStyle: RectangularViewfinderLineStyle;
-    dimming: number;
-    animation: RectangularViewfinderAnimation | null;
+    get style(): RectangularViewfinderStyle;
+    get lineStyle(): RectangularViewfinderLineStyle;
+    get dimming(): number;
+    set dimming(value: number);
+    get animation(): RectangularViewfinderAnimation | null;
+    set animation(animation: RectangularViewfinderAnimation | null);
     setSize(size: SizeWithUnit): void;
     setWidthAndAspectRatio(width: NumberWithUnit, heightToWidthAspectRatio: number): void;
     setHeightAndAspectRatio(height: NumberWithUnit, widthToHeightAspectRatio: number): void;
@@ -660,7 +686,7 @@ export class SpotlightViewfinder implements Viewfinder {
     enabledBorderColor: Color;
     disabledBorderColor: Color;
     backgroundColor: Color;
-    readonly sizeWithUnitAndAspect: SizeWithUnitAndAspect;
+    get sizeWithUnitAndAspect(): SizeWithUnitAndAspect;
     constructor();
     setSize(size: SizeWithUnit): void;
     setWidthAndAspectRatio(width: NumberWithUnit, heightToWidthAspectRatio: number): void;
@@ -696,7 +722,7 @@ interface PrivateRectangularViewfinderAnimation {
 export class RectangularViewfinderAnimation {
     private readonly _isLooping;
     private static fromJSON;
-    readonly isLooping: boolean;
+    get isLooping(): boolean;
     constructor(isLooping: boolean);
 }
 
@@ -709,10 +735,10 @@ interface PrivateVibration {
 }
 export class Vibration {
     private type;
-    static readonly defaultVibration: Vibration;
-    static readonly selectionHapticFeedback: Vibration;
-    static readonly successHapticFeedback: Vibration;
-    static readonly impactHapticFeedback: Vibration;
+    static get defaultVibration(): Vibration;
+    static get selectionHapticFeedback(): Vibration;
+    static get successHapticFeedback(): Vibration;
+    static get impactHapticFeedback(): Vibration;
     private static fromJSON;
     private constructor();
 }
@@ -724,7 +750,7 @@ interface PrivateSound {
 }
 export class Sound {
     resource: string | null;
-    static readonly defaultSound: Sound;
+    static get defaultSound(): Sound;
     private static fromJSON;
     constructor(resource: Optional<string>);
 }
@@ -736,12 +762,12 @@ interface PrivateFeedback {
     fromJSON(json: FeedbackJSON): Feedback;
 }
 export class Feedback {
-    static readonly defaultFeedback: Feedback;
+    static get defaultFeedback(): Feedback;
     private _vibration;
     private _sound;
     private proxy;
-    readonly vibration: Vibration | null;
-    readonly sound: Sound | null;
+    get vibration(): Vibration | null;
+    get sound(): Sound | null;
     private static fromJSON;
     constructor(vibration: Optional<Vibration>, sound: Optional<Sound>);
     emit(): void;
@@ -750,7 +776,7 @@ export class Feedback {
 
 
 export class DataCaptureVersion {
-    static readonly pluginVersion: string;
+    static get pluginVersion(): string;
 }
 
 

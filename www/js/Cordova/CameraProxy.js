@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.CameraProxy = void 0;
 const Cordova_1 = require("scandit-cordova-datacapture-core.Cordova");
 var FrameSourceListenerEvent;
 (function (FrameSourceListenerEvent) {

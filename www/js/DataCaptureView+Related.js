@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.LogoStyle = exports.SwipeToZoom = exports.PrivateZoomGestureDeserializer = exports.TapToFocus = exports.PrivateFocusGestureDeserializer = void 0;
 /// <amd-module name="scandit-cordova-datacapture-core.DataCaptureView+Related"/>
 // ^ needed because Cordova can't resolve "../xx" style dependencies
 const Serializeable_1 = require("scandit-cordova-datacapture-core.Serializeable");

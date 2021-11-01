@@ -31,6 +31,16 @@ data class SerializableBrushDefaults(
             )
     )
 
+    fun toJSONObject(): JSONObject {
+        val data = JSONObject()
+
+        data.put(FIELD_FILL_COLOR, fillColor)
+        data.put(FIELD_STROKE_COLOR, strokeColor)
+        data.put(FIELD_STROKE_WIDTH, strokeWidth?.toDouble() ?: 0.0)
+
+        return data
+    }
+
     companion object {
         private const val FIELD_FILL_COLOR = "fillColor"
         private const val FIELD_STROKE_COLOR = "strokeColor"

@@ -6,6 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.AimerViewfinder = exports.SpotlightViewfinder = exports.RectangularViewfinder = exports.LaserlineViewfinder = exports.NoViewfinder = exports.Brush = void 0;
 /// <amd-module name="scandit-cordova-datacapture-core.Viewfinder"/>
 // ^ needed because Cordova can't resolve "../xx" style dependencies
 const Common_1 = require("scandit-cordova-datacapture-core.Common");

@@ -2,6 +2,7 @@
 /// <amd-module name="scandit-cordova-datacapture-core.CommonCordova"/>
 // ^ needed because Cordova can't resolve "../xx" style dependencies
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.initializePlugin = exports.cordovaExec = exports.pluginsMetadata = exports.CordovaError = void 0;
 // tslint:disable:no-var-requires
 const exec = require('cordova/exec');
 const channel = require('cordova/channel');

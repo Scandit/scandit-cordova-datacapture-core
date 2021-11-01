@@ -6,6 +6,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.DataCaptureView = exports.HTMLElementState = exports.Anchor = exports.ZoomSwitchControl = exports.TorchSwitchControl = void 0;
 const Cordova_1 = require("scandit-cordova-datacapture-core.Cordova");
 const DataCaptureViewProxy_1 = require("scandit-cordova-datacapture-core.DataCaptureViewProxy");
 const Serializeable_1 = require("scandit-cordova-datacapture-core.Serializeable");
@@ -52,6 +53,49 @@ __decorate([
     Serializeable_1.ignoreFromSerialization
 ], TorchSwitchControl.prototype, "view", void 0);
 exports.TorchSwitchControl = TorchSwitchControl;
+class ZoomSwitchControl extends Serializeable_1.DefaultSerializeable {
+    constructor() {
+        super(...arguments);
+        this.type = 'zoom';
+        this.icon = {
+            zoomedOut: { default: null, pressed: null },
+            zoomedIn: { default: null, pressed: null },
+        };
+        this.view = null;
+    }
+    get zoomedOutImage() {
+        return this.icon.zoomedOut.default;
+    }
+    set zoomedOutImage(zoomedOutImage) {
+        this.icon.zoomedOut.default = zoomedOutImage;
+        this.view.controlUpdated();
+    }
+    get zoomedInImage() {
+        return this.icon.zoomedIn.default;
+    }
+    set zoomedInImage(zoomedInImage) {
+        this.icon.zoomedIn.default = zoomedInImage;
+        this.view.controlUpdated();
+    }
+    get zoomedInPressedImage() {
+        return this.icon.zoomedIn.pressed;
+    }
+    set zoomedInPressedImage(zoomedInPressedImage) {
+        this.icon.zoomedIn.pressed = zoomedInPressedImage;
+        this.view.controlUpdated();
+    }
+    get zoomedOutPressedImage() {
+        return this.icon.zoomedOut.pressed;
+    }
+    set zoomedOutPressedImage(zoomedOutPressedImage) {
+        this.icon.zoomedOut.pressed = zoomedOutPressedImage;
+        this.view.controlUpdated();
+    }
+}
+__decorate([
+    Serializeable_1.ignoreFromSerialization
+], ZoomSwitchControl.prototype, "view", void 0);
+exports.ZoomSwitchControl = ZoomSwitchControl;
 var Anchor;
 (function (Anchor) {
     Anchor["TopLeft"] = "topLeft";
