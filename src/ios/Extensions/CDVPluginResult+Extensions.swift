@@ -40,6 +40,8 @@ struct ListenerEvent {
 
         // ID Capture Listener
         case didCaptureInIdCapture = "didCaptureInIdCapture"
+        case didLocalizeInIdCapture = "didLocalizeInIdCapture"
+        case didRejectInIdCapture = "didRejectInIdCapture"
         case didFailInIdCapture = "didFailInIdCapture"
 
         // VolumeButtonObserver

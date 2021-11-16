@@ -64,6 +64,40 @@ export interface CameraSettingsDefaultsJSON {
     focusGestureStrategy: string;
     shouldPreferSmoothAutoFocus: boolean;
 }
+export interface IdCaptureOverlayDefaultsJSON {
+    defaultCapturedBrush: {
+        fillColor: string;
+        strokeColor: string;
+        strokeWidth: number;
+    };
+    defaultLocalizedBrush: {
+        fillColor: string;
+        strokeColor: string;
+        strokeWidth: number;
+    };
+    defaultRejectedBrush: {
+        fillColor: string;
+        strokeColor: string;
+        strokeWidth: number;
+    };
+}
+export interface IdCaptureOverlayDefaults {
+    defaultCapturedBrush: {
+        fillColor: Color;
+        strokeColor: Color;
+        strokeWidth: number;
+    };
+    defaultLocalizedBrush: {
+        fillColor: Color;
+        strokeColor: Color;
+        strokeWidth: number;
+    };
+    defaultRejectedBrush: {
+        fillColor: Color;
+        strokeColor: Color;
+        strokeWidth: number;
+    };
+}
 export interface PrivateCameraSettingsDefaults {
     fromJSON(json: CameraSettingsDefaultsJSON): CameraSettings;
 }
