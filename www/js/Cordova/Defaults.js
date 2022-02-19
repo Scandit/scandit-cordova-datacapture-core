@@ -53,11 +53,12 @@ exports.defaultsFromJSON = (json) => {
             acc.styles[key] = {
                 size: Common_1.SizeWithUnitAndAspect
                     .fromJSON(JSON.parse(viewfinder.size)),
-                color: Common_1.Color
-                    .fromJSON(viewfinder.color),
+                color: Common_1.Color.fromJSON(viewfinder.color),
+                disabledColor: Common_1.Color.fromJSON(viewfinder.disabledColor),
                 style: viewfinder.style,
                 lineStyle: viewfinder.lineStyle,
                 dimming: parseFloat(viewfinder.dimming.toString()),
+                disabledDimming: parseFloat(viewfinder.disabledDimming.toString()),
                 animation: Viewfinder_Related_1.RectangularViewfinderAnimation
                     .fromJSON(JSON.parse(viewfinder.animation)),
             };

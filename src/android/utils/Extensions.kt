@@ -15,10 +15,10 @@ import android.view.ViewGroup
 import com.scandit.datacapture.core.common.geometry.Point
 import com.scandit.datacapture.core.common.geometry.Quadrilateral
 import com.scandit.datacapture.core.internal.sdk.AppAndroidEnvironment
-import java.util.*
 import org.apache.cordova.CallbackContext
 import org.apache.cordova.PluginResult
 import org.json.JSONObject
+import java.util.*
 
 fun Int.pxFromDp(): Float {
     val context = AppAndroidEnvironment.applicationContext
@@ -65,10 +65,10 @@ val Int.hexString: String
 
 val String.colorInt: Int
     get() = Color.parseColor(
-            // ts is giving the color in format RRGGBBAA, we need to move the alpha and add the #.
-            "#" +
-                substring(6, 8) +
-                substring(0, 6)
+        // ts is giving the color in format RRGGBBAA, we need to move the alpha and add the #.
+        "#" +
+            substring(6, 8) +
+            substring(0, 6)
     )
 
 fun bitmapFromBase64String(string: String?): Bitmap? {
@@ -80,7 +80,7 @@ fun bitmapFromBase64String(string: String?): Bitmap? {
         val bytes = Base64.decode(trimmedString, Base64.DEFAULT)
         BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
     } catch (e: Exception) {
-        e.printStackTrace()
+        println(e)
         null
     }
 }

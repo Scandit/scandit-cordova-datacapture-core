@@ -22,10 +22,10 @@ class ActionSend(
     override fun run(args: JSONArray, callbackContext: CallbackContext) {
         try {
             val message = SerializableCallbackAction(
-                    actionName,
-                    args.getJSONObject(0),
-                    finishCallbackId = finishCallbackId,
-                    shouldNotifyWhenFinished = shouldNotifyWhenFinished
+                actionName,
+                args.getJSONObject(0),
+                finishCallbackId = finishCallbackId,
+                shouldNotifyWhenFinished = shouldNotifyWhenFinished
             ).toJson()
             listener.onSendAction(actionName, message, callbackContext)
         } catch (e: JSONException) {

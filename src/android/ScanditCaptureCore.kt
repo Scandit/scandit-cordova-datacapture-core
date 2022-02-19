@@ -80,7 +80,8 @@ import org.apache.cordova.PluginResult
 import org.json.JSONArray
 import org.json.JSONObject
 
-class ScanditCaptureCore : CordovaPlugin(),
+class ScanditCaptureCore :
+    CordovaPlugin(),
     DataCaptureContextListener,
     DataCaptureViewListener,
     CoreActionsListeners,
@@ -182,9 +183,10 @@ class ScanditCaptureCore : CordovaPlugin(),
         return try {
             actionsHandler.addAction(action, args, callbackContext)
         } catch (e: InvalidActionNameError) {
+            println(e)
             false
         } catch (e: Exception) {
-            e.printStackTrace()
+            println(e)
             true
         }
     }
@@ -249,9 +251,11 @@ class ScanditCaptureCore : CordovaPlugin(),
             }
 
             if (json.contains("desiredState")) {
-                switchToDesiredState(FrameSourceStateDeserializer.fromJson(
-                    json.requireByKeyAsString("desiredState")
-                ))
+                switchToDesiredState(
+                    FrameSourceStateDeserializer.fromJson(
+                        json.requireByKeyAsString("desiredState")
+                    )
+                )
             }
 
             this.addListener(this@ScanditCaptureCore)
@@ -490,7 +494,8 @@ class ScanditCaptureCore : CordovaPlugin(),
     //endregion
 }
 
-interface CoreActionsListeners : ActionInjectDefaults.ResultListener,
+interface CoreActionsListeners :
+    ActionInjectDefaults.ResultListener,
     ActionCreateContextAndView.ResultListener,
     ActionUpdateContextAndView.ResultListener,
     ActionViewShow.ResultListener,

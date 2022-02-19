@@ -17,12 +17,12 @@ data class SerializableSpotlightViewfinderDefaults(
 ) : SerializableData {
 
     override fun toJson(): JSONObject = JSONObject(
-            mapOf(
-                    FIELD_SIZE to size,
-                    FIELD_ENABLED_BORDER_COLOR to enabledBorderColor,
-                    FIELD_DISABLED_BORDER_COLOR to disabledBorderColor,
-                    FIELD_BACKGROUND_COLOR to backgroundColor
-            )
+        mapOf(
+            FIELD_SIZE to size,
+            FIELD_ENABLED_BORDER_COLOR to enabledBorderColor,
+            FIELD_DISABLED_BORDER_COLOR to disabledBorderColor,
+            FIELD_BACKGROUND_COLOR to backgroundColor
+        )
     )
 
     companion object {

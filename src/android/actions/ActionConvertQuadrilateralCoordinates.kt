@@ -32,7 +32,6 @@ class ActionConvertQuadrilateralCoordinates(
                 listener.onConvertQuadrilateralCoordinates(mappedQuadrilateral, callbackContext)
             }
         } catch (e: Exception) { // TODO SDC-1851 fine-catch deserializer exceptions
-            e.printStackTrace()
             listener.onJsonParseError(e, callbackContext)
         }
     }

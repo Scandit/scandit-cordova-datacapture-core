@@ -61,8 +61,10 @@ class RectangularViewfinder extends Serializeable_1.DefaultSerializeable {
         this._style = Cordova_1.Cordova.defaults.RectangularViewfinder.styles[viewfinderStyle].style;
         this._lineStyle = Cordova_1.Cordova.defaults.RectangularViewfinder.styles[viewfinderStyle].lineStyle;
         this._dimming = Cordova_1.Cordova.defaults.RectangularViewfinder.styles[viewfinderStyle].dimming;
+        this._disabledDimming = Cordova_1.Cordova.defaults.RectangularViewfinder.styles[viewfinderStyle].disabledDimming;
         this._animation = Cordova_1.Cordova.defaults.RectangularViewfinder.styles[viewfinderStyle].animation;
-        this.color = Cordova_1.Cordova.defaults.RectangularViewfinder.styles[viewfinderStyle].color;
+        this._color = Cordova_1.Cordova.defaults.RectangularViewfinder.styles[viewfinderStyle].color;
+        this._disabledColor = Cordova_1.Cordova.defaults.RectangularViewfinder.styles[viewfinderStyle].disabledColor;
         this._sizeWithUnitAndAspect = Cordova_1.Cordova.defaults.RectangularViewfinder.styles[viewfinderStyle].size;
         if (lineStyle !== undefined) {
             this._lineStyle = lineStyle;
@@ -77,11 +79,29 @@ class RectangularViewfinder extends Serializeable_1.DefaultSerializeable {
     get lineStyle() {
         return this._lineStyle;
     }
+    get color() {
+        return this._color;
+    }
+    set color(value) {
+        this._color = value;
+    }
+    get disabledColor() {
+        return this._disabledColor;
+    }
+    set disabledColor(value) {
+        this._disabledColor = value;
+    }
     get dimming() {
         return this._dimming;
     }
     set dimming(value) {
         this._dimming = value;
+    }
+    get disabledDimming() {
+        return this._disabledDimming;
+    }
+    set disabledDimming(value) {
+        this._disabledDimming = value;
     }
     get animation() {
         return this._animation;
@@ -112,12 +132,21 @@ __decorate([
     Serializeable_1.nameForSerialization('dimming')
 ], RectangularViewfinder.prototype, "_dimming", void 0);
 __decorate([
+    Serializeable_1.nameForSerialization('disabledDimming')
+], RectangularViewfinder.prototype, "_disabledDimming", void 0);
+__decorate([
     Serializeable_1.nameForSerialization('animation'),
     Serializeable_1.ignoreFromSerialization
 ], RectangularViewfinder.prototype, "_animation", void 0);
 __decorate([
     Serializeable_1.nameForSerialization('size')
 ], RectangularViewfinder.prototype, "_sizeWithUnitAndAspect", void 0);
+__decorate([
+    Serializeable_1.nameForSerialization('color')
+], RectangularViewfinder.prototype, "_color", void 0);
+__decorate([
+    Serializeable_1.nameForSerialization('disabledColor')
+], RectangularViewfinder.prototype, "_disabledColor", void 0);
 exports.RectangularViewfinder = RectangularViewfinder;
 class SpotlightViewfinder extends Serializeable_1.DefaultSerializeable {
     constructor() {

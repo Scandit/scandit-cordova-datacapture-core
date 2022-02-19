@@ -15,10 +15,10 @@ data class SerializableAimerViewfinderDefaults(
 ) : SerializableData {
 
     override fun toJson(): JSONObject = JSONObject(
-            mapOf(
-                    FIELD_FRAME_COLOR to frameColor,
-                    FIELD_DOT_COLOR to dotColor
-            )
+        mapOf(
+            FIELD_FRAME_COLOR to frameColor,
+            FIELD_DOT_COLOR to dotColor
+        )
     )
 
     companion object {

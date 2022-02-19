@@ -6,8 +6,8 @@
 
 package com.scandit.datacapture.cordova.core.callbacks
 
-import java.util.concurrent.atomic.AtomicBoolean
 import org.apache.cordova.CallbackContext
+import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class Callback(protected val callbackContext: CallbackContext) {
 

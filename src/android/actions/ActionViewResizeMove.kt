@@ -19,10 +19,9 @@ class ActionViewResizeMove(
         try {
             val infoJsonObject = args.getJSONObject(0)
             listener.onResizeAndMoveDataCaptureView(
-                    ResizeAndMoveInfo(infoJsonObject), callbackContext
+                ResizeAndMoveInfo(infoJsonObject), callbackContext
             )
         } catch (e: JSONException) {
-            e.printStackTrace()
             listener.onJsonParseError(e, callbackContext)
         }
     }

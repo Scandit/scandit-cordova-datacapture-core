@@ -47,45 +47,44 @@ class ActionInjectDefaults(
             val aimerViewfinder = AimerViewfinder()
             val brush = Brush.transparent()
             val availableCameraPositions = listOfNotNull(
-                    Camera.getCamera(CameraPosition.USER_FACING)?.position,
-                    Camera.getCamera(CameraPosition.WORLD_FACING)?.position
+                Camera.getCamera(CameraPosition.USER_FACING)?.position,
+                Camera.getCamera(CameraPosition.WORLD_FACING)?.position
             )
             val defaults = SerializableCoreDefaults(
-                    cameraDefaults = SerializableCameraDefaults(
-                            cameraSettingsDefault = SerializableCameraSettingsDefault(
-                                    settings = cameraSettings
-                            ),
-                            availablePositions = JSONArray(
-                                    availableCameraPositions.map { it.toJson() }
-                            ),
-                            defaultPosition = Camera.getDefaultCamera()?.position?.toJson()
+                cameraDefaults = SerializableCameraDefaults(
+                    cameraSettingsDefault = SerializableCameraSettingsDefault(
+                        settings = cameraSettings
                     ),
-                    dataCaptureViewDefaults = SerializableDataCaptureViewDefaults(
-                        dataCaptureView
+                    availablePositions = JSONArray(
+                        availableCameraPositions.map { it.toJson() }
                     ),
-                    laserlineViewfinderDefaults = SerializableLaserlineViewfinderDefaults(
-                        laserViewfinder
-                    ),
-                    rectangularViewfinderDefaults = SerializableRectangularViewfinderDefaults(
-                        rectangularViewfinder
-                    ),
-                    spotlightViewfinderDefaults = SerializableSpotlightViewfinderDefaults(
-                            size = spotlightViewfinder.sizeWithUnitAndAspect.toJson(),
-                            enabledBorderColor = spotlightViewfinder.enabledBorderColor.hexString,
-                            disabledBorderColor = spotlightViewfinder.disabledBorderColor.hexString,
-                            backgroundColor = spotlightViewfinder.backgroundColor.hexString
-                    ),
-                    aimerViewfinderDefaults = SerializableAimerViewfinderDefaults(
-                            frameColor = aimerViewfinder.frameColor.hexString,
-                            dotColor = aimerViewfinder.dotColor.hexString
-                    ),
-                    brushDefaults = SerializableBrushDefaults(
-                            brush = brush
-                    )
+                    defaultPosition = Camera.getDefaultCamera()?.position?.toJson()
+                ),
+                dataCaptureViewDefaults = SerializableDataCaptureViewDefaults(
+                    dataCaptureView
+                ),
+                laserlineViewfinderDefaults = SerializableLaserlineViewfinderDefaults(
+                    laserViewfinder
+                ),
+                rectangularViewfinderDefaults = SerializableRectangularViewfinderDefaults(
+                    rectangularViewfinder
+                ),
+                spotlightViewfinderDefaults = SerializableSpotlightViewfinderDefaults(
+                    size = spotlightViewfinder.sizeWithUnitAndAspect.toJson(),
+                    enabledBorderColor = spotlightViewfinder.enabledBorderColor.hexString,
+                    disabledBorderColor = spotlightViewfinder.disabledBorderColor.hexString,
+                    backgroundColor = spotlightViewfinder.backgroundColor.hexString
+                ),
+                aimerViewfinderDefaults = SerializableAimerViewfinderDefaults(
+                    frameColor = aimerViewfinder.frameColor.hexString,
+                    dotColor = aimerViewfinder.dotColor.hexString
+                ),
+                brushDefaults = SerializableBrushDefaults(
+                    brush = brush
+                )
             )
             listener.onCoreDefaults(defaults, callbackContext)
         } catch (e: JSONException) {
-            e.printStackTrace()
             listener.onJsonParseError(e, callbackContext)
         }
     }

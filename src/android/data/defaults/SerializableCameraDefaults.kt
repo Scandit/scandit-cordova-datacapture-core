@@ -17,11 +17,11 @@ data class SerializableCameraDefaults(
 ) : SerializableData {
 
     override fun toJson(): JSONObject = JSONObject(
-            mapOf(
-                    FIELD_CAMERA_SETTINGS_DEFAULTS to cameraSettingsDefault.toJson(),
-                    FIELD_DEFAULT_POSITION to defaultPosition,
-                    FIELD_AVAILABLE_POSITIONS to availablePositions
-            )
+        mapOf(
+            FIELD_CAMERA_SETTINGS_DEFAULTS to cameraSettingsDefault.toJson(),
+            FIELD_DEFAULT_POSITION to defaultPosition,
+            FIELD_AVAILABLE_POSITIONS to availablePositions
+        )
     )
 
     companion object {

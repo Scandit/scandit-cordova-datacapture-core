@@ -23,7 +23,7 @@ class ActionCreateContextAndView(
         try {
             val jsonString = args.getJSONObject(0).toString()
             val deserializationResult = dataCaptureContextDeserializer.contextFromJson(
-                    jsonString
+                jsonString
             )
             val view = deserializationResult.view
             val dataCaptureContext = deserializationResult.dataCaptureContext
@@ -36,13 +36,10 @@ class ActionCreateContextAndView(
                 callbackContext
             )
         } catch (e: JSONException) {
-            e.printStackTrace()
             listener.onJsonParseError(e, callbackContext)
         } catch (e: RuntimeException) { // TODO SDC-1851 fine-catch deserializer exceptions
-            e.printStackTrace()
             listener.onJsonParseError(e, callbackContext)
         } catch (e: Exception) {
-            e.printStackTrace()
             listener.onCreateContextAndViewError(e, callbackContext)
         }
     }

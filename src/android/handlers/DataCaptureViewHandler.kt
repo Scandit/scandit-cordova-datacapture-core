@@ -51,8 +51,8 @@ class DataCaptureViewHandler(
                 val backgroundView = createBackgroundView(activity)
                 backgroundViewReference = WeakReference(backgroundView)
                 activity.addContentView(
-                        backgroundView,
-                        ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+                    backgroundView,
+                    ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
                 )
                 webView.bringToFront()
                 webView.setBackgroundColor(Color.TRANSPARENT)
@@ -107,11 +107,11 @@ class DataCaptureViewHandler(
 
         uiWorker.post {
             activity.addContentView(
-                    dataCaptureView,
-                    ViewGroup.LayoutParams(
-                        latestInfo.width.pxFromDp().toInt(),
-                        latestInfo.height.pxFromDp().toInt()
-                    )
+                dataCaptureView,
+                ViewGroup.LayoutParams(
+                    latestInfo.width.pxFromDp().toInt(),
+                    latestInfo.height.pxFromDp().toInt()
+                )
             )
             render()
         }

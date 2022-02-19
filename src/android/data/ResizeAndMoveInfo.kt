@@ -17,11 +17,11 @@ data class ResizeAndMoveInfo(
 ) {
 
     constructor(json: JSONObject) : this(
-            top = json.getInt(KEY_TOP),
-            left = json.getInt(KEY_LEFT),
-            width = json.getInt(KEY_WIDTH),
-            height = json.getInt(KEY_HEIGHT),
-            shouldBeUnderWebView = json.getBoolean(KEY_ELEVATION)
+        top = json.getInt(KEY_TOP),
+        left = json.getInt(KEY_LEFT),
+        width = json.getInt(KEY_WIDTH),
+        height = json.getInt(KEY_HEIGHT),
+        shouldBeUnderWebView = json.getBoolean(KEY_ELEVATION)
     )
 
     companion object {

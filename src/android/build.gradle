@@ -8,11 +8,19 @@ android {
   }
 }
 
+def parentFile = project.projectDir.parentFile
+
 repositories {
+    maven { url "file://${parentFile}/../../../../.m2/repository" }
+    mavenLocal()
     flatDir {
         dirs 'libs', 'src/main/libs'
     }
+    mavenCentral()
 }
 
 dependencies {
-   }
+    def sdk_version = "6.11.0"
+
+    api "com.scandit.datacapture:core:$sdk_version"
+}

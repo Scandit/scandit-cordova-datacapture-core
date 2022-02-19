@@ -18,17 +18,17 @@ data class SerializableBrushDefaults(
 ) : SerializableData {
 
     constructor(brush: Brush?) : this(
-            fillColor = brush?.fillColor?.hexString,
-            strokeColor = brush?.strokeColor?.hexString,
-            strokeWidth = brush?.strokeWidth
+        fillColor = brush?.fillColor?.hexString,
+        strokeColor = brush?.strokeColor?.hexString,
+        strokeWidth = brush?.strokeWidth
     )
 
     override fun toJson(): JSONObject = JSONObject(
-            mapOf(
-                    FIELD_FILL_COLOR to fillColor,
-                    FIELD_STROKE_COLOR to strokeColor,
-                    FIELD_STROKE_WIDTH to strokeWidth
-            )
+        mapOf(
+            FIELD_FILL_COLOR to fillColor,
+            FIELD_STROKE_COLOR to strokeColor,
+            FIELD_STROKE_WIDTH to strokeWidth
+        )
     )
 
     fun toJSONObject(): JSONObject {

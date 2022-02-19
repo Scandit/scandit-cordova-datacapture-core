@@ -20,10 +20,10 @@ class CameraPermissionsActionsHandlerHelper(
     fun canBeRun(actionName: String): Boolean =
         actionFactory.canBeRunWithoutCameraPermission(actionName) ||
             cameraPermissionsGranted.get().also {
-            if (it.not() && cameraPermissionsRequested.getAndSet(true).not()) {
-                permissionRequest()
+                if (it.not() && cameraPermissionsRequested.getAndSet(true).not()) {
+                    permissionRequest()
+                }
             }
-        }
 
     fun onCameraPermissionsGranted() {
         cameraPermissionsGranted.set(true)

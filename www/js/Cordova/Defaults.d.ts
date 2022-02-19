@@ -110,9 +110,11 @@ interface LaserlineViewfinderDefault {
 interface RectangularViewfinderDefault {
     size: string;
     color: string;
+    disabledColor: string;
     style: string;
     lineStyle: string;
     dimming: number;
+    disabledDimming: number;
     animation: string;
 }
 export interface DefaultsJSON {

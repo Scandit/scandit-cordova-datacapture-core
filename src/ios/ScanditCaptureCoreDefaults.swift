@@ -171,8 +171,10 @@ public extension ScanditCaptureCoreDefaults.RectangularViewfinderDefaults {
                 "style": viewfinder.style.jsonString,
                 "size": viewfinder.sizeWithUnitAndAspect.jsonString,
                 "color": viewfinder.color.sdcHexString,
+                "disabledColor": viewfinder.disabledColor.sdcHexString,
                 "lineStyle": viewfinder.lineStyle.jsonString,
                 "dimming": viewfinder.dimming.description,
+                "disabledDimming": viewfinder.disabledDimming.description,
                 "animation": viewfinder.animation?.jsonString
             ]
             return defaults

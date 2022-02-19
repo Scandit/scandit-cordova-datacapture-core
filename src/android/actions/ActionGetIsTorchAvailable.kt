@@ -25,6 +25,7 @@ class ActionGetIsTorchAvailable(
         val cameraPosition = try {
             CameraPositionDeserializer.fromJson(args[0].toString())
         } catch (e: Exception) {
+            println(e)
             listener.onUnableToDeserializePositionError("GetIsTorchAvailable", callbackContext)
             return
         }

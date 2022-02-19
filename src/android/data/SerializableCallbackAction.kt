@@ -16,12 +16,12 @@ class SerializableCallbackAction(
 ) : SerializableData {
 
     override fun toJson(): JSONObject = JSONObject(
-            mapOf(
-                    FIELD_NAME to callbackName,
-                    FIELD_ARGUMENT to argument,
-                    FIELD_FINISH_CALLBACK_ID to finishCallbackId,
-                    FIELD_SHOULD_NOTIFY_WHEN_FINISHED to shouldNotifyWhenFinished
-            )
+        mapOf(
+            FIELD_NAME to callbackName,
+            FIELD_ARGUMENT to argument,
+            FIELD_FINISH_CALLBACK_ID to finishCallbackId,
+            FIELD_SHOULD_NOTIFY_WHEN_FINISHED to shouldNotifyWhenFinished
+        )
     )
 
     companion object {

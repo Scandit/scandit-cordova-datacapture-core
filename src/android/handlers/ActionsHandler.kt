@@ -10,9 +10,9 @@ import com.scandit.datacapture.cordova.core.data.ActionData
 import com.scandit.datacapture.cordova.core.errors.ActionError
 import com.scandit.datacapture.cordova.core.errors.InvalidActionNameError
 import com.scandit.datacapture.cordova.core.factories.ActionFactory
-import java.util.*
 import org.apache.cordova.CallbackContext
 import org.json.JSONArray
+import java.util.*
 
 class ActionsHandler(
     private val actionFactory: ActionFactory,
@@ -21,7 +21,7 @@ class ActionsHandler(
     private val actions: MutableList<ActionData> = Collections.synchronizedList(mutableListOf())
 
     fun addAction(actionName: String, args: JSONArray, callbackContext: CallbackContext): Boolean =
-            addAction(ActionData(actionName, args, callbackContext))
+        addAction(ActionData(actionName, args, callbackContext))
 
     private fun addAction(actionData: ActionData): Boolean {
         try {
@@ -33,9 +33,10 @@ class ActionsHandler(
                 actions.add(actionData)
             }
         } catch (e: InvalidActionNameError) {
+            println(e)
             return false
         } catch (e: Exception) {
-            e.printStackTrace()
+            println(e)
         }
         return true
     }
@@ -58,9 +59,9 @@ class ActionsHandler(
             val action = actionFactory.provideAction(actionData.actionName)
             action.run(actionData.args, actionData.callback)
         } catch (e: ActionError) {
-            e.printStackTrace()
+            println(e)
         } catch (e: Exception) {
-            e.printStackTrace()
+            println(e)
         }
     }
 }
