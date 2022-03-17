@@ -94,6 +94,8 @@ struct CommandError {
         case noBarcodeSelection = 10072
         case noBarcodeSelectionSession = 10073
         case noBarcodeSelectionOverlay = 10074
+        case noBarcodeCaptureSession = 10075
+        case noBarcodeTrackingSession = 10076
     }
 
     public static let invalidJSON = CommandError(code: .invalidJSON,
@@ -153,6 +155,16 @@ struct CommandError {
     public static let noBarcodeSelection = CommandError(code: .noBarcodeSelection,
                                                message: """
                                                 There was no BarcodeSelection mode to execute the command on
+                                                """)
+
+    public static let noBarcodeCaptureSession = CommandError(code: .noBarcodeCaptureSession,
+                                               message: """
+                                                There was no BarcodeCapture session to execute the command on
+                                                """)
+
+    public static let noBarcodeTrackingSession = CommandError(code: .noBarcodeTrackingSession,
+                                               message: """
+                                                There was no BarcodeTracking session to execute the command on
                                                 """)
 
     public static let noBarcodeSelectionSession = CommandError(code: .noBarcodeSelectionSession,

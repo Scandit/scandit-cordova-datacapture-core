@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <plugin id="scandit-cordova-datacapture-core"
-        version="6.11.0"
+        version="6.12.0"
         xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -100,11 +100,11 @@
 
         <source-file src="src/ios/SDCVolumeButtonObserver.h" />
 
-        <framework src="ScanditCaptureCore" spec="= 6.11.0" type="podspec" />
+        <framework src="ScanditCaptureCore" spec="= 6.12.0" type="podspec" />
     </platform>
 
     <!-- Android -->
-    <platform name="android" kotlin="1.4.10">
+    <platform name="android" kotlin="1.5.31">
 
         <config-file parent="/*" target="config.xml">
             <feature name="ScanditCaptureCore">
@@ -112,6 +112,10 @@
                     value="com.scandit.datacapture.cordova.core.ScanditCaptureCore" />
             </feature>
             <preference name="AndroidXEnabled" value="true" />
+            <preference name="GradlePluginKotlinEnabled" value="true" />
+            <preference name="GradlePluginKotlinVersion" value="1.5.31" />
+            <preference name="GradleVersion" value="7.2" />
+            <preference name="AndroidGradlePluginVersion" value="7.0.3" />
         </config-file>
 
         <!-- add permissions in AndroidManifest.xml file-->
@@ -266,12 +270,6 @@
 
         <!-- Add Kotlin support -->
         <hook src="src/hooks/support-kotlin.js" type="after_plugin_install" />
-        <framework src="org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version" />
-        <apply-plugin>kotlin-android</apply-plugin>
-        <apply-plugin>kotlin-android-extensions</apply-plugin>
-        <apply-plugin>kotlin-kapt</apply-plugin>
-        <apply-plugin>jacoco</apply-plugin>
-
     </platform>
 
 </plugin>

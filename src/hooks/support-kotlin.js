@@ -8,12 +8,7 @@ const platformAndroid = 'android'
 const tagApplyPlugin = 'apply-plugin'
 
 const kotlinVariablePositionRegex = /buildscript(\s*)\{\s*/g
-const kotlinClasspathPositionRegex = /classpath\s+(['"]).+(['"])/g
 const kotlinPluginPositionRegex = /com.android.application['"]/g
-
-const classpaths = [
-    '\t\tclasspath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"'
-]
 
 const addKotlinSupport = (context) => {
     let gradleFileContent = fs.readFileSync(gradlePath).toString()
@@ -49,10 +44,6 @@ const addKotlinSupport = (context) => {
     if (kotlinVersion) {
         // Add kotlin version variable to ext.
         gradleFileContent = append(`\text.kotlin_version = "${kotlinVersion}"\n\t`, kotlinVariablePositionRegex, gradleFileContent)
-        // Add kotlin classpath.
-        for (let classpath of classpaths) {
-            gradleFileContent = append(classpath, kotlinClasspathPositionRegex, gradleFileContent)
-        }
     }
 
     // Add all plugins avoiding duplicates. Reverse the plugins becasue we write always in the top
@@ -61,11 +52,17 @@ const addKotlinSupport = (context) => {
         gradleFileContent = append(pluginString, kotlinPluginPositionRegex, gradleFileContent)
     }
     fs.writeFileSync(gradlePath, gradleFileContent)
+    
+    if (kotlinVersion) {
+        // Hack needed due to a bug in the Cordova-Android library: https://github.com/apache/cordova-android/issues/1235
+        let mainGradleFileContent = fs.readFileSync(mainGradlePath).toString()
 
-    // Hack needed due to a bug in the Cordova-Android library: https://github.com/apache/cordova-android/issues/1235
-    let mainGradleFileContent = fs.readFileSync(mainGradlePath).toString()
-    mainGradleFileContent  = mainGradleFileContent.replace('ext.kotlin_version = \'1.3.50\'', 'ext.kotlin_version = \'1.4.10\'')
-    fs.writeFileSync(mainGradlePath, mainGradleFileContent)
+        const versionToReplace = 'ext.kotlin_version = \'1.3.50\''
+        const newVersion = `ext.kotlin_version = '${kotlinVersion}'`
+
+        mainGradleFileContent = mainGradleFileContent.replace(versionToReplace, newVersion)
+        fs.writeFileSync(mainGradlePath, mainGradleFileContent)
+    }
 }
 
 const append = (edit, reg, fullText) => {
