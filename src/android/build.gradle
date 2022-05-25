@@ -5,7 +5,11 @@ android {
     
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
-  }
+    }
+
+    kotlinOptions {
+        languageVersion = "1.3"
+    }
 }
 
 def parentFile = project.projectDir.parentFile
@@ -13,14 +17,11 @@ def parentFile = project.projectDir.parentFile
 repositories {
     maven { url "file://${parentFile}/../../../../.m2/repository" }
     mavenLocal()
-    flatDir {
-        dirs 'libs', 'src/main/libs'
-    }
     mavenCentral()
 }
 
 dependencies {
-    def sdk_version = "6.12.1"
+    def sdk_version = "6.13.0"
 
     api "com.scandit.datacapture:core:$sdk_version"
 }
