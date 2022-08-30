@@ -1,7 +1,7 @@
 android {
     // use same NDK version as the main android project
     // this version is included in the docker image used for cordova build
-    ndkVersion "21.4.7075529"
+    ndkVersion "23.1.7779620"
     
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -21,7 +21,7 @@ repositories {
 }
 
 dependencies {
-    def sdk_version = "6.13.1"
+    def sdk_version = "6.14.0"
 
     api "com.scandit.datacapture:core:$sdk_version"
 }
