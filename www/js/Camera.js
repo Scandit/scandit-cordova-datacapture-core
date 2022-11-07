@@ -13,15 +13,10 @@ const Camera_Related_1 = require("scandit-cordova-datacapture-core.Camera+Relate
 const CameraProxy_1 = require("scandit-cordova-datacapture-core.CameraProxy");
 const Cordova_1 = require("scandit-cordova-datacapture-core.Cordova");
 const Serializeable_1 = require("scandit-cordova-datacapture-core.Serializeable");
-var CameraType;
-(function (CameraType) {
-    CameraType["sparkCapture"] = "sparkCapture";
-})(CameraType || (CameraType = {}));
 class Camera extends Serializeable_1.DefaultSerializeable {
     constructor() {
         super(...arguments);
         this.type = 'camera';
-        this.cameraType = null;
         this.settings = null;
         this._desiredTorchState = Camera_Related_1.TorchState.Off;
         this._desiredState = Camera_Related_1.FrameSourceState.Off;
@@ -38,17 +33,6 @@ class Camera extends Serializeable_1.DefaultSerializeable {
         if (Cordova_1.Cordova.defaults.Camera.defaultPosition) {
             const camera = new Camera();
             camera.position = Cordova_1.Cordova.defaults.Camera.defaultPosition;
-            return camera;
-        }
-        else {
-            return null;
-        }
-    }
-    static get sparkCapture() {
-        if (Cordova_1.Cordova.defaults.Camera.defaultSparkCaptureCameraPosition !== null) {
-            const camera = new Camera();
-            camera.position = Cordova_1.Cordova.defaults.Camera.defaultSparkCaptureCameraPosition;
-            camera.cameraType = CameraType.sparkCapture;
             return camera;
         }
         else {

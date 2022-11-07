@@ -17,7 +17,6 @@ exports.defaultsFromJSON = (json) => {
             },
             defaultPosition: json.Camera.defaultPosition || null,
             availablePositions: json.Camera.availablePositions,
-            defaultSparkCaptureCameraPosition: json.Camera.defaultSparkCaptureCameraPosition || null,
         },
         DataCaptureView: {
             scanAreaMargins: Common_1.MarginsWithUnit

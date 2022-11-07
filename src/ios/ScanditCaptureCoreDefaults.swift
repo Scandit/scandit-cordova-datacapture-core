@@ -14,7 +14,6 @@ struct ScanditCaptureCoreDefaults: Encodable {
         let Settings: CameraSettingsDefaults
         let defaultPosition: String?
         let availablePositions: [String]
-        let defaultSparkCaptureCameraPosition: String?
     }
 
     struct DataCaptureViewDefaults: Encodable {
@@ -95,8 +94,7 @@ extension ScanditCaptureCoreDefaults.CameraDefaults {
 
         return Defaults(Settings: ScanditCaptureCoreDefaults.CameraSettingsDefaults.from(cameraSettings),
                         defaultPosition: Camera.default?.position.jsonString,
-                        availablePositions: availablePositions,
-                        defaultSparkCaptureCameraPosition: Camera.sparkCapture?.position.jsonString)
+                        availablePositions: availablePositions)
     }
 }
 

@@ -9,6 +9,7 @@ package com.scandit.datacapture.cordova.core.callbacks
 import org.apache.cordova.CallbackContext
 import java.util.concurrent.atomic.AtomicBoolean
 
+@Suppress("UnnecessaryAbstractClass")
 abstract class Callback(protected val callbackContext: CallbackContext) {
 
     protected val disposed: AtomicBoolean = AtomicBoolean(false)

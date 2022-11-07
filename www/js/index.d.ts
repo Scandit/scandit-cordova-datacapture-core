@@ -14,7 +14,6 @@ interface PrivateCamera {
 }
 export class Camera implements FrameSource {
     private type;
-    private cameraType;
     private settings;
     private position;
     private _desiredTorchState;
@@ -24,7 +23,6 @@ export class Camera implements FrameSource {
     private _proxy;
     private get proxy();
     static get default(): Camera | null;
-    static get sparkCapture(): Camera | null;
     static atPosition(cameraPosition: CameraPosition): Camera | null;
     get desiredState(): FrameSourceState;
     get isTorchAvailable(): boolean;

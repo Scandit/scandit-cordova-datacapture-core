@@ -31,10 +31,6 @@ struct ListenerEvent {
         case didUpdateSelectionInBarcodeSelection = "didUpdateSelectionInBarcodeSelection"
         case didUpdateSessionInBarcodeSelection = "didUpdateSessionInBarcodeSelection"
 
-        // Spark Capture Listener
-        case didScanInSparkCapture = "didScanInSparkCapture"
-        case didUpdateSessionInSparkCapture = "didUpdateSessionInSparkCapture"
-
         // Text Capture Listener
         case didCaptureInTextCapture = "didCaptureInTextCapture"
 
