@@ -9,9 +9,6 @@ package com.scandit.datacapture.cordova.core.callbacks
 import org.apache.cordova.CallbackContext
 import java.util.concurrent.atomic.AtomicBoolean
 
-// Used as a base class for all the callback. Suppressed the warning because import
-// doesn't contain any abstract members but we keep it abstract to avoid someone
-// creating an instance of the class.
 @Suppress("UnnecessaryAbstractClass")
 abstract class Callback(protected val callbackContext: CallbackContext) {
 
