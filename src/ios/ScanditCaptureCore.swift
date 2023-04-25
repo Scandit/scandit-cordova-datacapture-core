@@ -23,6 +23,8 @@ public class ScanditCaptureCore: CDVPlugin {
 
     public var context: DataCaptureContext?
 
+    public static var lastFrame: FrameData?
+
     var captureView: DataCaptureView? {
         didSet {
             guard oldValue != captureView else { return }
@@ -305,7 +307,7 @@ public class ScanditCaptureCore: CDVPlugin {
         }
 
         guard let jsonString = command.defaultArgumentAsString,
-              let quad = Quadrilateral(JSONString: jsonString) else {
+              let quad = Quadrilateral(jsonString: jsonString) else {
             commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
             return
         }
@@ -330,7 +332,7 @@ public class ScanditCaptureCore: CDVPlugin {
     @objc(getIsTorchAvailable:)
     func getIsTorchAvailable(command: CDVInvokedUrlCommand) {
         guard let jsonString = command.defaultArgumentAsString,
-              let cameraPosition = CameraPosition(JSONString: jsonString) else {
+              let cameraPosition = CameraPosition(jsonString: jsonString) else {
             commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
             return
         }
@@ -372,5 +374,19 @@ public class ScanditCaptureCore: CDVPlugin {
         }
 
         feedback.emit()
+    }
+
+    @objc(getLastFrame:)
+    func getLastFrame(command: CDVInvokedUrlCommand) {
+        guard let lastFrame = ScanditCaptureCore.lastFrame else {
+            commandDelegate.send(.failure(with: .noFrameData), callbackId: command.callbackId)
+            return
+        }
+        commandDelegate.send(.success(message: lastFrame.jsonString), callbackId: command.callbackId)
+    }
+
+    @objc(getLastFrameOrNull:)
+    func getLastFrameOrNull(command: CDVInvokedUrlCommand) {
+        commandDelegate.send(.success(message: ScanditCaptureCore.lastFrame?.jsonString), callbackId: command.callbackId)
     }
 }

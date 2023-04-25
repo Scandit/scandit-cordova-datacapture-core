@@ -21,6 +21,8 @@ var CordovaFunction;
     CordovaFunction["SubscribeViewListener"] = "subscribeViewListener";
     CordovaFunction["GetCurrentCameraState"] = "getCurrentCameraState";
     CordovaFunction["GetIsTorchAvailable"] = "getIsTorchAvailable";
+    CordovaFunction["GetLastFrame"] = "getLastFrame";
+    CordovaFunction["GetLastFrameOrNull"] = "getLastFrameOrNull";
     CordovaFunction["EmitFeedback"] = "emitFeedback";
     CordovaFunction["SubscribeVolumeButtonObserver"] = "subscribeVolumeButtonObserver";
     CordovaFunction["UnsubscribeVolumeButtonObserver"] = "unsubscribeVolumeButtonObserver";

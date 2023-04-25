@@ -8,23 +8,7 @@ package com.scandit.datacapture.cordova.core.factories
 
 import android.content.Context
 import com.scandit.datacapture.cordova.core.CoreActionsListeners
-import com.scandit.datacapture.cordova.core.actions.Action
-import com.scandit.datacapture.cordova.core.actions.ActionConvertPointCoordinates
-import com.scandit.datacapture.cordova.core.actions.ActionConvertQuadrilateralCoordinates
-import com.scandit.datacapture.cordova.core.actions.ActionCreateContextAndView
-import com.scandit.datacapture.cordova.core.actions.ActionDisposeContext
-import com.scandit.datacapture.cordova.core.actions.ActionEmitFeedback
-import com.scandit.datacapture.cordova.core.actions.ActionGetCameraState
-import com.scandit.datacapture.cordova.core.actions.ActionGetIsTorchAvailable
-import com.scandit.datacapture.cordova.core.actions.ActionInjectDefaults
-import com.scandit.datacapture.cordova.core.actions.ActionSend
-import com.scandit.datacapture.cordova.core.actions.ActionSubscribeContext
-import com.scandit.datacapture.cordova.core.actions.ActionSubscribeFrameSource
-import com.scandit.datacapture.cordova.core.actions.ActionSubscribeView
-import com.scandit.datacapture.cordova.core.actions.ActionUpdateContextAndView
-import com.scandit.datacapture.cordova.core.actions.ActionViewHide
-import com.scandit.datacapture.cordova.core.actions.ActionViewResizeMove
-import com.scandit.datacapture.cordova.core.actions.ActionViewShow
+import com.scandit.datacapture.cordova.core.actions.*
 import com.scandit.datacapture.cordova.core.deserializers.DeserializersProvider
 import com.scandit.datacapture.cordova.core.errors.InvalidActionNameError
 import com.scandit.datacapture.cordova.core.handlers.DataCaptureComponentsHandler
@@ -64,6 +48,7 @@ class CaptureCoreActionFactory(
             GET_IS_TORCH_AVAILABLE -> createActionGetIsTorchAvailable()
             SUBSCRIBE_FRAME_SOURCE -> createSubscribeFrameSource()
             SEND_ON_FRAME_SOURCE_STATE_CHANGED_EVENT -> createActionFrameSourceStateChanged()
+            GET_LAST_FRAME -> createActionGetLastFrame()
             else -> throw InvalidActionNameError(actionName)
         }
     }
@@ -128,6 +113,8 @@ class CaptureCoreActionFactory(
     private fun createActionFrameSourceStateChanged() =
         ActionSend(ACTION_FRAME_SOURCE_STATE_CHANGED, listener)
 
+    private fun createActionGetLastFrame() = ActionGetLastFrame(listener)
+
     companion object {
         private const val INJECT_DEFAULTS = "getDefaults"
         private const val CREATE_CONTEXT = "contextFromJSON"
@@ -154,6 +141,8 @@ class CaptureCoreActionFactory(
         const val ACTION_CONTEXT_OBSERVATION_STARTED = "didStartObservingContext"
         const val ACTION_VIEW_SIZE_CHANGED = "didChangeSizeOrientation"
         const val ACTION_FRAME_SOURCE_STATE_CHANGED = "didChangeState"
+
+        const val GET_LAST_FRAME = "getLastFrame"
 
         private val ACTIONS_REQUIRING_CAMERA =
             setOf(CREATE_CONTEXT, UPDATE_CONTEXT, VIEW_SHOW, VIEW_HIDE)

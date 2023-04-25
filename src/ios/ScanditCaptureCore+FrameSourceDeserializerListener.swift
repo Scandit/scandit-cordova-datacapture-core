@@ -1,9 +1,9 @@
 import ScanditCaptureCore
 
 extension Quadrilateral {
-    init?(JSONString: String) {
+    init?(jsonString: String) {
         var state = Quadrilateral()
-        if SDCQuadrilateralFromJSONString(JSONString, &state) {
+        if SDCQuadrilateralFromJSONString(jsonString, &state) {
             self = state
         } else {
             return nil
@@ -12,9 +12,9 @@ extension Quadrilateral {
 }
 
 extension TorchState {
-    init?(JSONString: String) {
+    init?(jsonString: String) {
         var state = TorchState.on
-        if SDCTorchStateFromJSONString(JSONString, &state) {
+        if SDCTorchStateFromJSONString(jsonString, &state) {
             self = state
         } else {
             return nil
@@ -23,9 +23,9 @@ extension TorchState {
 }
 
 extension CameraPosition {
-    init?(JSONString: String) {
+    init?(jsonString: String) {
         var position = CameraPosition.worldFacing
-        if SDCCameraPositionFromJSONString(JSONString, &position) {
+        if SDCCameraPositionFromJSONString(jsonString, &position) {
             self = position
         } else {
             return nil
@@ -34,9 +34,9 @@ extension CameraPosition {
 }
 
 extension FrameSourceState {
-    init?(JSONString: String) {
+    init?(jsonString: String) {
         var state = FrameSourceState.on
-        if SDCFrameSourceStateFromJSONString(JSONString, &state) {
+        if SDCFrameSourceStateFromJSONString(jsonString, &state) {
             self = state
         } else {
             return nil
@@ -45,9 +45,9 @@ extension FrameSourceState {
 }
 
 extension Anchor {
-    init?(JSONString: String) {
+    init?(jsonString: String) {
         var anchor = Anchor.center
-        if SDCAnchorFromJSONString(JSONString, &anchor) {
+        if SDCAnchorFromJSONString(jsonString, &anchor) {
             self = anchor
         } else {
             return nil
@@ -56,9 +56,9 @@ extension Anchor {
 }
 
 extension PointWithUnit {
-    init?(JSONString: String) {
+    init?(jsonString: String) {
         var point = PointWithUnit.zero
-        if SDCPointWithUnitFromJSONString(JSONString, &point) {
+        if SDCPointWithUnitFromJSONString(jsonString, &point) {
             self = point
         } else {
             return nil
@@ -70,25 +70,27 @@ extension ScanditCaptureCore: FrameSourceDeserializerDelegate {
 
     public func frameSourceDeserializer(_ deserializer: FrameSourceDeserializer,
                                         didStartDeserializingFrameSource frameSource: FrameSource,
-                                        from JSONValue: JSONValue) { }
+                                        from jsonValue: JSONValue) {
+        // Empty on purpose
+    }
 
     public func frameSourceDeserializer(_ deserializer: FrameSourceDeserializer,
                                         didFinishDeserializingFrameSource frameSource: FrameSource,
-                                        from JSONValue: JSONValue) {
+                                        from jsonValue: JSONValue) {
         guard let camera = frameSource as? Camera else {
             return
         }
 
         camera.addListener(self)
 
-        if JSONValue.containsKey("desiredTorchState"),
-           let desiredTorchState = TorchState(JSONString: JSONValue.string(forKey: "desiredTorchState",
+        if jsonValue.containsKey("desiredTorchState"),
+           let desiredTorchState = TorchState(jsonString: jsonValue.string(forKey: "desiredTorchState",
                                                                            default: TorchState.off.jsonString)) {
             camera.desiredTorchState = desiredTorchState
         }
 
-        if JSONValue.containsKey("desiredState"),
-           let desiredState = FrameSourceState(JSONString: JSONValue.string(forKey: "desiredState",
+        if jsonValue.containsKey("desiredState"),
+           let desiredState = FrameSourceState(jsonString: jsonValue.string(forKey: "desiredState",
                                                                             default: FrameSourceState.off.jsonString)) {
             camera.switch(toDesiredState: desiredState)
         }
@@ -96,10 +98,14 @@ extension ScanditCaptureCore: FrameSourceDeserializerDelegate {
 
     public func frameSourceDeserializer(_ deserializer: FrameSourceDeserializer,
                                         didStartDeserializingCameraSettings settings: CameraSettings,
-                                        from JSONValue: JSONValue) { }
+                                        from jsonValue: JSONValue) {
+        // Empty on purpose
+    }
 
     public func frameSourceDeserializer(_ deserializer: FrameSourceDeserializer,
                                         didFinishDeserializingCameraSettings settings: CameraSettings,
-                                        from JSONValue: JSONValue) { }
+                                        from jsonValue: JSONValue) {
+        // Empty on purpose
+    }
 
 }

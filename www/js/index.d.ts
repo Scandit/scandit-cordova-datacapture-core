@@ -119,6 +119,39 @@ export class CameraSettings {
     setProperty(name: string, value: any): void;
     getProperty(name: string): any;
 }
+export interface FrameDataJSON {
+    imageBuffers: ImageBufferJSON[];
+    orientation: number;
+}
+export interface ImageBufferJSON {
+    width: number;
+    height: number;
+    data: string;
+}
+interface PrivateImageBuffer {
+    _width: number;
+    _height: number;
+    _data: string;
+}
+export interface FrameData {
+    readonly imageBuffers: ImageBuffer[];
+    readonly orientation: number;
+}
+export class ImageBuffer {
+    private _width;
+    private _height;
+    private _data;
+    get width(): number;
+    get height(): number;
+    get data(): string;
+}
+class PrivateFrameData implements FrameData {
+    private _imageBuffers;
+    private _orientation;
+    get imageBuffers(): ImageBuffer[];
+    get orientation(): number;
+    static fromJSON(json: FrameDataJSON): FrameData;
+}
 
 
 export interface PointJSON {

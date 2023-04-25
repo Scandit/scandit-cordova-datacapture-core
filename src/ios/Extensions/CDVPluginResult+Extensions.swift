@@ -92,6 +92,8 @@ struct CommandError {
         case noBarcodeSelectionOverlay = 10074
         case noBarcodeCaptureSession = 10075
         case noBarcodeTrackingSession = 10076
+
+        case noFrameData = 10077
     }
 
     public static let invalidJSON = CommandError(code: .invalidJSON,
@@ -172,6 +174,11 @@ struct CommandError {
                                                message: """
                                                 There was no BarcodeSelection overlay to execute the command on
                                                 """)
+
+    public static let noFrameData = CommandError(code: .noFrameData,
+                                                     message: """
+                                                      There was no FrameData to execute the command on
+                                                      """)
 
     public let code: Code
     public let message: String

@@ -25,7 +25,9 @@ import com.scandit.datacapture.core.ui.DataCaptureView
 import com.scandit.datacapture.core.ui.style.Brush
 import com.scandit.datacapture.core.ui.viewfinder.AimerViewfinder
 import com.scandit.datacapture.core.ui.viewfinder.LaserlineViewfinder
+import com.scandit.datacapture.core.ui.viewfinder.LaserlineViewfinderStyle
 import com.scandit.datacapture.core.ui.viewfinder.RectangularViewfinder
+import com.scandit.datacapture.core.ui.viewfinder.RectangularViewfinderStyle
 import org.apache.cordova.CallbackContext
 import org.json.JSONArray
 import org.json.JSONException
@@ -39,8 +41,8 @@ class ActionInjectDefaults(
         try {
             val cameraSettings = CameraSettings()
             val dataCaptureView = DataCaptureView.newInstance(context, null)
-            val laserViewfinder = LaserlineViewfinder()
-            val rectangularViewfinder = RectangularViewfinder()
+            val laserViewfinder = LaserlineViewfinder(LaserlineViewfinderStyle.LEGACY)
+            val rectangularViewfinder = RectangularViewfinder(RectangularViewfinderStyle.LEGACY)
             @Suppress("DEPRECATION")
             val spotlightViewfinder =
                 com.scandit.datacapture.core.ui.viewfinder.SpotlightViewfinder()

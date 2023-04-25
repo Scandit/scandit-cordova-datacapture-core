@@ -11,9 +11,15 @@ struct ScanditCaptureCoreDefaults: Encodable {
     }
 
     struct CameraDefaults: Encodable {
-        let Settings: CameraSettingsDefaults
+        let settings: CameraSettingsDefaults
         let defaultPosition: String?
         let availablePositions: [String]
+
+        enum CodingKeys: String, CodingKey {
+            case settings = "Settings"
+            case defaultPosition
+            case availablePositions
+        }
     }
 
     struct DataCaptureViewDefaults: Encodable {
@@ -54,13 +60,13 @@ struct ScanditCaptureCoreDefaults: Encodable {
         let strokeWidth: Int
     }
 
-    let Camera: CameraDefaults
-    let DataCaptureView: DataCaptureViewDefaults
-    let LaserlineViewfinder: LaserlineViewfinderDefaults
-    let RectangularViewfinder: RectangularViewfinderDefaults
-    let SpotlightViewfinder: SpotlightViewfinderDefaults
-    let AimerViewfinder: AimerViewfinderDefaults
-    let Brush: BrushDefaults
+    let camera: CameraDefaults
+    let dataCaptureView: DataCaptureViewDefaults
+    let laserlineViewfinder: LaserlineViewfinderDefaults
+    let rectangularViewfinder: RectangularViewfinderDefaults
+    let spotlightViewfinder: SpotlightViewfinderDefaults
+    let aimerViewfinder: AimerViewfinderDefaults
+    let brush: BrushDefaults
 
     let deviceID: String?
 
@@ -71,14 +77,24 @@ struct ScanditCaptureCoreDefaults: Encodable {
          spotlightViewfinder: SpotlightViewfinder,
          aimerViewfinder: AimerViewfinder,
          brush: Brush) {
-        self.Camera = CameraDefaults.from(cameraSettings)
-        self.DataCaptureView = DataCaptureViewDefaults.from(dataCaptureView)
-        self.LaserlineViewfinder = LaserlineViewfinderDefaults.from(laserlineViewfinder)
-        self.RectangularViewfinder = RectangularViewfinderDefaults.from(rectangularViewfinder)
-        self.SpotlightViewfinder = SpotlightViewfinderDefaults.from(spotlightViewfinder)
-        self.AimerViewfinder = AimerViewfinderDefaults.from(aimerViewfinder)
-        self.Brush = BrushDefaults.from(brush)
+        self.camera = CameraDefaults.from(cameraSettings)
+        self.dataCaptureView = DataCaptureViewDefaults.from(dataCaptureView)
+        self.laserlineViewfinder = LaserlineViewfinderDefaults.from(laserlineViewfinder)
+        self.rectangularViewfinder = RectangularViewfinderDefaults.from(rectangularViewfinder)
+        self.spotlightViewfinder = SpotlightViewfinderDefaults.from(spotlightViewfinder)
+        self.aimerViewfinder = AimerViewfinderDefaults.from(aimerViewfinder)
+        self.brush = BrushDefaults.from(brush)
         self.deviceID = DataCaptureContext.deviceID
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case camera = "Camera"
+        case dataCaptureView = "DataCaptureView"
+        case laserlineViewfinder = "LaserlineViewfinder"
+        case rectangularViewfinder = "RectangularViewfinder"
+        case spotlightViewfinder = "SpotlightViewfinder"
+        case aimerViewfinder = "AimerViewfinder"
+        case brush = "Brush"
     }
 }
 
@@ -92,7 +108,7 @@ extension ScanditCaptureCoreDefaults.CameraDefaults {
         ]
         let availablePositions = Array(availableCameras.keys)
 
-        return Defaults(Settings: ScanditCaptureCoreDefaults.CameraSettingsDefaults.from(cameraSettings),
+        return Defaults(settings: ScanditCaptureCoreDefaults.CameraSettingsDefaults.from(cameraSettings),
                         defaultPosition: Camera.default?.position.jsonString,
                         availablePositions: availablePositions)
     }

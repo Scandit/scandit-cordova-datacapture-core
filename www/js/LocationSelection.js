@@ -22,14 +22,11 @@ class PrivateLocationSelection {
             case LocationSelectionType.Radius:
                 return RadiusLocationSelection
                     .fromJSON(json);
-                break;
             case LocationSelectionType.Rectangular:
                 return RectangularLocationSelection
                     .fromJSON(json);
-                break;
             default:
                 return exports.NoneLocationSelection;
-                break;
         }
     }
 }

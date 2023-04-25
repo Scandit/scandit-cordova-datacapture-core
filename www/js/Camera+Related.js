@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CameraSettings = exports.FocusGestureStrategy = exports.FocusRange = exports.VideoResolution = exports.CameraPosition = exports.TorchState = exports.FrameSourceState = void 0;
+exports.PrivateFrameData = exports.ImageBuffer = exports.CameraSettings = exports.FocusGestureStrategy = exports.FocusRange = exports.VideoResolution = exports.CameraPosition = exports.TorchState = exports.FrameSourceState = void 0;
 /// <amd-module name="scandit-cordova-datacapture-core.Camera+Related"/>
 // ^ needed because Cordova can't resolve "../xx" style dependencies
 const Cordova_1 = require("scandit-cordova-datacapture-core.Cordova");
@@ -119,3 +119,36 @@ class CameraSettings extends Serializeable_1.DefaultSerializeable {
     }
 }
 exports.CameraSettings = CameraSettings;
+class ImageBuffer {
+    get width() {
+        return this._width;
+    }
+    get height() {
+        return this._height;
+    }
+    get data() {
+        return this._data;
+    }
+}
+exports.ImageBuffer = ImageBuffer;
+class PrivateFrameData {
+    get imageBuffers() {
+        return this._imageBuffers;
+    }
+    get orientation() {
+        return this._orientation;
+    }
+    static fromJSON(json) {
+        const frameData = new PrivateFrameData();
+        frameData._imageBuffers = json.imageBuffers.map((imageBufferJSON) => {
+            const imageBuffer = new ImageBuffer();
+            imageBuffer._width = imageBufferJSON.width;
+            imageBuffer._height = imageBufferJSON.height;
+            imageBuffer._data = imageBufferJSON.data;
+            return imageBuffer;
+        });
+        frameData._orientation = json.orientation;
+        return frameData;
+    }
+}
+exports.PrivateFrameData = PrivateFrameData;

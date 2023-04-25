@@ -8,22 +8,7 @@ package com.scandit.datacapture.cordova.core
 
 import android.Manifest
 import android.content.pm.PackageManager
-import com.scandit.datacapture.cordova.core.actions.ActionConvertPointCoordinates
-import com.scandit.datacapture.cordova.core.actions.ActionConvertQuadrilateralCoordinates
-import com.scandit.datacapture.cordova.core.actions.ActionCreateContextAndView
-import com.scandit.datacapture.cordova.core.actions.ActionDisposeContext
-import com.scandit.datacapture.cordova.core.actions.ActionEmitFeedback
-import com.scandit.datacapture.cordova.core.actions.ActionGetCameraState
-import com.scandit.datacapture.cordova.core.actions.ActionGetIsTorchAvailable
-import com.scandit.datacapture.cordova.core.actions.ActionInjectDefaults
-import com.scandit.datacapture.cordova.core.actions.ActionSend
-import com.scandit.datacapture.cordova.core.actions.ActionSubscribeContext
-import com.scandit.datacapture.cordova.core.actions.ActionSubscribeFrameSource
-import com.scandit.datacapture.cordova.core.actions.ActionSubscribeView
-import com.scandit.datacapture.cordova.core.actions.ActionUpdateContextAndView
-import com.scandit.datacapture.cordova.core.actions.ActionViewHide
-import com.scandit.datacapture.cordova.core.actions.ActionViewResizeMove
-import com.scandit.datacapture.cordova.core.actions.ActionViewShow
+import com.scandit.datacapture.cordova.core.actions.*
 import com.scandit.datacapture.cordova.core.callbacks.CoreCallbackContainer
 import com.scandit.datacapture.cordova.core.callbacks.DataCaptureContextCallback
 import com.scandit.datacapture.cordova.core.callbacks.DataCaptureViewCallback
@@ -35,14 +20,7 @@ import com.scandit.datacapture.cordova.core.data.ResizeAndMoveInfo
 import com.scandit.datacapture.cordova.core.data.defaults.SerializableCoreDefaults
 import com.scandit.datacapture.cordova.core.deserializers.Deserializers
 import com.scandit.datacapture.cordova.core.deserializers.DeserializersProvider
-import com.scandit.datacapture.cordova.core.errors.CameraPositionDeserializationError
-import com.scandit.datacapture.cordova.core.errors.ContextDeserializationError
-import com.scandit.datacapture.cordova.core.errors.InvalidActionNameError
-import com.scandit.datacapture.cordova.core.errors.JsonParseError
-import com.scandit.datacapture.cordova.core.errors.NoCameraAvailableError
-import com.scandit.datacapture.cordova.core.errors.NoCameraWithPositionError
-import com.scandit.datacapture.cordova.core.errors.NoViewToConvertPointError
-import com.scandit.datacapture.cordova.core.errors.NoViewToConvertQuadrilateralError
+import com.scandit.datacapture.cordova.core.errors.*
 import com.scandit.datacapture.cordova.core.factories.ActionFactory
 import com.scandit.datacapture.cordova.core.factories.CaptureCoreActionFactory
 import com.scandit.datacapture.cordova.core.handlers.ActionsHandler
@@ -62,6 +40,8 @@ import com.scandit.datacapture.core.common.geometry.Quadrilateral
 import com.scandit.datacapture.core.common.geometry.toJson
 import com.scandit.datacapture.core.component.DataCaptureComponent
 import com.scandit.datacapture.core.component.serialization.DataCaptureComponentDeserializer
+import com.scandit.datacapture.core.data.FrameData
+import com.scandit.datacapture.core.data.toJson
 import com.scandit.datacapture.core.json.JsonValue
 import com.scandit.datacapture.core.source.Camera
 import com.scandit.datacapture.core.source.FrameSource
@@ -98,6 +78,8 @@ class ScanditCaptureCore :
                 PLUGIN_NAMES.add(name)
             }
         }
+
+        var lastFrame: FrameData? = null
     }
 
     private val uiWorker = UiWorker()
@@ -492,6 +474,17 @@ class ScanditCaptureCore :
     }
     //endregion
     //endregion
+
+    override fun getLastFrame(callbackContext: CallbackContext) {
+        val lastFrame = lastFrame
+
+        if (lastFrame == null) {
+            NoLastFrameError().sendResult(callbackContext)
+            return
+        }
+
+        callbackContext.success(Companion.lastFrame?.toJson())
+    }
 }
 
 interface CoreActionsListeners :
@@ -510,4 +503,5 @@ interface CoreActionsListeners :
     ActionSend.ResultListener,
     ActionEmitFeedback.ResultListener,
     ActionGetIsTorchAvailable.ResultListener,
-    ActionSubscribeFrameSource.ResultListener
+    ActionSubscribeFrameSource.ResultListener,
+    ActionGetLastFrame.ResultListener
