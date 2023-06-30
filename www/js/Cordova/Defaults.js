@@ -4,7 +4,7 @@ exports.defaultsFromJSON = void 0;
 const Common_1 = require("scandit-cordova-datacapture-core.Common");
 const DataCaptureView_Related_1 = require("scandit-cordova-datacapture-core.DataCaptureView+Related");
 const Viewfinder_Related_1 = require("scandit-cordova-datacapture-core.Viewfinder+Related");
-exports.defaultsFromJSON = (json) => {
+const defaultsFromJSON = (json) => {
     return {
         Camera: {
             Settings: {
@@ -87,3 +87,4 @@ exports.defaultsFromJSON = (json) => {
         deviceID: json.deviceID,
     };
 };
+exports.defaultsFromJSON = defaultsFromJSON;

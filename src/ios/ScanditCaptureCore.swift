@@ -160,6 +160,11 @@ public class ScanditCaptureCore: CDVPlugin {
         do {
             try deserializer.update(context, view: captureView, components: components, fromJSON: jsonString)
         } catch let error {
+            if (error.localizedDescription.contains("The mode cannot be updated: already initialized but")) {
+                contextFromJSON(command: command)
+                return
+            }
+            
             commandDelegate.send(.failure(with: error), callbackId: command.callbackId)
             contextDeserializationFailed(with: error)
             return

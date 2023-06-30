@@ -11,11 +11,6 @@ exports.Direction = exports.Orientation = exports.Color = exports.MarginsWithUni
 // ^ needed because Cordova can't resolve "../xx" style dependencies
 const Serializeable_1 = require("scandit-cordova-datacapture-core.Serializeable");
 class Point extends Serializeable_1.DefaultSerializeable {
-    constructor(x, y) {
-        super();
-        this._x = x;
-        this._y = y;
-    }
     get x() {
         return this._x;
     }
@@ -25,22 +20,20 @@ class Point extends Serializeable_1.DefaultSerializeable {
     static fromJSON(json) {
         return new Point(json.x, json.y);
     }
+    constructor(x, y) {
+        super();
+        this._x = x;
+        this._y = y;
+    }
 }
 __decorate([
-    Serializeable_1.nameForSerialization('x')
+    (0, Serializeable_1.nameForSerialization)('x')
 ], Point.prototype, "_x", void 0);
 __decorate([
-    Serializeable_1.nameForSerialization('y')
+    (0, Serializeable_1.nameForSerialization)('y')
 ], Point.prototype, "_y", void 0);
 exports.Point = Point;
 class Quadrilateral extends Serializeable_1.DefaultSerializeable {
-    constructor(topLeft, topRight, bottomRight, bottomLeft) {
-        super();
-        this._topLeft = topLeft;
-        this._topRight = topRight;
-        this._bottomRight = bottomRight;
-        this._bottomLeft = bottomLeft;
-    }
     get topLeft() {
         return this._topLeft;
     }
@@ -56,18 +49,25 @@ class Quadrilateral extends Serializeable_1.DefaultSerializeable {
     static fromJSON(json) {
         return new Quadrilateral(Point.fromJSON(json.topLeft), Point.fromJSON(json.topRight), Point.fromJSON(json.bottomRight), Point.fromJSON(json.bottomLeft));
     }
+    constructor(topLeft, topRight, bottomRight, bottomLeft) {
+        super();
+        this._topLeft = topLeft;
+        this._topRight = topRight;
+        this._bottomRight = bottomRight;
+        this._bottomLeft = bottomLeft;
+    }
 }
 __decorate([
-    Serializeable_1.nameForSerialization('topLeft')
+    (0, Serializeable_1.nameForSerialization)('topLeft')
 ], Quadrilateral.prototype, "_topLeft", void 0);
 __decorate([
-    Serializeable_1.nameForSerialization('topRight')
+    (0, Serializeable_1.nameForSerialization)('topRight')
 ], Quadrilateral.prototype, "_topRight", void 0);
 __decorate([
-    Serializeable_1.nameForSerialization('bottomRight')
+    (0, Serializeable_1.nameForSerialization)('bottomRight')
 ], Quadrilateral.prototype, "_bottomRight", void 0);
 __decorate([
-    Serializeable_1.nameForSerialization('bottomLeft')
+    (0, Serializeable_1.nameForSerialization)('bottomLeft')
 ], Quadrilateral.prototype, "_bottomLeft", void 0);
 exports.Quadrilateral = Quadrilateral;
 var MeasureUnit;
@@ -77,11 +77,6 @@ var MeasureUnit;
     MeasureUnit["Fraction"] = "fraction";
 })(MeasureUnit = exports.MeasureUnit || (exports.MeasureUnit = {}));
 class NumberWithUnit extends Serializeable_1.DefaultSerializeable {
-    constructor(value, unit) {
-        super();
-        this._value = value;
-        this._unit = unit;
-    }
     get value() {
         return this._value;
     }
@@ -91,20 +86,20 @@ class NumberWithUnit extends Serializeable_1.DefaultSerializeable {
     static fromJSON(json) {
         return new NumberWithUnit(json.value, json.unit);
     }
+    constructor(value, unit) {
+        super();
+        this._value = value;
+        this._unit = unit;
+    }
 }
 __decorate([
-    Serializeable_1.nameForSerialization('value')
+    (0, Serializeable_1.nameForSerialization)('value')
 ], NumberWithUnit.prototype, "_value", void 0);
 __decorate([
-    Serializeable_1.nameForSerialization('unit')
+    (0, Serializeable_1.nameForSerialization)('unit')
 ], NumberWithUnit.prototype, "_unit", void 0);
 exports.NumberWithUnit = NumberWithUnit;
 class PointWithUnit extends Serializeable_1.DefaultSerializeable {
-    constructor(x, y) {
-        super();
-        this._x = x;
-        this._y = y;
-    }
     get x() {
         return this._x;
     }
@@ -117,80 +112,80 @@ class PointWithUnit extends Serializeable_1.DefaultSerializeable {
     static get zero() {
         return new PointWithUnit(new NumberWithUnit(0, MeasureUnit.Pixel), new NumberWithUnit(0, MeasureUnit.Pixel));
     }
+    constructor(x, y) {
+        super();
+        this._x = x;
+        this._y = y;
+    }
 }
 __decorate([
-    Serializeable_1.nameForSerialization('x')
+    (0, Serializeable_1.nameForSerialization)('x')
 ], PointWithUnit.prototype, "_x", void 0);
 __decorate([
-    Serializeable_1.nameForSerialization('y')
+    (0, Serializeable_1.nameForSerialization)('y')
 ], PointWithUnit.prototype, "_y", void 0);
 exports.PointWithUnit = PointWithUnit;
 class Rect extends Serializeable_1.DefaultSerializeable {
-    constructor(origin, size) {
-        super();
-        this._origin = origin;
-        this._size = size;
-    }
     get origin() {
         return this._origin;
     }
     get size() {
         return this._size;
     }
+    constructor(origin, size) {
+        super();
+        this._origin = origin;
+        this._size = size;
+    }
 }
 __decorate([
-    Serializeable_1.nameForSerialization('origin')
+    (0, Serializeable_1.nameForSerialization)('origin')
 ], Rect.prototype, "_origin", void 0);
 __decorate([
-    Serializeable_1.nameForSerialization('size')
+    (0, Serializeable_1.nameForSerialization)('size')
 ], Rect.prototype, "_size", void 0);
 exports.Rect = Rect;
 class RectWithUnit extends Serializeable_1.DefaultSerializeable {
-    constructor(origin, size) {
-        super();
-        this._origin = origin;
-        this._size = size;
-    }
     get origin() {
         return this._origin;
     }
     get size() {
         return this._size;
     }
+    constructor(origin, size) {
+        super();
+        this._origin = origin;
+        this._size = size;
+    }
 }
 __decorate([
-    Serializeable_1.nameForSerialization('origin')
+    (0, Serializeable_1.nameForSerialization)('origin')
 ], RectWithUnit.prototype, "_origin", void 0);
 __decorate([
-    Serializeable_1.nameForSerialization('size')
+    (0, Serializeable_1.nameForSerialization)('size')
 ], RectWithUnit.prototype, "_size", void 0);
 exports.RectWithUnit = RectWithUnit;
 class SizeWithUnit extends Serializeable_1.DefaultSerializeable {
-    constructor(width, height) {
-        super();
-        this._width = width;
-        this._height = height;
-    }
     get width() {
         return this._width;
     }
     get height() {
         return this._height;
     }
-}
-__decorate([
-    Serializeable_1.nameForSerialization('width')
-], SizeWithUnit.prototype, "_width", void 0);
-__decorate([
-    Serializeable_1.nameForSerialization('height')
-], SizeWithUnit.prototype, "_height", void 0);
-exports.SizeWithUnit = SizeWithUnit;
-class Size extends Serializeable_1.DefaultSerializeable {
     constructor(width, height) {
         super();
         this._width = width;
         this._height = height;
     }
+}
+__decorate([
+    (0, Serializeable_1.nameForSerialization)('width')
+], SizeWithUnit.prototype, "_width", void 0);
+__decorate([
+    (0, Serializeable_1.nameForSerialization)('height')
+], SizeWithUnit.prototype, "_height", void 0);
+exports.SizeWithUnit = SizeWithUnit;
+class Size extends Serializeable_1.DefaultSerializeable {
     get width() {
         return this._width;
     }
@@ -200,31 +195,36 @@ class Size extends Serializeable_1.DefaultSerializeable {
     static fromJSON(json) {
         return new Size(json.width, json.height);
     }
+    constructor(width, height) {
+        super();
+        this._width = width;
+        this._height = height;
+    }
 }
 __decorate([
-    Serializeable_1.nameForSerialization('width')
+    (0, Serializeable_1.nameForSerialization)('width')
 ], Size.prototype, "_width", void 0);
 __decorate([
-    Serializeable_1.nameForSerialization('height')
+    (0, Serializeable_1.nameForSerialization)('height')
 ], Size.prototype, "_height", void 0);
 exports.Size = Size;
 class SizeWithAspect {
-    constructor(size, aspect) {
-        this._size = size;
-        this._aspect = aspect;
-    }
     get size() {
         return this._size;
     }
     get aspect() {
         return this._aspect;
     }
+    constructor(size, aspect) {
+        this._size = size;
+        this._aspect = aspect;
+    }
 }
 __decorate([
-    Serializeable_1.nameForSerialization('size')
+    (0, Serializeable_1.nameForSerialization)('size')
 ], SizeWithAspect.prototype, "_size", void 0);
 __decorate([
-    Serializeable_1.nameForSerialization('aspect')
+    (0, Serializeable_1.nameForSerialization)('aspect')
 ], SizeWithAspect.prototype, "_aspect", void 0);
 exports.SizeWithAspect = SizeWithAspect;
 var SizingMode;
@@ -328,26 +328,19 @@ class SizeWithUnitAndAspect {
     }
 }
 __decorate([
-    Serializeable_1.nameForSerialization('widthAndHeight')
+    (0, Serializeable_1.nameForSerialization)('widthAndHeight')
 ], SizeWithUnitAndAspect.prototype, "_widthAndHeight", void 0);
 __decorate([
-    Serializeable_1.nameForSerialization('widthAndAspectRatio')
+    (0, Serializeable_1.nameForSerialization)('widthAndAspectRatio')
 ], SizeWithUnitAndAspect.prototype, "_widthAndAspectRatio", void 0);
 __decorate([
-    Serializeable_1.nameForSerialization('heightAndAspectRatio')
+    (0, Serializeable_1.nameForSerialization)('heightAndAspectRatio')
 ], SizeWithUnitAndAspect.prototype, "_heightAndAspectRatio", void 0);
 __decorate([
-    Serializeable_1.nameForSerialization('shorterDimensionAndAspectRatio')
+    (0, Serializeable_1.nameForSerialization)('shorterDimensionAndAspectRatio')
 ], SizeWithUnitAndAspect.prototype, "_shorterDimensionAndAspectRatio", void 0);
 exports.SizeWithUnitAndAspect = SizeWithUnitAndAspect;
 class MarginsWithUnit extends Serializeable_1.DefaultSerializeable {
-    constructor(left, right, top, bottom) {
-        super();
-        this._left = left;
-        this._right = right;
-        this._top = top;
-        this._bottom = bottom;
-    }
     get left() {
         return this._left;
     }
@@ -366,24 +359,28 @@ class MarginsWithUnit extends Serializeable_1.DefaultSerializeable {
     static get zero() {
         return new MarginsWithUnit(new NumberWithUnit(0, MeasureUnit.Pixel), new NumberWithUnit(0, MeasureUnit.Pixel), new NumberWithUnit(0, MeasureUnit.Pixel), new NumberWithUnit(0, MeasureUnit.Pixel));
     }
+    constructor(left, right, top, bottom) {
+        super();
+        this._left = left;
+        this._right = right;
+        this._top = top;
+        this._bottom = bottom;
+    }
 }
 __decorate([
-    Serializeable_1.nameForSerialization('left')
+    (0, Serializeable_1.nameForSerialization)('left')
 ], MarginsWithUnit.prototype, "_left", void 0);
 __decorate([
-    Serializeable_1.nameForSerialization('right')
+    (0, Serializeable_1.nameForSerialization)('right')
 ], MarginsWithUnit.prototype, "_right", void 0);
 __decorate([
-    Serializeable_1.nameForSerialization('top')
+    (0, Serializeable_1.nameForSerialization)('top')
 ], MarginsWithUnit.prototype, "_top", void 0);
 __decorate([
-    Serializeable_1.nameForSerialization('bottom')
+    (0, Serializeable_1.nameForSerialization)('bottom')
 ], MarginsWithUnit.prototype, "_bottom", void 0);
 exports.MarginsWithUnit = MarginsWithUnit;
 class Color {
-    constructor(hex) {
-        this.hexadecimalString = hex;
-    }
     get redComponent() {
         return this.hexadecimalString.slice(0, 2);
     }
@@ -450,6 +447,9 @@ class Color {
             return 255 * alpha;
         }
         return alpha;
+    }
+    constructor(hex) {
+        this.hexadecimalString = hex;
     }
     withAlpha(alpha) {
         const newHex = this.hexadecimalString.slice(0, 6) + Color.numberToHex(Color.normalizeAlpha(alpha));

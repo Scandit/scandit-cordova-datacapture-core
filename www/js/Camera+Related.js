@@ -54,23 +54,6 @@ var PrivateCameraProperty;
     PrivateCameraProperty["CameraAPI"] = "api";
 })(PrivateCameraProperty || (PrivateCameraProperty = {}));
 class CameraSettings extends Serializeable_1.DefaultSerializeable {
-    constructor(settings) {
-        super();
-        this.preferredResolution = Cordova_1.Cordova.defaults.Camera.Settings.preferredResolution;
-        this.zoomFactor = Cordova_1.Cordova.defaults.Camera.Settings.zoomFactor;
-        this.zoomGestureZoomFactor = Cordova_1.Cordova.defaults.Camera.Settings.zoomGestureZoomFactor;
-        this.api = 0;
-        this.focus = {
-            range: Cordova_1.Cordova.defaults.Camera.Settings.focusRange,
-            focusGestureStrategy: Cordova_1.Cordova.defaults.Camera.Settings.focusGestureStrategy,
-            shouldPreferSmoothAutoFocus: Cordova_1.Cordova.defaults.Camera.Settings.shouldPreferSmoothAutoFocus,
-        };
-        if (settings !== undefined && settings !== null) {
-            Object.getOwnPropertyNames(settings).forEach(propertyName => {
-                this[propertyName] = settings[propertyName];
-            });
-        }
-    }
     get focusRange() {
         return this.focus.range;
     }
@@ -110,6 +93,23 @@ class CameraSettings extends Serializeable_1.DefaultSerializeable {
             settings.api = json.api;
         }
         return settings;
+    }
+    constructor(settings) {
+        super();
+        this.preferredResolution = Cordova_1.Cordova.defaults.Camera.Settings.preferredResolution;
+        this.zoomFactor = Cordova_1.Cordova.defaults.Camera.Settings.zoomFactor;
+        this.zoomGestureZoomFactor = Cordova_1.Cordova.defaults.Camera.Settings.zoomGestureZoomFactor;
+        this.api = 0;
+        this.focus = {
+            range: Cordova_1.Cordova.defaults.Camera.Settings.focusRange,
+            focusGestureStrategy: Cordova_1.Cordova.defaults.Camera.Settings.focusGestureStrategy,
+            shouldPreferSmoothAutoFocus: Cordova_1.Cordova.defaults.Camera.Settings.shouldPreferSmoothAutoFocus,
+        };
+        if (settings !== undefined && settings !== null) {
+            Object.getOwnPropertyNames(settings).forEach(propertyName => {
+                this[propertyName] = settings[propertyName];
+            });
+        }
     }
     setProperty(name, value) {
         this[name] = value;

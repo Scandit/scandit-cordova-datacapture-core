@@ -23,19 +23,6 @@ class DataCaptureContextSettings extends Serializeable_1.DefaultSerializeable {
 }
 exports.DataCaptureContextSettings = DataCaptureContextSettings;
 class DataCaptureContext extends Serializeable_1.DefaultSerializeable {
-    constructor(licenseKey, deviceName) {
-        super();
-        this.licenseKey = licenseKey;
-        this.deviceName = deviceName;
-        this.framework = 'cordova';
-        this.frameworkVersion = (window.cordova && window.cordova.version) || undefined;
-        this.settings = new DataCaptureContextSettings();
-        this._frameSource = null;
-        this.view = null;
-        this.modes = [];
-        this.components = [];
-        this.listeners = [];
-    }
     get frameSource() {
         return this._frameSource;
     }
@@ -63,6 +50,19 @@ class DataCaptureContext extends Serializeable_1.DefaultSerializeable {
             options = { deviceName: null };
         }
         return new DataCaptureContext(licenseKey, options.deviceName || '');
+    }
+    constructor(licenseKey, deviceName) {
+        super();
+        this.licenseKey = licenseKey;
+        this.deviceName = deviceName;
+        this.framework = 'cordova';
+        this.frameworkVersion = (window.cordova && window.cordova.version) || undefined;
+        this.settings = new DataCaptureContextSettings();
+        this._frameSource = null;
+        this.view = null;
+        this.modes = [];
+        this.components = [];
+        this.listeners = [];
     }
     setFrameSource(frameSource) {
         this._frameSource = frameSource;
@@ -135,7 +135,7 @@ class DataCaptureContext extends Serializeable_1.DefaultSerializeable {
     }
 }
 __decorate([
-    Serializeable_1.nameForSerialization('frameSource')
+    (0, Serializeable_1.nameForSerialization)('frameSource')
 ], DataCaptureContext.prototype, "_frameSource", void 0);
 __decorate([
     Serializeable_1.ignoreFromSerialization

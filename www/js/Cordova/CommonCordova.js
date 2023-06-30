@@ -3,16 +3,12 @@
 // ^ needed because Cordova can't resolve "../xx" style dependencies
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.initializePlugin = exports.cordovaExec = exports.pluginsMetadata = exports.CordovaError = void 0;
-// tslint:disable:no-var-requires
+/* eslint-disable @typescript-eslint/no-var-requires */
 const exec = require('cordova/exec');
 const channel = require('cordova/channel');
 const cordovaPluginsData = require('cordova/plugin_list');
-// tslint:enable:no-var-requires
+/* eslint-enable @typescript-eslint/no-var-requires */
 class CordovaError {
-    constructor(code, message) {
-        this.code = code;
-        this.message = message;
-    }
     static fromJSON(json) {
         if (json && json.code && json.message) {
             return new CordovaError(json.code, json.message);
@@ -21,10 +17,14 @@ class CordovaError {
             return null;
         }
     }
+    constructor(code, message) {
+        this.code = code;
+        this.message = message;
+    }
 }
 exports.CordovaError = CordovaError;
 exports.pluginsMetadata = cordovaPluginsData.metadata;
-exports.cordovaExec = (successCallback, errorCallback, className, functionName, args) => {
+const cordovaExec = (successCallback, errorCallback, className, functionName, args) => {
     if (window.Scandit && window.Scandit.DEBUG) {
         // tslint:disable-next-line:no-console
         console.log(`Called native function: ${functionName}`, args, { success: successCallback, error: errorCallback });
@@ -61,9 +61,11 @@ exports.cordovaExec = (successCallback, errorCallback, className, functionName, 
     };
     exec(extendedSuccessCallback, extendedErrorCallback, className, functionName, args);
 };
-exports.initializePlugin = (pluginName, customInitialization) => {
+exports.cordovaExec = cordovaExec;
+const initializePlugin = (pluginName, customInitialization) => {
     const readyEventName = `on${pluginName}Ready`;
     channel.createSticky(readyEventName);
     channel.waitForInitialization(readyEventName);
     customInitialization.then(() => channel[readyEventName].fire());
 };
+exports.initializePlugin = initializePlugin;

@@ -38,7 +38,6 @@ struct ListenerEvent {
         case didCaptureInIdCapture = "didCaptureInIdCapture"
         case didLocalizeInIdCapture = "didLocalizeInIdCapture"
         case didRejectInIdCapture = "didRejectInIdCapture"
-        case didFailInIdCapture = "didFailInIdCapture"
 
         // VolumeButtonObserver
         case didChangeVolume = "didChangeVolume"
