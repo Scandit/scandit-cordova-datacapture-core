@@ -4,7 +4,7 @@
  * Copyright (C) 2019- Scandit AG. All rights reserved.
  */
 
-def sdk_version = "6.18.0"
+def sdk_version = "6.18.1"
 
 if (System.getenv("SDC_FETCH_LIBS_SOURCE") != null) {
     def fetch = System.getenv("SDC_FETCH_LIBS_SOURCE")
@@ -30,46 +30,12 @@ android {
     }
 }
 
-def parentFile = project.projectDir.parentFile
+def hasInternalReposGradle = file('internal-repos.gradle').exists()
+if (hasInternalReposGradle) {
+    apply from: 'internal-repos.gradle'
+}
 
 repositories {
-    maven { url "file://${parentFile}/../../../../.m2/repository" }
-    maven {
-        // Repository used to fetch native libs published by develop/release pipelines
-        name = "internal"
-        url = uri("https://gitlab.scandit.com/api/v4/projects/1306/packages/maven")
-
-        credentials(HttpHeaderCredentials) {
-            if (System.getenv("CI_JOB_TOKEN") != null) {
-                name = "Job-Token"
-                value = System.getenv("CI_JOB_TOKEN")
-            } else {
-                name = "Private-Token"
-                value = System.getenv("GITLAB_PRIVATE_TOKEN")
-            }
-        }
-        authentication {
-            header(HttpHeaderAuthentication)
-        }
-    }
-    maven {
-        // Repository used to fetch native libs published during the MR pipeline
-        name = "private"
-        url = uri("https://gitlab.scandit.com/api/v4/projects/131/packages/maven")
-
-        credentials(HttpHeaderCredentials) {
-            if (System.getenv("CI_JOB_TOKEN") != null) {
-                name = "Job-Token"
-                value = System.getenv("CI_JOB_TOKEN")
-            } else {
-                name = "Private-Token"
-                value = System.getenv("GITLAB_PRIVATE_TOKEN")
-            }
-        }
-        authentication {
-            header(HttpHeaderAuthentication)
-        }
-    }
     google()
     mavenCentral()
     maven { url 'https://jitpack.io' }

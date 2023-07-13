@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <plugin id="scandit-cordova-datacapture-core"
-        version="6.18.0"
+        version="6.18.1"
         xmlns="http://apache.org/cordova/ns/plugins/1.0"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -100,7 +100,7 @@
 
         <source-file src="src/ios/SDCVolumeButtonObserver.h" />
 
-        <framework src="ScanditCaptureCore" spec="= 6.18.0" type="podspec" />
+        <framework src="ScanditCaptureCore" spec="= 6.18.1" type="podspec" />
     </platform>
 
     <!-- Android -->
@@ -270,6 +270,7 @@
             target-dir="kotlin/com/scandit/datacapture/cordova/core/utils" />
 
         <framework custom="true" src="src/android/build.gradle" type="gradleReference" />
+
         <framework src="com.squareup.okhttp3:okhttp:4.9.0" />
 
         <!-- Add Kotlin support -->
