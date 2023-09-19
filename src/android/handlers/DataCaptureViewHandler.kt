@@ -15,22 +15,18 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import com.scandit.datacapture.cordova.core.data.ResizeAndMoveInfo
 import com.scandit.datacapture.cordova.core.utils.pxFromDp
 import com.scandit.datacapture.cordova.core.utils.removeFromParent
-import com.scandit.datacapture.cordova.core.workers.Worker
 import com.scandit.datacapture.core.ui.DataCaptureView
-import com.scandit.datacapture.core.ui.DataCaptureViewListener
+import com.scandit.datacapture.frameworks.core.utils.MainThread
 import java.lang.ref.WeakReference
 
-class DataCaptureViewHandler(
-    private val viewListener: DataCaptureViewListener,
-    private val uiWorker: Worker
-) {
+class DataCaptureViewHandler {
     private var latestInfo: ResizeAndMoveInfo = ResizeAndMoveInfo(0, 0, 0, 0, false)
     private var isVisible: Boolean = false
     private var dataCaptureViewReference: WeakReference<DataCaptureView>? = null
     private var webViewReference: WeakReference<View>? = null
     private var backgroundViewReference: WeakReference<View>? = null
 
-    val dataCaptureView: DataCaptureView?
+    private val dataCaptureView: DataCaptureView?
         get() = dataCaptureViewReference?.get()
     private val webView: View?
         get() = webViewReference?.get()
@@ -47,7 +43,7 @@ class DataCaptureViewHandler(
     fun attachWebView(webView: View, activity: Activity) {
         if (this.webView != webView) {
             webViewReference = WeakReference(webView)
-            uiWorker.post {
+            MainThread.runOnMainThread {
                 val backgroundView = createBackgroundView(activity)
                 backgroundViewReference = WeakReference(backgroundView)
                 activity.addContentView(
@@ -103,9 +99,8 @@ class DataCaptureViewHandler(
 
     private fun addDataCaptureView(dataCaptureView: DataCaptureView, activity: Activity) {
         dataCaptureViewReference = WeakReference(dataCaptureView)
-        dataCaptureView.addListener(viewListener)
 
-        uiWorker.post {
+        MainThread.runOnMainThread {
             activity.addContentView(
                 dataCaptureView,
                 ViewGroup.LayoutParams(
@@ -119,13 +114,11 @@ class DataCaptureViewHandler(
 
     private fun removeDataCaptureView(dataCaptureView: DataCaptureView) {
         dataCaptureViewReference = null
-        removeView(dataCaptureView) {
-            dataCaptureView.removeListener(viewListener)
-        }
+        removeView(dataCaptureView)
     }
 
     private fun removeView(view: View, uiBlock: (() -> Unit)? = null) {
-        uiWorker.post {
+        MainThread.runOnMainThread {
             view.removeFromParent()
             uiBlock?.invoke()
         }

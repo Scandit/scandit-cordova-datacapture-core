@@ -6,16 +6,13 @@
 
 package com.scandit.datacapture.cordova.core.actions
 
+import com.scandit.datacapture.frameworks.core.CoreModule
 import org.apache.cordova.CallbackContext
 import org.json.JSONArray
 
-class ActionDisposeContext(private val listener: ResultListener) : Action {
-
+class ActionDisposeContext(private val coreModule: CoreModule) : Action {
     override fun run(args: JSONArray, callbackContext: CallbackContext) {
-        listener.onDisposeDataCaptureContext(callbackContext)
-    }
-
-    interface ResultListener {
-        fun onDisposeDataCaptureContext(callbackContext: CallbackContext)
+        coreModule.disposeContext()
+        callbackContext.success()
     }
 }
