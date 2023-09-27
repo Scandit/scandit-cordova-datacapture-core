@@ -4,14 +4,16 @@
  * Copyright (C) 2019- Scandit AG. All rights reserved.
  */
 
-def sdk_version = "6.19.0"
+def sdk_version = "6.19.1"
 
 if (System.getenv("SDC_FETCH_LIBS_SOURCE") != null) {
     def fetch = System.getenv("SDC_FETCH_LIBS_SOURCE")
 
     if (fetch == "local" && System.getenv("CI_MERGE_REQUEST_ID") != null) {
         if (sdk_version.contains("SNAPSHOT")) {
-            sdk_version = sdk_version.replace("SNAPSHOT", System.getenv("CI_MERGE_REQUEST_ID"))
+            sdk_version = sdk_version.replace("SNAPSHOT", System.getenv("CI_MERGE_REQUEST_ID") + "-SNAPSHOT")
+        } else if (System.getenv("CI_MERGE_REQUEST_ID") != null) {
+            sdk_version = sdk_version + "-" +  System.getenv("CI_MERGE_REQUEST_ID") + "-SNAPSHOT"
         }
     }
 }

@@ -1,4 +1,10 @@
 "use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PrivateFrameData = exports.ImageBuffer = exports.CameraSettings = exports.FocusGestureStrategy = exports.FocusRange = exports.VideoResolution = exports.CameraPosition = exports.TorchState = exports.FrameSourceState = void 0;
 /// <amd-module name="scandit-cordova-datacapture-core.Camera+Related"/>
@@ -49,10 +55,6 @@ var FocusGestureStrategy;
     FocusGestureStrategy["ManualUntilCapture"] = "manualUntilCapture";
     FocusGestureStrategy["AutoOnLocation"] = "autoOnLocation";
 })(FocusGestureStrategy = exports.FocusGestureStrategy || (exports.FocusGestureStrategy = {}));
-var PrivateCameraProperty;
-(function (PrivateCameraProperty) {
-    PrivateCameraProperty["CameraAPI"] = "api";
-})(PrivateCameraProperty || (PrivateCameraProperty = {}));
 class CameraSettings extends Serializeable_1.DefaultSerializeable {
     get focusRange() {
         return this.focus.range;
@@ -89,17 +91,25 @@ class CameraSettings extends Serializeable_1.DefaultSerializeable {
         settings.zoomGestureZoomFactor = json.zoomGestureZoomFactor;
         settings.focusGestureStrategy = json.focusGestureStrategy;
         settings.shouldPreferSmoothAutoFocus = json.shouldPreferSmoothAutoFocus;
-        if (json.api !== undefined && json.api !== null) {
-            settings.api = json.api;
+        if (json.properties != undefined) {
+            for (const key of Object.keys(json.properties)) {
+                settings.setProperty(key, json.properties[key]);
+            }
         }
         return settings;
     }
     constructor(settings) {
         super();
+        this.focusHiddenProperties = [
+            'range',
+            'manualLensPosition',
+            'shouldPreferSmoothAutoFocus',
+            'focusStrategy',
+            'focusGestureStrategy'
+        ];
         this.preferredResolution = Cordova_1.Cordova.defaults.Camera.Settings.preferredResolution;
         this.zoomFactor = Cordova_1.Cordova.defaults.Camera.Settings.zoomFactor;
         this.zoomGestureZoomFactor = Cordova_1.Cordova.defaults.Camera.Settings.zoomGestureZoomFactor;
-        this.api = 0;
         this.focus = {
             range: Cordova_1.Cordova.defaults.Camera.Settings.focusRange,
             focusGestureStrategy: Cordova_1.Cordova.defaults.Camera.Settings.focusGestureStrategy,
@@ -112,12 +122,22 @@ class CameraSettings extends Serializeable_1.DefaultSerializeable {
         }
     }
     setProperty(name, value) {
+        if (this.focusHiddenProperties.includes(name)) {
+            this.focus[name] = value;
+            return;
+        }
         this[name] = value;
     }
     getProperty(name) {
+        if (this.focusHiddenProperties.includes(name)) {
+            return this.focus[name];
+        }
         return this[name];
     }
 }
+__decorate([
+    Serializeable_1.ignoreFromSerialization
+], CameraSettings.prototype, "focusHiddenProperties", void 0);
 exports.CameraSettings = CameraSettings;
 class ImageBuffer {
     get width() {
