@@ -8,9 +8,6 @@ const exec = require('cordova/exec');
 const channel = require('cordova/channel');
 const cordovaPluginsData = require('cordova/plugin_list');
 /* eslint-enable @typescript-eslint/no-var-requires */
-let pluginMap = {};
-let didCoreFire = false;
-let corePluginName = 'ScanditCaptureCore';
 class CordovaError {
     static fromJSON(json) {
         if (json && json.code && json.message) {
@@ -69,24 +66,6 @@ const initializePlugin = (pluginName, customInitialization) => {
     const readyEventName = `on${pluginName}Ready`;
     channel.createSticky(readyEventName);
     channel.waitForInitialization(readyEventName);
-    const firePluginEvent = (eventName, init) => {
-        init.then(() => channel[eventName].fire());
-    };
-    if (pluginName === corePluginName) {
-        customInitialization.then(() => {
-            channel[readyEventName].fire();
-            didCoreFire = true;
-            Object.entries(pluginMap).forEach(([eventName, init]) => {
-                firePluginEvent(eventName, init);
-                delete pluginMap[eventName];
-            });
-        });
-    }
-    else if (didCoreFire) {
-        firePluginEvent(readyEventName, customInitialization);
-    }
-    else {
-        pluginMap[readyEventName] = customInitialization;
-    }
+    customInitialization.then(() => channel[readyEventName].fire());
 };
 exports.initializePlugin = initializePlugin;
