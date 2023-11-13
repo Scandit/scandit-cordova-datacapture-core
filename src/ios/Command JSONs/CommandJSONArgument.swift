@@ -15,10 +15,6 @@ extension CDVInvokedUrlCommand {
 
         return String(data: data, encoding: .utf8)
     }
-
-    var defaultArgumentAsDictionary: [String: Any?]? {
-        defaultArgument as? [String: Any?]
-    }
 }
 
 protocol CommandJSONArgument: Decodable {

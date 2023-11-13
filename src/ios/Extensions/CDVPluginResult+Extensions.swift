@@ -1,43 +1,43 @@
 struct ListenerEvent {
     enum Name: String, Decodable {
         // Context listener
-        case didChangeContextStatus = "DataCaptureContextListener.onStatusChanged"
-        case didStartObservingContext = "DataCaptureContextListener.onObservationStarted"
+        case didChangeContextStatus = "didChangeStatus"
+        case didStartObservingContext = "didStartObservingContext"
 
         // View listener
-        case didChangeSize = "DataCaptureViewListener.onSizeChanged"
+        case didChangeSize = "didChangeSizeOrientation"
 
         // Frame Source listener
-        case didChangeState = "FrameSourceListener.onStateChanged"
+        case didChangeState = "didChangeState"
 
         // Barcode Capture listener
-        case didScanInBarcodeCapture = "BarcodeCaptureListener.didScan"
-        case didUpdateSessionInBarcodeCapture = "BarcodeCaptureListener.didUpdateSession"
+        case didScanInBarcodeCapture = "didScanInBarcodeCapture"
+        case didUpdateSessionInBarcodeCapture = "didUpdateSessionInBarcodeCapture"
 
         // Barcode Tracking listener
-        case didUpdateSessionInBarcodeTracking = "BarcodeTrackingListener.didUpdateSession"
+        case didUpdateSessionInBarcodeTracking = "didUpdateSessionInBarcodeTracking"
 
         // Barcode Tracking Basic Overlay listener
-        case brushForTrackedBarcode = "BarcodeTrackingBasicOverlayListener.brushForTrackedBarcode"
-        case didTapTrackedBarcode = "BarcodeTrackingBasicOverlayListener.didTapTrackedBarcode"
+        case brushForTrackedBarcode = "brushForTrackedBarcode"
+        case didTapTrackedBarcode = "didTapTrackedBarcode"
 
         // Barcode Tracking Advanced Overlay listener
-        case viewForTrackedBarcode = "BarcodeTrackingAdvancedOverlayListener.viewForTrackedBarcode"
-        case anchorForTrackedBarcode = "BarcodeTrackingAdvancedOverlayListener.anchorForTrackedBarcode"
-        case offsetForTrackedBarcode = "BarcodeTrackingAdvancedOverlayListener.offsetForTrackedBarcode"
-        case didTapViewForTrackedBarcode = "BarcodeTrackingAdvancedOverlayListener.didTapViewForTrackedBarcode"
+        case viewForTrackedBarcode = "viewForTrackedBarcode"
+        case anchorForTrackedBarcode = "anchorForTrackedBarcode"
+        case offsetForTrackedBarcode = "offsetForTrackedBarcode"
+        case didTapViewForTrackedBarcode = "didTapViewForTrackedBarcode"
 
         // Barcode Tracking listener
-        case didUpdateSelectionInBarcodeSelection = "BarcodeSelectionListener.didUpdateSelection"
-        case didUpdateSessionInBarcodeSelection = "BarcodeSelectionListener.didUpdateSession"
+        case didUpdateSelectionInBarcodeSelection = "didUpdateSelectionInBarcodeSelection"
+        case didUpdateSessionInBarcodeSelection = "didUpdateSessionInBarcodeSelection"
 
         // Text Capture Listener
         case didCaptureInTextCapture = "didCaptureInTextCapture"
 
         // ID Capture Listener
-        case didCaptureInIdCapture = "IdCaptureListener.didCaptureId"
-        case didLocalizeInIdCapture = "IdCaptureListener.didLocalizeId"
-        case didRejectInIdCapture = "IdCaptureListener.didRejectId"
+        case didCaptureInIdCapture = "didCaptureInIdCapture"
+        case didLocalizeInIdCapture = "didLocalizeInIdCapture"
+        case didRejectInIdCapture = "didRejectInIdCapture"
 
         // VolumeButtonObserver
         case didChangeVolume = "didChangeVolume"
@@ -93,7 +93,6 @@ struct CommandError {
         case noBarcodeTrackingSession = 10076
 
         case noFrameData = 10077
-        case noBarcodeSelectionIdentifier = 10078
     }
 
     public static let invalidJSON = CommandError(code: .invalidJSON,
@@ -170,11 +169,6 @@ struct CommandError {
                                                 There was no BarcodeSelection session to execute the command on
                                                 """)
 
-    public static let missingBarcodeSelectionIdentifier = CommandError(code: .noBarcodeSelectionIdentifier,
-                                                                       message: """
-                                               There was no BarcodeSelection identifier passed.
-                                               """)
-
     public static let noBarcodeSelectionOverlay = CommandError(code: .noBarcodeSelectionOverlay,
                                                message: """
                                                 There was no BarcodeSelection overlay to execute the command on
@@ -197,7 +191,7 @@ struct CommandError {
 }
 
 extension CDVPluginResult {
-    typealias JSONMessage = [AnyHashable: Any]
+    typealias JSONMessage = [AnyHashable: AnyHashable]
 
     // MARK: - Success results
 
@@ -238,12 +232,6 @@ extension CDVPluginResult {
     /// Used with stored callback IDs from listeners when their callbacks are called.
     static func listenerCallback(_ event: ListenerEvent) -> CDVPluginResult {
         let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: event.resultMessage)!
-        result.setKeepCallbackAs(true)
-        return result
-    }
-
-    static func listenerCallback(_ message: [String: Any?]) -> CDVPluginResult {
-        let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: message as [AnyHashable: Any])!
         result.setKeepCallbackAs(true)
         return result
     }

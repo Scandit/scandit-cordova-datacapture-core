@@ -1,6 +1,6 @@
 {
   "name": "scandit-cordova-datacapture-core",
-  "version": "6.19.6",
+  "version": "6.18.3",
   "description": "Scandit Data Capture SDK for Cordova",
   "license": "Apache-2.0",
   "private": false,
@@ -16,7 +16,7 @@
     "postbuild": "node ./scripts/normalize-d-ts.js",
     "test": "npm run lint && jest",
     "lint": "eslint ./www/ts",
-    "coverage": "jest --coverage --maxWorkers=12",
+    "coverage": "jest --coverage",
     "clear-jest-cache": "jest --clearCache || true",
     "clean": "npm run clear-jest-cache && node ./scripts/clean.js",
     "clean-all": "npm run clean && node ./scripts/clean-all.js"

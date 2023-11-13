@@ -6,21 +6,16 @@
 
 package com.scandit.datacapture.cordova.core.actions
 
-import com.scandit.datacapture.cordova.core.errors.NoLastFrameError
-import com.scandit.datacapture.frameworks.core.utils.LastFrameData
 import org.apache.cordova.CallbackContext
 import org.json.JSONArray
 
-class ActionGetLastFrame : Action {
+class ActionGetLastFrame(private val listener: ResultListener) : Action {
 
     override fun run(args: JSONArray, callbackContext: CallbackContext) {
-        LastFrameData.getLastFrameDataJson { frameAsJson ->
-            if (frameAsJson == null) {
-                NoLastFrameError().sendResult(callbackContext)
-                return@getLastFrameDataJson
-            }
+        listener.getLastFrame(callbackContext)
+    }
 
-            callbackContext.success(frameAsJson)
-        }
+    interface ResultListener {
+        fun getLastFrame(callbackContext: CallbackContext)
     }
 }

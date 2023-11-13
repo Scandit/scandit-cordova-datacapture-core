@@ -1,39 +1,29 @@
 import WebKit
 
 import ScanditCaptureCore
-import ScanditFrameworksCore
+
+class ScanditCaptureCoreCallbacks {
+    var contextListener: Callback?
+    var viewListener: Callback?
+    var frameSourceListener: Callback?
+    var volumeButtonObserver: Callback?
+}
+
+protocol DataCapturePlugin where Self: CDVPlugin {
+    var modeDeserializers: [DataCaptureModeDeserializer] { get }
+    var componentDeserializers: [DataCaptureComponentDeserializer] { get }
+    var components: [DataCaptureComponent] { get }
+}
 
 @objc(ScanditCaptureCore)
 // swiftlint:disable:next type_body_length
 public class ScanditCaptureCore: CDVPlugin {
-    var coreModule: CoreModule!
-    var eventEmitter: CordovaEventEmitter!
-    var volumeButtonObserverCallback: Callback?
 
-    public static var lastFrame: FrameData? {
-        get {
-            LastFrameData.shared.frameData
-        }
-        set {
-            LastFrameData.shared.frameData = newValue
-        }
-    }
+    static var dataCapturePlugins = [DataCapturePlugin]()
 
-    public static func registerModeDeserializer(_ modeDeserializer: DataCaptureModeDeserializer) {
-        Deserializers.Factory.add(modeDeserializer)
-    }
+    public var context: DataCaptureContext?
 
-    public static func unregisterModeDeserializer(_ modeDeserialzer: DataCaptureModeDeserializer) {
-        Deserializers.Factory.remove(modeDeserialzer)
-    }
-
-    public static func registerComponentDeserializer(_ componentDeserializer: DataCaptureComponentDeserializer) {
-        Deserializers.Factory.add(componentDeserializer)
-    }
-
-    public static func unregisterComponentDeserializer(_ componentDeserializer: DataCaptureComponentDeserializer) {
-        Deserializers.Factory.remove(componentDeserializer)
-    }
+    public static var lastFrame: FrameData?
 
     var captureView: DataCaptureView? {
         didSet {
@@ -48,6 +38,8 @@ public class ScanditCaptureCore: CDVPlugin {
                 return
             }
 
+            captureView.addListener(self)
+
             captureView.isHidden = true
             captureView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -56,11 +48,50 @@ public class ScanditCaptureCore: CDVPlugin {
         }
     }
 
-    private var context: DataCaptureContext?
-
     private var volumeButtonObserver: VolumeButtonObserver?
 
     private lazy var captureViewConstraints = DataCaptureViewConstraints(relativeTo: webView as! WKWebView)
+
+    private lazy var viewDeserializer: DataCaptureViewDeserializer = {
+        let deserializer = DataCaptureViewDeserializer(modeDeserializers: modeDeserializers)
+        deserializer.delegate = self
+        return deserializer
+    }()
+
+    private lazy var frameSourceDeserializer: FrameSourceDeserializer = {
+        let deserializer = FrameSourceDeserializer(modeDeserializers: modeDeserializers)
+        deserializer.delegate = self
+        return deserializer
+    }()
+
+    private var modeDeserializers: [DataCaptureModeDeserializer] {
+        return ScanditCaptureCore.dataCapturePlugins.reduce(into: []) { deserializers, plugin in
+            deserializers.append(contentsOf: plugin.modeDeserializers)
+        }
+    }
+
+    private var componentDeserializers: [DataCaptureComponentDeserializer] {
+        return ScanditCaptureCore.dataCapturePlugins.reduce(into: []) { deserializers, plugin in
+            deserializers.append(contentsOf: plugin.componentDeserializers)
+        }
+    }
+
+    private var components: [DataCaptureComponent] {
+        return ScanditCaptureCore.dataCapturePlugins.reduce(into: []) { components, plugin in
+            components.append(contentsOf: plugin.components)
+        }
+    }
+
+    public lazy var deserializer: DataCaptureContextDeserializer = {
+        let deserializer = DataCaptureContextDeserializer(frameSourceDeserializer: self.frameSourceDeserializer,
+                                                          viewDeserializer: viewDeserializer,
+                                                          modeDeserializers: modeDeserializers,
+                                                          componentDeserializers: componentDeserializers)
+        deserializer.avoidThreadDependencies = true
+        return deserializer
+    }()
+
+    lazy var callbacks = ScanditCaptureCoreCallbacks()
 
     public override func pluginInitialize() {
         guard webView is WKWebView else {
@@ -69,28 +100,24 @@ public class ScanditCaptureCore: CDVPlugin {
                 For more information, see the Scandit documentation about how to add the Data Capture SDK to your app.
                 """)
         }
-
-        eventEmitter = CordovaEventEmitter(commandDelegate: commandDelegate)
-        let frameSourceListener = FrameworksFrameSourceListener(eventEmitter: eventEmitter)
-        let frameSourceDeserializer = FrameworksFrameSourceDeserializer(
-            frameSourceListener: frameSourceListener,
-            torchListener: frameSourceListener
-        )
-        let contextListener = FrameworksDataCaptureContextListener(eventEmitter: eventEmitter)
-        let viewListener = FrameworksDataCaptureViewListener(eventEmitter: eventEmitter)
-        
-        coreModule = CoreModule(frameSourceDeserializer: frameSourceDeserializer,
-                                frameSourceListener: frameSourceListener,
-                                dataCaptureContextListener: contextListener,
-                                dataCaptureViewListener: viewListener
-        )
-        coreModule.didStart()
-        DeserializationLifeCycleDispatcher.shared.attach(observer: self)
     }
 
-    public override func dispose() {
-        coreModule.didStop()
-        DeserializationLifeCycleDispatcher.shared.detach(observer: self)
+    public override func onReset() {
+        super.onReset()
+
+        // Remove the data capture view
+        captureView = nil
+
+        // Dispose of the context
+        context?.dispose()
+        context = nil
+
+        // Reset callbacks that might be stored
+        callbacks.contextListener = nil
+        callbacks.viewListener = nil
+        callbacks.volumeButtonObserver = nil
+
+        volumeButtonObserver = nil
     }
 
     // MARK: - DataCaptureContextProxy
@@ -103,7 +130,20 @@ public class ScanditCaptureCore: CDVPlugin {
             commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
             return
         }
-        coreModule.createContextFromJSON(jsonString, result: CordovaResult(commandDelegate, command.callbackId))
+
+        context?.dispose()
+
+        do {
+            context = try deserializer.context(fromJSONString: jsonString).context
+        } catch let error {
+            commandDelegate.send(.failure(with: error), callbackId: command.callbackId)
+            contextDeserializationFailed(with: error)
+            return
+        }
+
+        context!.addListener(self)
+
+        commandDelegate.send(.success, callbackId: command.callbackId)
     }
 
     @objc(updateContextFromJSON:)
@@ -112,50 +152,82 @@ public class ScanditCaptureCore: CDVPlugin {
             commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
             return
         }
-        coreModule.updateContextFromJSON(jsonString, result: CordovaResult(commandDelegate, command.callbackId))
+
+        guard let context = context else {
+            return contextFromJSON(command: command)
+        }
+
+        do {
+            try deserializer.update(context, view: captureView, components: components, fromJSON: jsonString)
+        } catch let error {
+            if (error.localizedDescription.contains("The mode cannot be updated: already initialized but")) {
+                contextFromJSON(command: command)
+                return
+            }
+            
+            commandDelegate.send(.failure(with: error), callbackId: command.callbackId)
+            contextDeserializationFailed(with: error)
+            return
+        }
+
+        commandDelegate.send(.success, callbackId: command.callbackId)
+    }
+
+    private func contextDeserializationFailed(with error: Error) {
+        guard let callback = callbacks.contextListener else {
+            return
+        }
+
+        let errorStatus: CDVPluginResult.JSONMessage = [
+            "code": -1,
+            "isValid": true,
+            "message": "Could not deserialize context: \(error.localizedDescription)"
+        ]
+        // "Route" through context deserialization errors to the context listener as status updates
+        let event = ListenerEvent(name: .didChangeContextStatus,
+                                  argument: errorStatus)
+        commandDelegate.send(.listenerCallback(event), callbackId: callback.id)
     }
 
     // MARK: Listeners
 
     @objc(subscribeContextListener:)
     func subscribeContextListener(command: CDVInvokedUrlCommand) {
-        eventEmitter.registerCallback(with: .contextObservingStarted, call: command)
-        eventEmitter.registerCallback(with: .contextStatusChanged, call: command)
-        coreModule.registerDataCaptureContextListener()
+        callbacks.contextListener?.dispose(by: commandDelegate)
+        callbacks.contextListener = Callback(id: command.callbackId)
         commandDelegate.send(.keepCallback, callbackId: command.callbackId)
     }
 
     @objc(subscribeViewListener:)
     func subscribeViewListener(command: CDVInvokedUrlCommand) {
-        eventEmitter.registerCallback(with: .dataCaptureViewSizeChanged, call: command)
-        coreModule.registerDataCaptureViewListener()
+        callbacks.viewListener?.dispose(by: commandDelegate)
+        callbacks.viewListener = Callback(id: command.callbackId)
         commandDelegate.send(.keepCallback, callbackId: command.callbackId)
     }
 
     @objc(subscribeFrameSourceListener:)
     func subscribeFrameSourceListener(command: CDVInvokedUrlCommand) {
-        eventEmitter.registerCallback(with: .frameSourceStateChanged, call: command)
-        eventEmitter.registerCallback(with: .torchStateChanged, call: command)
-        coreModule.registerFrameSourceListener()
+        callbacks.frameSourceListener?.dispose(by: commandDelegate)
+        callbacks.frameSourceListener = Callback(id: command.callbackId)
         commandDelegate.send(.keepCallback, callbackId: command.callbackId)
     }
 
     @objc(subscribeVolumeButtonObserver:)
     func subscribeVolumeButtonObserver(command: CDVInvokedUrlCommand) {
-        volumeButtonObserverCallback = Callback(id: command.callbackId)
+        callbacks.volumeButtonObserver = Callback(id: command.callbackId)
         volumeButtonObserver = VolumeButtonObserver(handler: { [weak self] in
             guard let self = self else {
                 return
             }
             self.commandDelegate.send(.listenerCallback(ListenerEvent(name: .didChangeVolume)),
-                                      callbackId: self.volumeButtonObserverCallback!.id)
+                                      callbackId: self.callbacks.volumeButtonObserver!.id)
         })
         commandDelegate.send(.keepCallback, callbackId: command.callbackId)
     }
 
     @objc(unsubscribeVolumeButtonObserver:)
     func unsubscribeVolumeButtonObserver(command: CDVInvokedUrlCommand) {
-        volumeButtonObserverCallback?.dispose(by: commandDelegate)
+        callbacks.volumeButtonObserver?.dispose(by: commandDelegate)
         volumeButtonObserver = nil
         commandDelegate.send(.success, callbackId: command.callbackId)
     }
@@ -164,7 +236,7 @@ public class ScanditCaptureCore: CDVPlugin {
 
     @objc(disposeContext:)
     func disposeContext(command: CDVInvokedUrlCommand) {
-        coreModule.disposeContext()
+        context?.dispose()
         commandDelegate.send(.success, callbackId: command.callbackId)
     }
 
@@ -239,8 +311,8 @@ public class ScanditCaptureCore: CDVPlugin {
             return
         }
 
-        var quad: Quadrilateral = Quadrilateral(topLeft: .zero, topRight: .zero, bottomRight: .zero, bottomLeft: .zero)
-        guard let jsonString = command.defaultArgumentAsString, SDCQuadrilateralFromJSONString(jsonString, &quad) else {
+        guard let jsonString = command.defaultArgumentAsString,
+              let quad = Quadrilateral(jsonString: jsonString) else {
             commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
             return
         }
@@ -258,29 +330,41 @@ public class ScanditCaptureCore: CDVPlugin {
             commandDelegate.send(.failure(with: .noCamera), callbackId: command.callbackId)
             return
         }
-        coreModule.getCameraState(
-            cameraPosition: camera.position.jsonString,
-            result: CordovaResult(commandDelegate, command.callbackId)
-        )
+
+        commandDelegate.send(.success(message: camera.currentState.jsonString), callbackId: command.callbackId)
     }
 
     @objc(getIsTorchAvailable:)
     func getIsTorchAvailable(command: CDVInvokedUrlCommand) {
-        guard let camera = context?.frameSource as? Camera else {
-            commandDelegate.send(.failure(with: .noCamera), callbackId: command.callbackId)
+        guard let jsonString = command.defaultArgumentAsString,
+              let cameraPosition = CameraPosition(jsonString: jsonString) else {
+            commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
             return
         }
-        coreModule.isTorchAvailable(
-            cameraPosition: camera.position.jsonString,
-            result: CordovaResult(commandDelegate, command.callbackId)
-        )
+
+        guard let camera = Camera(position: cameraPosition) else {
+            commandDelegate.send(.failure(with: .noCamera(withPosition: cameraPosition.jsonString)),
+                                 callbackId: command.callbackId)
+            return
+        }
+
+        commandDelegate.send(.success(message: camera.isTorchAvailable), callbackId: command.callbackId)
     }
 
     // MARK: - Defaults
 
     @objc(getDefaults:)
     func getDefaults(command: CDVInvokedUrlCommand) {
-        let defaults = coreModule.defaults.toEncodable() as CDVPluginResult.JSONMessage
+        let temporaryCameraSettings = CameraSettings()
+        let temporaryView = DataCaptureView.init(frame: CGRect.zero)
+
+        let defaults = ScanditCaptureCoreDefaults(cameraSettings: temporaryCameraSettings,
+                                                  dataCaptureView: temporaryView,
+                                                  laserlineViewfinder: LaserlineViewfinder(),
+                                                  rectangularViewfinder: RectangularViewfinder(),
+                                                  spotlightViewfinder: SpotlightViewfinder(),
+                                                  aimerViewfinder: AimerViewfinder(),
+                                                  brush: Brush())
         commandDelegate.send(.success(message: defaults), callbackId: command.callbackId)
     }
 
@@ -309,15 +393,5 @@ public class ScanditCaptureCore: CDVPlugin {
     @objc(getLastFrameOrNull:)
     func getLastFrameOrNull(command: CDVInvokedUrlCommand) {
         commandDelegate.send(.success(message: ScanditCaptureCore.lastFrame?.jsonString), callbackId: command.callbackId)
-    }
-}
-
-extension ScanditCaptureCore: DeserializationLifeCycleObserver {
-    public func dataCaptureContext(deserialized context: DataCaptureContext?) {
-        self.context = context
-    }
-
-    public func dataCaptureView(deserialized view: DataCaptureView?) {
-        captureView = view
     }
 }

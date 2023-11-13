@@ -6,16 +6,42 @@
 
 package com.scandit.datacapture.cordova.core.actions
 
-import com.scandit.datacapture.cordova.core.utils.CordovaResult
-import com.scandit.datacapture.frameworks.core.CoreModule
+import com.scandit.datacapture.core.source.Camera
+import com.scandit.datacapture.core.source.CameraPositionDeserializer
+import com.scandit.datacapture.core.source.toJson
 import org.apache.cordova.CallbackContext
 import org.json.JSONArray
 
 class ActionGetIsTorchAvailable(
-    private val coreModule: CoreModule
+    private val camera: Camera?,
+    private val listener: ResultListener
 ) : Action {
     override fun run(args: JSONArray, callbackContext: CallbackContext) {
-        val cameraPositionJson = args[0].toString()
-        coreModule.isTorchAvailable(cameraPositionJson, CordovaResult(callbackContext))
+        if (camera == null) {
+            listener.onNoCameraError(callbackContext)
+            return
+        }
+
+        val cameraPosition = try {
+            CameraPositionDeserializer.fromJson(args[0].toString())
+        } catch (e: Exception) {
+            println(e)
+            listener.onUnableToDeserializePositionError("GetIsTorchAvailable", callbackContext)
+            return
+        }
+
+        if (cameraPosition != camera.position) {
+            listener.onWrongCameraPositionError(cameraPosition.toJson(), callbackContext)
+            return
+        }
+
+        listener.onGetIsTorchAvailable(camera.isTorchAvailable, callbackContext)
+    }
+
+    interface ResultListener {
+        fun onGetIsTorchAvailable(isTorchAvailable: Boolean, callbackContext: CallbackContext)
+        fun onNoCameraError(callbackContext: CallbackContext)
+        fun onUnableToDeserializePositionError(action: String, callbackContext: CallbackContext)
+        fun onWrongCameraPositionError(position: String, callbackContext: CallbackContext)
     }
 }

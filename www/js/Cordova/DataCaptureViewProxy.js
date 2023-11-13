@@ -7,7 +7,7 @@ const Common_1 = require("scandit-cordova-datacapture-core.Common");
 const Cordova_1 = require("scandit-cordova-datacapture-core.Cordova");
 var DataCaptureViewListenerEvent;
 (function (DataCaptureViewListenerEvent) {
-    DataCaptureViewListenerEvent["DidChangeSizeOrientation"] = "DataCaptureViewListener.onSizeChanged";
+    DataCaptureViewListenerEvent["DidChangeSizeOrientation"] = "didChangeSizeOrientation";
 })(DataCaptureViewListenerEvent || (DataCaptureViewListenerEvent = {}));
 class DataCaptureViewProxy {
     static forDataCaptureView(view) {

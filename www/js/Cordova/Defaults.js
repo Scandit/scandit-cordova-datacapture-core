@@ -14,7 +14,6 @@ const defaultsFromJSON = (json) => {
                 zoomGestureZoomFactor: json.Camera.Settings.zoomGestureZoomFactor,
                 focusGestureStrategy: json.Camera.Settings.focusGestureStrategy,
                 shouldPreferSmoothAutoFocus: json.Camera.Settings.shouldPreferSmoothAutoFocus,
-                properties: json.Camera.Settings.properties,
             },
             defaultPosition: json.Camera.defaultPosition || null,
             availablePositions: json.Camera.availablePositions,

@@ -6,13 +6,16 @@
 
 package com.scandit.datacapture.cordova.core.actions
 
-import com.scandit.datacapture.cordova.core.handlers.DataCaptureViewHandler
 import org.apache.cordova.CallbackContext
 import org.json.JSONArray
 
-class ActionViewHide(private val dataCaptureViewHandler: DataCaptureViewHandler) : Action {
+class ActionViewHide(private val listener: ResultListener) : Action {
+
     override fun run(args: JSONArray, callbackContext: CallbackContext) {
-        dataCaptureViewHandler.setInvisible()
-        callbackContext.success()
+        listener.onHideDataCaptureView(callbackContext)
+    }
+
+    interface ResultListener {
+        fun onHideDataCaptureView(callbackContext: CallbackContext)
     }
 }
