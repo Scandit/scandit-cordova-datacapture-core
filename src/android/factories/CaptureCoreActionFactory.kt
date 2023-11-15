@@ -6,24 +6,16 @@
 
 package com.scandit.datacapture.cordova.core.factories
 
-import android.content.Context
-import com.scandit.datacapture.cordova.core.CoreActionsListeners
 import com.scandit.datacapture.cordova.core.actions.*
-import com.scandit.datacapture.cordova.core.deserializers.DeserializersProvider
 import com.scandit.datacapture.cordova.core.errors.InvalidActionNameError
-import com.scandit.datacapture.cordova.core.handlers.DataCaptureComponentsHandler
-import com.scandit.datacapture.cordova.core.handlers.DataCaptureContextHandler
 import com.scandit.datacapture.cordova.core.handlers.DataCaptureViewHandler
-import com.scandit.datacapture.cordova.core.workers.Worker
+import com.scandit.datacapture.cordova.core.utils.CordovaEventEmitter
+import com.scandit.datacapture.frameworks.core.CoreModule
 
 class CaptureCoreActionFactory(
-    private val context: Context,
-    private val listener: CoreActionsListeners,
-    private val deserializersProvider: DeserializersProvider,
-    private val captureContextHandler: DataCaptureContextHandler,
-    private val captureComponenentsHandler: DataCaptureComponentsHandler,
-    private val captureViewHandler: DataCaptureViewHandler,
-    private val uiWorker: Worker
+    private val coreModule: CoreModule,
+    private val dataCaptureViewHandler: DataCaptureViewHandler,
+    private val eventEmitter: CordovaEventEmitter
 ) : ActionFactory {
 
     @Throws(InvalidActionNameError::class)
@@ -41,13 +33,9 @@ class CaptureCoreActionFactory(
             CONVERT_POINT_COORDINATES -> createActionConvertPointCoordinates()
             CONVERT_QUAD_COORDINATES -> createActionConvertQuadrilateralCoordinates()
             GET_CAMERA_STATE -> createActionGetCameraState()
-            SEND_CONTEXT_STATUS_UPDATE_EVENT -> createActionContextStatusUpdate()
-            SEND_CONTEXT_OBSERVATION_STARTED_EVENT -> createActionContextObservationStarted()
-            SEND_VIEW_SIZE_CHANGED_EVENT -> createActionViewSizeChanged()
             ACTION_EMIT_FEEDBACK -> createActionEmitFeedback()
             GET_IS_TORCH_AVAILABLE -> createActionGetIsTorchAvailable()
             SUBSCRIBE_FRAME_SOURCE -> createSubscribeFrameSource()
-            SEND_ON_FRAME_SOURCE_STATE_CHANGED_EVENT -> createActionFrameSourceStateChanged()
             GET_LAST_FRAME -> createActionGetLastFrame()
             else -> throw InvalidActionNameError(actionName)
         }
@@ -56,64 +44,47 @@ class CaptureCoreActionFactory(
     override fun canBeRunWithoutCameraPermission(actionName: String): Boolean =
         actionName !in ACTIONS_REQUIRING_CAMERA
 
-    private fun createActionInjectDefaults() = ActionInjectDefaults(context, listener)
+    private fun createActionInjectDefaults() = ActionInjectDefaults(coreModule)
 
-    private fun createActionCreateContextAndView() = ActionCreateContextAndView(
-        deserializersProvider.deserializers.dataCaptureContextDeserializer, listener
-    )
+    private fun createActionCreateContextAndView() =
+        ActionCreateContextAndView(coreModule)
 
     private fun createActionUpdateContextAndView() = ActionUpdateContextAndView(
-        deserializersProvider.deserializers.dataCaptureContextDeserializer,
-        captureContextHandler.dataCaptureContext,
-        captureViewHandler.dataCaptureView,
-        captureComponenentsHandler.dataCaptureComponents,
-        CREATE_CONTEXT,
-        listener,
-        uiWorker
+        coreModule
     )
 
-    private fun createActionViewShow() = ActionViewShow(listener)
+    private fun createActionViewShow() = ActionViewShow(dataCaptureViewHandler)
 
-    private fun createActionViewHide() = ActionViewHide(listener)
+    private fun createActionViewHide() = ActionViewHide(dataCaptureViewHandler)
 
-    private fun createActionViewResizeMove() = ActionViewResizeMove(listener)
+    private fun createActionViewResizeMove() = ActionViewResizeMove(dataCaptureViewHandler)
 
-    private fun createActionDisposeContext() = ActionDisposeContext(listener)
+    private fun createActionDisposeContext() = ActionDisposeContext(coreModule)
 
-    private fun createActionSubscribeContext() = ActionSubscribeContext(listener)
+    private fun createActionSubscribeContext() = ActionSubscribeContext(coreModule, eventEmitter)
 
-    private fun createActionSubscribeView() = ActionSubscribeView(listener)
+    private fun createActionSubscribeView() = ActionSubscribeView(coreModule, eventEmitter)
 
     private fun createActionConvertPointCoordinates() = ActionConvertPointCoordinates(
-        captureViewHandler.dataCaptureView, listener
+        coreModule
     )
 
     private fun createActionConvertQuadrilateralCoordinates() =
-        ActionConvertQuadrilateralCoordinates(captureViewHandler.dataCaptureView, listener)
+        ActionConvertQuadrilateralCoordinates(coreModule)
 
     private fun createActionGetCameraState() = ActionGetCameraState(
-        captureContextHandler.camera, listener
+        coreModule
     )
 
-    private fun createActionContextStatusUpdate() = ActionSend(ACTION_STATUS_CHANGED, listener)
-
-    private fun createActionContextObservationStarted() =
-        ActionSend(ACTION_CONTEXT_OBSERVATION_STARTED, listener)
-
-    private fun createActionViewSizeChanged() = ActionSend(ACTION_VIEW_SIZE_CHANGED, listener)
-
-    private fun createActionEmitFeedback() = ActionEmitFeedback(listener)
+    private fun createActionEmitFeedback() = ActionEmitFeedback(coreModule)
 
     private fun createActionGetIsTorchAvailable() = ActionGetIsTorchAvailable(
-        captureContextHandler.camera, listener
+        coreModule
     )
 
-    private fun createSubscribeFrameSource() = ActionSubscribeFrameSource(listener)
+    private fun createSubscribeFrameSource() = ActionSubscribeFrameSource(coreModule, eventEmitter)
 
-    private fun createActionFrameSourceStateChanged() =
-        ActionSend(ACTION_FRAME_SOURCE_STATE_CHANGED, listener)
-
-    private fun createActionGetLastFrame() = ActionGetLastFrame(listener)
+    private fun createActionGetLastFrame() = ActionGetLastFrame()
 
     companion object {
         private const val INJECT_DEFAULTS = "getDefaults"
@@ -131,16 +102,6 @@ class CaptureCoreActionFactory(
         private const val ACTION_EMIT_FEEDBACK = "emitFeedback"
         private const val GET_IS_TORCH_AVAILABLE = "getIsTorchAvailable"
         private const val SUBSCRIBE_FRAME_SOURCE = "subscribeFrameSourceListener"
-
-        const val SEND_CONTEXT_STATUS_UPDATE_EVENT = "sendContextStatusUpdateEvent"
-        const val SEND_CONTEXT_OBSERVATION_STARTED_EVENT = "sendContextObservationStartedEvent"
-        const val SEND_VIEW_SIZE_CHANGED_EVENT = "sendViewSizeChangedEvent"
-        const val SEND_ON_FRAME_SOURCE_STATE_CHANGED_EVENT = "sendFrameSourceOnStateChangedEvent"
-
-        const val ACTION_STATUS_CHANGED = "didChangeStatus"
-        const val ACTION_CONTEXT_OBSERVATION_STARTED = "didStartObservingContext"
-        const val ACTION_VIEW_SIZE_CHANGED = "didChangeSizeOrientation"
-        const val ACTION_FRAME_SOURCE_STATE_CHANGED = "didChangeState"
 
         const val GET_LAST_FRAME = "getLastFrame"
 

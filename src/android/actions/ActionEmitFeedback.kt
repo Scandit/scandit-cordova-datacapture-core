@@ -6,28 +6,17 @@
 
 package com.scandit.datacapture.cordova.core.actions
 
-import com.scandit.datacapture.core.common.feedback.Feedback
+import com.scandit.datacapture.cordova.core.utils.CordovaResult
+import com.scandit.datacapture.frameworks.core.CoreModule
 import org.apache.cordova.CallbackContext
 import org.json.JSONArray
-import org.json.JSONException
 
 class ActionEmitFeedback(
-    private val listener: ResultListener
+    private val coreModule: CoreModule
 ) : Action {
 
     override fun run(args: JSONArray, callbackContext: CallbackContext) {
-        try {
-            val jsonObject = args.getJSONObject(0)
-            val feedback = Feedback.fromJson(jsonObject.toString())
-            listener.onEmitFeedback(feedback, callbackContext)
-        } catch (e: JSONException) {
-            listener.onJsonParseError(e, callbackContext)
-        } catch (e: RuntimeException) { // TODO [SDC-1851] - fine-catch deserializer exceptions
-            listener.onJsonParseError(e, callbackContext)
-        }
-    }
-
-    interface ResultListener : ActionJsonParseErrorResultListener {
-        fun onEmitFeedback(feedback: Feedback, callbackContext: CallbackContext)
+        val jsonObject = args.getJSONObject(0)
+        coreModule.emitFeedback(jsonObject.toString(), CordovaResult(callbackContext))
     }
 }

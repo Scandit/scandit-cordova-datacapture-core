@@ -10,6 +10,9 @@ export interface CameraSettingsDefaults {
     zoomGestureZoomFactor: number;
     focusGestureStrategy: FocusGestureStrategy;
     shouldPreferSmoothAutoFocus: boolean;
+    properties: {
+        [key: string]: any;
+    };
 }
 export interface Defaults {
     Camera: {
@@ -62,19 +65,22 @@ export interface CameraSettingsDefaultsJSON {
     zoomGestureZoomFactor: number;
     focusGestureStrategy: string;
     shouldPreferSmoothAutoFocus: boolean;
+    properties: {
+        [key: string]: any;
+    };
 }
 export interface IdCaptureOverlayDefaultsJSON {
-    defaultCapturedBrush: {
+    DefaultCapturedBrush: {
         fillColor: string;
         strokeColor: string;
         strokeWidth: number;
     };
-    defaultLocalizedBrush: {
+    DefaultLocalizedBrush: {
         fillColor: string;
         strokeColor: string;
         strokeWidth: number;
     };
-    defaultRejectedBrush: {
+    DefaultRejectedBrush: {
         fillColor: string;
         strokeColor: string;
         strokeWidth: number;
