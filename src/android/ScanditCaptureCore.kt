@@ -109,6 +109,7 @@ class ScanditCaptureCore :
         coreModule.onDestroy()
         eventEmitter.removeAllCallbacks()
         DeserializationLifecycleObserver.detach(this)
+        pluginInitialize()
     }
 
     override fun execute(
