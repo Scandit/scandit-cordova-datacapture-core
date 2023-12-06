@@ -94,18 +94,16 @@ export interface CameraSettingsJSON {
     zoomGestureZoomFactor: number;
     focusGestureStrategy: string;
     shouldPreferSmoothAutoFocus: boolean;
-    properties: {
-        [key: string]: any;
-    };
+    api: number;
 }
 interface PrivateCameraSettings {
     fromJSON(json: CameraSettingsJSON): CameraSettings;
 }
 export class CameraSettings {
-    private focusHiddenProperties;
     preferredResolution: VideoResolution;
     zoomFactor: number;
     zoomGestureZoomFactor: number;
+    private api;
     private focus;
     get focusRange(): FocusRange;
     set focusRange(newRange: FocusRange);
@@ -323,8 +321,7 @@ export class MarginsWithUnit {
     private static fromJSON;
     private static get zero();
     constructor(left: NumberWithUnit, right: NumberWithUnit, top: NumberWithUnit, bottom: NumberWithUnit);
-}
-type ColorJSON = string;
+} type ColorJSON = string;
 interface PrivateColor {
     fromJSON(json: ColorJSON): Color;
 }
@@ -551,13 +548,13 @@ export class DataCaptureView {
     private get htmlElementState();
     private scrollListener;
     private domObserver;
+    private orientationChangeListener;
     /**
      * The current context as a PrivateDataCaptureContext
      */
     private get privateContext();
     static forContext(context: DataCaptureContext | null): DataCaptureView;
     constructor();
-    private orientationChangeListener;
     connectToElement(element: HTMLElement): void;
     detachFromElement(): void;
     setFrame(frame: Rect, isUnderContent?: boolean): Promise<void>;

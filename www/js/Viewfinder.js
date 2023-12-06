@@ -13,6 +13,11 @@ const Common_1 = require("scandit-cordova-datacapture-core.Common");
 const Cordova_1 = require("scandit-cordova-datacapture-core.Cordova");
 const Serializeable_1 = require("scandit-cordova-datacapture-core.Serializeable");
 class Brush extends Serializeable_1.DefaultSerializeable {
+    constructor(fillColor = Cordova_1.Cordova.defaults.Brush.fillColor, strokeColor = Cordova_1.Cordova.defaults.Brush.strokeColor, strokeWidth = Cordova_1.Cordova.defaults.Brush.strokeWidth) {
+        super();
+        this.fill = { color: fillColor };
+        this.stroke = { color: strokeColor, width: strokeWidth };
+    }
     static get transparent() {
         const transparentBlack = Common_1.Color.fromRGBA(255, 255, 255, 0);
         return new Brush(transparentBlack, transparentBlack, 0);
@@ -25,11 +30,6 @@ class Brush extends Serializeable_1.DefaultSerializeable {
     }
     get strokeWidth() {
         return this.stroke.width;
-    }
-    constructor(fillColor = Cordova_1.Cordova.defaults.Brush.fillColor, strokeColor = Cordova_1.Cordova.defaults.Brush.strokeColor, strokeWidth = Cordova_1.Cordova.defaults.Brush.strokeWidth) {
-        super();
-        this.fill = { color: fillColor };
-        this.stroke = { color: strokeColor, width: strokeWidth };
     }
 }
 exports.Brush = Brush;
@@ -50,13 +50,10 @@ class LaserlineViewfinder extends Serializeable_1.DefaultSerializeable {
     }
 }
 __decorate([
-    (0, Serializeable_1.nameForSerialization)('style')
+    Serializeable_1.nameForSerialization('style')
 ], LaserlineViewfinder.prototype, "_style", void 0);
 exports.LaserlineViewfinder = LaserlineViewfinder;
 class RectangularViewfinder extends Serializeable_1.DefaultSerializeable {
-    get sizeWithUnitAndAspect() {
-        return this._sizeWithUnitAndAspect;
-    }
     constructor(style, lineStyle) {
         super();
         this.type = 'rectangular';
@@ -72,6 +69,9 @@ class RectangularViewfinder extends Serializeable_1.DefaultSerializeable {
         if (lineStyle !== undefined) {
             this._lineStyle = lineStyle;
         }
+    }
+    get sizeWithUnitAndAspect() {
+        return this._sizeWithUnitAndAspect;
     }
     get style() {
         return this._style;
@@ -123,35 +123,32 @@ class RectangularViewfinder extends Serializeable_1.DefaultSerializeable {
     }
 }
 __decorate([
-    (0, Serializeable_1.nameForSerialization)('style')
+    Serializeable_1.nameForSerialization('style')
 ], RectangularViewfinder.prototype, "_style", void 0);
 __decorate([
-    (0, Serializeable_1.nameForSerialization)('lineStyle')
+    Serializeable_1.nameForSerialization('lineStyle')
 ], RectangularViewfinder.prototype, "_lineStyle", void 0);
 __decorate([
-    (0, Serializeable_1.nameForSerialization)('dimming')
+    Serializeable_1.nameForSerialization('dimming')
 ], RectangularViewfinder.prototype, "_dimming", void 0);
 __decorate([
-    (0, Serializeable_1.nameForSerialization)('disabledDimming')
+    Serializeable_1.nameForSerialization('disabledDimming')
 ], RectangularViewfinder.prototype, "_disabledDimming", void 0);
 __decorate([
-    (0, Serializeable_1.nameForSerialization)('animation'),
+    Serializeable_1.nameForSerialization('animation'),
     Serializeable_1.ignoreFromSerialization
 ], RectangularViewfinder.prototype, "_animation", void 0);
 __decorate([
-    (0, Serializeable_1.nameForSerialization)('size')
+    Serializeable_1.nameForSerialization('size')
 ], RectangularViewfinder.prototype, "_sizeWithUnitAndAspect", void 0);
 __decorate([
-    (0, Serializeable_1.nameForSerialization)('color')
+    Serializeable_1.nameForSerialization('color')
 ], RectangularViewfinder.prototype, "_color", void 0);
 __decorate([
-    (0, Serializeable_1.nameForSerialization)('disabledColor')
+    Serializeable_1.nameForSerialization('disabledColor')
 ], RectangularViewfinder.prototype, "_disabledColor", void 0);
 exports.RectangularViewfinder = RectangularViewfinder;
 class SpotlightViewfinder extends Serializeable_1.DefaultSerializeable {
-    get sizeWithUnitAndAspect() {
-        return this._sizeWithUnitAndAspect;
-    }
     constructor() {
         super();
         this.type = 'spotlight';
@@ -161,6 +158,9 @@ class SpotlightViewfinder extends Serializeable_1.DefaultSerializeable {
         this.backgroundColor = Cordova_1.Cordova.defaults.SpotlightViewfinder.backgroundColor;
         // tslint:disable-next-line:no-console
         console.warn('SpotlightViewfinder is deprecated and will be removed in a future release. Use RectangularViewfinder instead.');
+    }
+    get sizeWithUnitAndAspect() {
+        return this._sizeWithUnitAndAspect;
     }
     setSize(size) {
         this._sizeWithUnitAndAspect = Common_1.SizeWithUnitAndAspect.sizeWithWidthAndHeight(size);
@@ -173,7 +173,7 @@ class SpotlightViewfinder extends Serializeable_1.DefaultSerializeable {
     }
 }
 __decorate([
-    (0, Serializeable_1.nameForSerialization)('size')
+    Serializeable_1.nameForSerialization('size')
 ], SpotlightViewfinder.prototype, "_sizeWithUnitAndAspect", void 0);
 exports.SpotlightViewfinder = SpotlightViewfinder;
 class AimerViewfinder extends Serializeable_1.DefaultSerializeable {

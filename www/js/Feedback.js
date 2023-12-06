@@ -19,6 +19,10 @@ var VibrationType;
     VibrationType["impactHaptic"] = "impactHaptic";
 })(VibrationType || (VibrationType = {}));
 class Vibration extends Serializeable_1.DefaultSerializeable {
+    constructor(type) {
+        super();
+        this.type = type;
+    }
     static get defaultVibration() {
         return new Vibration(VibrationType.default);
     }
@@ -34,23 +38,19 @@ class Vibration extends Serializeable_1.DefaultSerializeable {
     static fromJSON(json) {
         return new Vibration(json.type);
     }
-    constructor(type) {
-        super();
-        this.type = type;
-    }
 }
 exports.Vibration = Vibration;
 class Sound extends Serializeable_1.DefaultSerializeable {
+    constructor(resource) {
+        super();
+        this.resource = null;
+        this.resource = resource;
+    }
     static get defaultSound() {
         return new Sound(null);
     }
     static fromJSON(json) {
         return new Sound(json.resource);
-    }
-    constructor(resource) {
-        super();
-        this.resource = null;
-        this.resource = resource;
     }
 }
 __decorate([
@@ -58,6 +58,14 @@ __decorate([
 ], Sound.prototype, "resource", void 0);
 exports.Sound = Sound;
 class Feedback extends Serializeable_1.DefaultSerializeable {
+    constructor(vibration, sound) {
+        super();
+        this._vibration = null;
+        this._sound = null;
+        this._vibration = vibration;
+        this._sound = sound;
+        this.initialize();
+    }
     static get defaultFeedback() {
         return new Feedback(Vibration.defaultVibration, Sound.defaultSound);
     }
@@ -69,14 +77,6 @@ class Feedback extends Serializeable_1.DefaultSerializeable {
     }
     static fromJSON(json) {
         return new Feedback(json.vibration ? Vibration.fromJSON(json.vibration) : null, json.sound ? Sound.fromJSON(json.sound) : null);
-    }
-    constructor(vibration, sound) {
-        super();
-        this._vibration = null;
-        this._sound = null;
-        this._vibration = vibration;
-        this._sound = sound;
-        this.initialize();
     }
     emit() {
         if (!this.proxy) {
@@ -93,11 +93,11 @@ class Feedback extends Serializeable_1.DefaultSerializeable {
 }
 __decorate([
     Serializeable_1.ignoreFromSerializationIfNull,
-    (0, Serializeable_1.nameForSerialization)('vibration')
+    Serializeable_1.nameForSerialization('vibration')
 ], Feedback.prototype, "_vibration", void 0);
 __decorate([
     Serializeable_1.ignoreFromSerializationIfNull,
-    (0, Serializeable_1.nameForSerialization)('sound')
+    Serializeable_1.nameForSerialization('sound')
 ], Feedback.prototype, "_sound", void 0);
 __decorate([
     Serializeable_1.ignoreFromSerialization

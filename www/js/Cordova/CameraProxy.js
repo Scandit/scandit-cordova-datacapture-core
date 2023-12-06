@@ -5,7 +5,7 @@ const Camera_Related_1 = require("scandit-cordova-datacapture-core.Camera+Relate
 const Cordova_1 = require("scandit-cordova-datacapture-core.Cordova");
 var FrameSourceListenerEvent;
 (function (FrameSourceListenerEvent) {
-    FrameSourceListenerEvent["didChangeState"] = "FrameSourceListener.onStateChanged";
+    FrameSourceListenerEvent["didChangeState"] = "didChangeState";
 })(FrameSourceListenerEvent || (FrameSourceListenerEvent = {}));
 class CameraProxy {
     static forCamera(camera) {

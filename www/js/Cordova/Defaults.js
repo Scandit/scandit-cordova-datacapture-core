@@ -4,7 +4,7 @@ exports.defaultsFromJSON = void 0;
 const Common_1 = require("scandit-cordova-datacapture-core.Common");
 const DataCaptureView_Related_1 = require("scandit-cordova-datacapture-core.DataCaptureView+Related");
 const Viewfinder_Related_1 = require("scandit-cordova-datacapture-core.Viewfinder+Related");
-const defaultsFromJSON = (json) => {
+exports.defaultsFromJSON = (json) => {
     return {
         Camera: {
             Settings: {
@@ -14,7 +14,6 @@ const defaultsFromJSON = (json) => {
                 zoomGestureZoomFactor: json.Camera.Settings.zoomGestureZoomFactor,
                 focusGestureStrategy: json.Camera.Settings.focusGestureStrategy,
                 shouldPreferSmoothAutoFocus: json.Camera.Settings.shouldPreferSmoothAutoFocus,
-                properties: json.Camera.Settings.properties,
             },
             defaultPosition: json.Camera.defaultPosition || null,
             availablePositions: json.Camera.availablePositions,
@@ -88,4 +87,3 @@ const defaultsFromJSON = (json) => {
         deviceID: json.deviceID,
     };
 };
-exports.defaultsFromJSON = defaultsFromJSON;

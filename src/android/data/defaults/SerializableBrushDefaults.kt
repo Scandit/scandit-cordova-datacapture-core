@@ -7,8 +7,8 @@
 package com.scandit.datacapture.cordova.core.data.defaults
 
 import com.scandit.datacapture.cordova.core.data.SerializableData
+import com.scandit.datacapture.cordova.core.utils.hexString
 import com.scandit.datacapture.core.ui.style.Brush
-import com.scandit.datacapture.frameworks.core.extensions.hexString
 import org.json.JSONObject
 
 data class SerializableBrushDefaults(

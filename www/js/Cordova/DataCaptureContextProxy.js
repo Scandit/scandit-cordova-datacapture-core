@@ -7,8 +7,8 @@ const DataCaptureContext_Related_1 = require("scandit-cordova-datacapture-core.D
 const Cordova_1 = require("scandit-cordova-datacapture-core.Cordova");
 var DataCaptureContextListenerEvent;
 (function (DataCaptureContextListenerEvent) {
-    DataCaptureContextListenerEvent["DidChangeContextStatus"] = "DataCaptureContextListener.onStatusChanged";
-    DataCaptureContextListenerEvent["DidStartObservingContext"] = "DataCaptureContextListener.onObservationStarted";
+    DataCaptureContextListenerEvent["DidChangeContextStatus"] = "didChangeStatus";
+    DataCaptureContextListenerEvent["DidStartObservingContext"] = "didStartObservingContext";
 })(DataCaptureContextListenerEvent || (DataCaptureContextListenerEvent = {}));
 class DataCaptureContextProxy {
     static forDataCaptureContext(context) {
