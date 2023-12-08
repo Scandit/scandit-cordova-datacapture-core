@@ -31,12 +31,12 @@ var CordovaFunction;
 exports.Cordova = {
     pluginName: 'ScanditCaptureCore',
     defaults: {},
-    exec: (success, error, functionName, args) => CommonCordova_1.cordovaExec(success, error, exports.Cordova.pluginName, functionName, args),
+    exec: (success, error, functionName, args) => (0, CommonCordova_1.cordovaExec)(success, error, exports.Cordova.pluginName, functionName, args),
 };
 const getDefaults = new Promise((resolve, reject) => {
     exports.Cordova.exec((defaultsJSON) => {
-        exports.Cordova.defaults = Defaults_1.defaultsFromJSON(defaultsJSON);
+        exports.Cordova.defaults = (0, Defaults_1.defaultsFromJSON)(defaultsJSON);
         resolve();
     }, reject, CordovaFunction.GetDefaults, null);
 });
-CommonCordova_1.initializePlugin(exports.Cordova.pluginName, getDefaults);
+(0, CommonCordova_1.initializePlugin)(exports.Cordova.pluginName, getDefaults);

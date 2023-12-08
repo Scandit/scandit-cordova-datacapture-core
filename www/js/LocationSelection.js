@@ -34,20 +34,20 @@ exports.PrivateLocationSelection = PrivateLocationSelection;
 // tslint:disable-next-line:variable-name
 exports.NoneLocationSelection = { type: 'none' };
 class RadiusLocationSelection extends Serializeable_1.DefaultSerializeable {
-    constructor(radius) {
-        super();
-        this.type = LocationSelectionType.Radius;
-        this._radius = radius;
-    }
     get radius() {
         return this._radius;
     }
     static fromJSON(json) {
         return new RadiusLocationSelection(Common_1.NumberWithUnit.fromJSON(json.radius));
     }
+    constructor(radius) {
+        super();
+        this.type = LocationSelectionType.Radius;
+        this._radius = radius;
+    }
 }
 __decorate([
-    Serializeable_1.nameForSerialization('radius')
+    (0, Serializeable_1.nameForSerialization)('radius')
 ], RadiusLocationSelection.prototype, "_radius", void 0);
 exports.RadiusLocationSelection = RadiusLocationSelection;
 class RectangularLocationSelection extends Serializeable_1.DefaultSerializeable {
@@ -83,6 +83,6 @@ class RectangularLocationSelection extends Serializeable_1.DefaultSerializeable 
     }
 }
 __decorate([
-    Serializeable_1.nameForSerialization('size')
+    (0, Serializeable_1.nameForSerialization)('size')
 ], RectangularLocationSelection.prototype, "_sizeWithUnitAndAspect", void 0);
 exports.RectangularLocationSelection = RectangularLocationSelection;

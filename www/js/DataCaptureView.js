@@ -129,31 +129,6 @@ class HTMLElementState {
 }
 exports.HTMLElementState = HTMLElementState;
 class DataCaptureView extends Serializeable_1.DefaultSerializeable {
-    constructor() {
-        super();
-        this._context = null;
-        this.scanAreaMargins = Cordova_1.Cordova.defaults.DataCaptureView.scanAreaMargins;
-        this.pointOfInterest = Cordova_1.Cordova.defaults.DataCaptureView.pointOfInterest;
-        this.logoAnchor = Cordova_1.Cordova.defaults.DataCaptureView.logoAnchor;
-        this.logoOffset = Cordova_1.Cordova.defaults.DataCaptureView.logoOffset;
-        this.focusGesture = Cordova_1.Cordova.defaults.DataCaptureView.focusGesture;
-        this.zoomGesture = Cordova_1.Cordova.defaults.DataCaptureView.zoomGesture;
-        this.logoStyle = Cordova_1.Cordova.defaults.DataCaptureView.logoStyle;
-        this.overlays = [];
-        this.controls = [];
-        this.listeners = [];
-        this.htmlElement = null;
-        this._htmlElementState = new HTMLElementState();
-        this.scrollListener = this.elementDidChange.bind(this);
-        this.domObserver = new MutationObserver(this.elementDidChange.bind(this));
-        this.orientationChangeListener = (() => {
-            this.elementDidChange();
-            // SDC-1784 -> workaround because at the moment of this callback the element doesn't have the updated size.
-            setTimeout(this.elementDidChange.bind(this), 100);
-            setTimeout(this.elementDidChange.bind(this), 300);
-            setTimeout(this.elementDidChange.bind(this), 1000);
-        });
-    }
     get context() {
         return this._context;
     }
@@ -198,6 +173,31 @@ class DataCaptureView extends Serializeable_1.DefaultSerializeable {
         const view = new DataCaptureView();
         view.context = context;
         return view;
+    }
+    constructor() {
+        super();
+        this._context = null;
+        this.scanAreaMargins = Cordova_1.Cordova.defaults.DataCaptureView.scanAreaMargins;
+        this.pointOfInterest = Cordova_1.Cordova.defaults.DataCaptureView.pointOfInterest;
+        this.logoAnchor = Cordova_1.Cordova.defaults.DataCaptureView.logoAnchor;
+        this.logoOffset = Cordova_1.Cordova.defaults.DataCaptureView.logoOffset;
+        this.focusGesture = Cordova_1.Cordova.defaults.DataCaptureView.focusGesture;
+        this.zoomGesture = Cordova_1.Cordova.defaults.DataCaptureView.zoomGesture;
+        this.logoStyle = Cordova_1.Cordova.defaults.DataCaptureView.logoStyle;
+        this.overlays = [];
+        this.controls = [];
+        this.listeners = [];
+        this.htmlElement = null;
+        this._htmlElementState = new HTMLElementState();
+        this.scrollListener = this.elementDidChange.bind(this);
+        this.domObserver = new MutationObserver(this.elementDidChange.bind(this));
+        this.orientationChangeListener = (() => {
+            this.elementDidChange();
+            // SDC-1784 -> workaround because at the moment of this callback the element doesn't have the updated size.
+            setTimeout(this.elementDidChange.bind(this), 100);
+            setTimeout(this.elementDidChange.bind(this), 300);
+            setTimeout(this.elementDidChange.bind(this), 1000);
+        });
     }
     connectToElement(element) {
         this.htmlElement = element;

@@ -112,13 +112,13 @@ class Camera extends Serializeable_1.DefaultSerializeable {
     }
 }
 __decorate([
-    Serializeable_1.serializationDefault({})
+    (0, Serializeable_1.serializationDefault)({})
 ], Camera.prototype, "settings", void 0);
 __decorate([
-    Serializeable_1.nameForSerialization('desiredTorchState')
+    (0, Serializeable_1.nameForSerialization)('desiredTorchState')
 ], Camera.prototype, "_desiredTorchState", void 0);
 __decorate([
-    Serializeable_1.nameForSerialization('desiredState')
+    (0, Serializeable_1.nameForSerialization)('desiredState')
 ], Camera.prototype, "_desiredState", void 0);
 __decorate([
     Serializeable_1.ignoreFromSerialization
