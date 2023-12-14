@@ -8,19 +8,17 @@ package com.scandit.datacapture.cordova.core.actions
 
 import com.scandit.datacapture.cordova.core.utils.CordovaResult
 import com.scandit.datacapture.frameworks.core.CoreModule
-import com.scandit.datacapture.frameworks.core.utils.DefaultMainThread
 import com.scandit.datacapture.frameworks.core.utils.MainThread
 import org.apache.cordova.CallbackContext
 import org.json.JSONArray
 
 class ActionUpdateContextAndView(
-    private val coreModule: CoreModule,
-    private val mainThread: MainThread = DefaultMainThread.getInstance()
+    private val coreModule: CoreModule
 ) : Action {
 
     override fun run(args: JSONArray, callbackContext: CallbackContext) {
         val jsonString = args.getJSONObject(0).toString()
-        mainThread.runOnMainThread {
+        MainThread.runOnMainThread {
             coreModule.updateContextFromJson(jsonString, CordovaResult(callbackContext))
         }
     }
