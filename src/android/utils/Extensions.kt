@@ -56,3 +56,11 @@ fun CallbackContext.successAndKeepCallback(message: JSONObject) {
         }
     )
 }
+
+fun CallbackContext.successAndKeepCallback(message: String) {
+    sendPluginResult(
+        PluginResult(PluginResult.Status.OK, message).apply {
+            keepCallback = true
+        }
+    )
+}

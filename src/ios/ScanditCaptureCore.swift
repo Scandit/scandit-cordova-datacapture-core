@@ -27,14 +27,6 @@ public class ScanditCaptureCore: CDVPlugin {
         Deserializers.Factory.remove(modeDeserialzer)
     }
 
-    public static func registerComponentDeserializer(_ componentDeserializer: DataCaptureComponentDeserializer) {
-        Deserializers.Factory.add(componentDeserializer)
-    }
-
-    public static func unregisterComponentDeserializer(_ componentDeserializer: DataCaptureComponentDeserializer) {
-        Deserializers.Factory.remove(componentDeserializer)
-    }
-
     var captureView: DataCaptureView? {
         didSet {
             guard oldValue != captureView else { return }
@@ -125,11 +117,26 @@ public class ScanditCaptureCore: CDVPlugin {
         commandDelegate.send(.keepCallback, callbackId: command.callbackId)
     }
 
+    @objc(unsubscribeContextListener:)
+    func unsubscribeContextListener(command: CDVInvokedUrlCommand) {
+        eventEmitter.unregisterCallback(with: .contextObservingStarted)
+        eventEmitter.unregisterCallback(with: .contextStatusChanged)
+        coreModule.unregisterDataCaptureContextListener()
+        commandDelegate.send(.success, callbackId: command.callbackId)
+    }
+
     @objc(subscribeViewListener:)
     func subscribeViewListener(command: CDVInvokedUrlCommand) {
         eventEmitter.registerCallback(with: .dataCaptureViewSizeChanged, call: command)
         coreModule.registerDataCaptureViewListener()
         commandDelegate.send(.keepCallback, callbackId: command.callbackId)
+    }
+
+    @objc(unsubscribeViewListener:)
+    func unsubscribeViewListener(command: CDVInvokedUrlCommand) {
+        eventEmitter.unregisterCallback(with: .dataCaptureViewSizeChanged)
+        coreModule.unregisterDataCaptureViewListener()
+        commandDelegate.send(.success, callbackId: command.callbackId)
     }
 
     @objc(subscribeFrameSourceListener:)
@@ -138,6 +145,14 @@ public class ScanditCaptureCore: CDVPlugin {
         eventEmitter.registerCallback(with: .torchStateChanged, call: command)
         coreModule.registerFrameSourceListener()
         commandDelegate.send(.keepCallback, callbackId: command.callbackId)
+    }
+
+    @objc(unsubscribeFrameSourceListener:)
+    func unsubscribeFrameSourceListener(command: CDVInvokedUrlCommand) {
+        eventEmitter.unregisterCallback(with: .frameSourceStateChanged)
+        eventEmitter.unregisterCallback(with: .torchStateChanged)
+        coreModule.unregisterFrameSourceListener()
+        commandDelegate.send(.success, callbackId: command.callbackId)
     }
 
     @objc(subscribeVolumeButtonObserver:)
@@ -275,6 +290,15 @@ public class ScanditCaptureCore: CDVPlugin {
             result: CordovaResult(commandDelegate, command.callbackId)
         )
     }
+    
+    @objc(switchCameraToDesiredState:)
+    func switchCameraToDesiredState(command: CDVInvokedUrlCommand) {
+        guard let desiredStateJson = command.defaultArgumentAsString else {
+            commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
+            return
+        }
+        coreModule.switchCameraToDesiredState(stateJson: desiredStateJson, result: CordovaResult(commandDelegate, command.callbackId))
+    }
 
     // MARK: - Defaults
 
@@ -309,6 +333,70 @@ public class ScanditCaptureCore: CDVPlugin {
     @objc(getLastFrameOrNull:)
     func getLastFrameOrNull(command: CDVInvokedUrlCommand) {
         commandDelegate.send(.success(message: ScanditCaptureCore.lastFrame?.jsonString), callbackId: command.callbackId)
+    }
+    
+    @objc(addModeToContext:)
+    func addModeToContext(command: CDVInvokedUrlCommand) {
+        guard let modeJson = command.defaultArgumentAsString else {
+            commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
+            return
+        }
+        coreModule.addModeToContext(modeJson: modeJson, result: CordovaResult(commandDelegate, command.callbackId))
+    }
+    
+    @objc(removeModeFromContext:)
+    func removeModeFromContext(command: CDVInvokedUrlCommand) {
+        guard let modeJson = command.defaultArgumentAsString else {
+            commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
+            return
+        }
+        coreModule.removeModeFromContext(modeJson: modeJson, result: CordovaResult(commandDelegate, command.callbackId))
+    }
+    
+    @objc(removeAllModes:)
+    func removeAllModes(command: CDVInvokedUrlCommand) {
+        coreModule.removeAllModes(result: CordovaResult(commandDelegate, command.callbackId))
+    }
+    
+    @objc(createDataCaptureView:)
+    func createDataCaptureView(command: CDVInvokedUrlCommand) {
+        guard let viewJson = command.defaultArgumentAsString else {
+            commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
+            return
+        }
+        _ = coreModule.createDataCaptureView(viewJson: viewJson, result: CordovaResult(commandDelegate, command.callbackId))
+    }
+    
+    @objc(updateDataCaptureView:)
+    func updateDataCaptureView(command: CDVInvokedUrlCommand) {
+        guard let viewJson = command.defaultArgumentAsString else {
+            commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
+            return
+        }
+        coreModule.updateDataCaptureView(viewJson: viewJson, result:  CordovaResult(commandDelegate, command.callbackId))
+    }
+
+    @objc(addOverlay:)
+    func addOverlay(command: CDVInvokedUrlCommand) {
+        guard let overlayJson = command.defaultArgumentAsString else {
+            commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
+            return
+        }
+        coreModule.addOverlayToView(overlayJson: overlayJson, result:  CordovaResult(commandDelegate, command.callbackId))
+    }
+
+    @objc(removeOverlay:)
+    func removeOverlay(command: CDVInvokedUrlCommand) {
+        guard let overlayJson = command.defaultArgumentAsString else {
+            commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
+            return
+        }
+        coreModule.removeOverlayFromView(overlayJson: overlayJson, result:  CordovaResult(commandDelegate, command.callbackId))
+    }
+
+    @objc(removeAllOverlays:)
+    func removeAllOverlays(command: CDVInvokedUrlCommand) {
+        coreModule.removeAllOverlays(result:  CordovaResult(commandDelegate, command.callbackId))
     }
 }
 

@@ -185,7 +185,11 @@ class ScanditCaptureCore :
         callbackContext.successAndKeepCallback(message)
     }
 
-    override fun onDataCaptureViewDeserialized(dataCaptureView: DataCaptureView) {
+    override fun onDataCaptureViewDeserialized(dataCaptureView: DataCaptureView?) {
+        if (dataCaptureView == null) {
+            captureViewHandler.disposeCurrentDataCaptureView()
+            return
+        }
         captureViewHandler.attachDataCaptureView(dataCaptureView, cordova.activity)
     }
 }
