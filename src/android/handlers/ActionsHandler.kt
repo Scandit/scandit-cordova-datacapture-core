@@ -29,10 +29,8 @@ class ActionsHandler(
                 // We are ready to run this action.
                 executeSyncAction(actionData)
             } else {
-                synchronized(actions) {
-                    // We cannot run this action yet, add it to the queue.
-                    actions.add(actionData)
-                }
+                // We cannot run this action yet, add it to the queue.
+                actions.add(actionData)
             }
         } catch (e: InvalidActionNameError) {
             println(e)
@@ -45,11 +43,8 @@ class ActionsHandler(
 
     fun onCameraPermissionGranted() {
         actionsHandlerHelper.onCameraPermissionsGranted()
-        synchronized(actions) {
-            for (actionData in actions) {
-                addAction(actionData)
-            }
-            actions.clear()
+        for (actionData in actions) {
+            addAction(actionData)
         }
     }
 

@@ -16,7 +16,7 @@ class ActionConvertQuadrilateralCoordinates(
 ) : Action {
 
     override fun run(args: JSONArray, callbackContext: CallbackContext) {
-        val quadrilateralJson = args.getString(0)
+        val quadrilateralJson = args.getJSONObject(0).toString()
         coreModule.viewQuadrilateralForFrameQuadrilateral(
             quadrilateralJson, CordovaResult(callbackContext)
         )

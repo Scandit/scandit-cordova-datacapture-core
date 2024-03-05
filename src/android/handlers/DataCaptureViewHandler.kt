@@ -81,7 +81,7 @@ class DataCaptureViewHandler(
         disposeCurrentBackgroundView()
     }
 
-    fun disposeCurrentDataCaptureView() {
+    private fun disposeCurrentDataCaptureView() {
         val dataCaptureView = dataCaptureView ?: return
         removeDataCaptureView(dataCaptureView)
     }

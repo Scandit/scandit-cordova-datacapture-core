@@ -1,29 +1,37 @@
 {
   "name": "scandit-cordova-datacapture-core",
-  "version": "6.22.0",
+  "version": "6.21.3",
   "description": "Scandit Data Capture SDK for Cordova",
   "license": "Apache-2.0",
   "private": false,
-  "main": "dist/index.js",
-  "types": "dist/dts/index.d.ts",
   "keywords": [
     "ecosystem:cordova",
     "cordova-ios",
     "cordova-android"
   ],
+  "types": "www/js/index.d.ts",
   "scripts": {
-    "build": "rollup -c rollup.config.js --bundleConfigAsCjs",
-    "test": "npm run lint",
+    "prebuild": "node ./scripts/prep-d-ts.js",
+    "build": "tsc",
+    "postbuild": "node ./scripts/normalize-d-ts.js",
+    "test": "npm run lint && jest",
     "lint": "eslint ./www/ts",
     "coverage": "jest --coverage --maxWorkers=12",
     "clear-jest-cache": "jest --clearCache || true",
-    "clean": "npm run clear-jest-cache && rimraf dist coverage",
-    "clean-all": "npm run clean && rimraf node_modules"
+    "clean": "npm run clear-jest-cache && node ./scripts/clean.js",
+    "clean-all": "npm run clean && node ./scripts/clean-all.js"
   },
-  "dependencies": {
-    "scandit-datacapture-frameworks-core": "6.22.0"
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "4.9.5",
+    "@types/jest": "29.5.0",
+    "jest": "29.5.0",
+    "jest-environment-jsdom": "29.5.0",
+    "ts-jest": "29.0.5",
+    "eslint": "8.35.0",
+    "@typescript-eslint/parser": "5.54.1",
+    "@typescript-eslint/eslint-plugin": "5.54.1"
   },
-  "devDependencies": {},
   "cordova": {
     "id": "scandit-cordova-datacapture-core",
     "platforms": [
