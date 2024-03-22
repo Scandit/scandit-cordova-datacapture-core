@@ -8,4 +8,4 @@ export { FocusGestureStrategy, FocusRange, FrameData, FrameSource, FrameSourceSt
 export { ImageBuffer, Feedback, Sound, Vibration, DataCaptureContext, DataCaptureContextSettings, DataCaptureContextCreationOptions } from 'scandit-datacapture-frameworks-core';
 export { DataCaptureMode, DataCaptureContextListener, ContextStatus, DataCaptureComponent, ZoomGesture, SpotlightViewfinder, TapToFocus, Control, SwipeToZoom } from 'scandit-datacapture-frameworks-core';
 export { DataCaptureVersion } from './DataCaptureVersion';
-export { DataCaptureView } from './DataCaptureView';
+export { DataCaptureView, HTMLElementState } from './DataCaptureView';
