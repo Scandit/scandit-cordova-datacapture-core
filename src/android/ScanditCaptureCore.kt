@@ -101,11 +101,20 @@ class ScanditCaptureCore :
     }
 
     override fun onReset() {
+        destroy()
+        pluginInitialize()
+    }
+
+    override fun onDestroy() {
+        destroy()
+        super.onDestroy()
+    }
+
+    private fun destroy() {
         captureViewHandler.disposeCurrent()
         coreModule.onDestroy()
         eventEmitter.removeAllCallbacks()
         DeserializationLifecycleObserver.detach(this)
-        pluginInitialize()
     }
 
     override fun execute(
