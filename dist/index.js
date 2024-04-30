@@ -744,7 +744,6 @@ exports.ZoomSwitchControl = core.ZoomSwitchControl;
 exports.CordovaError = CordovaError;
 exports.DataCaptureVersion = DataCaptureVersion;
 exports.DataCaptureView = DataCaptureView;
-exports.HTMLElementState = HTMLElementState;
 exports.cordovaExec = cordovaExec;
 exports.initializePlugin = initializePlugin;
 exports.pluginsMetadata = pluginsMetadata;
