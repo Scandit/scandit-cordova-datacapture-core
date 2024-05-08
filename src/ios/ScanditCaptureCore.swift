@@ -52,7 +52,7 @@ public class ScanditCaptureCore: CDVPlugin {
 
     private var volumeButtonObserver: VolumeButtonObserver?
 
-    private lazy var captureViewConstraints = DataCaptureViewConstraints(relativeTo: webView as! WKWebView)
+    private lazy var captureViewConstraints = NativeViewConstraints(relativeTo: webView as! WKWebView)
 
     public override func pluginInitialize() {
         guard webView is WKWebView else {
