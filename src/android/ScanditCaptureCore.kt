@@ -21,7 +21,6 @@ import com.scandit.datacapture.core.common.feedback.Feedback
 import com.scandit.datacapture.core.source.FrameSourceState
 import com.scandit.datacapture.core.ui.DataCaptureView
 import com.scandit.datacapture.frameworks.core.CoreModule
-import com.scandit.datacapture.frameworks.core.deserialization.DefaultDeserializationLifecycleObserver
 import com.scandit.datacapture.frameworks.core.deserialization.DeserializationLifecycleObserver
 import com.scandit.datacapture.frameworks.core.listeners.FrameworksDataCaptureContextListener
 import com.scandit.datacapture.frameworks.core.listeners.FrameworksDataCaptureViewListener
@@ -57,9 +56,6 @@ class ScanditCaptureCore :
 
     private val lastFrameData: LastFrameData = DefaultLastFrameData.getInstance()
 
-    private val deserializationLifecycleObserver: DeserializationLifecycleObserver =
-        DefaultDeserializationLifecycleObserver.getInstance()
-
     private var frameSourceStateBeforeStopping: FrameSourceState = FrameSourceState.OFF
 
     private var latestDesiredFrameSource: FrameSourceState = FrameSourceState.OFF
@@ -89,7 +85,7 @@ class ScanditCaptureCore :
                 .associateBy { it.name }
 
         checkOrRequestCameraPermission()
-        deserializationLifecycleObserver.attach(this)
+        DeserializationLifecycleObserver.attach(this)
     }
 
     override fun onStop() {
@@ -118,7 +114,7 @@ class ScanditCaptureCore :
         captureViewHandler.disposeCurrent()
         coreModule.onDestroy()
         eventEmitter.removeAllCallbacks()
-        deserializationLifecycleObserver.detach(this)
+        DeserializationLifecycleObserver.detach(this)
     }
 
     override fun execute(

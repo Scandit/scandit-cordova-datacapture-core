@@ -8,7 +8,5 @@ export interface BlockingModeListenerResult {
     enabled: boolean;
 }
 export declare const pluginsMetadata: any;
-export declare const cordovaExec: (successCallback: Function | null, errorCallback: Function | null, className: string, functionName: string, args: [
-    any
-] | null) => void;
+export declare const cordovaExec: (successCallback: Function | null, errorCallback: Function | null, className: string, functionName: string, args: [any] | null) => void;
 export declare function initializePlugin(pluginName: string, customInitialization: () => Promise<void>): Promise<void>;
