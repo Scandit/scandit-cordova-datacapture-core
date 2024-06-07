@@ -161,7 +161,7 @@ class NativeCameraProxy extends core.BaseNativeProxy {
         NativeCameraProxy.cordovaExec(this.notifyListeners.bind(this), null, CordovaFunction.SubscribeFrameSourceListener, null);
     }
     unregisterListenerForCameraEvents() {
-        new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             NativeCameraProxy.cordovaExec(resolve, reject, CordovaFunction.UnsubscribeFrameSourceListener, null);
         });
     }
@@ -180,11 +180,6 @@ class NativeCameraProxy extends core.BaseNativeProxy {
     }
 }
 
-var DataCaptureContextListenerEvent;
-(function (DataCaptureContextListenerEvent) {
-    DataCaptureContextListenerEvent["DidChangeContextStatus"] = "DataCaptureContextListener.onStatusChanged";
-    DataCaptureContextListenerEvent["DidStartObservingContext"] = "DataCaptureContextListener.onObservationStarted";
-})(DataCaptureContextListenerEvent || (DataCaptureContextListenerEvent = {}));
 class NativeDataCaptureContextProxy extends core.BaseNativeProxy {
     static get cordovaExec() {
         return Cordova.exec;
@@ -208,7 +203,7 @@ class NativeDataCaptureContextProxy extends core.BaseNativeProxy {
     dispose() {
         NativeDataCaptureContextProxy.cordovaExec(null, null, CordovaFunction.DisposeContext, null);
     }
-    registerListenerForEvents() {
+    registerListenerForDataCaptureContext() {
         NativeDataCaptureContextProxy.cordovaExec(this.notifyListeners.bind(this), null, CordovaFunction.SubscribeContextListener, null);
     }
     addModeToContext(modeJson) {
@@ -226,8 +221,8 @@ class NativeDataCaptureContextProxy extends core.BaseNativeProxy {
             NativeDataCaptureContextProxy.cordovaExec(resolve, reject, CordovaFunction.RemoveAllModesFromContext, null);
         });
     }
-    unsubscribeListener() {
-        new Promise((resolve, reject) => {
+    unregisterListenerForDataCaptureContext() {
+        return new Promise((resolve, reject) => {
             NativeDataCaptureContextProxy.cordovaExec(resolve, reject, CordovaFunction.UnsubscribeContextListener, null);
         });
     }
@@ -239,11 +234,11 @@ class NativeDataCaptureContextProxy extends core.BaseNativeProxy {
             return;
         }
         switch (event.name) {
-            case DataCaptureContextListenerEvent.DidChangeContextStatus:
+            case core.DataCaptureContextEvents.didChangeStatus:
                 const contextStatus = core.ContextStatus.fromJSON(event.argument);
                 this.eventEmitter.emit(core.DataCaptureContextEvents.didChangeStatus, contextStatus);
                 break;
-            case DataCaptureContextListenerEvent.DidStartObservingContext:
+            case core.DataCaptureContextEvents.didStartObservingContext:
                 this.eventEmitter.emit(core.DataCaptureContextEvents.didStartObservingContext);
                 break;
         }
@@ -261,10 +256,6 @@ class NativeFeedbackProxy extends core.BaseNativeProxy {
     }
 }
 
-var DataCaptureViewListenerEvent;
-(function (DataCaptureViewListenerEvent) {
-    DataCaptureViewListenerEvent["DidChangeSizeOrientation"] = "DataCaptureViewListener.onSizeChanged";
-})(DataCaptureViewListenerEvent || (DataCaptureViewListenerEvent = {}));
 class NativeDataCaptureViewProxy extends core.BaseNativeProxy {
     viewPointForFramePoint(pointJson) {
         return new Promise((resolve, reject) => {
@@ -333,7 +324,7 @@ class NativeDataCaptureViewProxy extends core.BaseNativeProxy {
             return;
         }
         switch (event.name) {
-            case DataCaptureViewListenerEvent.DidChangeSizeOrientation:
+            case core.DataCaptureViewEvents.didChangeSize:
                 this.eventEmitter.emit(core.DataCaptureViewEvents.didChangeSize, JSON.stringify(event.argument));
                 break;
         }
@@ -647,13 +638,13 @@ __decorate([
 initializeCordovaCore();
 
 exports.AimerViewfinder = core.AimerViewfinder;
-Object.defineProperty(exports, 'Anchor', {
+Object.defineProperty(exports, "Anchor", {
     enumerable: true,
     get: function () { return core.Anchor; }
 });
 exports.Brush = core.Brush;
 exports.Camera = core.Camera;
-Object.defineProperty(exports, 'CameraPosition', {
+Object.defineProperty(exports, "CameraPosition", {
     enumerable: true,
     get: function () { return core.CameraPosition; }
 });
@@ -662,42 +653,42 @@ exports.Color = core.Color;
 exports.ContextStatus = core.ContextStatus;
 exports.DataCaptureContext = core.DataCaptureContext;
 exports.DataCaptureContextSettings = core.DataCaptureContextSettings;
-Object.defineProperty(exports, 'Direction', {
+Object.defineProperty(exports, "Direction", {
     enumerable: true,
     get: function () { return core.Direction; }
 });
 exports.Feedback = core.Feedback;
-Object.defineProperty(exports, 'FocusGestureStrategy', {
+Object.defineProperty(exports, "FocusGestureStrategy", {
     enumerable: true,
     get: function () { return core.FocusGestureStrategy; }
 });
-Object.defineProperty(exports, 'FocusRange', {
+Object.defineProperty(exports, "FocusRange", {
     enumerable: true,
     get: function () { return core.FocusRange; }
 });
-Object.defineProperty(exports, 'FrameSourceState', {
+Object.defineProperty(exports, "FrameSourceState", {
     enumerable: true,
     get: function () { return core.FrameSourceState; }
 });
 exports.ImageBuffer = core.ImageBuffer;
 exports.LaserlineViewfinder = core.LaserlineViewfinder;
-Object.defineProperty(exports, 'LaserlineViewfinderStyle', {
+Object.defineProperty(exports, "LaserlineViewfinderStyle", {
     enumerable: true,
     get: function () { return core.LaserlineViewfinderStyle; }
 });
-Object.defineProperty(exports, 'LogoStyle', {
+Object.defineProperty(exports, "LogoStyle", {
     enumerable: true,
     get: function () { return core.LogoStyle; }
 });
 exports.MarginsWithUnit = core.MarginsWithUnit;
-Object.defineProperty(exports, 'MeasureUnit', {
+Object.defineProperty(exports, "MeasureUnit", {
     enumerable: true,
     get: function () { return core.MeasureUnit; }
 });
 exports.NoViewfinder = core.NoViewfinder;
 exports.NoneLocationSelection = core.NoneLocationSelection;
 exports.NumberWithUnit = core.NumberWithUnit;
-Object.defineProperty(exports, 'Orientation', {
+Object.defineProperty(exports, "Orientation", {
     enumerable: true,
     get: function () { return core.Orientation; }
 });
@@ -710,19 +701,23 @@ exports.RectWithUnit = core.RectWithUnit;
 exports.RectangularLocationSelection = core.RectangularLocationSelection;
 exports.RectangularViewfinder = core.RectangularViewfinder;
 exports.RectangularViewfinderAnimation = core.RectangularViewfinderAnimation;
-Object.defineProperty(exports, 'RectangularViewfinderLineStyle', {
+Object.defineProperty(exports, "RectangularViewfinderLineStyle", {
     enumerable: true,
     get: function () { return core.RectangularViewfinderLineStyle; }
 });
-Object.defineProperty(exports, 'RectangularViewfinderStyle', {
+Object.defineProperty(exports, "RectangularViewfinderStyle", {
     enumerable: true,
     get: function () { return core.RectangularViewfinderStyle; }
+});
+Object.defineProperty(exports, "ScanIntention", {
+    enumerable: true,
+    get: function () { return core.ScanIntention; }
 });
 exports.Size = core.Size;
 exports.SizeWithAspect = core.SizeWithAspect;
 exports.SizeWithUnit = core.SizeWithUnit;
 exports.SizeWithUnitAndAspect = core.SizeWithUnitAndAspect;
-Object.defineProperty(exports, 'SizingMode', {
+Object.defineProperty(exports, "SizingMode", {
     enumerable: true,
     get: function () { return core.SizingMode; }
 });
@@ -730,13 +725,13 @@ exports.Sound = core.Sound;
 exports.SpotlightViewfinder = core.SpotlightViewfinder;
 exports.SwipeToZoom = core.SwipeToZoom;
 exports.TapToFocus = core.TapToFocus;
-Object.defineProperty(exports, 'TorchState', {
+Object.defineProperty(exports, "TorchState", {
     enumerable: true,
     get: function () { return core.TorchState; }
 });
 exports.TorchSwitchControl = core.TorchSwitchControl;
 exports.Vibration = core.Vibration;
-Object.defineProperty(exports, 'VideoResolution', {
+Object.defineProperty(exports, "VideoResolution", {
     enumerable: true,
     get: function () { return core.VideoResolution; }
 });

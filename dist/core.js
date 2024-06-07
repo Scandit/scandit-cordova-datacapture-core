@@ -981,8 +981,8 @@ class DataCaptureContextSettings extends DefaultSerializeable {
 
 exports.DataCaptureContextEvents = void 0;
 (function (DataCaptureContextEvents) {
-    DataCaptureContextEvents["didChangeStatus"] = "didChangeStatus";
-    DataCaptureContextEvents["didStartObservingContext"] = "didStartObservingContext";
+    DataCaptureContextEvents["didChangeStatus"] = "DataCaptureContextListener.onStatusChanged";
+    DataCaptureContextEvents["didStartObservingContext"] = "DataCaptureContextListener.onObservationStarted";
 })(exports.DataCaptureContextEvents || (exports.DataCaptureContextEvents = {}));
 class DataCaptureContextController {
     get framework() {
@@ -1029,7 +1029,7 @@ class DataCaptureContextController {
         this._proxy.dispose();
     }
     unsubscribeListener() {
-        this._proxy.unsubscribeListener();
+        this._proxy.unregisterListenerForDataCaptureContext();
         this.eventEmitter.removeListener(exports.DataCaptureContextEvents.didChangeStatus);
         this.eventEmitter.removeListener(exports.DataCaptureContextEvents.didStartObservingContext);
     }
@@ -1040,7 +1040,7 @@ class DataCaptureContextController {
     initializeContextFromJSON() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                this._proxy.contextFromJSON(this.context);
+                yield this._proxy.contextFromJSON(this.context);
             }
             catch (error) {
                 this.notifyListenersOfDeserializationError(error);
@@ -1050,7 +1050,7 @@ class DataCaptureContextController {
     }
     subscribeListener() {
         var _a, _b, _c, _d;
-        this._proxy.registerListenerForEvents();
+        this._proxy.registerListenerForDataCaptureContext();
         (_b = (_a = this._proxy).subscribeDidChangeStatus) === null || _b === void 0 ? void 0 : _b.call(_a);
         (_d = (_c = this._proxy).subscribeDidStartObservingContext) === null || _d === void 0 ? void 0 : _d.call(_c);
         this.eventEmitter.on(exports.DataCaptureContextEvents.didChangeStatus, (contextStatus) => {
@@ -1727,9 +1727,15 @@ exports.Direction = void 0;
     Direction["BottomToTop"] = "bottomToTop";
 })(exports.Direction || (exports.Direction = {}));
 
+exports.ScanIntention = void 0;
+(function (ScanIntention) {
+    ScanIntention["Manual"] = "manual";
+    ScanIntention["Smart"] = "smart";
+})(exports.ScanIntention || (exports.ScanIntention = {}));
+
 exports.DataCaptureViewEvents = void 0;
 (function (DataCaptureViewEvents) {
-    DataCaptureViewEvents["didChangeSize"] = "didChangeSize";
+    DataCaptureViewEvents["didChangeSize"] = "DataCaptureViewListener.onSizeChanged";
 })(exports.DataCaptureViewEvents || (exports.DataCaptureViewEvents = {}));
 class DataCaptureViewController extends BaseController {
     static forDataCaptureView(view) {
@@ -1777,9 +1783,6 @@ class DataCaptureViewController extends BaseController {
     }
     removeOverlay(overlay) {
         return this._proxy.removeOverlay(JSON.stringify(overlay.toJSON()));
-    }
-    removeAllOverlays() {
-        return this._proxy.removeAllOverlays();
     }
     subscribeListener() {
         var _a, _b;
@@ -1950,8 +1953,8 @@ class BaseDataCaptureView extends DefaultSerializeable {
         this.controller.updateView();
     }
     dispose() {
+        this.overlays.forEach(overlay => this.removeOverlay(overlay));
         this.overlays = [];
-        this.controller.removeAllOverlays();
         this.listeners.forEach(listener => this.removeListener(listener));
         this.controller.dispose();
     }
@@ -2738,8 +2741,8 @@ class RadiusLocationSelection extends DefaultSerializeable {
     get radius() {
         return this._radius;
     }
-    static fromJSON(JSON) {
-        const radius = NumberWithUnit.fromJSON(JSON.radius);
+    static fromJSON(locationSelectionJson) {
+        const radius = NumberWithUnit.fromJSON(locationSelectionJson.radius);
         return new RadiusLocationSelection(radius);
     }
     constructor(radius) {
