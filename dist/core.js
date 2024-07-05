@@ -377,7 +377,7 @@ FactoryMaker.instances = new Map();
 
 function createEventEmitter() {
     const ee = new EventEmitter();
-    FactoryMaker.bindInstance('EventEmitter', ee);
+    FactoryMaker.bindInstanceIfNotExists('EventEmitter', ee);
 }
 
 class BaseController {
@@ -611,7 +611,7 @@ class ImageFrameSourceController {
     }
     unsubscribeListener() {
         this._proxy.unregisterListenerForEvents();
-        this.eventEmitter.removeAllListeners();
+        this.eventEmitter.removeAllListeners(exports.FrameSourceListenerEvents.didChangeState);
     }
 }
 
@@ -811,6 +811,17 @@ class Camera extends DefaultSerializeable {
             camera.settings = settings;
         }
         return camera;
+    }
+    static asPositionWithSettings(cameraPosition, settings) {
+        if (Camera.coreDefaults.Camera.availablePositions.includes(cameraPosition)) {
+            const camera = new Camera();
+            camera.settings = settings;
+            camera.position = cameraPosition;
+            return camera;
+        }
+        else {
+            return null;
+        }
     }
     static atPosition(cameraPosition) {
         if (Camera.coreDefaults.Camera.availablePositions.includes(cameraPosition)) {
@@ -1030,8 +1041,8 @@ class DataCaptureContextController {
     }
     unsubscribeListener() {
         this._proxy.unregisterListenerForDataCaptureContext();
-        this.eventEmitter.removeListener(exports.DataCaptureContextEvents.didChangeStatus);
-        this.eventEmitter.removeListener(exports.DataCaptureContextEvents.didStartObservingContext);
+        this.eventEmitter.removeAllListeners(exports.DataCaptureContextEvents.didChangeStatus);
+        this.eventEmitter.removeAllListeners(exports.DataCaptureContextEvents.didStartObservingContext);
     }
     initialize() {
         this.subscribeListener();
@@ -1801,7 +1812,7 @@ class DataCaptureViewController extends BaseController {
     }
     unsubscribeListener() {
         this._proxy.unregisterListenerForViewEvents();
-        this.eventEmitter.removeAllListeners();
+        this.eventEmitter.removeAllListeners(exports.DataCaptureViewEvents.didChangeSize);
     }
 }
 
@@ -1989,25 +2000,25 @@ __decorate([
     ignoreFromSerialization
 ], BaseDataCaptureView.prototype, "coreDefaults", null);
 __decorate([
-    ignoreFromSerialization
+    nameForSerialization('scanAreaMargins')
 ], BaseDataCaptureView.prototype, "_scanAreaMargins", void 0);
 __decorate([
-    ignoreFromSerialization
+    nameForSerialization('pointOfInterest')
 ], BaseDataCaptureView.prototype, "_pointOfInterest", void 0);
 __decorate([
-    ignoreFromSerialization
+    nameForSerialization('logoAnchor')
 ], BaseDataCaptureView.prototype, "_logoAnchor", void 0);
 __decorate([
-    ignoreFromSerialization
+    nameForSerialization('logoOffset')
 ], BaseDataCaptureView.prototype, "_logoOffset", void 0);
 __decorate([
-    ignoreFromSerialization
+    nameForSerialization('focusGesture')
 ], BaseDataCaptureView.prototype, "_focusGesture", void 0);
 __decorate([
-    ignoreFromSerialization
+    nameForSerialization('zoomGesture')
 ], BaseDataCaptureView.prototype, "_zoomGesture", void 0);
 __decorate([
-    ignoreFromSerialization
+    nameForSerialization('logoStyle')
 ], BaseDataCaptureView.prototype, "_logoStyle", void 0);
 __decorate([
     ignoreFromSerialization
@@ -2404,12 +2415,17 @@ class RectangularViewfinder extends DefaultSerializeable {
     get sizeWithUnitAndAspect() {
         return this._sizeWithUnitAndAspect;
     }
+    set sizeWithUnitAndAspect(value) {
+        this._sizeWithUnitAndAspect = value;
+        this.update();
+    }
     get coreDefaults() {
         return getCoreDefaults();
     }
     constructor(style, lineStyle) {
         super();
         this.type = 'rectangular';
+        this.eventEmitter = FactoryMaker.getInstance('EventEmitter');
         const viewfinderStyle = style || this.coreDefaults.RectangularViewfinder.defaultStyle;
         this._style = this.coreDefaults.RectangularViewfinder.styles[viewfinderStyle].style;
         this._lineStyle = this.coreDefaults.RectangularViewfinder.styles[viewfinderStyle].lineStyle;
@@ -2435,36 +2451,43 @@ class RectangularViewfinder extends DefaultSerializeable {
     }
     set dimming(value) {
         this._dimming = value;
+        this.update();
     }
     get disabledDimming() {
         return this._disabledDimming;
     }
     set disabledDimming(value) {
         this._disabledDimming = value;
+        this.update();
     }
     get animation() {
         return this._animation;
     }
     set animation(animation) {
         this._animation = animation;
+        this.update();
     }
     setSize(size) {
-        this._sizeWithUnitAndAspect = SizeWithUnitAndAspect.sizeWithWidthAndHeight(size);
+        this.sizeWithUnitAndAspect = SizeWithUnitAndAspect.sizeWithWidthAndHeight(size);
     }
     setWidthAndAspectRatio(width, heightToWidthAspectRatio) {
-        this._sizeWithUnitAndAspect = SizeWithUnitAndAspect.sizeWithWidthAndAspectRatio(width, heightToWidthAspectRatio);
+        this.sizeWithUnitAndAspect = SizeWithUnitAndAspect.sizeWithWidthAndAspectRatio(width, heightToWidthAspectRatio);
     }
     setHeightAndAspectRatio(height, widthToHeightAspectRatio) {
-        this._sizeWithUnitAndAspect = SizeWithUnitAndAspect.sizeWithHeightAndAspectRatio(height, widthToHeightAspectRatio);
+        this.sizeWithUnitAndAspect = SizeWithUnitAndAspect.sizeWithHeightAndAspectRatio(height, widthToHeightAspectRatio);
     }
     setShorterDimensionAndAspectRatio(fraction, aspectRatio) {
-        this._sizeWithUnitAndAspect = SizeWithUnitAndAspect.sizeWithShorterDimensionAndAspectRatio(new NumberWithUnit(fraction, exports.MeasureUnit.Fraction), aspectRatio);
+        this.sizeWithUnitAndAspect = SizeWithUnitAndAspect.sizeWithShorterDimensionAndAspectRatio(new NumberWithUnit(fraction, exports.MeasureUnit.Fraction), aspectRatio);
     }
     get disabledColor() {
         return this._disabledColor;
     }
     set disabledColor(value) {
         this._disabledColor = value;
+        this.update();
+    }
+    update() {
+        this.eventEmitter.emit('viewfinder.update');
     }
 }
 __decorate([
@@ -2489,6 +2512,9 @@ __decorate([
 __decorate([
     nameForSerialization('disabledColor')
 ], RectangularViewfinder.prototype, "_disabledColor", void 0);
+__decorate([
+    ignoreFromSerialization
+], RectangularViewfinder.prototype, "eventEmitter", void 0);
 
 exports.RectangularViewfinderStyle = void 0;
 (function (RectangularViewfinderStyle) {
