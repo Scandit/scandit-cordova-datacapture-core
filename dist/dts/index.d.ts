@@ -1,6 +1,6 @@
 export * from './Cordova/CommonCordova';
 export { Direction, Color, MarginsWithUnit, MeasureUnit, NumberWithUnit, Orientation, Point, PointWithUnit, DataCaptureOverlay, DataCaptureViewListener } from 'scandit-datacapture-frameworks-core';
-export { Quadrilateral, Rect, RectWithUnit, Size, SizeWithAspect, SizeWithUnit, SizeWithUnitAndAspect, SizingMode, Anchor, ScanIntention } from 'scandit-datacapture-frameworks-core';
+export { Quadrilateral, Rect, RectWithUnit, Size, SizeWithAspect, SizeWithUnit, SizeWithUnitAndAspect, SizingMode, Anchor } from 'scandit-datacapture-frameworks-core';
 export { LogoStyle, TorchSwitchControl, ZoomSwitchControl, NoneLocationSelection, RadiusLocationSelection, RectangularLocationSelection } from 'scandit-datacapture-frameworks-core';
 export { LocationSelection, AimerViewfinder, LaserlineViewfinder, LaserlineViewfinderStyle, RectangularViewfinder, RectangularViewfinderAnimation } from 'scandit-datacapture-frameworks-core';
 export { RectangularViewfinderLineStyle, RectangularViewfinderStyle, Viewfinder, Brush, NoViewfinder, Camera, CameraSettings, CameraPosition } from 'scandit-datacapture-frameworks-core';
@@ -8,4 +8,4 @@ export { FocusGestureStrategy, FocusRange, FrameData, FrameSource, FrameSourceSt
 export { ImageBuffer, Feedback, Sound, Vibration, DataCaptureContext, DataCaptureContextSettings, DataCaptureContextCreationOptions } from 'scandit-datacapture-frameworks-core';
 export { DataCaptureMode, DataCaptureContextListener, ContextStatus, DataCaptureComponent, ZoomGesture, SpotlightViewfinder, TapToFocus, Control, SwipeToZoom } from 'scandit-datacapture-frameworks-core';
 export { DataCaptureVersion } from './DataCaptureVersion';
-export { DataCaptureView, HTMLElementState } from './DataCaptureView';
+export { DataCaptureView } from './DataCaptureView';

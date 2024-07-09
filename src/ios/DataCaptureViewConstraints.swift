@@ -1,6 +1,6 @@
 import WebKit
 
-class NativeViewConstraints {
+class DataCaptureViewConstraints {
     let webView: WKWebView
 
     var captureView: UIView? {

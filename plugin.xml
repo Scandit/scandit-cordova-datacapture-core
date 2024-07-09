@@ -1,4 +1,4 @@
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="scandit-cordova-datacapture-core" version="6.25.0">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="scandit-cordova-datacapture-core" version="6.22.3">
     <name>ScanditCaptureCore</name>
     <js-module name="Core" src="dist/core.js">
         <merges target="Scandit" />
@@ -25,7 +25,7 @@
         <source-file src="src/ios/Callbacks.swift" />
         <source-file src="src/ios/CordovaEventEmitter.swift" />
         <source-file src="src/ios/CordovaResult.swift" />
-        <source-file src="src/ios/NativeViewConstraints.swift" />
+        <source-file src="src/ios/DataCaptureViewConstraints.swift" />
         <header-file src="src/ios/ScanditCaptureCore-Bridging-Header.h" type="BridgingHeader" />
         <source-file src="src/ios/ScanditCaptureCore.swift" />
         <source-file src="src/ios/ScanditCaptureCoreDefaults.swift" />
@@ -37,7 +37,7 @@
         <source-file src="src/ios/SDCVolumeButtonObserver.h" />
         <podspec>
             <pods use-frameworks="true">
-                <pod name="scandit-datacapture-frameworks-core" spec="= 6.25.0" />
+                <pod name="scandit-datacapture-frameworks-core" spec="= 6.22.3" />
             </pods>
         </podspec>
     </platform>
@@ -55,18 +55,60 @@
             <uses-permission android:name="android.permission.VIBRATE" />
         </config-file>
         <source-file src="src/android/ScanditCaptureCore.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core" />
+        <source-file src="src/android/communication/CameraPermissionGrantedListener.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/communication" />
+        <source-file src="src/android/factories/ActionFactory.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/factories" />
+        <source-file src="src/android/factories/CaptureCoreActionFactory.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/factories" />
+        <source-file src="src/android/callbacks/Callback.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/callbacks" />
         <source-file src="src/android/handlers/DataCaptureViewHandler.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/handlers" />
+        <source-file src="src/android/handlers/ActionsHandler.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/handlers" />
+        <source-file src="src/android/handlers/CameraPermissionsActionsHandlerHelper.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/handlers" />
+        <source-file src="src/android/errors/InvalidActionNameError.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/errors" />
         <source-file src="src/android/errors/ActionError.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/errors" />
         <source-file src="src/android/errors/JsonParseError.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/errors" />
         <source-file src="src/android/errors/NoLastFrameError.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/errors" />
+        <source-file src="src/android/actions/Action.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionInjectDefaults.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionCreateContextAndView.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionUpdateContextAndView.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionViewResizeMove.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionViewShow.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionViewHide.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionDisposeContext.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionSubscribeContext.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionUnsubscribeContext.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionSubscribeView.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionUnsubscribeView.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionConvertPointCoordinates.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionConvertQuadrilateralCoordinates.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionGetCameraState.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionSend.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionEmitFeedback.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionGetIsTorchAvailable.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionSubscribeFrameSource.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionUnsubscribeFrameSource.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionGetLastFrame.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionSwitchCameraToDesiredState.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionAddModeToContext.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionRemoveAllModesFromContext.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionCreateDataCaptureView.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionRemoveModeFromContext.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionUpdateDataCaptureView.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/actions/ActionOverlayHandler.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/actions" />
+        <source-file src="src/android/workers/Worker.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/workers" />
+        <source-file src="src/android/workers/BackgroundWorker.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/workers" />
+        <source-file src="src/android/workers/UiWorker.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/workers" />
+        <source-file src="src/android/data/ActionData.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/data" />
         <source-file src="src/android/data/SerializableData.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/data" />
         <source-file src="src/android/data/ResizeAndMoveInfo.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/data" />
+        <source-file src="src/android/data/SerializableViewState.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/data" />
+        <source-file src="src/android/data/SerializablePoint.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/data" />
         <source-file src="src/android/data/SerializableCallbackAction.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/data" />
         <source-file src="src/android/data/SerializableFinishModeCallbackData.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/data" />
+        <source-file src="src/android/data/defaults/SerializableCameraSettingsDefault.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/data/defaults" />
+        <source-file src="src/android/data/defaults/SerializableBrushDefaults.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/data/defaults" />
         <source-file src="src/android/utils/Extensions.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/utils" />
         <source-file src="src/android/utils/CordovaResult.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/utils" />
         <source-file src="src/android/utils/CordovaEventEmitter.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/utils" />
-        <source-file src="src/android/utils/PluginMethod.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/utils" />
         <framework custom="true" src="src/android/build.gradle" type="gradleReference" />
         <hook src="src/hooks/support-kotlin.js" type="after_plugin_install" />
     </platform>

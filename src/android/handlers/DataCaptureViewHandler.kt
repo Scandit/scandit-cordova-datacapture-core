@@ -104,9 +104,6 @@ class DataCaptureViewHandler(
         dataCaptureViewReference = WeakReference(dataCaptureView)
 
         mainThread.runOnMainThread {
-            dataCaptureView.parent?.let {
-                (it as ViewGroup).removeView(dataCaptureView)
-            }
             activity.addContentView(
                 dataCaptureView,
                 ViewGroup.LayoutParams(
