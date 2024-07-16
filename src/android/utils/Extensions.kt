@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import com.scandit.datacapture.core.internal.sdk.AppAndroidEnvironment
 import org.apache.cordova.CallbackContext
 import org.apache.cordova.PluginResult
+import org.json.JSONArray
 import org.json.JSONObject
 
 fun Int.pxFromDp(): Float {
@@ -64,3 +65,17 @@ fun CallbackContext.successAndKeepCallback(message: String) {
         }
     )
 }
+
+val JSONArray.defaultArgumentAsString: String
+    get() {
+        return this[0].toString()
+    }
+
+
+fun JSONArray.optBoolean(key: String, defaultValue: Boolean): Boolean =
+    this.getJSONObject(0).optBoolean(key, defaultValue)
+
+fun JSONArray.optString(key: String, defaultValue: String): String =
+    this.getJSONObject(0).optString(key, defaultValue)
+
+
