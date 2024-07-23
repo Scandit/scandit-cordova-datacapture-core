@@ -1,6 +1,6 @@
 {
   "name": "scandit-cordova-datacapture-core",
-  "version": "6.24.2",
+  "version": "6.23.4",
   "description": "Scandit Data Capture SDK for Cordova",
   "license": "Apache-2.0",
   "private": false,
@@ -15,24 +15,15 @@
     "build": "rollup -c rollup.config.js --bundleConfigAsCjs",
     "test": "npm run lint",
     "lint": "eslint ./www/ts",
-    "jest": "jest",
     "coverage": "jest --coverage --maxWorkers=12",
     "clear-jest-cache": "jest --clearCache || true",
     "clean": "npm run clear-jest-cache && rimraf dist coverage",
     "clean-all": "npm run clean && rimraf node_modules"
   },
   "dependencies": {
-    "scandit-datacapture-frameworks-core": "6.24.2"
+    "scandit-datacapture-frameworks-core": "6.23.4"
   },
-  "devDependencies": {
-    "@babel/plugin-proposal-class-properties": "^7.18.6",
-    "@babel/plugin-proposal-decorators": "^7.24.0",
-    "@babel/preset-env": "^7.24.0",
-    "@babel/preset-typescript": "^7.23.3",
-    "@types/jest": "^29.5.12",
-    "babel-jest": "^29.7.0",
-    "ts-jest": "^29.1.2"
-  },
+  "devDependencies": {},
   "cordova": {
     "id": "scandit-cordova-datacapture-core",
     "platforms": [

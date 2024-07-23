@@ -8,6 +8,6 @@ export declare class NativeCameraProxy extends BaseNativeProxy implements Camera
     isTorchAvailable(position: CameraPosition): Promise<boolean>;
     switchCameraToDesiredState(desiredStateJson: string): Promise<void>;
     registerListenerForCameraEvents(): void;
-    unregisterListenerForCameraEvents(): Promise<void>;
+    unregisterListenerForCameraEvents(): void;
     private notifyListeners;
 }
