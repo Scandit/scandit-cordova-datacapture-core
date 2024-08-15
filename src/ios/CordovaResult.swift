@@ -12,6 +12,8 @@ public struct CordovaResult: FrameworksResult {
     public func success(result: Any?) {
         if let res = result as? CDVPluginResult.JSONMessage {
             commandDelegate.send(.success(message: res), callbackId: callbackId)
+        } else if let res = result as? String {
+            commandDelegate.send(.success(message: res), callbackId: callbackId)
         } else {
             commandDelegate.send(.success, callbackId: callbackId)
         }

@@ -4,7 +4,7 @@ export { Quadrilateral, Rect, RectWithUnit, Size, SizeWithAspect, SizeWithUnit, 
 export { LogoStyle, TorchSwitchControl, ZoomSwitchControl, NoneLocationSelection, RadiusLocationSelection, RectangularLocationSelection } from 'scandit-datacapture-frameworks-core';
 export { LocationSelection, AimerViewfinder, LaserlineViewfinder, LaserlineViewfinderStyle, RectangularViewfinder, RectangularViewfinderAnimation } from 'scandit-datacapture-frameworks-core';
 export { RectangularViewfinderLineStyle, RectangularViewfinderStyle, Viewfinder, Brush, NoViewfinder, Camera, CameraSettings, CameraPosition } from 'scandit-datacapture-frameworks-core';
-export { FocusGestureStrategy, FocusRange, FrameData, FrameSource, FrameSourceState, FrameSourceListener, TorchState, VideoResolution, FocusGesture } from 'scandit-datacapture-frameworks-core';
+export { FocusGestureStrategy, FocusRange, FrameData, FrameSource, FrameSourceState, FrameSourceListener, ImageFrameSource, TorchState, VideoResolution, FocusGesture } from 'scandit-datacapture-frameworks-core';
 export { ImageBuffer, Feedback, Sound, Vibration, DataCaptureContext, DataCaptureContextSettings, DataCaptureContextCreationOptions } from 'scandit-datacapture-frameworks-core';
 export { DataCaptureMode, DataCaptureContextListener, ContextStatus, DataCaptureComponent, ZoomGesture, SpotlightViewfinder, TapToFocus, Control, SwipeToZoom } from 'scandit-datacapture-frameworks-core';
 export { DataCaptureVersion } from './DataCaptureVersion';
