@@ -331,47 +331,10 @@ class NativeDataCaptureViewProxy extends core.BaseNativeProxy {
     }
 }
 
-class NativeImageFrameSourceProxy extends core.BaseNativeProxy {
-    static get cordovaExec() {
-        return Cordova.exec;
-    }
-    getCurrentCameraState(_position) {
-        return new Promise((resolve, reject) => {
-            NativeImageFrameSourceProxy.cordovaExec(resolve, reject, CordovaFunction.GetCurrentCameraState, null);
-        });
-    }
-    switchCameraToDesiredState(desiredStateJson) {
-        return new Promise((resolve, reject) => {
-            NativeImageFrameSourceProxy.cordovaExec(resolve, reject, CordovaFunction.SwitchCameraToDesiredState, [desiredStateJson]);
-        });
-    }
-    registerListenerForEvents() {
-        NativeImageFrameSourceProxy.cordovaExec(this.notifyListeners.bind(this), null, CordovaFunction.SubscribeFrameSourceListener, null);
-    }
-    unregisterListenerForEvents() {
-        return new Promise((resolve, reject) => {
-            NativeImageFrameSourceProxy.cordovaExec(resolve, reject, CordovaFunction.UnsubscribeFrameSourceListener, null);
-        });
-    }
-    notifyListeners(event) {
-        if (!event) {
-            // The event could be undefined/null in case the plugin result did not pass a "message",
-            // which could happen e.g. in case of "ok" results, which could signal e.g. successful
-            // listener subscriptions.
-            return;
-        }
-        switch (event.name) {
-            case core.FrameSourceListenerEvents.didChangeState:
-                this.eventEmitter.emit(core.FrameSourceListenerEvents.didChangeState, event.argument.state);
-                break;
-        }
-    }
-}
-
 function initCoreProxy() {
     core.FactoryMaker.bindInstance('DataCaptureContextProxy', new NativeDataCaptureContextProxy());
     core.FactoryMaker.bindInstance('FeedbackProxy', new NativeFeedbackProxy());
-    core.FactoryMaker.bindInstance('ImageFrameSourceProxy', new NativeImageFrameSourceProxy());
+    //FactoryMaker.bindInstance('ImageFrameSourceProxy', new NativeImageFrameSourceProxy());
     core.FactoryMaker.bindInstance('DataCaptureViewProxy', new NativeDataCaptureViewProxy());
     core.FactoryMaker.bindInstance('CameraProxy', new NativeCameraProxy());
 }
@@ -708,7 +671,6 @@ Object.defineProperty(exports, "FrameSourceState", {
     get: function () { return core.FrameSourceState; }
 });
 exports.ImageBuffer = core.ImageBuffer;
-exports.ImageFrameSource = core.ImageFrameSource;
 exports.LaserlineViewfinder = core.LaserlineViewfinder;
 Object.defineProperty(exports, "LaserlineViewfinderStyle", {
     enumerable: true,
