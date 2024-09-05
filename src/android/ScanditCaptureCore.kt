@@ -6,7 +6,6 @@
 
 package com.scandit.datacapture.cordova.core
 
-import android.Manifest
 import android.content.pm.PackageManager
 import com.scandit.datacapture.cordova.core.data.ResizeAndMoveInfo
 import com.scandit.datacapture.cordova.core.errors.JsonParseError
@@ -14,11 +13,13 @@ import com.scandit.datacapture.cordova.core.errors.NoLastFrameError
 import com.scandit.datacapture.cordova.core.handlers.DataCaptureViewHandler
 import com.scandit.datacapture.cordova.core.utils.CordovaEventEmitter
 import com.scandit.datacapture.cordova.core.utils.CordovaResult
+import com.scandit.datacapture.cordova.core.utils.PermissionRequest
 import com.scandit.datacapture.cordova.core.utils.PluginMethod
 import com.scandit.datacapture.cordova.core.utils.defaultArgumentAsString
 import com.scandit.datacapture.cordova.core.utils.successAndKeepCallback
 import com.scandit.datacapture.core.common.feedback.Feedback
 import com.scandit.datacapture.core.source.FrameSourceState
+import com.scandit.datacapture.core.source.FrameSourceStateDeserializer
 import com.scandit.datacapture.core.ui.DataCaptureView
 import com.scandit.datacapture.frameworks.core.CoreModule
 import com.scandit.datacapture.frameworks.core.deserialization.DefaultDeserializationLifecycleObserver
@@ -43,7 +44,7 @@ class ScanditCaptureCore :
     DeserializationLifecycleObserver.Observer {
 
     companion object {
-        private const val CODE_CAMERA_PERMISSIONS = 200
+
         private val PLUGIN_NAMES: MutableSet<String> = mutableSetOf()
 
         fun addPlugin(name: String) {
@@ -56,6 +57,8 @@ class ScanditCaptureCore :
     private val mainThread: MainThread = DefaultMainThread.getInstance()
 
     private val lastFrameData: LastFrameData = DefaultLastFrameData.getInstance()
+
+    private val permissionRequest = PermissionRequest.getInstance()
 
     private val deserializationLifecycleObserver: DeserializationLifecycleObserver =
         DefaultDeserializationLifecycleObserver.getInstance()
@@ -88,18 +91,18 @@ class ScanditCaptureCore :
             this.javaClass.methods.filter { it.getAnnotation(PluginMethod::class.java) != null }
                 .associateBy { it.name }
 
-        checkOrRequestCameraPermission()
         deserializationLifecycleObserver.attach(this)
     }
 
     override fun onStop() {
-        frameSourceStateBeforeStopping = coreModule.getCurrentCameraDesiredState() ?: FrameSourceState.OFF
+        frameSourceStateBeforeStopping =
+            coreModule.getCurrentCameraDesiredState() ?: FrameSourceState.OFF
         coreModule.switchToDesiredCameraState(FrameSourceState.OFF)
         latestFeedback?.release()
     }
 
     override fun onStart() {
-        if (checkCameraPermission()) {
+        if (permissionRequest.checkCameraPermission(this)) {
             coreModule.switchToDesiredCameraState(frameSourceStateBeforeStopping)
         }
     }
@@ -337,6 +340,14 @@ class ScanditCaptureCore :
 
     @PluginMethod
     fun switchCameraToDesiredState(args: JSONArray, callbackContext: CallbackContext) {
+        if (!permissionRequest.checkCameraPermission(this)) {
+            latestDesiredFrameSource =
+                FrameSourceStateDeserializer.fromJson(args.defaultArgumentAsString)
+
+            permissionRequest.checkOrRequestCameraPermission(this)
+            return
+        }
+
         coreModule.switchCameraToDesiredState(
             args.defaultArgumentAsString,
             CordovaResult(callbackContext)
@@ -402,15 +413,6 @@ class ScanditCaptureCore :
         coreModule.removeAllOverlays(CordovaResult(callbackContext))
     }
 
-    private fun checkCameraPermission(): Boolean {
-        return cordova.hasPermission(Manifest.permission.CAMERA)
-    }
-
-    private fun checkOrRequestCameraPermission() {
-        if (checkCameraPermission().not()) {
-            cordova.requestPermission(this, CODE_CAMERA_PERMISSIONS, Manifest.permission.CAMERA)
-        }
-    }
 
     @Deprecated("Deprecated in Java")
     override fun onRequestPermissionResult(
@@ -418,7 +420,7 @@ class ScanditCaptureCore :
         permissions: Array<out String>?,
         grantResults: IntArray?
     ) {
-        if (requestCode == CODE_CAMERA_PERMISSIONS) {
+        if (requestCode == PermissionRequest.CODE_CAMERA_PERMISSIONS) {
             if (grantResults?.firstOrNull() == PackageManager.PERMISSION_GRANTED) {
                 // Switch camera state once the permission has been granted
                 coreModule.switchToDesiredCameraState(latestDesiredFrameSource)
@@ -427,7 +429,6 @@ class ScanditCaptureCore :
             }
         }
     }
-
 
     private fun notifyCameraPermissionDenied() {
         eventEmitter.emit(

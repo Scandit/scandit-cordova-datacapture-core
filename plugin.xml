@@ -1,4 +1,4 @@
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="scandit-cordova-datacapture-core" version="6.25.3">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="scandit-cordova-datacapture-core" version="6.27.0">
     <name>ScanditCaptureCore</name>
     <js-module name="Core" src="dist/core.js">
         <merges target="Scandit" />
@@ -37,7 +37,7 @@
         <source-file src="src/ios/SDCVolumeButtonObserver.h" />
         <podspec>
             <pods use-frameworks="true">
-                <pod name="scandit-datacapture-frameworks-core" spec="= 6.25.3" />
+                <pod name="scandit-datacapture-frameworks-core" spec="= 6.27.0" />
             </pods>
         </podspec>
     </platform>
@@ -67,6 +67,7 @@
         <source-file src="src/android/utils/CordovaResult.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/utils" />
         <source-file src="src/android/utils/CordovaEventEmitter.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/utils" />
         <source-file src="src/android/utils/PluginMethod.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/utils" />
+        <source-file src="src/android/utils/PermissionRequest.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/utils" />
         <framework custom="true" src="src/android/build.gradle" type="gradleReference" />
         <hook src="src/hooks/support-kotlin.js" type="after_plugin_install" />
     </platform>
