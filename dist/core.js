@@ -991,6 +991,16 @@ class DataCaptureContextSettings extends DefaultSerializeable {
     }
 }
 
+class DataCaptureContextFeatures {
+    static get featureFlags() {
+        return this._featureFlags;
+    }
+    static set featureFlags(value) {
+        this._featureFlags = value;
+    }
+}
+DataCaptureContextFeatures._featureFlags = {};
+
 exports.DataCaptureContextEvents = void 0;
 (function (DataCaptureContextEvents) {
     DataCaptureContextEvents["didChangeStatus"] = "DataCaptureContextListener.onStatusChanged";
@@ -1052,7 +1062,9 @@ class DataCaptureContextController {
     initializeContextFromJSON() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                yield this._proxy.contextFromJSON(this.context);
+                const featureFlagsString = yield this._proxy.contextFromJSON(this.context);
+                DataCaptureContextFeatures.featureFlags =
+                    JSON.parse(featureFlagsString);
             }
             catch (error) {
                 this.notifyListenersOfDeserializationError(error);
@@ -2889,6 +2901,7 @@ exports.Color = Color;
 exports.ContextStatus = ContextStatus;
 exports.ControlImage = ControlImage;
 exports.DataCaptureContext = DataCaptureContext;
+exports.DataCaptureContextFeatures = DataCaptureContextFeatures;
 exports.DataCaptureContextSettings = DataCaptureContextSettings;
 exports.DataCaptureViewController = DataCaptureViewController;
 exports.DefaultSerializeable = DefaultSerializeable;
