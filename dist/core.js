@@ -1235,6 +1235,9 @@ __decorate([
 ], DataCaptureContext.prototype, "_frameSource", void 0);
 __decorate([
     ignoreFromSerialization
+], DataCaptureContext.prototype, "view", void 0);
+__decorate([
+    ignoreFromSerialization
 ], DataCaptureContext.prototype, "modes", void 0);
 __decorate([
     ignoreFromSerialization
@@ -1767,11 +1770,13 @@ exports.DataCaptureViewEvents = void 0;
     DataCaptureViewEvents["didChangeSize"] = "DataCaptureViewListener.onSizeChanged";
 })(exports.DataCaptureViewEvents || (exports.DataCaptureViewEvents = {}));
 class DataCaptureViewController extends BaseController {
-    static forDataCaptureView(view) {
+    static forDataCaptureView(view, autoCreateNativeView) {
         const controller = new DataCaptureViewController();
         controller.view = view;
-        controller.createView();
-        controller.subscribeListener();
+        if (autoCreateNativeView) {
+            controller.createView();
+            controller.subscribeListener();
+        }
         return controller;
     }
     constructor() {
@@ -1798,6 +1803,15 @@ class DataCaptureViewController extends BaseController {
     hide() {
         return this._proxy.hide();
     }
+    createNativeView() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.createView();
+            this.subscribeListener();
+        });
+    }
+    removeNativeView() {
+        return this._proxy.removeView();
+    }
     createView() {
         return this._proxy.createView(JSON.stringify(this.view.toJSON()));
     }
@@ -1806,12 +1820,6 @@ class DataCaptureViewController extends BaseController {
     }
     dispose() {
         this.unsubscribeListener();
-    }
-    addOverlay(overlay) {
-        return this._proxy.addOverlay(JSON.stringify(overlay.toJSON()));
-    }
-    removeOverlay(overlay) {
-        return this._proxy.removeOverlay(JSON.stringify(overlay.toJSON()));
     }
     subscribeListener() {
         var _a, _b;
@@ -1903,18 +1911,20 @@ class BaseDataCaptureView extends DefaultSerializeable {
     get privateContext() {
         return this.context;
     }
-    static forContext(context) {
-        const view = new BaseDataCaptureView();
+    static forContext(context, autoCreateNativeView = true) {
+        const view = new BaseDataCaptureView(autoCreateNativeView);
         view.context = context;
+        view.isViewCreated = autoCreateNativeView;
         return view;
     }
-    constructor() {
+    constructor(autoCreateNativeView) {
         super();
         this._context = null;
         this.overlays = [];
         this.controls = [];
         this.listeners = [];
-        this.controller = DataCaptureViewController.forDataCaptureView(this);
+        this.isViewCreated = false;
+        this.controller = DataCaptureViewController.forDataCaptureView(this, autoCreateNativeView);
         this._scanAreaMargins = this.coreDefaults.DataCaptureView.scanAreaMargins;
         this._pointOfInterest = this.coreDefaults.DataCaptureView.pointOfInterest;
         this._logoAnchor = this.coreDefaults.DataCaptureView.logoAnchor;
@@ -1929,7 +1939,7 @@ class BaseDataCaptureView extends DefaultSerializeable {
         }
         overlay.view = this;
         this.overlays.push(overlay);
-        this.controller.addOverlay(overlay);
+        this.controller.updateView();
     }
     removeOverlay(overlay) {
         if (!this.overlays.includes(overlay)) {
@@ -1937,7 +1947,7 @@ class BaseDataCaptureView extends DefaultSerializeable {
         }
         overlay.view = null;
         this.overlays.splice(this.overlays.indexOf(overlay), 1);
-        this.controller.removeOverlay(overlay);
+        this.controller.updateView();
     }
     addListener(listener) {
         if (!this.listeners.includes(listener)) {
@@ -1981,11 +1991,29 @@ class BaseDataCaptureView extends DefaultSerializeable {
     controlUpdated() {
         this.controller.updateView();
     }
+    createNativeView() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.isViewCreated) {
+                return Promise.resolve();
+            }
+            yield this.controller.createNativeView();
+            this.isViewCreated = true;
+        });
+    }
+    removeNativeView() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.isViewCreated) {
+                return Promise.resolve();
+            }
+            this.controller.removeNativeView();
+            this.isViewCreated = false;
+        });
+    }
     dispose() {
-        this.overlays.forEach(overlay => this.removeOverlay(overlay));
         this.overlays = [];
         this.listeners.forEach(listener => this.removeListener(listener));
         this.controller.dispose();
+        this.isViewCreated = false;
     }
     // HTML Views only
     setFrame(frame, isUnderContent = false) {
@@ -2040,13 +2068,13 @@ __decorate([
 ], BaseDataCaptureView.prototype, "_logoStyle", void 0);
 __decorate([
     ignoreFromSerialization
-], BaseDataCaptureView.prototype, "overlays", void 0);
-__decorate([
-    ignoreFromSerialization
 ], BaseDataCaptureView.prototype, "controller", void 0);
 __decorate([
     ignoreFromSerialization
 ], BaseDataCaptureView.prototype, "listeners", void 0);
+__decorate([
+    ignoreFromSerialization
+], BaseDataCaptureView.prototype, "isViewCreated", void 0);
 
 class ZoomSwitchControl extends DefaultSerializeable {
     constructor() {

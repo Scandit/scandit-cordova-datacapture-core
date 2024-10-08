@@ -95,6 +95,8 @@ struct CommandError {
 
         case noFrameData = 10077
         case noBarcodeSelectionIdentifier = 10078
+        
+        case noFeedbackJsonPassed = 10079
     }
 
     public static let invalidJSON = CommandError(code: .invalidJSON,
@@ -185,6 +187,9 @@ struct CommandError {
                                                      message: """
                                                       There was no FrameData to execute the command on
                                                       """)
+    
+    public static let noFeedbackJsonPassed = CommandError(code: .invalidJSON,
+                                                 message: "No feedbackJson was provided for the function.")
 
     public let code: Code
     public let message: String

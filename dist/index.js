@@ -298,19 +298,9 @@ class NativeDataCaptureViewProxy extends core.BaseNativeProxy {
             NativeDataCaptureViewProxy.cordovaExec(resolve, reject, CordovaFunction.UpdateDataCaptureView, [viewJson]);
         });
     }
-    addOverlay(overlayJson) {
+    removeView() {
         return new Promise((resolve, reject) => {
-            NativeDataCaptureViewProxy.cordovaExec(resolve, reject, CordovaFunction.AddOverlay, [overlayJson]);
-        });
-    }
-    removeOverlay(overlayJson) {
-        return new Promise((resolve, reject) => {
-            NativeDataCaptureViewProxy.cordovaExec(resolve, reject, CordovaFunction.RemoveOverlay, [overlayJson]);
-        });
-    }
-    removeAllOverlays() {
-        return new Promise((resolve, reject) => {
-            NativeDataCaptureViewProxy.cordovaExec(resolve, reject, CordovaFunction.RemoveAllOverlays, null);
+            NativeDataCaptureViewProxy.cordovaExec(resolve, reject, CordovaFunction.RemoveDataCaptureView, null);
         });
     }
     static get cordovaExec() {
@@ -406,9 +396,7 @@ var CordovaFunction;
     CordovaFunction["RemoveAllModesFromContext"] = "removeAllModesFromContext";
     CordovaFunction["CreateDataCaptureView"] = "createDataCaptureView";
     CordovaFunction["UpdateDataCaptureView"] = "updateDataCaptureView";
-    CordovaFunction["AddOverlay"] = "addOverlay";
-    CordovaFunction["RemoveOverlay"] = "removeOverlay";
-    CordovaFunction["RemoveAllOverlays"] = "removeAllOverlays";
+    CordovaFunction["RemoveDataCaptureView"] = "removeDataCaptureView";
 })(CordovaFunction || (CordovaFunction = {}));
 // tslint:disable-next-line:variable-name
 const Cordova = {
@@ -554,19 +542,24 @@ class DataCaptureView {
             setTimeout(this.elementDidChange.bind(this), 300);
             setTimeout(this.elementDidChange.bind(this), 1000);
         });
-        this.baseDataCaptureView = new core.BaseDataCaptureView();
+        this.baseDataCaptureView = new core.BaseDataCaptureView(false);
     }
     connectToElement(element) {
-        this.htmlElement = element;
-        this.htmlElementState = new HTMLElementState();
-        // Initial update
-        this.elementDidChange();
-        this.subscribeToChangesOnHTMLElement();
+        // add view to native hierarchy
+        this.baseDataCaptureView.createNativeView().then(() => {
+            this.htmlElement = element;
+            this.htmlElementState = new HTMLElementState();
+            // Initial update
+            this.elementDidChange();
+            this.subscribeToChangesOnHTMLElement();
+        });
     }
     detachFromElement() {
         this.unsubscribeFromChangesOnHTMLElement();
         this.htmlElement = null;
         this.elementDidChange();
+        // Remove view from native hierarchy
+        this.baseDataCaptureView.removeNativeView();
     }
     setFrame(frame, isUnderContent = false) {
         return this.baseDataCaptureView.setFrame(frame, isUnderContent);

@@ -9,9 +9,7 @@ export declare class NativeDataCaptureViewProxy extends BaseNativeProxy implemen
     hide(): Promise<void>;
     createView(viewJson: string): Promise<void>;
     updateView(viewJson: string): Promise<void>;
-    addOverlay(overlayJson: string): Promise<void>;
-    removeOverlay(overlayJson: string): Promise<void>;
-    removeAllOverlays(): Promise<void>;
+    removeView(): Promise<void>;
     private static get cordovaExec();
     private notifyListeners;
 }

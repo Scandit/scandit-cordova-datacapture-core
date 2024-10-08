@@ -27,9 +27,7 @@ export declare enum CordovaFunction {
     RemoveAllModesFromContext = "removeAllModesFromContext",
     CreateDataCaptureView = "createDataCaptureView",
     UpdateDataCaptureView = "updateDataCaptureView",
-    AddOverlay = "addOverlay",
-    RemoveOverlay = "removeOverlay",
-    RemoveAllOverlays = "removeAllOverlays"
+    RemoveDataCaptureView = "removeDataCaptureView"
 }
 export declare const Cordova: {
     pluginName: string;

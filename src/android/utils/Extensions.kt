@@ -71,11 +71,8 @@ val JSONArray.defaultArgumentAsString: String
         return this[0].toString()
     }
 
-
 fun JSONArray.optBoolean(key: String, defaultValue: Boolean): Boolean =
     this.getJSONObject(0).optBoolean(key, defaultValue)
 
 fun JSONArray.optString(key: String, defaultValue: String): String =
     this.getJSONObject(0).optString(key, defaultValue)
-
-

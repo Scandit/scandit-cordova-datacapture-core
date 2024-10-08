@@ -4,9 +4,8 @@ import android.Manifest
 import org.apache.cordova.CordovaPlugin
 
 class PermissionRequest {
-    fun checkCameraPermission(plugin: CordovaPlugin): Boolean {
-        return plugin.cordova.hasPermission(Manifest.permission.CAMERA)
-    }
+    fun checkCameraPermission(plugin: CordovaPlugin): Boolean =
+        plugin.cordova.hasPermission(Manifest.permission.CAMERA)
 
     fun checkOrRequestCameraPermission(plugin: CordovaPlugin) {
         if (checkCameraPermission(plugin).not()) {

@@ -20,10 +20,7 @@ import com.scandit.datacapture.cordova.core.utils.successAndKeepCallback
 import com.scandit.datacapture.core.common.feedback.Feedback
 import com.scandit.datacapture.core.source.FrameSourceState
 import com.scandit.datacapture.core.source.FrameSourceStateDeserializer
-import com.scandit.datacapture.core.ui.DataCaptureView
 import com.scandit.datacapture.frameworks.core.CoreModule
-import com.scandit.datacapture.frameworks.core.deserialization.DefaultDeserializationLifecycleObserver
-import com.scandit.datacapture.frameworks.core.deserialization.DeserializationLifecycleObserver
 import com.scandit.datacapture.frameworks.core.listeners.FrameworksDataCaptureContextListener
 import com.scandit.datacapture.frameworks.core.listeners.FrameworksDataCaptureViewListener
 import com.scandit.datacapture.frameworks.core.listeners.FrameworksFrameSourceDeserializer
@@ -40,8 +37,7 @@ import org.json.JSONObject
 import java.lang.reflect.Method
 
 class ScanditCaptureCore :
-    CordovaPlugin(),
-    DeserializationLifecycleObserver.Observer {
+    CordovaPlugin() {
 
     companion object {
 
@@ -59,9 +55,6 @@ class ScanditCaptureCore :
     private val lastFrameData: LastFrameData = DefaultLastFrameData.getInstance()
 
     private val permissionRequest = PermissionRequest.getInstance()
-
-    private val deserializationLifecycleObserver: DeserializationLifecycleObserver =
-        DefaultDeserializationLifecycleObserver.getInstance()
 
     private var frameSourceStateBeforeStopping: FrameSourceState = FrameSourceState.OFF
 
@@ -84,14 +77,11 @@ class ScanditCaptureCore :
     private lateinit var exposedFunctionsToJs: Map<String, Method>
 
     override fun pluginInitialize() {
-        captureViewHandler.attachWebView(webView.view, cordova.activity)
         coreModule.onCreate(cordova.context)
         // Init functions exposed to JS
         exposedFunctionsToJs =
             this.javaClass.methods.filter { it.getAnnotation(PluginMethod::class.java) != null }
                 .associateBy { it.name }
-
-        deserializationLifecycleObserver.attach(this)
     }
 
     override fun onStop() {
@@ -121,7 +111,6 @@ class ScanditCaptureCore :
         captureViewHandler.disposeCurrent()
         coreModule.onDestroy()
         eventEmitter.removeAllCallbacks()
-        deserializationLifecycleObserver.detach(this)
     }
 
     override fun execute(
@@ -378,10 +367,14 @@ class ScanditCaptureCore :
 
     @PluginMethod
     fun createDataCaptureView(args: JSONArray, callbackContext: CallbackContext) {
-        coreModule.createDataCaptureView(
+        captureViewHandler.attachWebView(webView.view, cordova.activity)
+        val view = coreModule.createDataCaptureView(
             args.defaultArgumentAsString,
             CordovaResult(callbackContext)
         )
+        if (view != null) {
+            captureViewHandler.attachDataCaptureView(view, cordova.activity)
+        }
     }
 
     @PluginMethod
@@ -393,26 +386,17 @@ class ScanditCaptureCore :
     }
 
     @PluginMethod
-    fun addOverlay(args: JSONArray, callbackContext: CallbackContext) {
-        coreModule.addOverlayToView(args.defaultArgumentAsString, CordovaResult(callbackContext))
-    }
-
-    @PluginMethod
-    fun removeOverlay(args: JSONArray, callbackContext: CallbackContext) {
-        coreModule.removeOverlayFromView(
-            args.defaultArgumentAsString,
-            CordovaResult(callbackContext)
-        )
-    }
-
-    @PluginMethod
-    fun removeAllOverlays(
+    fun removeDataCaptureView(
         @Suppress("UNUSED_PARAMETER") args: JSONArray,
         callbackContext: CallbackContext
     ) {
-        coreModule.removeAllOverlays(CordovaResult(callbackContext))
+        val dcViewToRemove = captureViewHandler.dataCaptureView
+        captureViewHandler.disposeCurrentDataCaptureView()
+        if (dcViewToRemove != null) {
+            coreModule.dataCaptureViewDisposed(dcViewToRemove)
+        }
+        callbackContext.success()
     }
-
 
     @Deprecated("Deprecated in Java")
     override fun onRequestPermissionResult(
@@ -443,13 +427,5 @@ class ScanditCaptureCore :
 
     private fun onJsonParseError(error: Throwable, callbackContext: CallbackContext) {
         JsonParseError(error.message).sendResult(callbackContext)
-    }
-
-    override fun onDataCaptureViewDeserialized(dataCaptureView: DataCaptureView?) {
-        if (dataCaptureView == null) {
-            captureViewHandler.disposeCurrentDataCaptureView()
-            return
-        }
-        captureViewHandler.attachDataCaptureView(dataCaptureView, cordova.activity)
     }
 }

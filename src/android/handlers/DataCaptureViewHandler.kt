@@ -29,7 +29,7 @@ class DataCaptureViewHandler(
     private var webViewReference: WeakReference<View>? = null
     private var backgroundViewReference: WeakReference<View>? = null
 
-    private val dataCaptureView: DataCaptureView?
+    val dataCaptureView: DataCaptureView?
         get() = dataCaptureViewReference?.get()
     private val webView: View?
         get() = webViewReference?.get()

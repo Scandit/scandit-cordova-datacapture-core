@@ -19,21 +19,15 @@ public class ScanditCaptureCore: CDVPlugin {
         }
     }
 
-    public static func registerModeDeserializer(_ modeDeserializer: DataCaptureModeDeserializer) {
-        Deserializers.Factory.add(modeDeserializer)
-    }
-
-    public static func unregisterModeDeserializer(_ modeDeserialzer: DataCaptureModeDeserializer) {
-        Deserializers.Factory.remove(modeDeserialzer)
-    }
-
     var captureView: DataCaptureView? {
         didSet {
             guard oldValue != captureView else { return }
 
             if let oldValue = oldValue {
                 captureViewConstraints.captureView = nil
-                oldValue.removeFromSuperview()
+                if oldValue.superview != nil {
+                    oldValue.removeFromSuperview()
+                }
             }
 
             guard let captureView = captureView else {
@@ -319,6 +313,7 @@ public class ScanditCaptureCore: CDVPlugin {
         }
 
         feedback.emit()
+        commandDelegate.send(.success, callbackId: command.callbackId)
     }
 
     @objc(getLastFrame:)
@@ -364,7 +359,9 @@ public class ScanditCaptureCore: CDVPlugin {
             commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
             return
         }
-        _ = coreModule.createDataCaptureView(viewJson: viewJson, result: CordovaResult(commandDelegate, command.callbackId))
+        dispatchMainSync {
+            captureView = coreModule.createDataCaptureView(viewJson: viewJson, result: CordovaResult(commandDelegate, command.callbackId))
+        }
     }
     
     @objc(updateDataCaptureView:)
@@ -373,39 +370,24 @@ public class ScanditCaptureCore: CDVPlugin {
             commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
             return
         }
-        coreModule.updateDataCaptureView(viewJson: viewJson, result:  CordovaResult(commandDelegate, command.callbackId))
-    }
-
-    @objc(addOverlay:)
-    func addOverlay(command: CDVInvokedUrlCommand) {
-        guard let overlayJson = command.defaultArgumentAsString else {
-            commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
-            return
+        dispatchMainSync {
+            coreModule.updateDataCaptureView(viewJson: viewJson, result:  CordovaResult(commandDelegate, command.callbackId))
         }
-        coreModule.addOverlayToView(overlayJson: overlayJson, result:  CordovaResult(commandDelegate, command.callbackId))
     }
 
-    @objc(removeOverlay:)
-    func removeOverlay(command: CDVInvokedUrlCommand) {
-        guard let overlayJson = command.defaultArgumentAsString else {
-            commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
-            return
+    @objc(removeDataCaptureView:)
+    func removeDataCaptureView(command: CDVInvokedUrlCommand) {
+        dispatchMainSync {
+            if let dcViewToRemove = captureView {
+                coreModule.dataCaptureViewDisposed(dcViewToRemove)
+            }
         }
-        coreModule.removeOverlayFromView(overlayJson: overlayJson, result:  CordovaResult(commandDelegate, command.callbackId))
-    }
-
-    @objc(removeAllOverlays:)
-    func removeAllOverlays(command: CDVInvokedUrlCommand) {
-        coreModule.removeAllOverlays(result:  CordovaResult(commandDelegate, command.callbackId))
+        commandDelegate.send(.success, callbackId: command.callbackId)
     }
 }
 
 extension ScanditCaptureCore: DeserializationLifeCycleObserver {
     public func dataCaptureContext(deserialized context: DataCaptureContext?) {
         self.context = context
-    }
-
-    public func dataCaptureView(deserialized view: DataCaptureView?) {
-        captureView = view
     }
 }
