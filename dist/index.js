@@ -561,8 +561,11 @@ class DataCaptureView {
         // Remove view from native hierarchy
         this.baseDataCaptureView.removeNativeView();
     }
-    setFrame(frame, isUnderContent = false) {
-        return this.baseDataCaptureView.setFrame(frame, isUnderContent);
+    setFrame(frame_1) {
+        return __awaiter(this, arguments, void 0, function* (frame, isUnderContent = false) {
+            yield this.baseDataCaptureView.createNativeView();
+            return this.baseDataCaptureView.setFrame(frame, isUnderContent);
+        });
     }
     show() {
         if (this.htmlElement) {
