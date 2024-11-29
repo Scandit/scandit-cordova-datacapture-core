@@ -17,8 +17,7 @@ export declare enum CordovaFunction {
     GetCurrentCameraState = "getCurrentCameraState",
     GetIsTorchAvailable = "getIsTorchAvailable",
     SwitchCameraToDesiredState = "switchCameraToDesiredState",
-    GetLastFrame = "getLastFrame",
-    GetLastFrameOrNull = "getLastFrameOrNull",
+    GetFrame = "getFrame",
     EmitFeedback = "emitFeedback",
     SubscribeVolumeButtonObserver = "subscribeVolumeButtonObserver",
     UnsubscribeVolumeButtonObserver = "unsubscribeVolumeButtonObserver",
@@ -27,7 +26,8 @@ export declare enum CordovaFunction {
     RemoveAllModesFromContext = "removeAllModesFromContext",
     CreateDataCaptureView = "createDataCaptureView",
     UpdateDataCaptureView = "updateDataCaptureView",
-    RemoveDataCaptureView = "removeDataCaptureView"
+    RemoveDataCaptureView = "removeDataCaptureView",
+    GetOpenSourceSoftwareLicenseInfo = "getOpenSourceSoftwareLicenseInfo"
 }
 export declare const Cordova: {
     pluginName: string;

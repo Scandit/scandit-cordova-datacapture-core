@@ -1,20 +1,6 @@
 import { Anchor, Control, DataCaptureOverlay, DataCaptureViewListener, MarginsWithUnit, Point, PointWithUnit, Quadrilateral, Rect } from 'scandit-datacapture-frameworks-core';
 import { DataCaptureContext } from 'scandit-datacapture-frameworks-core';
 import { FocusGesture, LogoStyle, ZoomGesture } from 'scandit-datacapture-frameworks-core';
-export declare class HTMLElementState {
-    isShown: boolean;
-    position: {
-        top: number;
-        left: number;
-    } | null;
-    size: {
-        width: number;
-        height: number;
-    } | null;
-    shouldBeUnderContent: boolean;
-    get isValid(): boolean;
-    didChangeComparedTo(other: HTMLElementState): boolean;
-}
 export declare class DataCaptureView {
     private baseDataCaptureView;
     get context(): DataCaptureContext | null;
