@@ -14,8 +14,6 @@ public struct CordovaResult: FrameworksResult {
             commandDelegate.send(.success(message: res), callbackId: callbackId)
         } else if let res = result as? String {
             commandDelegate.send(.success(message: res), callbackId: callbackId)
-        } else if let res = result as? Bool {
-            commandDelegate.send(.success(message: res), callbackId: callbackId)
         } else {
             commandDelegate.send(.success, callbackId: callbackId)
         }
