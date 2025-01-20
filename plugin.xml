@@ -1,4 +1,4 @@
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="scandit-cordova-datacapture-core" version="6.28.3">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="scandit-cordova-datacapture-core" version="7.0.2">
     <name>ScanditCaptureCore</name>
     <js-module name="Core" src="dist/core.js">
         <merges target="Scandit" />
@@ -37,7 +37,7 @@
         <source-file src="src/ios/SDCVolumeButtonObserver.h" />
         <podspec>
             <pods use-frameworks="true">
-                <pod name="scandit-datacapture-frameworks-core" spec="= 6.28.3" />
+                <pod name="scandit-datacapture-frameworks-core" spec="= 7.0.2" />
             </pods>
         </podspec>
     </platform>

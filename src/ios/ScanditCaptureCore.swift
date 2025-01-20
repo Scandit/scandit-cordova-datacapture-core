@@ -10,15 +10,6 @@ public class ScanditCaptureCore: CDVPlugin {
     var eventEmitter: CordovaEventEmitter!
     var volumeButtonObserverCallback: Callback?
 
-    public static var lastFrame: FrameData? {
-        get {
-            LastFrameData.shared.frameData
-        }
-        set {
-            LastFrameData.shared.frameData = newValue
-        }
-    }
-
     var captureView: DataCaptureView? {
         didSet {
             guard oldValue != captureView else { return }
@@ -316,18 +307,14 @@ public class ScanditCaptureCore: CDVPlugin {
         commandDelegate.send(.success, callbackId: command.callbackId)
     }
 
-    @objc(getLastFrame:)
-    func getLastFrame(command: CDVInvokedUrlCommand) {
-        guard let lastFrame = ScanditCaptureCore.lastFrame else {
-            commandDelegate.send(.failure(with: .noFrameData), callbackId: command.callbackId)
+    @objc(getFrame:)
+    func getFrame(command: CDVInvokedUrlCommand) {
+         guard let frameId = command.defaultArgumentAsString else {
+            commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
             return
         }
-        commandDelegate.send(.success(message: lastFrame.jsonString), callbackId: command.callbackId)
-    }
 
-    @objc(getLastFrameOrNull:)
-    func getLastFrameOrNull(command: CDVInvokedUrlCommand) {
-        commandDelegate.send(.success(message: ScanditCaptureCore.lastFrame?.jsonString), callbackId: command.callbackId)
+        coreModule.getLastFrameAsJson(frameId: frameId, result: CordovaResult(commandDelegate, command.callbackId))
     }
     
     @objc(addModeToContext:)
@@ -383,6 +370,11 @@ public class ScanditCaptureCore: CDVPlugin {
             }
         }
         commandDelegate.send(.success, callbackId: command.callbackId)
+    }
+    
+    @objc(getOpenSourceSoftwareLicenseInfo:)
+    func getOpenSourceSoftwareLicenseInfo(command: CDVInvokedUrlCommand) {
+        coreModule.getOpenSourceSoftwareLicenseInfo(result: CordovaResult(commandDelegate, command.callbackId))
     }
 }
 

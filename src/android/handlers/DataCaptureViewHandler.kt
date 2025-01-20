@@ -43,19 +43,9 @@ class DataCaptureViewHandler(
         }
     }
 
-    fun attachWebView(webView: View, activity: Activity) {
+    fun attachWebView(webView: View) {
         if (this.webView != webView) {
             webViewReference = WeakReference(webView)
-            mainThread.runOnMainThread {
-                val backgroundView = createBackgroundView(activity)
-                backgroundViewReference = WeakReference(backgroundView)
-                activity.addContentView(
-                    backgroundView,
-                    ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
-                )
-                webView.bringToFront()
-                webView.setBackgroundColor(Color.TRANSPARENT)
-            }
         }
     }
 
@@ -84,6 +74,7 @@ class DataCaptureViewHandler(
     fun disposeCurrentDataCaptureView() {
         val dataCaptureView = dataCaptureView ?: return
         removeDataCaptureView(dataCaptureView)
+        disposeCurrentBackgroundView()
     }
 
     private fun disposeCurrentWebView() {
@@ -102,8 +93,16 @@ class DataCaptureViewHandler(
 
     private fun addDataCaptureView(dataCaptureView: DataCaptureView, activity: Activity) {
         dataCaptureViewReference = WeakReference(dataCaptureView)
-
         mainThread.runOnMainThread {
+            val backgroundView = createBackgroundView(activity)
+            backgroundViewReference = WeakReference(backgroundView)
+            activity.addContentView(
+                backgroundView,
+                ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+            )
+            webView?.bringToFront()
+            webView?.setBackgroundColor(Color.TRANSPARENT)
+
             dataCaptureView.parent?.let {
                 (it as ViewGroup).removeView(dataCaptureView)
             }
