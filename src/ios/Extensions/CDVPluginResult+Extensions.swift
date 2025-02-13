@@ -14,20 +14,20 @@ struct ListenerEvent {
         case didScanInBarcodeCapture = "BarcodeCaptureListener.didScan"
         case didUpdateSessionInBarcodeCapture = "BarcodeCaptureListener.didUpdateSession"
 
-        // Barcode Batch listener
-        case didUpdateSessionInBarcodeBatch = "BarcodeBatchListener.didUpdateSession"
+        // Barcode Tracking listener
+        case didUpdateSessionInBarcodeTracking = "BarcodeTrackingListener.didUpdateSession"
 
-        // Barcode Batch Basic Overlay listener
-        case brushForTrackedBarcode = "BarcodeBatchBasicOverlayListener.brushForTrackedBarcode"
-        case didTapTrackedBarcode = "BarcodeBatchBasicOverlayListener.didTapTrackedBarcode"
+        // Barcode Tracking Basic Overlay listener
+        case brushForTrackedBarcode = "BarcodeTrackingBasicOverlayListener.brushForTrackedBarcode"
+        case didTapTrackedBarcode = "BarcodeTrackingBasicOverlayListener.didTapTrackedBarcode"
 
-        // Barcode Batch Advanced Overlay listener
-        case viewForTrackedBarcode = "BarcodeBatchAdvancedOverlayListener.viewForTrackedBarcode"
-        case anchorForTrackedBarcode = "BarcodeBatchAdvancedOverlayListener.anchorForTrackedBarcode"
-        case offsetForTrackedBarcode = "BarcodeBatchAdvancedOverlayListener.offsetForTrackedBarcode"
-        case didTapViewForTrackedBarcode = "BarcodeBatchAdvancedOverlayListener.didTapViewForTrackedBarcode"
+        // Barcode Tracking Advanced Overlay listener
+        case viewForTrackedBarcode = "BarcodeTrackingAdvancedOverlayListener.viewForTrackedBarcode"
+        case anchorForTrackedBarcode = "BarcodeTrackingAdvancedOverlayListener.anchorForTrackedBarcode"
+        case offsetForTrackedBarcode = "BarcodeTrackingAdvancedOverlayListener.offsetForTrackedBarcode"
+        case didTapViewForTrackedBarcode = "BarcodeTrackingAdvancedOverlayListener.didTapViewForTrackedBarcode"
 
-        // Barcode Batch listener
+        // Barcode Tracking listener
         case didUpdateSelectionInBarcodeSelection = "BarcodeSelectionListener.didUpdateSelection"
         case didUpdateSessionInBarcodeSelection = "BarcodeSelectionListener.didUpdateSession"
 
@@ -91,13 +91,12 @@ struct CommandError {
         case noBarcodeSelectionSession = 10073
         case noBarcodeSelectionOverlay = 10074
         case noBarcodeCaptureSession = 10075
-        case noBarcodeBatchSession = 10076
+        case noBarcodeTrackingSession = 10076
 
         case noFrameData = 10077
         case noBarcodeSelectionIdentifier = 10078
-
+        
         case noFeedbackJsonPassed = 10079
-        case wrongOrNoArgumentPassed = 10080
     }
 
     public static let invalidJSON = CommandError(code: .invalidJSON,
@@ -164,9 +163,9 @@ struct CommandError {
                                                 There was no BarcodeCapture session to execute the command on
                                                 """)
 
-    public static let noBarcodeBatchSession = CommandError(code: .noBarcodeBatchSession,
+    public static let noBarcodeTrackingSession = CommandError(code: .noBarcodeTrackingSession,
                                                message: """
-                                                There was no BarcodeBatch session to execute the command on
+                                                There was no BarcodeTracking session to execute the command on
                                                 """)
 
     public static let noBarcodeSelectionSession = CommandError(code: .noBarcodeSelectionSession,
@@ -188,12 +187,9 @@ struct CommandError {
                                                      message: """
                                                       There was no FrameData to execute the command on
                                                       """)
-
-    public static let noFeedbackJsonPassed = CommandError(code: .noFeedbackJsonPassed,
+    
+    public static let noFeedbackJsonPassed = CommandError(code: .invalidJSON,
                                                  message: "No feedbackJson was provided for the function.")
-
-    public static let wrongOrNoArgumentPassed = CommandError(code: .wrongOrNoArgumentPassed,
-                                                 message: "Wrong or no argument was provided for the function.")
 
     public let code: Code
     public let message: String
