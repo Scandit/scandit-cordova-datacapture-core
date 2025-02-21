@@ -16,13 +16,9 @@ import com.scandit.datacapture.cordova.core.data.ResizeAndMoveInfo
 import com.scandit.datacapture.cordova.core.utils.pxFromDp
 import com.scandit.datacapture.cordova.core.utils.removeFromParent
 import com.scandit.datacapture.core.ui.DataCaptureView
-import com.scandit.datacapture.frameworks.core.utils.DefaultMainThread
-import com.scandit.datacapture.frameworks.core.utils.MainThread
 import java.lang.ref.WeakReference
 
-class DataCaptureViewHandler(
-    private val mainThread: MainThread = DefaultMainThread.getInstance()
-) {
+class DataCaptureViewHandler {
     private var latestInfo: ResizeAndMoveInfo = ResizeAndMoveInfo(0, 0, 0, 0, false)
     private var isVisible: Boolean = false
     private var dataCaptureViewReference: WeakReference<DataCaptureView>? = null
@@ -31,31 +27,20 @@ class DataCaptureViewHandler(
 
     val dataCaptureView: DataCaptureView?
         get() = dataCaptureViewReference?.get()
+
     private val webView: View?
         get() = webViewReference?.get()
+
     private val backgroundView: View?
         get() = backgroundViewReference?.get()
 
     fun attachDataCaptureView(dataCaptureView: DataCaptureView, activity: Activity) {
-        if (this.dataCaptureView != dataCaptureView) {
-            disposeCurrentDataCaptureView()
-            addDataCaptureView(dataCaptureView, activity)
-        }
+        addDataCaptureView(dataCaptureView, activity)
     }
 
-    fun attachWebView(webView: View, activity: Activity) {
+    fun attachWebView(webView: View) {
         if (this.webView != webView) {
             webViewReference = WeakReference(webView)
-            mainThread.runOnMainThread {
-                val backgroundView = createBackgroundView(activity)
-                backgroundViewReference = WeakReference(backgroundView)
-                activity.addContentView(
-                    backgroundView,
-                    ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
-                )
-                webView.bringToFront()
-                webView.setBackgroundColor(Color.TRANSPARENT)
-            }
         }
     }
 
@@ -74,20 +59,10 @@ class DataCaptureViewHandler(
         render()
     }
 
-    // Remove current dataCaptureView and backgroundView from hierarchy, and clear all references.
-    fun disposeCurrent() {
-        disposeCurrentDataCaptureView()
-        disposeCurrentWebView()
-        disposeCurrentBackgroundView()
-    }
-
-    fun disposeCurrentDataCaptureView() {
-        val dataCaptureView = dataCaptureView ?: return
-        removeDataCaptureView(dataCaptureView)
-    }
-
-    private fun disposeCurrentWebView() {
+    fun disposeCurrentWebView() {
         webViewReference = null
+        val dcView = dataCaptureView ?: return
+        removeDataCaptureView(dcView)
     }
 
     private fun disposeCurrentBackgroundView() {
@@ -102,8 +77,16 @@ class DataCaptureViewHandler(
 
     private fun addDataCaptureView(dataCaptureView: DataCaptureView, activity: Activity) {
         dataCaptureViewReference = WeakReference(dataCaptureView)
+        activity.runOnUiThread {
+            val backgroundView = createBackgroundView(activity)
+            backgroundViewReference = WeakReference(backgroundView)
+            activity.addContentView(
+                backgroundView,
+                ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+            )
+            webView?.bringToFront()
+            webView?.setBackgroundColor(Color.TRANSPARENT)
 
-        mainThread.runOnMainThread {
             dataCaptureView.parent?.let {
                 (it as ViewGroup).removeView(dataCaptureView)
             }
@@ -118,15 +101,15 @@ class DataCaptureViewHandler(
         }
     }
 
-    private fun removeDataCaptureView(dataCaptureView: DataCaptureView) {
+    fun removeDataCaptureView(dataCaptureView: DataCaptureView) {
         dataCaptureViewReference = null
         removeView(dataCaptureView)
+        disposeCurrentBackgroundView()
     }
 
-    private fun removeView(view: View, uiBlock: (() -> Unit)? = null) {
-        mainThread.runOnMainThread {
+    private fun removeView(view: View) {
+        view.post {
             view.removeFromParent()
-            uiBlock?.invoke()
         }
     }
 

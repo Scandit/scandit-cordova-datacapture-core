@@ -9,7 +9,6 @@ package com.scandit.datacapture.cordova.core
 import android.content.pm.PackageManager
 import com.scandit.datacapture.cordova.core.data.ResizeAndMoveInfo
 import com.scandit.datacapture.cordova.core.errors.JsonParseError
-import com.scandit.datacapture.cordova.core.errors.NoLastFrameError
 import com.scandit.datacapture.cordova.core.handlers.DataCaptureViewHandler
 import com.scandit.datacapture.cordova.core.utils.CordovaEventEmitter
 import com.scandit.datacapture.cordova.core.utils.CordovaResult
@@ -25,9 +24,7 @@ import com.scandit.datacapture.frameworks.core.listeners.FrameworksDataCaptureCo
 import com.scandit.datacapture.frameworks.core.listeners.FrameworksDataCaptureViewListener
 import com.scandit.datacapture.frameworks.core.listeners.FrameworksFrameSourceDeserializer
 import com.scandit.datacapture.frameworks.core.listeners.FrameworksFrameSourceListener
-import com.scandit.datacapture.frameworks.core.utils.DefaultLastFrameData
 import com.scandit.datacapture.frameworks.core.utils.DefaultMainThread
-import com.scandit.datacapture.frameworks.core.utils.LastFrameData
 import com.scandit.datacapture.frameworks.core.utils.MainThread
 import org.apache.cordova.CallbackContext
 import org.apache.cordova.CordovaPlugin
@@ -51,8 +48,6 @@ class ScanditCaptureCore :
     }
 
     private val mainThread: MainThread = DefaultMainThread.getInstance()
-
-    private val lastFrameData: LastFrameData = DefaultLastFrameData.getInstance()
 
     private val permissionRequest = PermissionRequest.getInstance()
 
@@ -108,7 +103,7 @@ class ScanditCaptureCore :
     }
 
     private fun destroy() {
-        captureViewHandler.disposeCurrent()
+        captureViewHandler.disposeCurrentWebView()
         coreModule.onDestroy()
         eventEmitter.removeAllCallbacks()
     }
@@ -256,7 +251,8 @@ class ScanditCaptureCore :
     @PluginMethod
     fun viewQuadrilateralForFrameQuadrilateral(args: JSONArray, callbackContext: CallbackContext) {
         coreModule.viewQuadrilateralForFrameQuadrilateral(
-            args.defaultArgumentAsString, CordovaResult(callbackContext)
+            args.defaultArgumentAsString,
+            CordovaResult(callbackContext)
         )
     }
 
@@ -313,18 +309,8 @@ class ScanditCaptureCore :
     }
 
     @PluginMethod
-    fun getLastFrame(
-        @Suppress("UNUSED_PARAMETER") args: JSONArray,
-        callbackContext: CallbackContext
-    ) {
-        lastFrameData.getLastFrameDataJson { frameAsJson ->
-            if (frameAsJson == null) {
-                NoLastFrameError().sendResult(callbackContext)
-                return@getLastFrameDataJson
-            }
-
-            callbackContext.success(frameAsJson)
-        }
+    fun getFrame(args: JSONArray, callbackContext: CallbackContext) {
+        coreModule.getLastFrameAsJson(args.defaultArgumentAsString, CordovaResult(callbackContext))
     }
 
     @PluginMethod
@@ -367,14 +353,20 @@ class ScanditCaptureCore :
 
     @PluginMethod
     fun createDataCaptureView(args: JSONArray, callbackContext: CallbackContext) {
-        captureViewHandler.attachWebView(webView.view, cordova.activity)
+        captureViewHandler.attachWebView(webView.view)
         val view = coreModule.createDataCaptureView(
             args.defaultArgumentAsString,
             CordovaResult(callbackContext)
         )
         if (view != null) {
+            val existingView = captureViewHandler.dataCaptureView
+            if (existingView != null) {
+                coreModule.dataCaptureViewDisposed(existingView)
+                captureViewHandler.removeDataCaptureView(existingView)
+            }
             captureViewHandler.attachDataCaptureView(view, cordova.activity)
         }
+        callbackContext.success()
     }
 
     @PluginMethod
@@ -391,11 +383,19 @@ class ScanditCaptureCore :
         callbackContext: CallbackContext
     ) {
         val dcViewToRemove = captureViewHandler.dataCaptureView
-        captureViewHandler.disposeCurrentDataCaptureView()
         if (dcViewToRemove != null) {
             coreModule.dataCaptureViewDisposed(dcViewToRemove)
+            captureViewHandler.removeDataCaptureView(dcViewToRemove)
         }
         callbackContext.success()
+    }
+
+    @PluginMethod
+    fun getOpenSourceSoftwareLicenseInfo(
+        @Suppress("UNUSED_PARAMETER") args: JSONArray,
+        callbackContext: CallbackContext
+    ) {
+        coreModule.getOpenSourceSoftwareLicenseInfo(CordovaResult(callbackContext))
     }
 
     @Deprecated("Deprecated in Java")
