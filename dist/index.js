@@ -6114,7 +6114,7 @@ var SparkScanListenerEvents;
     SparkScanListenerEvents["didUpdateSession"] = "SparkScanListener.didUpdateSession";
     SparkScanListenerEvents["didScan"] = "SparkScanListener.didScan";
 })(SparkScanListenerEvents || (SparkScanListenerEvents = {}));
-class SparkScanListenerController extends core.BaseController {
+class SparkScanListenerController extends core.BaseNewController {
     static forSparkScan(sparkScan) {
         const controller = new SparkScanListenerController();
         controller.sparkScan = sparkScan;
@@ -6122,6 +6122,27 @@ class SparkScanListenerController extends core.BaseController {
     }
     constructor() {
         super('SparkScanListenerProxy');
+        this.hasNativeListenerSubscriptions = false;
+        this.didUpdateSessionListener = (data) => __awaiter(this, void 0, void 0, function* () {
+            const payload = core.EventDataParser.parse(data);
+            if (payload === null) {
+                console.error('SparkScanListenerController didUpdateSession payload is null');
+                return;
+            }
+            const session = SparkScanSession.fromJSON(payload);
+            yield this.notifyListenersOfDidUpdateSession(session);
+            this._proxy.finishDidUpdateSessionCallback(this.sparkScan.isEnabled);
+        });
+        this.didScanListener = (data) => __awaiter(this, void 0, void 0, function* () {
+            const payload = core.EventDataParser.parse(data);
+            if (payload === null) {
+                console.error('SparkScanListenerController.subscribeListener: didScan payload is null');
+                return;
+            }
+            const session = SparkScanSession.fromJSON(payload);
+            yield this.notifyListenersOfDidScan(session);
+            this._proxy.finishDidScanCallback(this.sparkScan.isEnabled);
+        });
     }
     reset() {
         return this._proxy.resetSession();
@@ -6132,34 +6153,22 @@ class SparkScanListenerController extends core.BaseController {
         return this._proxy.updateMode(json);
     }
     subscribeListener() {
-        this._proxy.registerListenerForEvents();
+        if (this.hasNativeListenerSubscriptions === false) {
+            this._proxy.registerListenerForEvents();
+            this.hasNativeListenerSubscriptions = true;
+        }
         this._proxy.subscribeDidScanListener();
         this._proxy.subscribeDidUpdateSessionListener();
-        this.eventEmitter.on(SparkScanListenerEvents.didUpdateSession, (data) => __awaiter(this, void 0, void 0, function* () {
-            const payload = core.EventDataParser.parse(data);
-            if (payload === null) {
-                console.error('SparkScanListenerController didUpdateSession payload is null');
-                return;
-            }
-            const session = SparkScanSession.fromJSON(payload);
-            yield this.notifyListenersOfDidUpdateSession(session);
-            this._proxy.finishDidUpdateSessionCallback(this.sparkScan.isEnabled);
-        }));
-        this.eventEmitter.on(SparkScanListenerEvents.didScan, (data) => __awaiter(this, void 0, void 0, function* () {
-            const payload = core.EventDataParser.parse(data);
-            if (payload === null) {
-                console.error('SparkScanListenerController.subscribeListener: didScan payload is null');
-                return;
-            }
-            const session = SparkScanSession.fromJSON(payload);
-            yield this.notifyListenersOfDidScan(session);
-            this._proxy.finishDidScanCallback(this.sparkScan.isEnabled);
-        }));
+        this.eventEmitter.on(SparkScanListenerEvents.didUpdateSession, this.didUpdateSessionListener);
+        this.eventEmitter.on(SparkScanListenerEvents.didScan, this.didScanListener);
     }
     unsubscribeListener() {
-        this._proxy.unregisterListenerForEvents();
-        this.eventEmitter.removeAllListeners(SparkScanListenerEvents.didUpdateSession);
-        this.eventEmitter.removeAllListeners(SparkScanListenerEvents.didScan);
+        if (this.hasNativeListenerSubscriptions === true) {
+            this._proxy.unregisterListenerForEvents();
+            this.hasNativeListenerSubscriptions = false;
+        }
+        this.eventEmitter.off(SparkScanListenerEvents.didUpdateSession, this.didUpdateSessionListener);
+        this.eventEmitter.off(SparkScanListenerEvents.didScan, this.didScanListener);
     }
     setModeEnabledState(enabled) {
         this._proxy.setModeEnabledState(enabled);
@@ -9032,6 +9041,56 @@ __decorate$1([
     core.ignoreFromSerialization
 ], DataCaptureView.prototype, "orientationChangeListener", void 0);
 
+class VolumeButtonObserverProxy {
+    static forVolumeButtonObserver(volumeButtonObserver) {
+        const proxy = new VolumeButtonObserverProxy();
+        proxy.volumeButtonObserver = volumeButtonObserver;
+        proxy.subscribe();
+        return proxy;
+    }
+    dispose() {
+        this.unsubscribe();
+    }
+    subscribe() {
+        VolumeButtonObserverProxy.cordovaExec(this.notifyListeners.bind(this), null, CordovaFunction.SubscribeVolumeButtonObserver, null);
+    }
+    unsubscribe() {
+        VolumeButtonObserverProxy.cordovaExec(null, null, CordovaFunction.UnsubscribeVolumeButtonObserver, null);
+    }
+    notifyListeners(event) {
+        if (!event) {
+            // The event could be undefined/null in case the plugin result did not pass a "message",
+            // which could happen e.g. in case of "ok" results, which could signal e.g. successful
+            // listener subscriptions.
+            return;
+        }
+        if (this.volumeButtonObserver.didChangeVolume && event.name === 'didChangeVolume') {
+            this.volumeButtonObserver.didChangeVolume();
+        }
+    }
+}
+VolumeButtonObserverProxy.cordovaExec = Cordova.exec;
+
+// Note: the class is made private by being excluded from the docs through `coverage_cordova_javascript_name_ignore`
+class VolumeButtonObserver {
+    constructor(didChangeVolume) {
+        this.didChangeVolume = didChangeVolume;
+        this.initialize();
+    }
+    dispose() {
+        if (this.proxy) {
+            this.proxy.dispose();
+            this.proxy = null;
+            this.didChangeVolume = null;
+        }
+    }
+    initialize() {
+        if (!this.proxy) {
+            this.proxy = VolumeButtonObserverProxy.forVolumeButtonObserver(this);
+        }
+    }
+}
+
 initializeCordovaCore();
 
 exports.AimerViewfinder = core.AimerViewfinder;
@@ -9143,6 +9202,7 @@ exports.Ean13BarcodeGeneratorBuilder = Ean13BarcodeGeneratorBuilder;
 exports.InterleavedTwoOfFiveBarcodeGeneratorBuilder = InterleavedTwoOfFiveBarcodeGeneratorBuilder;
 exports.QrCodeBarcodeGeneratorBuilder = QrCodeBarcodeGeneratorBuilder;
 exports.UpcaBarcodeGeneratorBuilder = UpcaBarcodeGeneratorBuilder;
+exports.VolumeButtonObserver = VolumeButtonObserver;
 exports.cordovaExec = cordovaExec;
 exports.createCordovaNativeCaller = createCordovaNativeCaller;
 exports.initializePlugin = initializePlugin;

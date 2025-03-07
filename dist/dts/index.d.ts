@@ -11,3 +11,4 @@ export { BarcodeGenerator, BarcodeGeneratorBuilder, Code39BarcodeGeneratorBuilde
 export { UpcaBarcodeGeneratorBuilder, InterleavedTwoOfFiveBarcodeGeneratorBuilder, QrCodeBarcodeGeneratorBuilder, DataMatrixBarcodeGeneratorBuilder, QrCodeErrorCorrectionLevel, AztecBarcodeGeneratorBuilder } from 'scandit-datacapture-frameworks-barcode';
 export { DataCaptureVersion } from './DataCaptureVersion';
 export { DataCaptureView } from './DataCaptureView';
+export { VolumeButtonObserver } from './VolumeButtonObserver';

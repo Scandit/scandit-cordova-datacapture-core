@@ -379,6 +379,18 @@ class FactoryMaker {
         }
         return item.instance;
     }
+    static createInstance(clsName) {
+        var _a;
+        const item = FactoryMaker.instances.get(clsName);
+        if (item === null || item === undefined) {
+            throw new Error(`Trying to get a non existing instance for ${clsName}`);
+        }
+        const proxyInstance = (_a = item.builder) === null || _a === void 0 ? void 0 : _a.call(item);
+        if (proxyInstance === undefined) {
+            throw new Error(`item.builder?.() returned undefined for ${clsName}`);
+        }
+        return proxyInstance;
+    }
 }
 FactoryMaker.instances = new Map();
 
@@ -433,6 +445,18 @@ class BaseController {
     constructor(proxyName) {
         this.eventEmitter = FactoryMaker.getInstance('EventEmitter');
         this.proxyName = proxyName;
+    }
+    emit(event, payload) {
+        this.eventEmitter.emit(event, payload);
+    }
+}
+class BaseNewController {
+    get _proxy() {
+        return this._cachedProxy;
+    }
+    constructor(proxyName) {
+        this.eventEmitter = FactoryMaker.getInstance('EventEmitter');
+        this._cachedProxy = FactoryMaker.createInstance(proxyName);
     }
     emit(event, payload) {
         this.eventEmitter.emit(event, payload);
@@ -3232,6 +3256,7 @@ exports.AimerViewfinder = AimerViewfinder;
 exports.BaseController = BaseController;
 exports.BaseDataCaptureView = BaseDataCaptureView;
 exports.BaseNativeProxy = BaseNativeProxy;
+exports.BaseNewController = BaseNewController;
 exports.Brush = Brush;
 exports.Camera = Camera;
 exports.CameraController = CameraController;
