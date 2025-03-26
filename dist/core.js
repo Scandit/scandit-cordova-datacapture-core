@@ -2190,16 +2190,6 @@ __decorate([
     ignoreFromSerialization
 ], DataCaptureContext, "coreDefaults", null);
 
-class DataCaptureContextFeatures {
-    static isFeatureSupported(feature) {
-        return this._featureFlags.get(feature);
-    }
-    static setIsFeatureSupported(feature, value) {
-        this._featureFlags.set(feature, value);
-    }
-}
-DataCaptureContextFeatures._featureFlags = new Map();
-
 exports.DataCaptureViewEvents = void 0;
 (function (DataCaptureViewEvents) {
     DataCaptureViewEvents["didChangeSize"] = "DataCaptureViewListener.onSizeChanged";
@@ -3265,7 +3255,6 @@ exports.Color = Color;
 exports.ContextStatus = ContextStatus;
 exports.ControlImage = ControlImage;
 exports.DataCaptureContext = DataCaptureContext;
-exports.DataCaptureContextFeatures = DataCaptureContextFeatures;
 exports.DataCaptureContextSettings = DataCaptureContextSettings;
 exports.DataCaptureViewController = DataCaptureViewController;
 exports.DefaultSerializeable = DefaultSerializeable;

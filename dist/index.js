@@ -5572,15 +5572,12 @@ class BarcodeBatchListenerController {
             this.barcodeBatch.isInListenerCallback = value;
         });
         this.eventEmitter.on(BarcodeBatchListenerEvents.didUpdateSession, (data) => __awaiter(this, void 0, void 0, function* () {
-            var _a;
             const payload = core.EventDataParser.parse(data);
             if (payload === null) {
                 console.error('BarcodeBatchListenerController didUpdateSession payload is null');
                 return;
             }
             const session = BarcodeBatchSession.fromJSON(payload);
-            // Read the feature flag from the payload and set it in the DataCaptureContextFeatures.
-            core.DataCaptureContextFeatures.setIsFeatureSupported("barcode-ar-full", (_a = payload.isBarcodeArFull) !== null && _a !== void 0 ? _a : false);
             yield this.notifyListenersOfDidUpdateSession(session);
             this._proxy.finishDidUpdateSessionCallback(this.barcodeBatch.isEnabled);
         }));
