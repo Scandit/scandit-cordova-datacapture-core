@@ -12,3 +12,4 @@ export { UpcaBarcodeGeneratorBuilder, InterleavedTwoOfFiveBarcodeGeneratorBuilde
 export { DataCaptureVersion } from './DataCaptureVersion';
 export { DataCaptureView } from './DataCaptureView';
 export { VolumeButtonObserver } from './VolumeButtonObserver';
+export * as __ScanditCore from 'scandit-datacapture-frameworks-core';

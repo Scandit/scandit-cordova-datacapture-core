@@ -20,6 +20,8 @@ import com.scandit.datacapture.core.common.feedback.Feedback
 import com.scandit.datacapture.core.source.FrameSourceState
 import com.scandit.datacapture.core.source.FrameSourceStateDeserializer
 import com.scandit.datacapture.frameworks.core.CoreModule
+import com.scandit.datacapture.frameworks.core.lifecycle.ActivityLifecycleDispatcher
+import com.scandit.datacapture.frameworks.core.lifecycle.DefaultActivityLifecycle
 import com.scandit.datacapture.frameworks.core.listeners.FrameworksDataCaptureContextListener
 import com.scandit.datacapture.frameworks.core.listeners.FrameworksDataCaptureViewListener
 import com.scandit.datacapture.frameworks.core.listeners.FrameworksFrameSourceDeserializer
@@ -46,6 +48,9 @@ class ScanditCaptureCore :
             }
         }
     }
+
+    private val lifecycleDispatcher: ActivityLifecycleDispatcher =
+        DefaultActivityLifecycle.getInstance()
 
     private val mainThread: MainThread = DefaultMainThread.getInstance()
 
@@ -80,6 +85,7 @@ class ScanditCaptureCore :
     }
 
     override fun onStop() {
+        lifecycleDispatcher.dispatchOnStop()
         frameSourceStateBeforeStopping =
             coreModule.getCurrentCameraDesiredState() ?: FrameSourceState.OFF
         coreModule.switchToDesiredCameraState(FrameSourceState.OFF)
@@ -87,6 +93,7 @@ class ScanditCaptureCore :
     }
 
     override fun onStart() {
+        lifecycleDispatcher.dispatchOnStart()
         if (permissionRequest.checkCameraPermission(this)) {
             coreModule.switchToDesiredCameraState(frameSourceStateBeforeStopping)
         }
@@ -98,8 +105,16 @@ class ScanditCaptureCore :
     }
 
     override fun onDestroy() {
+        lifecycleDispatcher.dispatchOnDestroy()
         destroy()
-        super.onDestroy()
+    }
+
+    override fun onPause(multitasking: Boolean) {
+        lifecycleDispatcher.dispatchOnPause()
+    }
+
+    override fun onResume(multitasking: Boolean) {
+        lifecycleDispatcher.dispatchOnResume()
     }
 
     private fun destroy() {
@@ -320,6 +335,7 @@ class ScanditCaptureCore :
                 FrameSourceStateDeserializer.fromJson(args.defaultArgumentAsString)
 
             permissionRequest.checkOrRequestCameraPermission(this)
+            callbackContext.success()
             return
         }
 
