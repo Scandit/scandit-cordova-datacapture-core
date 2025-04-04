@@ -15,13 +15,9 @@ public class CordovaEventEmitter: Emitter {
         defer { self.lock.signal() }
         
         guard let callbackId = callbacks[name] else { return }
-
-        guard let data = try? JSONSerialization.data(withJSONObject: payload),
-              let jsonString = String(data: data, encoding: .utf8) else { return }
-        
         let args: [String: Any] = [
             "name": name,
-            "data": jsonString
+            "argument": payload
         ]
         commandDelegate.send(.listenerCallback(args), callbackId: callbackId)
     }

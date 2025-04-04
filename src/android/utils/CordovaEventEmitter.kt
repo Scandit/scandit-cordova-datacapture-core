@@ -15,10 +15,11 @@ class CordovaEventEmitter : Emitter {
 
     override fun emit(eventName: String, payload: MutableMap<String, Any?>) {
         val callback = callbacks[eventName] ?: return
-        val cordovaPayload = JSONObject()
-        cordovaPayload.put("name", eventName)
-        cordovaPayload.put("data", JSONObject(payload).toString())
-        callback.successAndKeepCallback(cordovaPayload)
+        val cordovaPayload = mapOf(
+            "name" to eventName,
+            "argument" to payload
+        )
+        callback.successAndKeepCallback(JSONObject(cordovaPayload))
     }
 
     fun registerCallback(eventName: String, callbackContext: CallbackContext) {
