@@ -10,15 +10,6 @@ public class ScanditCaptureCore: CDVPlugin {
     var eventEmitter: CordovaEventEmitter!
     var volumeButtonObserverCallback: Callback?
 
-    public static var lastFrame: FrameData? {
-        get {
-            LastFrameData.shared.frameData
-        }
-        set {
-            LastFrameData.shared.frameData = newValue
-        }
-    }
-
     var captureView: DataCaptureView? {
         didSet {
             guard oldValue != captureView else { return }
@@ -41,8 +32,6 @@ public class ScanditCaptureCore: CDVPlugin {
             captureViewConstraints.captureView = captureView
         }
     }
-
-    private var context: DataCaptureContext?
 
     private var volumeButtonObserver: VolumeButtonObserver?
 
@@ -71,12 +60,10 @@ public class ScanditCaptureCore: CDVPlugin {
                                 dataCaptureViewListener: viewListener
         )
         coreModule.didStart()
-        DeserializationLifeCycleDispatcher.shared.attach(observer: self)
     }
 
     public override func dispose() {
         coreModule.didStop()
-        DeserializationLifeCycleDispatcher.shared.detach(observer: self)
     }
 
     // MARK: - DataCaptureContextProxy
@@ -226,61 +213,43 @@ public class ScanditCaptureCore: CDVPlugin {
 
     @objc(viewPointForFramePoint:)
     func viewPointForFramePoint(command: CDVInvokedUrlCommand) {
-        guard let captureView = captureView else {
-            commandDelegate.send(.failure(with: .cantConvertPointWithoutView), callbackId: command.callbackId)
-            return
-        }
-
-        guard let pointJSON = try? PointJSON.fromCommand(command) else {
+        guard let pointJSON = command.defaultArgumentAsString else {
             commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
             return
         }
-
-        let convertedPoint = captureView.viewPoint(forFramePoint: pointJSON.cgPoint)
-
-        commandDelegate.send(.success(message: convertedPoint.jsonString), callbackId: command.callbackId)
+        
+        coreModule.viewPointForFramePoint(json: pointJSON, result: CordovaResult(commandDelegate, command.callbackId))
     }
 
     @objc(viewQuadrilateralForFrameQuadrilateral:)
     func viewQuadrilateralForFrameQuadrilateral(command: CDVInvokedUrlCommand) {
-        guard let captureView = captureView else {
-            commandDelegate.send(.failure(with: .cantConvertQuadrilateralWithoutView), callbackId: command.callbackId)
-            return
-        }
-
         var quad: Quadrilateral = Quadrilateral(topLeft: .zero, topRight: .zero, bottomRight: .zero, bottomLeft: .zero)
         guard let jsonString = command.defaultArgumentAsString, SDCQuadrilateralFromJSONString(jsonString, &quad) else {
             commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
             return
         }
-
-        let convertedQuadrilateral = captureView.viewQuadrilateral(forFrameQuadrilateral: quad)
-
-        commandDelegate.send(.success(message: convertedQuadrilateral.jsonString), callbackId: command.callbackId)
+        
+        coreModule.viewQuadrilateralForFrameQuadrilateral(json: jsonString, result: CordovaResult(commandDelegate, command.callbackId))
     }
 
     // MARK: - CameraProxy
 
     @objc(getCurrentCameraState:)
     func getCurrentCameraState(command: CDVInvokedUrlCommand) {
-        guard let camera = context?.frameSource as? Camera else {
-            commandDelegate.send(.failure(with: .noCamera), callbackId: command.callbackId)
-            return
-        }
-        coreModule.getCameraState(
-            cameraPosition: camera.position.jsonString,
+        coreModule.getCurrentCameraState(
             result: CordovaResult(commandDelegate, command.callbackId)
         )
     }
 
     @objc(getIsTorchAvailable:)
     func getIsTorchAvailable(command: CDVInvokedUrlCommand) {
-        guard let camera = context?.frameSource as? Camera else {
-            commandDelegate.send(.failure(with: .noCamera), callbackId: command.callbackId)
+        guard let positionJson = command.defaultArgumentAsString else {
+            commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
             return
         }
+        
         coreModule.isTorchAvailable(
-            cameraPosition: camera.position.jsonString,
+            cameraPosition: positionJson,
             result: CordovaResult(commandDelegate, command.callbackId)
         )
     }
@@ -316,18 +285,14 @@ public class ScanditCaptureCore: CDVPlugin {
         commandDelegate.send(.success, callbackId: command.callbackId)
     }
 
-    @objc(getLastFrame:)
-    func getLastFrame(command: CDVInvokedUrlCommand) {
-        guard let lastFrame = ScanditCaptureCore.lastFrame else {
-            commandDelegate.send(.failure(with: .noFrameData), callbackId: command.callbackId)
+    @objc(getFrame:)
+    func getFrame(command: CDVInvokedUrlCommand) {
+         guard let frameId = command.defaultArgumentAsString else {
+            commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
             return
         }
-        commandDelegate.send(.success(message: lastFrame.jsonString), callbackId: command.callbackId)
-    }
 
-    @objc(getLastFrameOrNull:)
-    func getLastFrameOrNull(command: CDVInvokedUrlCommand) {
-        commandDelegate.send(.success(message: ScanditCaptureCore.lastFrame?.jsonString), callbackId: command.callbackId)
+        coreModule.getLastFrameAsJson(frameId: frameId, result: CordovaResult(commandDelegate, command.callbackId))
     }
     
     @objc(addModeToContext:)
@@ -359,8 +324,11 @@ public class ScanditCaptureCore: CDVPlugin {
             commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
             return
         }
-        dispatchMainSync {
-            captureView = coreModule.createDataCaptureView(viewJson: viewJson, result: CordovaResult(commandDelegate, command.callbackId))
+        dispatchMain {
+            self.captureView = self.coreModule.createDataCaptureView(
+                viewJson: viewJson,
+                result: CordovaResult(self.commandDelegate, command.callbackId)
+            )
         }
     }
     
@@ -370,24 +338,28 @@ public class ScanditCaptureCore: CDVPlugin {
             commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
             return
         }
-        dispatchMainSync {
-            coreModule.updateDataCaptureView(viewJson: viewJson, result:  CordovaResult(commandDelegate, command.callbackId))
+        dispatchMain {
+            self.coreModule.updateDataCaptureView(
+                viewJson: viewJson,
+                result:  CordovaResult(self.commandDelegate, command.callbackId)
+            )
         }
     }
 
     @objc(removeDataCaptureView:)
     func removeDataCaptureView(command: CDVInvokedUrlCommand) {
-        dispatchMainSync {
-            if let dcViewToRemove = captureView {
-                coreModule.dataCaptureViewDisposed(dcViewToRemove)
+        dispatchMain {
+            if let dcViewToRemove = self.captureView {
+                self.coreModule.dataCaptureViewDisposed(dcViewToRemove)
             }
+            
+            self.commandDelegate.send(.success, callbackId: command.callbackId)
         }
-        commandDelegate.send(.success, callbackId: command.callbackId)
+    
     }
-}
-
-extension ScanditCaptureCore: DeserializationLifeCycleObserver {
-    public func dataCaptureContext(deserialized context: DataCaptureContext?) {
-        self.context = context
+    
+    @objc(getOpenSourceSoftwareLicenseInfo:)
+    func getOpenSourceSoftwareLicenseInfo(command: CDVInvokedUrlCommand) {
+        coreModule.getOpenSourceSoftwareLicenseInfo(result: CordovaResult(commandDelegate, command.callbackId))
     }
 }
