@@ -24,7 +24,6 @@ import com.scandit.datacapture.frameworks.core.lifecycle.ActivityLifecycleDispat
 import com.scandit.datacapture.frameworks.core.lifecycle.DefaultActivityLifecycle
 import com.scandit.datacapture.frameworks.core.listeners.FrameworksDataCaptureContextListener
 import com.scandit.datacapture.frameworks.core.listeners.FrameworksDataCaptureViewListener
-import com.scandit.datacapture.frameworks.core.listeners.FrameworksFrameSourceDeserializer
 import com.scandit.datacapture.frameworks.core.listeners.FrameworksFrameSourceListener
 import com.scandit.datacapture.frameworks.core.observers.VolumeButtonObserver
 import com.scandit.datacapture.frameworks.core.utils.DefaultMainThread
@@ -71,13 +70,7 @@ class ScanditCaptureCore :
 
     private var volumeButtonObserver: VolumeButtonObserver? = null
 
-    private val frameSourceListener = FrameworksFrameSourceListener(eventEmitter)
-    private val coreModule = CoreModule(
-        frameSourceListener,
-        FrameworksDataCaptureContextListener(eventEmitter),
-        FrameworksDataCaptureViewListener(eventEmitter),
-        FrameworksFrameSourceDeserializer(frameSourceListener)
-    )
+    private val coreModule = CoreModule.create(eventEmitter)
 
     private lateinit var exposedFunctionsToJs: Map<String, Method>
 
@@ -241,41 +234,48 @@ class ScanditCaptureCore :
 
     @PluginMethod
     fun subscribeViewListener(
-        @Suppress("UNUSED_PARAMETER") args: JSONArray,
+        args: JSONArray,
         callbackContext: CallbackContext
     ) {
         eventEmitter.registerCallback(
             FrameworksDataCaptureViewListener.ON_SIZE_CHANGED_EVENT_NAME,
             callbackContext
         )
-        coreModule.registerDataCaptureViewListener()
+        val viewId = args.getInt(0)
+        coreModule.registerDataCaptureViewListener(viewId)
         callbackContext.successAndKeepCallback()
     }
 
     @PluginMethod
     fun unsubscribeViewListener(
-        @Suppress("UNUSED_PARAMETER") args: JSONArray,
+        args: JSONArray,
         callbackContext: CallbackContext
     ) {
         eventEmitter.unregisterCallback(
             FrameworksDataCaptureViewListener.ON_SIZE_CHANGED_EVENT_NAME
         )
-        coreModule.unregisterDataCaptureViewListener()
+        val viewId = args.getInt(0)
+        coreModule.unregisterDataCaptureViewListener(viewId)
         callbackContext.success()
     }
 
     @PluginMethod
     fun viewPointForFramePoint(args: JSONArray, callbackContext: CallbackContext) {
+        val argsJson = args.getJSONObject(0)
+
         coreModule.viewPointForFramePoint(
-            args.defaultArgumentAsString,
+            argsJson.getInt("viewId"),
+            argsJson.getString("point"),
             CordovaResult(callbackContext)
         )
     }
 
     @PluginMethod
     fun viewQuadrilateralForFrameQuadrilateral(args: JSONArray, callbackContext: CallbackContext) {
+        val argsJson = args.getJSONObject(0)
         coreModule.viewQuadrilateralForFrameQuadrilateral(
-            args.defaultArgumentAsString,
+            argsJson.getInt("viewId"),
+            argsJson.getString("quadrilateral"),
             CordovaResult(callbackContext)
         )
     }
@@ -404,10 +404,12 @@ class ScanditCaptureCore :
 
     @PluginMethod
     fun removeDataCaptureView(
-        @Suppress("UNUSED_PARAMETER") args: JSONArray,
+        args: JSONArray,
         callbackContext: CallbackContext
     ) {
-        val dcViewToRemove = captureViewHandler.dataCaptureView
+        val viewId = args.getInt(0)
+
+        val dcViewToRemove = coreModule.getDataCaptureViewById(viewId)
         if (dcViewToRemove != null) {
             coreModule.dataCaptureViewDisposed(dcViewToRemove)
             captureViewHandler.removeDataCaptureView(dcViewToRemove)
