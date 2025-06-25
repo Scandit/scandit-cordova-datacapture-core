@@ -26,6 +26,7 @@ import com.scandit.datacapture.frameworks.core.listeners.FrameworksDataCaptureCo
 import com.scandit.datacapture.frameworks.core.listeners.FrameworksDataCaptureViewListener
 import com.scandit.datacapture.frameworks.core.listeners.FrameworksFrameSourceDeserializer
 import com.scandit.datacapture.frameworks.core.listeners.FrameworksFrameSourceListener
+import com.scandit.datacapture.frameworks.core.observers.VolumeButtonObserver
 import com.scandit.datacapture.frameworks.core.utils.DefaultMainThread
 import com.scandit.datacapture.frameworks.core.utils.MainThread
 import org.apache.cordova.CallbackContext
@@ -39,6 +40,8 @@ class ScanditCaptureCore :
     CordovaPlugin() {
 
     companion object {
+
+        private const val VOLUME_CHANGE_EVENT = "didChangeVolume"
 
         private val PLUGIN_NAMES: MutableSet<String> = mutableSetOf()
 
@@ -65,6 +68,8 @@ class ScanditCaptureCore :
     private val captureViewHandler = DataCaptureViewHandler()
 
     private val eventEmitter = CordovaEventEmitter()
+
+    private var volumeButtonObserver: VolumeButtonObserver? = null
 
     private val frameSourceListener = FrameworksFrameSourceListener(eventEmitter)
     private val coreModule = CoreModule(
@@ -111,10 +116,14 @@ class ScanditCaptureCore :
 
     override fun onPause(multitasking: Boolean) {
         lifecycleDispatcher.dispatchOnPause()
+        // Need to stop observer when app goes in background
+        volumeButtonObserver?.unsubscribe()
     }
 
     override fun onResume(multitasking: Boolean) {
         lifecycleDispatcher.dispatchOnResume()
+        // Resume observer when app comes from background
+        volumeButtonObserver?.subscribe()
     }
 
     private fun destroy() {
@@ -412,6 +421,35 @@ class ScanditCaptureCore :
         callbackContext: CallbackContext
     ) {
         coreModule.getOpenSourceSoftwareLicenseInfo(CordovaResult(callbackContext))
+    }
+
+    @PluginMethod
+    fun subscribeVolumeButtonObserver(
+        @Suppress("UNUSED_PARAMETER") args: JSONArray,
+        callbackContext: CallbackContext
+    ) {
+        eventEmitter.registerCallback(VOLUME_CHANGE_EVENT, callbackContext)
+        volumeButtonObserver = VolumeButtonObserver(
+            cordova.context,
+            object : VolumeButtonObserver.VolumeButtonCallback {
+                override fun onVolumeButtonPressed() {
+                    eventEmitter.emit(VOLUME_CHANGE_EVENT, mutableMapOf())
+                }
+            }
+        )
+        volumeButtonObserver?.subscribe()
+        callbackContext.successAndKeepCallback()
+    }
+
+    @PluginMethod
+    fun unsubscribeVolumeButtonObserver(
+        @Suppress("UNUSED_PARAMETER") args: JSONArray,
+        callbackContext: CallbackContext
+    ) {
+        eventEmitter.unregisterCallback(VOLUME_CHANGE_EVENT)
+        volumeButtonObserver?.unsubscribe()
+        volumeButtonObserver = null
+        callbackContext.success()
     }
 
     @Deprecated("Deprecated in Java")
