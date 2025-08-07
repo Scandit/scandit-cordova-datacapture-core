@@ -23,13 +23,21 @@ class CordovaResult(private val callbackContext: CallbackContext) : FrameworksRe
     }
 
     override fun success(result: Any?) {
-        if (result is Map<*, *>) {
-            callbackContext.success(JSONObject(result))
-        } else if (result != null) {
-            callbackContext.success(result.toString())
-        } else {
+        if (result == null) {
             callbackContext.success()
+            return
         }
+
+        val resultData = if (result is Map<*, *>) {
+            JSONObject(result).toString()
+        } else {
+            result.toString()
+        }
+
+        val cordovaPayload = JSONObject()
+        cordovaPayload.put("data", resultData)
+
+        callbackContext.success(cordovaPayload)
     }
 
     companion object {
