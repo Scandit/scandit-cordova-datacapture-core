@@ -374,7 +374,7 @@ class FactoryMaker {
             throw new Error(`Trying to get a non existing instance for ${clsName}`);
         }
         if (!item.instance && item.builder) {
-            item.instance = (_a = item.builder) === null || _a === undefined ? undefined : _a.call(item);
+            item.instance = (_a = item.builder) === null || _a === void 0 ? void 0 : _a.call(item);
         }
         return item.instance;
     }
@@ -384,7 +384,7 @@ class FactoryMaker {
         if (item === null || item === undefined) {
             throw new Error(`Trying to get a non existing instance for ${clsName}`);
         }
-        const proxyInstance = (_a = item.builder) === null || _a === undefined ? undefined : _a.call(item);
+        const proxyInstance = (_a = item.builder) === null || _a === void 0 ? void 0 : _a.call(item);
         if (proxyInstance === undefined) {
             throw new Error(`item.builder?.() returned undefined for ${clsName}`);
         }
@@ -446,18 +446,6 @@ class BaseController {
         this.proxyName = proxyName;
     }
 }
-class BaseNewController {
-    get _proxy() {
-        return this._cachedProxy;
-    }
-    constructor(proxyName) {
-        this.eventEmitter = FactoryMaker.getInstance('EventEmitter');
-        this._cachedProxy = FactoryMaker.createInstance(proxyName);
-    }
-    emit(event, payload) {
-        this.eventEmitter.emit(event, payload);
-    }
-}
 class BaseNativeProxy {
     constructor() {
         this.eventEmitter = FactoryMaker.getInstance('EventEmitter');
@@ -513,14 +501,14 @@ class AdvancedNativeProxy extends BaseNativeProxy {
         this.nativeCaller = nativeCaller;
         this.events = events;
         this.eventSubscriptions = new Map();
-        this.events.forEach((event) => __awaiter$2(this, undefined, undefined, function* () {
+        this.events.forEach((event) => __awaiter$2(this, void 0, void 0, function* () {
             yield this._registerEvent(event);
         }));
         // Wrapping the AdvancedNativeProxy instance with the JS proxy hook
         return new Proxy(this, advancedNativeProxyHook);
     }
     dispose() {
-        return __awaiter$2(this, undefined, undefined, function* () {
+        return __awaiter$2(this, void 0, void 0, function* () {
             for (const event of this.events) {
                 yield this._unregisterEvent(event);
             }
@@ -532,11 +520,11 @@ class AdvancedNativeProxy extends BaseNativeProxy {
         return this.nativeCaller.callFn(fnName, args);
     }
     _registerEvent(event) {
-        return __awaiter$2(this, undefined, undefined, function* () {
-            const handler = (args) => __awaiter$2(this, undefined, undefined, function* () {
+        return __awaiter$2(this, void 0, void 0, function* () {
+            const handler = (args) => __awaiter$2(this, void 0, void 0, function* () {
                 this.eventEmitter.emit(event.nativeEventName, args);
             });
-            this.eventEmitter.on(event.nativeEventName, (args) => __awaiter$2(this, undefined, undefined, function* () {
+            this.eventEmitter.on(event.nativeEventName, (args) => __awaiter$2(this, void 0, void 0, function* () {
                 // Call to the special method defined on the JS Proxy hook
                 try {
                     const hookArg = this.nativeCaller.eventHook(args);
@@ -552,7 +540,7 @@ class AdvancedNativeProxy extends BaseNativeProxy {
         });
     }
     _unregisterEvent(event) {
-        return __awaiter$2(this, undefined, undefined, function* () {
+        return __awaiter$2(this, void 0, void 0, function* () {
             const subscription = this.eventSubscriptions.get(event.name);
             yield this.nativeCaller.unregisterEvent(event.nativeEventName, subscription);
             this.eventEmitter.off(event.nativeEventName);
@@ -728,6 +716,66 @@ class ImageBuffer {
     }
 }
 
+class FrameDataSettings extends DefaultSerializeable {
+    constructor() {
+        super();
+        // Enables the file system cache for the frame.
+        this._isFileSystemCacheEnabled = false;
+        // The quality of the image. 0-100.
+        this._imageQuality = 100;
+        // Enables the auto-rotation of the frame.
+        this._isAutoRotateEnabled = false;
+    }
+    get isFileSystemCacheEnabled() {
+        return this._isFileSystemCacheEnabled;
+    }
+    set isFileSystemCacheEnabled(enabled) {
+        this._isFileSystemCacheEnabled = enabled;
+    }
+    get imageQuality() {
+        return this._imageQuality;
+    }
+    set imageQuality(quality) {
+        if (quality < 0 || quality > 100) {
+            throw new Error('Image quality must be between 0 and 100');
+        }
+        this._imageQuality = quality;
+    }
+    get isAutoRotateEnabled() {
+        return this._isAutoRotateEnabled;
+    }
+    set isAutoRotateEnabled(enabled) {
+        this._isAutoRotateEnabled = enabled;
+    }
+}
+__decorate$2([
+    nameForSerialization('sc_frame_isFileSystemCacheEnabled')
+], FrameDataSettings.prototype, "_isFileSystemCacheEnabled", void 0);
+__decorate$2([
+    nameForSerialization('sc_frame_imageQuality')
+], FrameDataSettings.prototype, "_imageQuality", void 0);
+__decorate$2([
+    nameForSerialization('sc_frame_autoRotate')
+], FrameDataSettings.prototype, "_isAutoRotateEnabled", void 0);
+
+class FrameDataSettingsBuilder {
+    constructor(settings) {
+        this.settings = settings;
+    }
+    enableFileSystemCache(enabled) {
+        this.settings.isFileSystemCacheEnabled = enabled;
+        return this;
+    }
+    setImageQuality(quality) {
+        this.settings.imageQuality = quality;
+        return this;
+    }
+    enableAutoRotate(enabled) {
+        this.settings.isAutoRotateEnabled = enabled;
+        return this;
+    }
+}
+
 exports.CameraPosition = void 0;
 (function (CameraPosition) {
     CameraPosition["WorldFacing"] = "worldFacing";
@@ -774,10 +822,10 @@ class Point extends DefaultSerializeable {
 }
 __decorate$2([
     nameForSerialization('x')
-], Point.prototype, "_x", undefined);
+], Point.prototype, "_x", void 0);
 __decorate$2([
     nameForSerialization('y')
-], Point.prototype, "_y", undefined);
+], Point.prototype, "_y", void 0);
 
 class Quadrilateral extends DefaultSerializeable {
     get topLeft() {
@@ -805,16 +853,16 @@ class Quadrilateral extends DefaultSerializeable {
 }
 __decorate$2([
     nameForSerialization('topLeft')
-], Quadrilateral.prototype, "_topLeft", undefined);
+], Quadrilateral.prototype, "_topLeft", void 0);
 __decorate$2([
     nameForSerialization('topRight')
-], Quadrilateral.prototype, "_topRight", undefined);
+], Quadrilateral.prototype, "_topRight", void 0);
 __decorate$2([
     nameForSerialization('bottomRight')
-], Quadrilateral.prototype, "_bottomRight", undefined);
+], Quadrilateral.prototype, "_bottomRight", void 0);
 __decorate$2([
     nameForSerialization('bottomLeft')
-], Quadrilateral.prototype, "_bottomLeft", undefined);
+], Quadrilateral.prototype, "_bottomLeft", void 0);
 
 class NumberWithUnit extends DefaultSerializeable {
     get value() {
@@ -834,10 +882,10 @@ class NumberWithUnit extends DefaultSerializeable {
 }
 __decorate$2([
     nameForSerialization('value')
-], NumberWithUnit.prototype, "_value", undefined);
+], NumberWithUnit.prototype, "_value", void 0);
 __decorate$2([
     nameForSerialization('unit')
-], NumberWithUnit.prototype, "_unit", undefined);
+], NumberWithUnit.prototype, "_unit", void 0);
 
 exports.MeasureUnit = void 0;
 (function (MeasureUnit) {
@@ -867,10 +915,10 @@ class PointWithUnit extends DefaultSerializeable {
 }
 __decorate$2([
     nameForSerialization('x')
-], PointWithUnit.prototype, "_x", undefined);
+], PointWithUnit.prototype, "_x", void 0);
 __decorate$2([
     nameForSerialization('y')
-], PointWithUnit.prototype, "_y", undefined);
+], PointWithUnit.prototype, "_y", void 0);
 
 class Rect extends DefaultSerializeable {
     get origin() {
@@ -887,10 +935,10 @@ class Rect extends DefaultSerializeable {
 }
 __decorate$2([
     nameForSerialization('origin')
-], Rect.prototype, "_origin", undefined);
+], Rect.prototype, "_origin", void 0);
 __decorate$2([
     nameForSerialization('size')
-], Rect.prototype, "_size", undefined);
+], Rect.prototype, "_size", void 0);
 
 class RectWithUnit extends DefaultSerializeable {
     get origin() {
@@ -907,10 +955,10 @@ class RectWithUnit extends DefaultSerializeable {
 }
 __decorate$2([
     nameForSerialization('origin')
-], RectWithUnit.prototype, "_origin", undefined);
+], RectWithUnit.prototype, "_origin", void 0);
 __decorate$2([
     nameForSerialization('size')
-], RectWithUnit.prototype, "_size", undefined);
+], RectWithUnit.prototype, "_size", void 0);
 
 class ScanditIcon extends DefaultSerializeable {
     static fromJSON(json) {
@@ -952,26 +1000,26 @@ class ScanditIcon extends DefaultSerializeable {
 __decorate$2([
     nameForSerialization('backgroundColor'),
     ignoreFromSerializationIfNull
-], ScanditIcon.prototype, "_backgroundColor", undefined);
+], ScanditIcon.prototype, "_backgroundColor", void 0);
 __decorate$2([
     nameForSerialization('backgroundShape'),
     ignoreFromSerializationIfNull
-], ScanditIcon.prototype, "_backgroundShape", undefined);
+], ScanditIcon.prototype, "_backgroundShape", void 0);
 __decorate$2([
     nameForSerialization('icon'),
     ignoreFromSerializationIfNull
-], ScanditIcon.prototype, "_icon", undefined);
+], ScanditIcon.prototype, "_icon", void 0);
 __decorate$2([
     nameForSerialization('iconColor'),
     ignoreFromSerializationIfNull
-], ScanditIcon.prototype, "_iconColor", undefined);
+], ScanditIcon.prototype, "_iconColor", void 0);
 __decorate$2([
     nameForSerialization('backgroundStrokeColor'),
     ignoreFromSerializationIfNull
-], ScanditIcon.prototype, "_backgroundStrokeColor", undefined);
+], ScanditIcon.prototype, "_backgroundStrokeColor", void 0);
 __decorate$2([
     nameForSerialization('backgroundStrokeWidth')
-], ScanditIcon.prototype, "_backgroundStrokeWidth", undefined);
+], ScanditIcon.prototype, "_backgroundStrokeWidth", void 0);
 
 class ScanditIconBuilder {
     constructor() {
@@ -1061,10 +1109,10 @@ class Size extends DefaultSerializeable {
 }
 __decorate$2([
     nameForSerialization('width')
-], Size.prototype, "_width", undefined);
+], Size.prototype, "_width", void 0);
 __decorate$2([
     nameForSerialization('height')
-], Size.prototype, "_height", undefined);
+], Size.prototype, "_height", void 0);
 
 class SizeWithAspect extends DefaultSerializeable {
     get size() {
@@ -1081,10 +1129,10 @@ class SizeWithAspect extends DefaultSerializeable {
 }
 __decorate$2([
     nameForSerialization('size')
-], SizeWithAspect.prototype, "_size", undefined);
+], SizeWithAspect.prototype, "_size", void 0);
 __decorate$2([
     nameForSerialization('aspect')
-], SizeWithAspect.prototype, "_aspect", undefined);
+], SizeWithAspect.prototype, "_aspect", void 0);
 
 class SizeWithUnit extends DefaultSerializeable {
     get width() {
@@ -1101,10 +1149,10 @@ class SizeWithUnit extends DefaultSerializeable {
 }
 __decorate$2([
     nameForSerialization('width')
-], SizeWithUnit.prototype, "_width", undefined);
+], SizeWithUnit.prototype, "_width", void 0);
 __decorate$2([
     nameForSerialization('height')
-], SizeWithUnit.prototype, "_height", undefined);
+], SizeWithUnit.prototype, "_height", void 0);
 
 exports.SizingMode = void 0;
 (function (SizingMode) {
@@ -1209,16 +1257,16 @@ class SizeWithUnitAndAspect {
 }
 __decorate$2([
     nameForSerialization('widthAndHeight')
-], SizeWithUnitAndAspect.prototype, "_widthAndHeight", undefined);
+], SizeWithUnitAndAspect.prototype, "_widthAndHeight", void 0);
 __decorate$2([
     nameForSerialization('widthAndAspectRatio')
-], SizeWithUnitAndAspect.prototype, "_widthAndAspectRatio", undefined);
+], SizeWithUnitAndAspect.prototype, "_widthAndAspectRatio", void 0);
 __decorate$2([
     nameForSerialization('heightAndAspectRatio')
-], SizeWithUnitAndAspect.prototype, "_heightAndAspectRatio", undefined);
+], SizeWithUnitAndAspect.prototype, "_heightAndAspectRatio", void 0);
 __decorate$2([
     nameForSerialization('shorterDimensionAndAspectRatio')
-], SizeWithUnitAndAspect.prototype, "_shorterDimensionAndAspectRatio", undefined);
+], SizeWithUnitAndAspect.prototype, "_shorterDimensionAndAspectRatio", void 0);
 
 class MarginsWithUnit extends DefaultSerializeable {
     get left() {
@@ -1249,16 +1297,16 @@ class MarginsWithUnit extends DefaultSerializeable {
 }
 __decorate$2([
     nameForSerialization('left')
-], MarginsWithUnit.prototype, "_left", undefined);
+], MarginsWithUnit.prototype, "_left", void 0);
 __decorate$2([
     nameForSerialization('right')
-], MarginsWithUnit.prototype, "_right", undefined);
+], MarginsWithUnit.prototype, "_right", void 0);
 __decorate$2([
     nameForSerialization('top')
-], MarginsWithUnit.prototype, "_top", undefined);
+], MarginsWithUnit.prototype, "_top", void 0);
 __decorate$2([
     nameForSerialization('bottom')
-], MarginsWithUnit.prototype, "_bottom", undefined);
+], MarginsWithUnit.prototype, "_bottom", void 0);
 
 class Color {
     get redComponent() {
@@ -1404,6 +1452,7 @@ exports.ScanIntention = void 0;
 (function (ScanIntention) {
     ScanIntention["Manual"] = "manual";
     ScanIntention["Smart"] = "smart";
+    ScanIntention["SmartSelection"] = "smartSelection";
 })(exports.ScanIntention || (exports.ScanIntention = {}));
 
 class EventDataParser {
@@ -1432,7 +1481,7 @@ class Observable extends DefaultSerializeable {
 }
 __decorate$2([
     ignoreFromSerialization
-], Observable.prototype, "listeners", undefined);
+], Observable.prototype, "listeners", void 0);
 
 class HtmlElementPosition {
     constructor(top, left) {
@@ -1475,8 +1524,8 @@ class HTMLElementState {
         var _a, _b, _c, _d;
         if (!other)
             return true;
-        const positionChanged = (_b = (_a = this.position) === null || _a === undefined ? undefined : _a.didChangeComparedTo(other.position)) !== null && _b !== undefined ? _b : (this.position !== other.position);
-        const sizeChanged = (_d = (_c = this.size) === null || _c === undefined ? undefined : _c.didChangeComparedTo(other.size)) !== null && _d !== undefined ? _d : (this.size !== other.size);
+        const positionChanged = (_b = (_a = this.position) === null || _a === void 0 ? void 0 : _a.didChangeComparedTo(other.position)) !== null && _b !== void 0 ? _b : (this.position !== other.position);
+        const sizeChanged = (_d = (_c = this.size) === null || _c === void 0 ? void 0 : _c.didChangeComparedTo(other.size)) !== null && _d !== void 0 ? _d : (this.size !== other.size);
         return positionChanged || sizeChanged || this.shouldBeUnderContent !== other.shouldBeUnderContent;
     }
 }
@@ -1492,7 +1541,7 @@ class ImageFrameSourceController {
         this._proxy = FactoryMaker.getInstance('ImageFrameSourceProxy');
     }
     getCurrentState() {
-        return __awaiter$2(this, undefined, undefined, function* () {
+        return __awaiter$2(this, void 0, void 0, function* () {
             const result = yield this._proxy.getCurrentCameraState(this.imageFrameSource.position);
             if (result == null) {
                 return exports.FrameSourceState.Off;
@@ -1506,7 +1555,7 @@ class ImageFrameSourceController {
     subscribeListener() {
         var _a, _b;
         this._proxy.registerListenerForEvents();
-        (_b = (_a = this._proxy).subscribeDidChangeState) === null || _b === undefined ? undefined : _b.call(_a);
+        (_b = (_a = this._proxy).subscribeDidChangeState) === null || _b === void 0 ? void 0 : _b.call(_a);
         this.eventEmitter.on(FrameSourceListenerEvents.didChangeState, (data) => {
             const event = EventDataParser.parse(data);
             if (event === null) {
@@ -1597,19 +1646,19 @@ class ImageFrameSource extends DefaultSerializeable {
 }
 __decorate$2([
     nameForSerialization('id')
-], ImageFrameSource.prototype, "_id", undefined);
+], ImageFrameSource.prototype, "_id", void 0);
 __decorate$2([
     nameForSerialization('desiredState')
-], ImageFrameSource.prototype, "_desiredState", undefined);
+], ImageFrameSource.prototype, "_desiredState", void 0);
 __decorate$2([
     ignoreFromSerialization
-], ImageFrameSource.prototype, "listeners", undefined);
+], ImageFrameSource.prototype, "listeners", void 0);
 __decorate$2([
     ignoreFromSerialization
-], ImageFrameSource.prototype, "_context", undefined);
+], ImageFrameSource.prototype, "_context", void 0);
 __decorate$2([
     ignoreFromSerialization
-], ImageFrameSource.prototype, "controller", undefined);
+], ImageFrameSource.prototype, "controller", void 0);
 
 class PrivateFrameData {
     get imageBuffers() {
@@ -1638,7 +1687,16 @@ class PrivateFrameData {
     }
 }
 
-class CameraController {
+class BaseNewController {
+    get _proxy() {
+        return this._cachedProxy;
+    }
+    constructor(proxyName) {
+        this._cachedProxy = FactoryMaker.createInstance(proxyName);
+    }
+}
+
+class CameraController extends BaseNewController {
     static get _proxy() {
         return FactoryMaker.getInstance('CameraProxy');
     }
@@ -1648,14 +1706,14 @@ class CameraController {
         return controller;
     }
     constructor() {
-        this.eventEmitter = FactoryMaker.getInstance('EventEmitter');
+        super('CameraProxy');
     }
     get privateCamera() {
         return this.camera;
     }
     static getFrame(frameId) {
-        return __awaiter$2(this, undefined, undefined, function* () {
-            const result = yield CameraController._proxy.getFrame(frameId);
+        return __awaiter$2(this, void 0, void 0, function* () {
+            const result = yield CameraController._proxy.$getFrame({ frameId });
             if (result == null) {
                 return PrivateFrameData.empty();
             }
@@ -1664,8 +1722,8 @@ class CameraController {
         });
     }
     static getFrameOrNull(frameId) {
-        return __awaiter$2(this, undefined, undefined, function* () {
-            const result = yield CameraController._proxy.getFrame(frameId);
+        return __awaiter$2(this, void 0, void 0, function* () {
+            const result = yield CameraController._proxy.$getFrame({ frameId });
             if (result == null) {
                 return null;
             }
@@ -1674,8 +1732,8 @@ class CameraController {
         });
     }
     getCurrentState() {
-        return __awaiter$2(this, undefined, undefined, function* () {
-            const result = yield CameraController._proxy.getCurrentCameraState(this.privateCamera.position);
+        return __awaiter$2(this, void 0, void 0, function* () {
+            const result = yield this._proxy.$getCurrentCameraState({ position: this.privateCamera.position });
             if (result == null) {
                 return exports.FrameSourceState.Off;
             }
@@ -1683,8 +1741,8 @@ class CameraController {
         });
     }
     getIsTorchAvailable() {
-        return __awaiter$2(this, undefined, undefined, function* () {
-            const result = yield CameraController._proxy.isTorchAvailable(this.privateCamera.position);
+        return __awaiter$2(this, void 0, void 0, function* () {
+            const result = yield this._proxy.$isTorchAvailable({ position: this.privateCamera.position });
             if (result == null) {
                 return false;
             }
@@ -1692,25 +1750,30 @@ class CameraController {
         });
     }
     switchCameraToDesiredState(desiredState) {
-        return CameraController._proxy.switchCameraToDesiredState(desiredState);
+        return this._proxy.$switchCameraToDesiredState({ desiredStateJson: desiredState.toString() });
     }
     subscribeListener() {
-        var _a, _b;
-        CameraController._proxy.registerListenerForCameraEvents();
-        (_b = (_a = CameraController._proxy).subscribeDidChangeState) === null || _b === undefined ? undefined : _b.call(_a);
-        this.eventEmitter.on(FrameSourceListenerEvents.didChangeState, (data) => {
-            const event = EventDataParser.parse(data);
-            if (event) {
-                this.privateCamera.listeners.forEach(listener => {
-                    var _a;
-                    (_a = listener === null || listener === undefined ? undefined : listener.didChangeState) === null || _a === undefined ? undefined : _a.call(listener, this.camera, event.state);
-                });
-            }
-        });
+        this._proxy.$registerListenerForCameraEvents();
+        this._proxy.subscribeForEvents([FrameSourceListenerEvents.didChangeState]);
+        this._proxy.eventEmitter.on(FrameSourceListenerEvents.didChangeState, this.handleDidChangeStateEvent.bind(this));
     }
     unsubscribeListener() {
-        CameraController._proxy.unregisterListenerForCameraEvents();
-        this.eventEmitter.off(FrameSourceListenerEvents.didChangeState);
+        this._proxy.$unregisterListenerForCameraEvents();
+        this._proxy.unsubscribeFromEvents([FrameSourceListenerEvents.didChangeState]);
+        this._proxy.eventEmitter.off(FrameSourceListenerEvents.didChangeState, this.handleDidChangeStateEvent.bind(this));
+    }
+    dispose() {
+        this.unsubscribeListener();
+        this._proxy.dispose();
+    }
+    handleDidChangeStateEvent(ev) {
+        const event = EventDataParser.parse(ev.data);
+        if (event) {
+            this.privateCamera.listeners.forEach(listener => {
+                var _a;
+                (_a = listener === null || listener === void 0 ? void 0 : listener.didChangeState) === null || _a === void 0 ? void 0 : _a.call(listener, this.camera, event.state);
+            });
+        }
     }
 }
 
@@ -1835,7 +1898,7 @@ class Camera extends DefaultSerializeable {
         return this.didChange();
     }
     didChange() {
-        return __awaiter$2(this, undefined, undefined, function* () {
+        return __awaiter$2(this, void 0, void 0, function* () {
             if (this.context) {
                 yield this.context.update();
             }
@@ -1844,22 +1907,22 @@ class Camera extends DefaultSerializeable {
 }
 __decorate$2([
     serializationDefault({})
-], Camera.prototype, "settings", undefined);
+], Camera.prototype, "settings", void 0);
 __decorate$2([
     nameForSerialization('desiredTorchState')
-], Camera.prototype, "_desiredTorchState", undefined);
+], Camera.prototype, "_desiredTorchState", void 0);
 __decorate$2([
     ignoreFromSerialization
-], Camera.prototype, "_desiredState", undefined);
+], Camera.prototype, "_desiredState", void 0);
 __decorate$2([
     ignoreFromSerialization
-], Camera.prototype, "listeners", undefined);
+], Camera.prototype, "listeners", void 0);
 __decorate$2([
     ignoreFromSerialization
-], Camera.prototype, "_context", undefined);
+], Camera.prototype, "_context", void 0);
 __decorate$2([
     ignoreFromSerialization
-], Camera.prototype, "controller", undefined);
+], Camera.prototype, "controller", void 0);
 __decorate$2([
     ignoreFromSerialization
 ], Camera, "coreDefaults", null);
@@ -1889,11 +1952,11 @@ class ControlImage extends DefaultSerializeable {
 __decorate$2([
     ignoreFromSerializationIfNull,
     nameForSerialization('data')
-], ControlImage.prototype, "_data", undefined);
+], ControlImage.prototype, "_data", void 0);
 __decorate$2([
     ignoreFromSerializationIfNull,
     nameForSerialization('name')
-], ControlImage.prototype, "_name", undefined);
+], ControlImage.prototype, "_name", void 0);
 
 class ContextStatus {
     static fromJSON(json) {
@@ -1917,6 +1980,16 @@ class ContextStatus {
 class DataCaptureContextSettings extends DefaultSerializeable {
     constructor() {
         super();
+        this._frameSettings = new FrameDataSettings();
+    }
+    get frameDataSettings() {
+        return this._frameSettings;
+    }
+    set frameDataSettings(settings) {
+        this._frameSettings = settings;
+    }
+    frameDataSettingsBuilder() {
+        return new FrameDataSettingsBuilder(this._frameSettings);
     }
     setProperty(name, value) {
         this[name] = value;
@@ -1925,6 +1998,9 @@ class DataCaptureContextSettings extends DefaultSerializeable {
         return this[name];
     }
 }
+__decorate$2([
+    nameForSerialization('frameSettings')
+], DataCaptureContextSettings.prototype, "_frameSettings", void 0);
 
 class OpenSourceSoftwareLicenseInfo {
     constructor(licenseText) {
@@ -1940,12 +2016,12 @@ var DataCaptureContextEvents;
     DataCaptureContextEvents["didChangeStatus"] = "DataCaptureContextListener.onStatusChanged";
     DataCaptureContextEvents["didStartObservingContext"] = "DataCaptureContextListener.onObservationStarted";
 })(DataCaptureContextEvents || (DataCaptureContextEvents = {}));
-class DataCaptureContextController {
-    static get framework() {
-        return FactoryMaker.getInstance('DataCaptureContextProxy').framework;
+class DataCaptureContextController extends BaseNewController {
+    get framework() {
+        return this._proxy.framework;
     }
-    static get frameworkVersion() {
-        return FactoryMaker.getInstance('DataCaptureContextProxy').frameworkVersion;
+    get frameworkVersion() {
+        return this._proxy.frameworkVersion;
     }
     get privateContext() {
         return this.context;
@@ -1956,14 +2032,13 @@ class DataCaptureContextController {
         return controller;
     }
     constructor() {
+        super('DataCaptureContextProxy');
         this._listenerRegistered = false;
-        this._proxy = FactoryMaker.getInstance('DataCaptureContextProxy');
-        this.eventEmitter = FactoryMaker.getInstance('EventEmitter');
     }
     updateContextFromJSON() {
-        return __awaiter$2(this, undefined, undefined, function* () {
+        return __awaiter$2(this, void 0, void 0, function* () {
             try {
-                yield this._proxy.updateContextFromJSON(JSON.stringify(this.context.toJSON()));
+                yield this._proxy.$updateContextFromJSON({ contextJson: JSON.stringify(this.context.toJSON()) });
             }
             catch (error) {
                 this.notifyListenersOfDeserializationError(error);
@@ -1972,31 +2047,36 @@ class DataCaptureContextController {
         });
     }
     addModeToContext(mode) {
-        return this._proxy.addModeToContext(JSON.stringify(mode.toJSON()));
+        return this._proxy.$addModeToContext({ modeJson: JSON.stringify(mode.toJSON()) });
     }
     removeModeFromContext(mode) {
-        return this._proxy.removeModeFromContext(JSON.stringify(mode.toJSON()));
+        return this._proxy.$removeModeFromContext({ modeJson: JSON.stringify(mode.toJSON()) });
     }
     removeAllModesFromContext() {
-        return this._proxy.removeAllModesFromContext();
+        return this._proxy.$removeAllModes();
     }
     dispose() {
         this.unsubscribeListener();
+        this._proxy.$disposeContext();
         this._proxy.dispose();
     }
     unsubscribeListener() {
-        this._proxy.unregisterListenerForDataCaptureContext();
-        this.eventEmitter.removeAllListeners(DataCaptureContextEvents.didChangeStatus);
-        this.eventEmitter.removeAllListeners(DataCaptureContextEvents.didStartObservingContext);
+        if (!this._listenerRegistered) {
+            return;
+        }
+        this._proxy.$unsubscribeContextListener();
+        this._proxy.unsubscribeFromEvents(Object.values(DataCaptureContextEvents));
+        this._proxy.eventEmitter.off(DataCaptureContextEvents.didChangeStatus, this.handleDidChangeStatusEvent.bind(this));
+        this._proxy.eventEmitter.off(DataCaptureContextEvents.didStartObservingContext, this.handleDidStartObservingContextEvent.bind(this));
+        this._listenerRegistered = false;
     }
     initialize() {
-        this.subscribeListener();
         return this.initializeContextFromJSON();
     }
     initializeContextFromJSON() {
-        return __awaiter$2(this, undefined, undefined, function* () {
+        return __awaiter$2(this, void 0, void 0, function* () {
             try {
-                yield this._proxy.contextFromJSON(JSON.stringify(this.context.toJSON()));
+                yield this._proxy.$contextFromJSON({ contextJson: JSON.stringify(this.context.toJSON()) });
             }
             catch (error) {
                 this.notifyListenersOfDeserializationError(error);
@@ -2005,36 +2085,36 @@ class DataCaptureContextController {
         });
     }
     static getOpenSourceSoftwareLicenseInfo() {
-        return __awaiter$2(this, undefined, undefined, function* () {
+        return __awaiter$2(this, void 0, void 0, function* () {
             const proxy = FactoryMaker.getInstance('DataCaptureContextProxy');
-            const result = yield proxy.getOpenSourceSoftwareLicenseInfo();
+            const result = yield proxy.$getOpenSourceSoftwareLicenseInfo();
             return new OpenSourceSoftwareLicenseInfo(result.data);
         });
     }
     subscribeListener() {
-        var _a, _b, _c, _d;
         if (this._listenerRegistered) {
             return;
         }
-        this._proxy.registerListenerForDataCaptureContext();
-        (_b = (_a = this._proxy).subscribeDidChangeStatus) === null || _b === undefined ? undefined : _b.call(_a);
-        (_d = (_c = this._proxy).subscribeDidStartObservingContext) === null || _d === undefined ? undefined : _d.call(_c);
-        this.eventEmitter.on(DataCaptureContextEvents.didChangeStatus, (data) => {
-            const event = EventDataParser.parse(data);
-            if (event === null) {
-                console.error('DataCaptureContextController didChangeStatus payload is null');
-                return;
-            }
-            const contextStatus = ContextStatus.fromJSON(JSON.parse(event.status));
-            this.notifyListenersOfDidChangeStatus(contextStatus);
-        });
-        this.eventEmitter.on(DataCaptureContextEvents.didStartObservingContext, () => {
-            this.privateContext.listeners.forEach(listener => {
-                var _a;
-                (_a = listener.didStartObservingContext) === null || _a === undefined ? undefined : _a.call(listener, this.context);
-            });
-        });
+        this._proxy.$subscribeContextListener();
+        this._proxy.subscribeForEvents(Object.values(DataCaptureContextEvents));
+        this._proxy.eventEmitter.on(DataCaptureContextEvents.didChangeStatus, this.handleDidChangeStatusEvent.bind(this));
+        this._proxy.eventEmitter.on(DataCaptureContextEvents.didStartObservingContext, this.handleDidStartObservingContextEvent.bind(this));
         this._listenerRegistered = true;
+    }
+    handleDidChangeStatusEvent(eventPayload) {
+        const event = EventDataParser.parse(eventPayload.data);
+        if (event === null) {
+            console.error('DataCaptureContextController didChangeStatus payload is null');
+            return;
+        }
+        const contextStatus = ContextStatus.fromJSON(JSON.parse(event.status));
+        this.notifyListenersOfDidChangeStatus(contextStatus);
+    }
+    handleDidStartObservingContextEvent() {
+        this.privateContext.listeners.forEach(listener => {
+            var _a;
+            (_a = listener.didStartObservingContext) === null || _a === void 0 ? void 0 : _a.call(listener, this.context);
+        });
     }
     notifyListenersOfDeserializationError(error) {
         const contextStatus = ContextStatus
@@ -2102,7 +2182,7 @@ class DataCaptureContext extends DefaultSerializeable {
     }
     static create(licenseKey, options, settings) {
         DataCaptureContext.sharedInstance.licenseKey = licenseKey;
-        DataCaptureContext.sharedInstance.deviceName = (options === null || options === undefined ? undefined : options.deviceName) || '';
+        DataCaptureContext.sharedInstance.deviceName = (options === null || options === void 0 ? void 0 : options.deviceName) || '';
         DataCaptureContext.sharedInstance.settings = settings || new DataCaptureContextSettings();
         return DataCaptureContext.sharedInstance;
     }
@@ -2110,8 +2190,8 @@ class DataCaptureContext extends DefaultSerializeable {
         super();
         this.licenseKey = licenseKey;
         this.deviceName = deviceName;
-        this._framework = DataCaptureContextController.framework;
-        this._frameworkVersion = DataCaptureContextController.frameworkVersion;
+        this._framework = 'unknown';
+        this._frameworkVersion = 'unknown';
         this.settings = new DataCaptureContextSettings();
         this._frameSource = null;
         this.view = null;
@@ -2124,6 +2204,8 @@ class DataCaptureContext extends DefaultSerializeable {
         }
         if (this.controller == null) {
             this.controller = DataCaptureContextController.forDataCaptureContext(this);
+            this._framework = this.controller.framework;
+            this._frameworkVersion = this.controller.frameworkVersion;
         }
     }
     setFrameSource(frameSource) {
@@ -2137,6 +2219,9 @@ class DataCaptureContext extends DefaultSerializeable {
         return this.update();
     }
     addListener(listener) {
+        if (this.listeners.length === 0) {
+            this.controller.subscribeListener();
+        }
         if (this.listeners.includes(listener)) {
             return;
         }
@@ -2147,6 +2232,9 @@ class DataCaptureContext extends DefaultSerializeable {
             return;
         }
         this.listeners.splice(this.listeners.indexOf(listener), 1);
+        if (this.listeners.length === 0) {
+            this.controller.unsubscribeListener();
+        }
     }
     addMode(mode) {
         if (!this.modes.includes(mode)) {
@@ -2185,7 +2273,7 @@ class DataCaptureContext extends DefaultSerializeable {
         if (!this.controller) {
             return;
         }
-        (_a = this.view) === null || _a === undefined ? undefined : _a.dispose();
+        (_a = this.view) === null || _a === void 0 ? void 0 : _a.dispose();
         this.removeAllModes();
         this.controller.dispose();
     }
@@ -2194,7 +2282,7 @@ class DataCaptureContext extends DefaultSerializeable {
         return this.update();
     }
     static getOpenSourceSoftwareLicenseInfo() {
-        return __awaiter$2(this, undefined, undefined, function* () {
+        return __awaiter$2(this, void 0, void 0, function* () {
             return DataCaptureContextController.getOpenSourceSoftwareLicenseInfo();
         });
     }
@@ -2207,28 +2295,28 @@ class DataCaptureContext extends DefaultSerializeable {
 }
 __decorate$2([
     ignoreFromSerialization
-], DataCaptureContext.prototype, "controller", undefined);
+], DataCaptureContext.prototype, "controller", void 0);
 __decorate$2([
     nameForSerialization('framework')
-], DataCaptureContext.prototype, "_framework", undefined);
+], DataCaptureContext.prototype, "_framework", void 0);
 __decorate$2([
     nameForSerialization('frameworkVersion')
-], DataCaptureContext.prototype, "_frameworkVersion", undefined);
+], DataCaptureContext.prototype, "_frameworkVersion", void 0);
 __decorate$2([
     nameForSerialization('frameSource')
-], DataCaptureContext.prototype, "_frameSource", undefined);
+], DataCaptureContext.prototype, "_frameSource", void 0);
 __decorate$2([
     ignoreFromSerialization
-], DataCaptureContext.prototype, "view", undefined);
+], DataCaptureContext.prototype, "view", void 0);
 __decorate$2([
     ignoreFromSerialization
-], DataCaptureContext.prototype, "modes", undefined);
+], DataCaptureContext.prototype, "modes", void 0);
 __decorate$2([
     ignoreFromSerialization
-], DataCaptureContext.prototype, "listeners", undefined);
+], DataCaptureContext.prototype, "listeners", void 0);
 __decorate$2([
     ignoreFromSerialization
-], DataCaptureContext, "_instance", undefined);
+], DataCaptureContext, "_instance", void 0);
 __decorate$2([
     ignoreFromSerialization
 ], DataCaptureContext, "coreDefaults", null);
@@ -2251,14 +2339,14 @@ class DataCaptureViewController extends BaseController {
         super('DataCaptureViewProxy');
     }
     viewPointForFramePoint(point) {
-        return __awaiter$2(this, undefined, undefined, function* () {
-            const result = yield this._proxy.viewPointForFramePoint(JSON.stringify(point.toJSON()));
+        return __awaiter$2(this, void 0, void 0, function* () {
+            const result = yield this._proxy.viewPointForFramePoint({ viewId: this.view.viewId, pointJson: JSON.stringify(point.toJSON()) });
             return Point.fromJSON(JSON.parse(result.data));
         });
     }
     viewQuadrilateralForFrameQuadrilateral(quadrilateral) {
-        return __awaiter$2(this, undefined, undefined, function* () {
-            const result = yield this._proxy.viewQuadrilateralForFrameQuadrilateral(JSON.stringify(quadrilateral.toJSON()));
+        return __awaiter$2(this, void 0, void 0, function* () {
+            const result = yield this._proxy.viewQuadrilateralForFrameQuadrilateral({ viewId: this.view.viewId, quadrilateralJson: JSON.stringify(quadrilateral.toJSON()) });
             return Quadrilateral.fromJSON(JSON.parse(result.data));
         });
     }
@@ -2266,24 +2354,30 @@ class DataCaptureViewController extends BaseController {
         return this._proxy.setPositionAndSize(top, left, width, height, shouldBeUnderWebView);
     }
     show() {
+        if (!this.isViewCreated())
+            return Promise.resolve();
         return this._proxy.show();
     }
     hide() {
+        if (!this.isViewCreated())
+            return Promise.resolve();
         return this._proxy.hide();
     }
     createNativeView() {
-        return __awaiter$2(this, undefined, undefined, function* () {
+        return __awaiter$2(this, void 0, void 0, function* () {
             yield this.createView();
             this.subscribeListener();
         });
     }
     removeNativeView() {
-        return this._proxy.removeView();
+        return this._proxy.removeView(this.view.viewId);
     }
     createView() {
         return this._proxy.createView(JSON.stringify(this.view.toJSON()));
     }
     updateView() {
+        if (!this.isViewCreated())
+            return Promise.resolve();
         return this._proxy.updateView(JSON.stringify(this.view.toJSON()));
     }
     dispose() {
@@ -2291,12 +2385,15 @@ class DataCaptureViewController extends BaseController {
     }
     subscribeListener() {
         var _a, _b;
-        this._proxy.registerListenerForViewEvents();
-        (_b = (_a = this._proxy).subscribeDidChangeSize) === null || _b === undefined ? undefined : _b.call(_a);
+        this._proxy.registerListenerForViewEvents(this.view.viewId);
+        (_b = (_a = this._proxy).subscribeDidChangeSize) === null || _b === void 0 ? void 0 : _b.call(_a);
         this.eventEmitter.on(DataCaptureViewEvents.didChangeSize, (data) => {
             const event = EventDataParser.parse(data);
             if (event === null) {
                 console.error('DataCaptureViewController didChangeSize payload is null');
+                return;
+            }
+            if (event.viewId !== this.view.viewId) {
                 return;
             }
             const size = Size.fromJSON(event.size);
@@ -2309,8 +2406,11 @@ class DataCaptureViewController extends BaseController {
         });
     }
     unsubscribeListener() {
-        this._proxy.unregisterListenerForViewEvents();
+        this._proxy.unregisterListenerForViewEvents(this.view.viewId);
         this.eventEmitter.removeAllListeners(DataCaptureViewEvents.didChangeSize);
+    }
+    isViewCreated() {
+        return this.view.viewId > 0;
     }
 }
 
@@ -2333,6 +2433,13 @@ class BaseDataCaptureView extends DefaultSerializeable {
     }
     get scanAreaMargins() {
         return this._scanAreaMargins;
+    }
+    get viewId() {
+        var _a;
+        return (_a = this._viewId) !== null && _a !== void 0 ? _a : -1;
+    }
+    set viewId(newValue) {
+        this._viewId = newValue;
     }
     set scanAreaMargins(newValue) {
         this._scanAreaMargins = newValue;
@@ -2392,7 +2499,8 @@ class BaseDataCaptureView extends DefaultSerializeable {
     constructor(autoCreateNativeView) {
         super();
         this._context = null;
-        this.viewId = null;
+        this._viewId = -1;
+        this.parentId = null;
         this.overlays = [];
         this.controls = [];
         this.listeners = [];
@@ -2420,6 +2528,10 @@ class BaseDataCaptureView extends DefaultSerializeable {
         }
         overlay.view = null;
         this.overlays.splice(this.overlays.indexOf(overlay), 1);
+        this.controller.updateView();
+    }
+    removeAllOverlays() {
+        this.overlays = [];
         this.controller.updateView();
     }
     addListener(listener) {
@@ -2464,17 +2576,18 @@ class BaseDataCaptureView extends DefaultSerializeable {
     controlUpdated() {
         this.controller.updateView();
     }
-    createNativeView() {
-        return __awaiter$2(this, undefined, undefined, function* () {
+    createNativeView(viewId) {
+        return __awaiter$2(this, void 0, void 0, function* () {
             if (this.isViewCreated) {
                 return Promise.resolve();
             }
+            this.viewId = viewId;
             yield this.controller.createNativeView();
             this.isViewCreated = true;
         });
     }
     removeNativeView() {
-        return __awaiter$2(this, undefined, undefined, function* () {
+        return __awaiter$2(this, void 0, void 0, function* () {
             if (!this.isViewCreated) {
                 return Promise.resolve();
             }
@@ -2486,6 +2599,7 @@ class BaseDataCaptureView extends DefaultSerializeable {
         this.overlays = [];
         this.listeners.forEach(listener => this.removeListener(listener));
         this.controller.dispose();
+        this.viewId = -1;
         this.isViewCreated = false;
     }
     // HTML Views only
@@ -2510,46 +2624,71 @@ class BaseDataCaptureView extends DefaultSerializeable {
 }
 __decorate$2([
     ignoreFromSerialization
-], BaseDataCaptureView.prototype, "_context", undefined);
+], BaseDataCaptureView.prototype, "_context", void 0);
 __decorate$2([
     ignoreFromSerialization
-], BaseDataCaptureView.prototype, "viewComponent", undefined);
+], BaseDataCaptureView.prototype, "viewComponent", void 0);
 __decorate$2([
     ignoreFromSerialization
 ], BaseDataCaptureView.prototype, "coreDefaults", null);
 __decorate$2([
     nameForSerialization('scanAreaMargins')
-], BaseDataCaptureView.prototype, "_scanAreaMargins", undefined);
+], BaseDataCaptureView.prototype, "_scanAreaMargins", void 0);
 __decorate$2([
+    nameForSerialization('viewId')
+], BaseDataCaptureView.prototype, "_viewId", void 0);
+__decorate$2([
+    nameForSerialization('parentId'),
     ignoreFromSerializationIfNull
-], BaseDataCaptureView.prototype, "viewId", undefined);
+], BaseDataCaptureView.prototype, "parentId", void 0);
 __decorate$2([
     nameForSerialization('pointOfInterest')
-], BaseDataCaptureView.prototype, "_pointOfInterest", undefined);
+], BaseDataCaptureView.prototype, "_pointOfInterest", void 0);
 __decorate$2([
     nameForSerialization('logoAnchor')
-], BaseDataCaptureView.prototype, "_logoAnchor", undefined);
+], BaseDataCaptureView.prototype, "_logoAnchor", void 0);
 __decorate$2([
     nameForSerialization('logoOffset')
-], BaseDataCaptureView.prototype, "_logoOffset", undefined);
+], BaseDataCaptureView.prototype, "_logoOffset", void 0);
 __decorate$2([
     nameForSerialization('focusGesture')
-], BaseDataCaptureView.prototype, "_focusGesture", undefined);
+], BaseDataCaptureView.prototype, "_focusGesture", void 0);
 __decorate$2([
     nameForSerialization('zoomGesture')
-], BaseDataCaptureView.prototype, "_zoomGesture", undefined);
+], BaseDataCaptureView.prototype, "_zoomGesture", void 0);
 __decorate$2([
     nameForSerialization('logoStyle')
-], BaseDataCaptureView.prototype, "_logoStyle", undefined);
+], BaseDataCaptureView.prototype, "_logoStyle", void 0);
 __decorate$2([
     ignoreFromSerialization
-], BaseDataCaptureView.prototype, "controller", undefined);
+], BaseDataCaptureView.prototype, "controller", void 0);
 __decorate$2([
     ignoreFromSerialization
-], BaseDataCaptureView.prototype, "listeners", undefined);
+], BaseDataCaptureView.prototype, "listeners", void 0);
 __decorate$2([
     ignoreFromSerialization
-], BaseDataCaptureView.prototype, "isViewCreated", undefined);
+], BaseDataCaptureView.prototype, "isViewCreated", void 0);
+
+class ScreenStateManager {
+    constructor() {
+        this.activeScreenId = null;
+    }
+    static getInstance() {
+        if (!ScreenStateManager.instance) {
+            ScreenStateManager.instance = new ScreenStateManager();
+        }
+        return ScreenStateManager.instance;
+    }
+    setActiveScreen(screenId) {
+        if (this.activeScreenId === screenId) {
+            return;
+        }
+        this.activeScreenId = screenId;
+    }
+    isScreenActive(screenId) {
+        return (this.activeScreenId === null || this.activeScreenId === screenId);
+    }
+}
 
 class ZoomSwitchControl extends DefaultSerializeable {
     constructor() {
@@ -2565,76 +2704,76 @@ class ZoomSwitchControl extends DefaultSerializeable {
     }
     get zoomedOutImage() {
         var _a, _b;
-        if (((_a = this.icon.zoomedOut.default) === null || _a === undefined ? undefined : _a.isBase64EncodedImage()) == true) {
-            return (_b = this.icon.zoomedOut.default) === null || _b === undefined ? undefined : _b.data;
+        if (((_a = this.icon.zoomedOut.default) === null || _a === void 0 ? void 0 : _a.isBase64EncodedImage()) == true) {
+            return (_b = this.icon.zoomedOut.default) === null || _b === void 0 ? void 0 : _b.data;
         }
         return null;
     }
     set zoomedOutImage(zoomedOutImage) {
         var _a;
         this.icon.zoomedOut.default = ControlImage.fromBase64EncodedImage(zoomedOutImage);
-        (_a = this.view) === null || _a === undefined ? undefined : _a.controlUpdated();
+        (_a = this.view) === null || _a === void 0 ? void 0 : _a.controlUpdated();
     }
     get zoomedInImage() {
         var _a, _b;
-        if (((_a = this.icon.zoomedIn.default) === null || _a === undefined ? undefined : _a.isBase64EncodedImage()) == true) {
-            return (_b = this.icon.zoomedIn.default) === null || _b === undefined ? undefined : _b.data;
+        if (((_a = this.icon.zoomedIn.default) === null || _a === void 0 ? void 0 : _a.isBase64EncodedImage()) == true) {
+            return (_b = this.icon.zoomedIn.default) === null || _b === void 0 ? void 0 : _b.data;
         }
         return null;
     }
     set zoomedInImage(zoomedInImage) {
         var _a;
         this.icon.zoomedIn.default = ControlImage.fromBase64EncodedImage(zoomedInImage);
-        (_a = this.view) === null || _a === undefined ? undefined : _a.controlUpdated();
+        (_a = this.view) === null || _a === void 0 ? void 0 : _a.controlUpdated();
     }
     get zoomedInPressedImage() {
         var _a, _b;
-        if (((_a = this.icon.zoomedIn.pressed) === null || _a === undefined ? undefined : _a.isBase64EncodedImage()) == true) {
-            return (_b = this.icon.zoomedIn.pressed) === null || _b === undefined ? undefined : _b.data;
+        if (((_a = this.icon.zoomedIn.pressed) === null || _a === void 0 ? void 0 : _a.isBase64EncodedImage()) == true) {
+            return (_b = this.icon.zoomedIn.pressed) === null || _b === void 0 ? void 0 : _b.data;
         }
         return null;
     }
     set zoomedInPressedImage(zoomedInPressedImage) {
         var _a;
         this.icon.zoomedIn.pressed = ControlImage.fromBase64EncodedImage(zoomedInPressedImage);
-        (_a = this.view) === null || _a === undefined ? undefined : _a.controlUpdated();
+        (_a = this.view) === null || _a === void 0 ? void 0 : _a.controlUpdated();
     }
     get zoomedOutPressedImage() {
         var _a, _b;
-        if (((_a = this.icon.zoomedOut.pressed) === null || _a === undefined ? undefined : _a.isBase64EncodedImage()) == true) {
-            return (_b = this.icon.zoomedOut.pressed) === null || _b === undefined ? undefined : _b.data;
+        if (((_a = this.icon.zoomedOut.pressed) === null || _a === void 0 ? void 0 : _a.isBase64EncodedImage()) == true) {
+            return (_b = this.icon.zoomedOut.pressed) === null || _b === void 0 ? void 0 : _b.data;
         }
         return null;
     }
     set zoomedOutPressedImage(zoomedOutPressedImage) {
         var _a;
         this.icon.zoomedOut.pressed = ControlImage.fromBase64EncodedImage(zoomedOutPressedImage);
-        (_a = this.view) === null || _a === undefined ? undefined : _a.controlUpdated();
+        (_a = this.view) === null || _a === void 0 ? void 0 : _a.controlUpdated();
     }
     setZoomedInImage(resource) {
         var _a;
         this.icon.zoomedIn.default = ControlImage.fromResourceName(resource);
-        (_a = this.view) === null || _a === undefined ? undefined : _a.controlUpdated();
+        (_a = this.view) === null || _a === void 0 ? void 0 : _a.controlUpdated();
     }
     setZoomedInPressedImage(resource) {
         var _a;
         this.icon.zoomedIn.pressed = ControlImage.fromResourceName(resource);
-        (_a = this.view) === null || _a === undefined ? undefined : _a.controlUpdated();
+        (_a = this.view) === null || _a === void 0 ? void 0 : _a.controlUpdated();
     }
     setZoomedOutImage(resource) {
         var _a;
         this.icon.zoomedOut.default = ControlImage.fromResourceName(resource);
-        (_a = this.view) === null || _a === undefined ? undefined : _a.controlUpdated();
+        (_a = this.view) === null || _a === void 0 ? void 0 : _a.controlUpdated();
     }
     setZoomedOutPressedImage(resource) {
         var _a;
         this.icon.zoomedOut.pressed = ControlImage.fromResourceName(resource);
-        (_a = this.view) === null || _a === undefined ? undefined : _a.controlUpdated();
+        (_a = this.view) === null || _a === void 0 ? void 0 : _a.controlUpdated();
     }
 }
 __decorate$2([
     ignoreFromSerialization
-], ZoomSwitchControl.prototype, "view", undefined);
+], ZoomSwitchControl.prototype, "view", void 0);
 
 class TorchSwitchControl extends DefaultSerializeable {
     constructor() {
@@ -2650,66 +2789,66 @@ class TorchSwitchControl extends DefaultSerializeable {
     }
     get torchOffImage() {
         var _a, _b;
-        if (((_a = this.icon.off.default) === null || _a === undefined ? undefined : _a.isBase64EncodedImage()) == true) {
-            return (_b = this.icon.off.default) === null || _b === undefined ? undefined : _b.data;
+        if (((_a = this.icon.off.default) === null || _a === void 0 ? void 0 : _a.isBase64EncodedImage()) == true) {
+            return (_b = this.icon.off.default) === null || _b === void 0 ? void 0 : _b.data;
         }
         return null;
     }
     set torchOffImage(torchOffImage) {
         var _a;
         this.icon.off.default = ControlImage.fromBase64EncodedImage(torchOffImage);
-        (_a = this.view) === null || _a === undefined ? undefined : _a.controlUpdated();
+        (_a = this.view) === null || _a === void 0 ? void 0 : _a.controlUpdated();
     }
     get torchOffPressedImage() {
         var _a, _b;
-        if (((_a = this.icon.off.pressed) === null || _a === undefined ? undefined : _a.isBase64EncodedImage()) == true) {
-            return (_b = this.icon.off.pressed) === null || _b === undefined ? undefined : _b.data;
+        if (((_a = this.icon.off.pressed) === null || _a === void 0 ? void 0 : _a.isBase64EncodedImage()) == true) {
+            return (_b = this.icon.off.pressed) === null || _b === void 0 ? void 0 : _b.data;
         }
         return null;
     }
     set torchOffPressedImage(torchOffPressedImage) {
         var _a;
         this.icon.off.pressed = ControlImage.fromBase64EncodedImage(torchOffPressedImage);
-        (_a = this.view) === null || _a === undefined ? undefined : _a.controlUpdated();
+        (_a = this.view) === null || _a === void 0 ? void 0 : _a.controlUpdated();
     }
     get torchOnImage() {
         var _a, _b;
-        if (((_a = this.icon.on.default) === null || _a === undefined ? undefined : _a.isBase64EncodedImage()) == true) {
-            return (_b = this.icon.on.default) === null || _b === undefined ? undefined : _b.data;
+        if (((_a = this.icon.on.default) === null || _a === void 0 ? void 0 : _a.isBase64EncodedImage()) == true) {
+            return (_b = this.icon.on.default) === null || _b === void 0 ? void 0 : _b.data;
         }
         return null;
     }
     set torchOnImage(torchOnImage) {
         var _a;
         this.icon.on.default = ControlImage.fromBase64EncodedImage(torchOnImage);
-        (_a = this.view) === null || _a === undefined ? undefined : _a.controlUpdated();
+        (_a = this.view) === null || _a === void 0 ? void 0 : _a.controlUpdated();
     }
     get torchOnPressedImage() {
         var _a, _b;
-        if (((_a = this.icon.on.pressed) === null || _a === undefined ? undefined : _a.isBase64EncodedImage()) == true) {
-            return (_b = this.icon.on.pressed) === null || _b === undefined ? undefined : _b.data;
+        if (((_a = this.icon.on.pressed) === null || _a === void 0 ? void 0 : _a.isBase64EncodedImage()) == true) {
+            return (_b = this.icon.on.pressed) === null || _b === void 0 ? void 0 : _b.data;
         }
         return null;
     }
     setTorchOffImage(resource) {
         var _a;
         this.icon.off.default = ControlImage.fromResourceName(resource);
-        (_a = this.view) === null || _a === undefined ? undefined : _a.controlUpdated();
+        (_a = this.view) === null || _a === void 0 ? void 0 : _a.controlUpdated();
     }
     setTorchOffPressedImage(resource) {
         var _a;
         this.icon.off.pressed = ControlImage.fromResourceName(resource);
-        (_a = this.view) === null || _a === undefined ? undefined : _a.controlUpdated();
+        (_a = this.view) === null || _a === void 0 ? void 0 : _a.controlUpdated();
     }
     setTorchOnImage(resource) {
         var _a;
         this.icon.on.default = ControlImage.fromResourceName(resource);
-        (_a = this.view) === null || _a === undefined ? undefined : _a.controlUpdated();
+        (_a = this.view) === null || _a === void 0 ? void 0 : _a.controlUpdated();
     }
     setTorchOnPressedImage(resource) {
         var _a;
         this.icon.on.pressed = ControlImage.fromResourceName(resource);
-        (_a = this.view) === null || _a === undefined ? undefined : _a.controlUpdated();
+        (_a = this.view) === null || _a === void 0 ? void 0 : _a.controlUpdated();
     }
     setImageResource(resource) {
         var _a;
@@ -2717,17 +2856,17 @@ class TorchSwitchControl extends DefaultSerializeable {
         this.icon.off.pressed = ControlImage.fromResourceName(resource);
         this.icon.on.default = ControlImage.fromResourceName(resource);
         this.icon.on.pressed = ControlImage.fromResourceName(resource);
-        (_a = this.view) === null || _a === undefined ? undefined : _a.controlUpdated();
+        (_a = this.view) === null || _a === void 0 ? void 0 : _a.controlUpdated();
     }
     set torchOnPressedImage(torchOnPressedImage) {
         var _a;
         this.icon.on.pressed = ControlImage.fromBase64EncodedImage(torchOnPressedImage);
-        (_a = this.view) === null || _a === undefined ? undefined : _a.controlUpdated();
+        (_a = this.view) === null || _a === void 0 ? void 0 : _a.controlUpdated();
     }
 }
 __decorate$2([
     ignoreFromSerialization
-], TorchSwitchControl.prototype, "view", undefined);
+], TorchSwitchControl.prototype, "view", void 0);
 
 exports.VideoResolution = void 0;
 (function (VideoResolution) {
@@ -2842,7 +2981,7 @@ class CameraSettings extends DefaultSerializeable {
 }
 __decorate$2([
     ignoreFromSerialization
-], CameraSettings.prototype, "focusHiddenProperties", undefined);
+], CameraSettings.prototype, "focusHiddenProperties", void 0);
 
 const NoViewfinder = { type: 'none' };
 
@@ -2864,7 +3003,7 @@ class RectangularViewfinderAnimation extends DefaultSerializeable {
 }
 __decorate$2([
     nameForSerialization('isLooping')
-], RectangularViewfinderAnimation.prototype, "_isLooping", undefined);
+], RectangularViewfinderAnimation.prototype, "_isLooping", void 0);
 
 class RectangularViewfinder extends DefaultSerializeable {
     get sizeWithUnitAndAspect() {
@@ -2947,29 +3086,29 @@ class RectangularViewfinder extends DefaultSerializeable {
 }
 __decorate$2([
     nameForSerialization('style')
-], RectangularViewfinder.prototype, "_style", undefined);
+], RectangularViewfinder.prototype, "_style", void 0);
 __decorate$2([
     nameForSerialization('lineStyle')
-], RectangularViewfinder.prototype, "_lineStyle", undefined);
+], RectangularViewfinder.prototype, "_lineStyle", void 0);
 __decorate$2([
     nameForSerialization('dimming')
-], RectangularViewfinder.prototype, "_dimming", undefined);
+], RectangularViewfinder.prototype, "_dimming", void 0);
 __decorate$2([
     nameForSerialization('disabledDimming')
-], RectangularViewfinder.prototype, "_disabledDimming", undefined);
+], RectangularViewfinder.prototype, "_disabledDimming", void 0);
 __decorate$2([
     nameForSerialization('animation'),
     ignoreFromSerialization
-], RectangularViewfinder.prototype, "_animation", undefined);
+], RectangularViewfinder.prototype, "_animation", void 0);
 __decorate$2([
     nameForSerialization('size')
-], RectangularViewfinder.prototype, "_sizeWithUnitAndAspect", undefined);
+], RectangularViewfinder.prototype, "_sizeWithUnitAndAspect", void 0);
 __decorate$2([
     nameForSerialization('disabledColor')
-], RectangularViewfinder.prototype, "_disabledColor", undefined);
+], RectangularViewfinder.prototype, "_disabledColor", void 0);
 __decorate$2([
     ignoreFromSerialization
-], RectangularViewfinder.prototype, "eventEmitter", undefined);
+], RectangularViewfinder.prototype, "eventEmitter", void 0);
 
 exports.RectangularViewfinderStyle = void 0;
 (function (RectangularViewfinderStyle) {
@@ -2992,6 +3131,19 @@ class AimerViewfinder extends DefaultSerializeable {
         this.type = 'aimer';
         this.frameColor = this.coreDefaults.AimerViewfinder.frameColor;
         this.dotColor = this.coreDefaults.AimerViewfinder.dotColor;
+    }
+}
+
+class LaserlineViewfinder extends DefaultSerializeable {
+    get coreDefaults() {
+        return getCoreDefaults();
+    }
+    constructor() {
+        super();
+        this.type = 'laserline';
+        this.width = this.coreDefaults.LaserlineViewfinder.width;
+        this.enabledColor = this.coreDefaults.LaserlineViewfinder.enabledColor;
+        this.disabledColor = this.coreDefaults.LaserlineViewfinder.disabledColor;
     }
 }
 
@@ -3049,6 +3201,11 @@ function parseDefaults(jsonDefaults) {
         Brush: new Brush(Color
             .fromJSON(jsonDefaults.Brush.fillColor), Color
             .fromJSON(jsonDefaults.Brush.strokeColor), jsonDefaults.Brush.strokeWidth),
+        LaserlineViewfinder: {
+            width: NumberWithUnit.fromJSON(JSON.parse(jsonDefaults.LaserlineViewfinder.width)),
+            enabledColor: Color.fromJSON(jsonDefaults.LaserlineViewfinder.enabledColor),
+            disabledColor: Color.fromJSON(jsonDefaults.LaserlineViewfinder.disabledColor),
+        },
         deviceID: jsonDefaults.deviceID,
     };
     // Inject defaults to avoid a circular dependency between these classes and the defaults
@@ -3109,11 +3266,11 @@ class WaveFormVibration extends Vibration {
 }
 __decorate$2([
     nameForSerialization('timings')
-], WaveFormVibration.prototype, "_timings", undefined);
+], WaveFormVibration.prototype, "_timings", void 0);
 __decorate$2([
     ignoreFromSerializationIfNull,
     nameForSerialization('amplitudes')
-], WaveFormVibration.prototype, "_amplitudes", undefined);
+], WaveFormVibration.prototype, "_amplitudes", void 0);
 
 class Sound extends DefaultSerializeable {
     static get defaultSound() {
@@ -3130,7 +3287,7 @@ class Sound extends DefaultSerializeable {
 }
 __decorate$2([
     ignoreFromSerializationIfNull
-], Sound.prototype, "resource", undefined);
+], Sound.prototype, "resource", void 0);
 
 class FeedbackController {
     constructor(feedback) {
@@ -3157,7 +3314,7 @@ class Feedback extends DefaultSerializeable {
         return this._sound;
     }
     static fromJSON(json) {
-        return new Feedback((json === null || json === undefined ? undefined : json.vibration) ? Vibration.fromJSON(json.vibration) : null, (json === null || json === undefined ? undefined : json.sound) ? Sound.fromJSON(json.sound) : null);
+        return new Feedback((json === null || json === void 0 ? void 0 : json.vibration) ? Vibration.fromJSON(json.vibration) : null, (json === null || json === void 0 ? void 0 : json.sound) ? Sound.fromJSON(json.sound) : null);
     }
     constructor(vibration, sound) {
         super();
@@ -3177,14 +3334,14 @@ class Feedback extends DefaultSerializeable {
 __decorate$2([
     ignoreFromSerializationIfNull,
     nameForSerialization('vibration')
-], Feedback.prototype, "_vibration", undefined);
+], Feedback.prototype, "_vibration", void 0);
 __decorate$2([
     ignoreFromSerializationIfNull,
     nameForSerialization('sound')
-], Feedback.prototype, "_sound", undefined);
+], Feedback.prototype, "_sound", void 0);
 __decorate$2([
     ignoreFromSerialization
-], Feedback.prototype, "controller", undefined);
+], Feedback.prototype, "controller", void 0);
 
 const NoneLocationSelection = { type: 'none' };
 
@@ -3204,7 +3361,7 @@ class RadiusLocationSelection extends DefaultSerializeable {
 }
 __decorate$2([
     nameForSerialization('radius')
-], RadiusLocationSelection.prototype, "_radius", undefined);
+], RadiusLocationSelection.prototype, "_radius", void 0);
 
 class RectangularLocationSelection extends DefaultSerializeable {
     constructor() {
@@ -3266,7 +3423,7 @@ class RectangularLocationSelection extends DefaultSerializeable {
 }
 __decorate$2([
     nameForSerialization('size')
-], RectangularLocationSelection.prototype, "_sizeWithUnitAndAspect", undefined);
+], RectangularLocationSelection.prototype, "_sizeWithUnitAndAspect", void 0);
 
 class LicenseInfo extends DefaultSerializeable {
     get expiration() {
@@ -3276,7 +3433,7 @@ class LicenseInfo extends DefaultSerializeable {
 __decorate$2([
     nameForSerialization('expiration')
     // @ts-ignore
-], LicenseInfo.prototype, "_expiration", undefined);
+], LicenseInfo.prototype, "_expiration", void 0);
 
 var Expiration;
 (function (Expiration) {
@@ -3285,15 +3442,250 @@ var Expiration;
     Expiration["NotAvailable"] = "notAvailable";
 })(Expiration || (Expiration = {}));
 
+class BaseInstanceAwareNativeProxy {
+    constructor() {
+        this.eventEmitter = new EventEmitter();
+    }
+}
+
+/**
+ * JS Proxy hook to act as middleware to all the calls performed by an AdvancedNativeProxy instance
+ * This will allow AdvancedNativeProxy to call dynamically the methods defined in the interface defined
+ * as parameter in createAdvancedNativeProxy function
+ */
+const advancedInstanceAwareNativeProxyHook = {
+    /**
+     * Dynamic property getter for the AdvancedNativeProxy
+     * In order to call a native method this needs to be preceded by the `$` symbol on the name, ie `$methodName`
+     * In order to set a native event handler this needs to be preceded by `on$` prefix, ie `on$eventName`
+     * @param advancedNativeProxy
+     * @param prop
+     */
+    get(advancedNativeProxy, prop) {
+        // Important: $ and on$ are required since if they are not added all
+        // properties present on AdvancedNativeProxy will be redirected to the
+        // advancedNativeProxy._call, which will call native even for the own
+        // properties of the class
+        // All the methods with the following structure
+        // $methodName will be redirected to the special _call
+        // method on AdvancedNativeProxy
+        if (prop.startsWith("$")) {
+            if (prop in advancedNativeProxy) {
+                return advancedNativeProxy[prop];
+            }
+            return (args) => {
+                return advancedNativeProxy._call(prop.substring(1), args);
+            };
+            // All methods with the following structure
+            // on$methodName will trigger the event handler properties
+        }
+        else if (prop.startsWith("on$")) {
+            return advancedNativeProxy[prop.substring(3)];
+            // Everything else will be taken as a property
+        }
+        else {
+            return advancedNativeProxy[prop];
+        }
+    }
+};
+/**
+ * AdvancedNativeProxy will provide an easy way to communicate between native proxies
+ * and other parts of the architecture such as the controller layer
+ */
+class AdvancedInstanceAwareNativeProxy extends BaseInstanceAwareNativeProxy {
+    constructor(nativeCaller, events = []) {
+        super();
+        this.nativeCaller = nativeCaller;
+        this.events = events;
+        this.eventSubscriptions = new Map();
+        this.eventHandlers = new Map();
+        this.events.forEach((event) => __awaiter$2(this, void 0, void 0, function* () {
+            yield this._registerEvent(event);
+        }));
+        // Wrapping the AdvancedNativeProxy instance with the JS proxy hook
+        return new Proxy(this, advancedInstanceAwareNativeProxyHook);
+    }
+    dispose() {
+        return __awaiter$2(this, void 0, void 0, function* () {
+            for (const event of this.events) {
+                yield this._unregisterEvent(event);
+            }
+            this.eventSubscriptions.clear();
+            this.events = [];
+        });
+    }
+    _call(fnName, args) {
+        return this.nativeCaller.callFn(fnName, args);
+    }
+    _registerEvent(event) {
+        return __awaiter$2(this, void 0, void 0, function* () {
+            const handler = (args) => __awaiter$2(this, void 0, void 0, function* () {
+                this.eventEmitter.emit(event.nativeEventName, args);
+            });
+            const instanceHandler = (args) => __awaiter$2(this, void 0, void 0, function* () {
+                try {
+                    const hookArg = this.nativeCaller.eventHook(args);
+                    yield this[`on$${event.name}`](hookArg);
+                }
+                catch (e) {
+                    console.error(`Error while trying to execute handler for ${event.nativeEventName}`, e);
+                    throw e;
+                }
+            });
+            // Store the instance-specific handler
+            this.eventHandlers.set(event.nativeEventName, instanceHandler);
+            this.eventEmitter.on(event.nativeEventName, instanceHandler);
+            const subscription = yield this.nativeCaller.registerEvent(event.nativeEventName, handler);
+            this.eventSubscriptions.set(event.name, subscription);
+        });
+    }
+    _unregisterEvent(event) {
+        return __awaiter$2(this, void 0, void 0, function* () {
+            const subscription = this.eventSubscriptions.get(event.name);
+            yield this.nativeCaller.unregisterEvent(event.nativeEventName, subscription);
+            // Get the instance-specific handler
+            const handler = this.eventHandlers.get(event.nativeEventName);
+            if (handler) {
+                // Remove only this instance's handler
+                this.eventEmitter.off(event.nativeEventName, handler);
+                this.eventHandlers.delete(event.nativeEventName);
+            }
+            this.eventSubscriptions.delete(event.name);
+        });
+    }
+}
+/**
+ * Function to create a custom AdvancedNativeProxy. This will return an object which will provide dynamically the
+ * methods specified in the PROXY interface.
+ *
+ * The Proxy interface implemented in order to call native methods will require a special mark
+ * `$methodName` for method calls
+ * `on$methodName` for the listeners added to the events defined in eventsEnum
+ * @param nativeCaller
+ * @param eventsEnum
+ */
+function createAdvancedInstanceAwareNativeProxy(nativeCaller, eventsEnum = undefined) {
+    const eventsList = eventsEnum == null ? [] : Object.entries(eventsEnum).map(([key, value]) => ({
+        name: key,
+        nativeEventName: value
+    }));
+    return new AdvancedInstanceAwareNativeProxy(nativeCaller, eventsList);
+}
+
+/**
+ * JS Proxy hook to act as middleware to all the calls performed by an AdvancedNativeProxy instance
+ * This will allow AdvancedNativeProxy to call dynamically the methods defined in the interface defined
+ * as parameter in createAdvancedNativeProxy function
+ */
+const nativeProxyHook = {
+    /**
+     * Dynamic property getter for the AdvancedNativeProxy
+     * In order to call a native method this needs to be preceded by the `$` symbol on the name, ie `$methodName`
+     * In order to set a native event handler this needs to be preceded by `on$` prefix, ie `on$eventName`
+     * @param advancedNativeProxy
+     * @param prop
+     */
+    get(nativeProxy, prop) {
+        // Important: $ and on$ are required since if they are not added all
+        // properties present on AdvancedNativeProxy will be redirected to the
+        // advancedNativeProxy._call, which will call native even for the own
+        // properties of the class
+        // All the methods with the following structure
+        // $methodName will be redirected to the special _call
+        // method on AdvancedNativeProxy
+        if (prop.startsWith("$")) {
+            if (prop in nativeProxy) {
+                return nativeProxy[prop];
+            }
+            return (args) => {
+                return nativeProxy._call(prop.substring(1), args);
+            };
+        }
+        else {
+            return nativeProxy[prop];
+        }
+    }
+};
+class NativeProxy extends BaseInstanceAwareNativeProxy {
+    constructor(nativeCaller) {
+        super();
+        this.nativeCaller = nativeCaller;
+        this.eventSubscriptions = new Map();
+        this.eventHandlers = new Map();
+        // Create the cached handler once
+        this.cachedEventHandler = (eventName) => (args) => __awaiter$2(this, void 0, void 0, function* () {
+            this.eventEmitter.emit(eventName, args);
+        });
+        // Wrapping the NativeProxy instance with the JS proxy hook
+        return new Proxy(this, nativeProxyHook);
+    }
+    get framework() {
+        if ('framework' in this.nativeCaller) {
+            return this.nativeCaller.framework;
+        }
+        return 'unknown';
+    }
+    get frameworkVersion() {
+        if ('frameworkVersion' in this.nativeCaller) {
+            return this.nativeCaller.frameworkVersion;
+        }
+        return 'unknown';
+    }
+    subscribeForEvents(events) {
+        return __awaiter$2(this, void 0, void 0, function* () {
+            for (const event of events) {
+                yield this._registerEvent(event);
+            }
+        });
+    }
+    unsubscribeFromEvents(events) {
+        return __awaiter$2(this, void 0, void 0, function* () {
+            for (const event of events) {
+                yield this._unregisterEvent(event);
+            }
+        });
+    }
+    dispose() {
+        return __awaiter$2(this, void 0, void 0, function* () {
+            for (const nativeEventName of this.eventSubscriptions.keys()) {
+                yield this._unregisterEvent(nativeEventName);
+            }
+            this.eventSubscriptions.clear();
+        });
+    }
+    _call(fnName, args) {
+        return this.nativeCaller.callFn(fnName, args);
+    }
+    _registerEvent(event) {
+        return __awaiter$2(this, void 0, void 0, function* () {
+            const handler = this.cachedEventHandler(event);
+            const subscription = yield this.nativeCaller.registerEvent(event, handler);
+            this.eventSubscriptions.set(event, subscription);
+        });
+    }
+    _unregisterEvent(event) {
+        return __awaiter$2(this, void 0, void 0, function* () {
+            const subscription = this.eventSubscriptions.get(event);
+            yield this.nativeCaller.unregisterEvent(event, subscription);
+            this.eventSubscriptions.delete(event);
+        });
+    }
+}
+function createNativeProxy(nativeCaller) {
+    return new NativeProxy(nativeCaller);
+}
+
 createEventEmitter();
 
 var index = /*#__PURE__*/Object.freeze({
     __proto__: null,
+    AdvancedInstanceAwareNativeProxy: AdvancedInstanceAwareNativeProxy,
     AdvancedNativeProxy: AdvancedNativeProxy,
     AimerViewfinder: AimerViewfinder,
     get Anchor () { return exports.Anchor; },
     BaseController: BaseController,
     BaseDataCaptureView: BaseDataCaptureView,
+    BaseInstanceAwareNativeProxy: BaseInstanceAwareNativeProxy,
     BaseNativeProxy: BaseNativeProxy,
     BaseNewController: BaseNewController,
     Brush: Brush,
@@ -3319,6 +3711,8 @@ var index = /*#__PURE__*/Object.freeze({
     get FocusGestureStrategy () { return exports.FocusGestureStrategy; },
     get FocusRange () { return exports.FocusRange; },
     get FontFamily () { return FontFamily; },
+    FrameDataSettings: FrameDataSettings,
+    FrameDataSettingsBuilder: FrameDataSettingsBuilder,
     get FrameSourceListenerEvents () { return FrameSourceListenerEvents; },
     get FrameSourceState () { return exports.FrameSourceState; },
     HTMLElementState: HTMLElementState,
@@ -3326,10 +3720,12 @@ var index = /*#__PURE__*/Object.freeze({
     HtmlElementSize: HtmlElementSize,
     ImageBuffer: ImageBuffer,
     ImageFrameSource: ImageFrameSource,
+    LaserlineViewfinder: LaserlineViewfinder,
     LicenseInfo: LicenseInfo,
     get LogoStyle () { return exports.LogoStyle; },
     MarginsWithUnit: MarginsWithUnit,
     get MeasureUnit () { return exports.MeasureUnit; },
+    NativeProxy: NativeProxy,
     NoViewfinder: NoViewfinder,
     NoneLocationSelection: NoneLocationSelection,
     NumberWithUnit: NumberWithUnit,
@@ -3355,6 +3751,7 @@ var index = /*#__PURE__*/Object.freeze({
     ScanditIconBuilder: ScanditIconBuilder,
     get ScanditIconShape () { return ScanditIconShape; },
     get ScanditIconType () { return ScanditIconType; },
+    ScreenStateManager: ScreenStateManager,
     Size: Size,
     SizeWithAspect: SizeWithAspect,
     SizeWithUnit: SizeWithUnit,
@@ -3371,8 +3768,10 @@ var index = /*#__PURE__*/Object.freeze({
     get VideoResolution () { return exports.VideoResolution; },
     WaveFormVibration: WaveFormVibration,
     ZoomSwitchControl: ZoomSwitchControl,
+    createAdvancedInstanceAwareNativeProxy: createAdvancedInstanceAwareNativeProxy,
     createAdvancedNativeFromCtorProxy: createAdvancedNativeFromCtorProxy,
     createAdvancedNativeProxy: createAdvancedNativeProxy,
+    createNativeProxy: createNativeProxy,
     getCoreDefaults: getCoreDefaults,
     ignoreFromSerialization: ignoreFromSerialization,
     ignoreFromSerializationIfNull: ignoreFromSerializationIfNull,
@@ -3517,9 +3916,15 @@ class CordovaNativeCaller {
         this.eventRegisteredCheckList = new Set();
         this.eventHandlers = new Map();
     }
+    get framework() {
+        return 'cordova';
+    }
+    get frameworkVersion() {
+        return (window.cordova && window.cordova.version) || undefined;
+    }
     callFn(fnName, args) {
         if (this.eventRegisterFnName.includes(fnName)) {
-            this.setUpEventListener(fnName);
+            this.setUpEventListener(fnName, args);
             return Promise.resolve();
         }
         return new Promise((resolve, reject) => {
@@ -3538,11 +3943,12 @@ class CordovaNativeCaller {
         this.eventRegisteredCheckList.delete(evName);
         return Promise.resolve(undefined);
     }
-    setUpEventListener(subscriptionFnName) {
-        if (!this.areEventsRegistered) {
-            this.cordovaExec(this.notifyListeners.bind(this), null, subscriptionFnName, null);
-            this.eventRegisteredCheckList.add(subscriptionFnName);
+    setUpEventListener(subscriptionFnName, args) {
+        if (this.eventRegisteredCheckList.has(subscriptionFnName)) {
+            return;
         }
+        this.cordovaExec(this.notifyListeners.bind(this), null, subscriptionFnName, [args]);
+        this.eventRegisteredCheckList.add(subscriptionFnName);
     }
     notifyListeners(ev) {
         if (ev == null) {
@@ -3561,124 +3967,6 @@ function createCordovaNativeCaller(cordovaExec, pluginName, eventRegisterFnName)
     return new CordovaNativeCaller(cordovaExec, pluginName, eventRegisterFnName);
 }
 
-class NativeCameraProxy extends BaseNativeProxy {
-    static get cordovaExec() {
-        return Cordova.exec;
-    }
-    getFrame(frameId) {
-        return new Promise((resolve, reject) => {
-            NativeCameraProxy.cordovaExec(resolve, reject, CordovaFunction.GetFrame, [frameId]);
-        });
-    }
-    getCurrentCameraState(_position) {
-        return new Promise((resolve, reject) => {
-            NativeCameraProxy.cordovaExec(resolve, reject, CordovaFunction.GetCurrentCameraState, null);
-        });
-    }
-    isTorchAvailable(position) {
-        return new Promise((resolve, reject) => {
-            NativeCameraProxy.cordovaExec(resolve, reject, CordovaFunction.GetIsTorchAvailable, [position]);
-        });
-    }
-    switchCameraToDesiredState(desiredStateJson) {
-        return new Promise((resolve, reject) => {
-            NativeCameraProxy.cordovaExec(resolve, reject, CordovaFunction.SwitchCameraToDesiredState, [desiredStateJson]);
-        });
-    }
-    registerListenerForCameraEvents() {
-        NativeCameraProxy.cordovaExec(this.notifyListeners.bind(this), null, CordovaFunction.SubscribeFrameSourceListener, null);
-    }
-    unregisterListenerForCameraEvents() {
-        return new Promise((resolve, reject) => {
-            NativeCameraProxy.cordovaExec(resolve, reject, CordovaFunction.UnsubscribeFrameSourceListener, null);
-        });
-    }
-    notifyListeners(event) {
-        if (!event) {
-            // The event could be undefined/null in case the plugin result did not pass a "message",
-            // which could happen e.g. in case of "ok" results, which could signal e.g. successful
-            // listener subscriptions.
-            return;
-        }
-        switch (event.name) {
-            case FrameSourceListenerEvents.didChangeState:
-                this.eventEmitter.emit(FrameSourceListenerEvents.didChangeState, event.data);
-                break;
-        }
-    }
-}
-
-class NativeDataCaptureContextProxy extends BaseNativeProxy {
-    static get cordovaExec() {
-        return Cordova.exec;
-    }
-    get framework() {
-        return 'cordova';
-    }
-    get frameworkVersion() {
-        return (window.cordova && window.cordova.version) || undefined;
-    }
-    contextFromJSON(contextJson) {
-        return __awaiter$1(this, void 0, void 0, function* () {
-            return new Promise((resolve, reject) => {
-                NativeDataCaptureContextProxy.cordovaExec(resolve, reject, CordovaFunction.ContextFromJSON, [JSON.parse(contextJson)]);
-            });
-        });
-    }
-    updateContextFromJSON(contextJson) {
-        return new Promise((resolve, reject) => {
-            NativeDataCaptureContextProxy.cordovaExec(resolve, reject, CordovaFunction.UpdateContextFromJSON, [JSON.parse(contextJson)]);
-        });
-    }
-    dispose() {
-        NativeDataCaptureContextProxy.cordovaExec(null, null, CordovaFunction.DisposeContext, null);
-    }
-    registerListenerForDataCaptureContext() {
-        NativeDataCaptureContextProxy.cordovaExec(this.notifyListeners.bind(this), null, CordovaFunction.SubscribeContextListener, null);
-    }
-    addModeToContext(modeJson) {
-        return new Promise((resolve, reject) => {
-            NativeDataCaptureContextProxy.cordovaExec(resolve, reject, CordovaFunction.AddModeToContext, [modeJson]);
-        });
-    }
-    removeModeFromContext(modeJson) {
-        return new Promise((resolve, reject) => {
-            NativeDataCaptureContextProxy.cordovaExec(resolve, reject, CordovaFunction.RemoveModeFromContext, [modeJson]);
-        });
-    }
-    removeAllModesFromContext() {
-        return new Promise((resolve, reject) => {
-            NativeDataCaptureContextProxy.cordovaExec(resolve, reject, CordovaFunction.RemoveAllModesFromContext, null);
-        });
-    }
-    unregisterListenerForDataCaptureContext() {
-        return new Promise((resolve, reject) => {
-            NativeDataCaptureContextProxy.cordovaExec(resolve, reject, CordovaFunction.UnsubscribeContextListener, null);
-        });
-    }
-    getOpenSourceSoftwareLicenseInfo() {
-        return new Promise((resolve, reject) => {
-            NativeDataCaptureContextProxy.cordovaExec(resolve, reject, CordovaFunction.GetOpenSourceSoftwareLicenseInfo, null);
-        });
-    }
-    notifyListeners(event) {
-        if (!event) {
-            // The event could be undefined/null in case the plugin result did not pass a "message",
-            // which could happen e.g. in case of "ok" results, which could signal e.g. successful
-            // listener subscriptions.
-            return;
-        }
-        switch (event.name) {
-            case DataCaptureContextEvents.didChangeStatus:
-                this.eventEmitter.emit(DataCaptureContextEvents.didChangeStatus, event.data);
-                break;
-            case DataCaptureContextEvents.didStartObservingContext:
-                this.eventEmitter.emit(DataCaptureContextEvents.didStartObservingContext);
-                break;
-        }
-    }
-}
-
 class NativeFeedbackProxy extends BaseNativeProxy {
     static get cordovaExec() {
         return Cordova.exec;
@@ -3691,21 +3979,21 @@ class NativeFeedbackProxy extends BaseNativeProxy {
 }
 
 class NativeDataCaptureViewProxy extends BaseNativeProxy {
-    viewPointForFramePoint(pointJson) {
+    viewPointForFramePoint({ viewId, pointJson }) {
         return new Promise((resolve, reject) => {
-            NativeDataCaptureViewProxy.cordovaExec(resolve, reject, CordovaFunction.ViewPointForFramePoint, [pointJson]);
+            NativeDataCaptureViewProxy.cordovaExec(resolve, reject, CordovaFunction.ViewPointForFramePoint, [{ viewId: viewId, point: pointJson }]);
         });
     }
-    viewQuadrilateralForFrameQuadrilateral(quadrilateralJson) {
+    viewQuadrilateralForFrameQuadrilateral({ viewId, quadrilateralJson }) {
         return new Promise((resolve, reject) => {
-            NativeDataCaptureViewProxy.cordovaExec(resolve, reject, CordovaFunction.ViewQuadrilateralForFrameQuadrilateral, [quadrilateralJson]);
+            NativeDataCaptureViewProxy.cordovaExec(resolve, reject, CordovaFunction.ViewQuadrilateralForFrameQuadrilateral, [{ viewId: viewId, quadrilateral: quadrilateralJson }]);
         });
     }
-    registerListenerForViewEvents() {
-        NativeDataCaptureViewProxy.cordovaExec(this.notifyListeners.bind(this), null, CordovaFunction.SubscribeViewListener, null);
+    registerListenerForViewEvents(viewId) {
+        NativeDataCaptureViewProxy.cordovaExec(this.notifyListeners.bind(this), null, CordovaFunction.SubscribeViewListener, [viewId]);
     }
-    unregisterListenerForViewEvents() {
-        NativeDataCaptureViewProxy.cordovaExec(null, null, CordovaFunction.UnsubscribeViewListener, null);
+    unregisterListenerForViewEvents(viewId) {
+        NativeDataCaptureViewProxy.cordovaExec(null, null, CordovaFunction.UnsubscribeViewListener, [viewId]);
     }
     setPositionAndSize(top, left, width, height, shouldBeUnderWebView) {
         return new Promise((resolve, reject) => {
@@ -3732,9 +4020,9 @@ class NativeDataCaptureViewProxy extends BaseNativeProxy {
             NativeDataCaptureViewProxy.cordovaExec(resolve, reject, CordovaFunction.UpdateDataCaptureView, [viewJson]);
         });
     }
-    removeView() {
+    removeView(viewId) {
         return new Promise((resolve, reject) => {
-            NativeDataCaptureViewProxy.cordovaExec(resolve, reject, CordovaFunction.RemoveDataCaptureView, null);
+            NativeDataCaptureViewProxy.cordovaExec(resolve, reject, CordovaFunction.RemoveDataCaptureView, [viewId]);
         });
     }
     static get cordovaExec() {
@@ -3793,21 +4081,22 @@ class NativeImageFrameSourceProxy extends BaseNativeProxy {
 }
 
 function initCoreProxy() {
-    FactoryMaker.bindInstance('DataCaptureContextProxy', new NativeDataCaptureContextProxy());
     FactoryMaker.bindInstance('FeedbackProxy', new NativeFeedbackProxy());
     FactoryMaker.bindInstance('ImageFrameSourceProxy', new NativeImageFrameSourceProxy());
     FactoryMaker.bindInstance('DataCaptureViewProxy', new NativeDataCaptureViewProxy());
-    FactoryMaker.bindInstance('CameraProxy', new NativeCameraProxy());
+    FactoryMaker.bindLazyInstance('DataCaptureContextProxy', () => {
+        const caller = createCordovaNativeCaller(Cordova.exec, Cordova.pluginName, ['subscribeContextListener']);
+        return createNativeProxy(caller);
+    });
+    FactoryMaker.bindLazyInstance('CameraProxy', () => {
+        const caller = createCordovaNativeCaller(Cordova.exec, Cordova.pluginName, ['registerListenerForCameraEvents']);
+        return createNativeProxy(caller);
+    });
 }
 
 var CordovaFunction;
 (function (CordovaFunction) {
     CordovaFunction["GetDefaults"] = "getDefaults";
-    CordovaFunction["ContextFromJSON"] = "contextFromJSON";
-    CordovaFunction["DisposeContext"] = "disposeContext";
-    CordovaFunction["UpdateContextFromJSON"] = "updateContextFromJSON";
-    CordovaFunction["SubscribeContextListener"] = "subscribeContextListener";
-    CordovaFunction["UnsubscribeContextListener"] = "unsubscribeContextListener";
     CordovaFunction["SubscribeFrameSourceListener"] = "subscribeFrameSourceListener";
     CordovaFunction["UnsubscribeFrameSourceListener"] = "unsubscribeFrameSourceListener";
     CordovaFunction["SetViewPositionAndSize"] = "setViewPositionAndSize";
@@ -3824,13 +4113,9 @@ var CordovaFunction;
     CordovaFunction["EmitFeedback"] = "emitFeedback";
     CordovaFunction["SubscribeVolumeButtonObserver"] = "subscribeVolumeButtonObserver";
     CordovaFunction["UnsubscribeVolumeButtonObserver"] = "unsubscribeVolumeButtonObserver";
-    CordovaFunction["AddModeToContext"] = "addModeToContext";
-    CordovaFunction["RemoveModeFromContext"] = "removeModeFromContext";
-    CordovaFunction["RemoveAllModesFromContext"] = "removeAllModesFromContext";
     CordovaFunction["CreateDataCaptureView"] = "createDataCaptureView";
     CordovaFunction["UpdateDataCaptureView"] = "updateDataCaptureView";
     CordovaFunction["RemoveDataCaptureView"] = "removeDataCaptureView";
-    CordovaFunction["GetOpenSourceSoftwareLicenseInfo"] = "getOpenSourceSoftwareLicenseInfo";
 })(CordovaFunction || (CordovaFunction = {}));
 // tslint:disable-next-line:variable-name
 const Cordova = {
@@ -3950,13 +4235,13 @@ class Range extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('minimum')
-], Range.prototype, "_minimum", undefined);
+], Range.prototype, "_minimum", void 0);
 __decorate([
     nameForSerialization('maximum')
-], Range.prototype, "_maximum", undefined);
+], Range.prototype, "_maximum", void 0);
 __decorate([
     nameForSerialization('step')
-], Range.prototype, "_step", undefined);
+], Range.prototype, "_step", void 0);
 
 var CompositeType;
 (function (CompositeType) {
@@ -4006,13 +4291,13 @@ class SymbologySettings extends DefaultSerializeable {
 }
 __decorate([
     ignoreFromSerialization
-], SymbologySettings.prototype, "_symbology", undefined);
+], SymbologySettings.prototype, "_symbology", void 0);
 __decorate([
     nameForSerialization('enabled')
-], SymbologySettings.prototype, "isEnabled", undefined);
+], SymbologySettings.prototype, "isEnabled", void 0);
 __decorate([
     nameForSerialization('colorInvertedEnabled')
-], SymbologySettings.prototype, "isColorInvertedEnabled", undefined);
+], SymbologySettings.prototype, "isColorInvertedEnabled", void 0);
 
 class ArucoDictionary {
     constructor() {
@@ -4034,13 +4319,13 @@ class ArucoDictionary {
 }
 __decorate([
     nameForSerialization('preset')
-], ArucoDictionary.prototype, "_preset", undefined);
+], ArucoDictionary.prototype, "_preset", void 0);
 __decorate([
     nameForSerialization('markers')
-], ArucoDictionary.prototype, "_markers", undefined);
+], ArucoDictionary.prototype, "_markers", void 0);
 __decorate([
     nameForSerialization('markerSize')
-], ArucoDictionary.prototype, "_markerSize", undefined);
+], ArucoDictionary.prototype, "_markerSize", void 0);
 
 var ArucoDictionaryPreset;
 (function (ArucoDictionaryPreset) {
@@ -4069,10 +4354,10 @@ class ArucoMarker extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('markerData')
-], ArucoMarker.prototype, "_markerData", undefined);
+], ArucoMarker.prototype, "_markerData", void 0);
 __decorate([
     nameForSerialization('markerSize')
-], ArucoMarker.prototype, "_markerSize", undefined);
+], ArucoMarker.prototype, "_markerSize", void 0);
 
 function getBarcodeDefaults() {
     return FactoryMaker.getInstance('BarcodeDefaults');
@@ -4082,8 +4367,8 @@ function getBarcodeCaptureDefaults() {
     return FactoryMaker.getInstance('BarcodeCaptureDefaults');
 }
 
-function getBarcodeCheckDefaults() {
-    return FactoryMaker.getInstance('BarcodeCheckDefaults');
+function getBarcodeArDefaults() {
+    return FactoryMaker.getInstance('BarcodeArDefaults');
 }
 
 function getBarcodeSelectionDefaults() {
@@ -4113,7 +4398,7 @@ class BarcodeCountFeedback extends DefaultSerializeable {
     }
     updateFeedback() {
         var _a;
-        (_a = this.listenerController) === null || _a === undefined ? undefined : _a.updateFeedback(JSON.stringify(this.toJSON()));
+        (_a = this.controller) === null || _a === void 0 ? void 0 : _a.updateFeedback(JSON.stringify(this.toJSON()));
     }
     static fromJSON(json) {
         const success = Feedback.fromJSON(json.success);
@@ -4125,7 +4410,7 @@ class BarcodeCountFeedback extends DefaultSerializeable {
     }
     constructor(success, error) {
         super();
-        this.listenerController = null;
+        this.controller = null;
         this._success = BarcodeCountFeedback.barcodeCountDefaults.Feedback.success;
         this._failure = BarcodeCountFeedback.barcodeCountDefaults.Feedback.failure;
         this.success = success;
@@ -4134,16 +4419,162 @@ class BarcodeCountFeedback extends DefaultSerializeable {
 }
 __decorate([
     ignoreFromSerialization
-], BarcodeCountFeedback.prototype, "listenerController", undefined);
+], BarcodeCountFeedback.prototype, "controller", void 0);
 __decorate([
     nameForSerialization('success')
-], BarcodeCountFeedback.prototype, "_success", undefined);
+], BarcodeCountFeedback.prototype, "_success", void 0);
 __decorate([
     nameForSerialization('failure')
-], BarcodeCountFeedback.prototype, "_failure", undefined);
+], BarcodeCountFeedback.prototype, "_failure", void 0);
 __decorate([
     ignoreFromSerialization
 ], BarcodeCountFeedback, "barcodeCountDefaults", null);
+
+class BarcodeCount extends DefaultSerializeable {
+    constructor() {
+        super(...arguments);
+        this.type = 'barcodeCount';
+        this._feedback = BarcodeCountFeedback.default;
+        this._isEnabled = true;
+        this._hasListeners = false;
+        this.listeners = [];
+        this._additionalBarcodes = [];
+        this.privateContext = null;
+        this._controller = null;
+    }
+    get isEnabled() {
+        return this._isEnabled;
+    }
+    set isEnabled(isEnabled) {
+        var _a;
+        this._isEnabled = isEnabled;
+        (_a = this.controller) === null || _a === void 0 ? void 0 : _a.setModeEnabledState(isEnabled);
+    }
+    get context() {
+        return this._context;
+    }
+    get feedback() {
+        return this._feedback;
+    }
+    set feedback(feedback) {
+        var _a;
+        this._feedback = feedback;
+        this._feedback.controller = this.controller;
+        (_a = this.controller) === null || _a === void 0 ? void 0 : _a.updateFeedback(JSON.stringify(feedback.toJSON()));
+    }
+    get _context() {
+        return this.privateContext;
+    }
+    set _context(newContext) {
+        this.privateContext = newContext;
+    }
+    get controller() {
+        return this._controller;
+    }
+    set controller(newController) {
+        this._controller = newController;
+        this._feedback.controller = this.controller;
+    }
+    static forContext(context, settings) {
+        const barcodeCount = new BarcodeCount();
+        barcodeCount.settings = settings;
+        return barcodeCount;
+    }
+    static get barcodeCountDefaults() {
+        return getBarcodeCountDefaults();
+    }
+    applySettings(settings) {
+        this.settings = settings;
+        return this.didChange();
+    }
+    addListener(listener) {
+        this.checkAndSubscribeListeners();
+        if (this.listeners.includes(listener)) {
+            return;
+        }
+        this.listeners.push(listener);
+        this._hasListeners = this.listeners.length > 0;
+    }
+    checkAndSubscribeListeners() {
+        var _a;
+        if (this.listeners.length === 0) {
+            (_a = this.controller) === null || _a === void 0 ? void 0 : _a.registerModeListener();
+        }
+    }
+    removeListener(listener) {
+        if (!this.listeners.includes(listener)) {
+            return;
+        }
+        this.listeners.splice(this.listeners.indexOf(listener));
+        this.checkAndUnsubscribeListeners();
+        this._hasListeners = this.listeners.length > 0;
+    }
+    checkAndUnsubscribeListeners() {
+        var _a;
+        if (this.listeners.length === 0) {
+            (_a = this.controller) === null || _a === void 0 ? void 0 : _a.removeModeListener();
+        }
+    }
+    reset() {
+        var _a, _b;
+        return (_b = (_a = this.controller) === null || _a === void 0 ? void 0 : _a.reset()) !== null && _b !== void 0 ? _b : Promise.resolve();
+    }
+    startScanningPhase() {
+        var _a;
+        (_a = this.controller) === null || _a === void 0 ? void 0 : _a.startScanningPhase();
+    }
+    endScanningPhase() {
+        var _a;
+        (_a = this.controller) === null || _a === void 0 ? void 0 : _a.endScanningPhase();
+    }
+    setBarcodeCountCaptureList(barcodeCountCaptureList) {
+        var _a;
+        (_a = this.controller) === null || _a === void 0 ? void 0 : _a.setBarcodeCountCaptureList(barcodeCountCaptureList);
+    }
+    setAdditionalBarcodes(barcodes) {
+        this._additionalBarcodes = barcodes;
+        return this.didChange();
+    }
+    clearAdditionalBarcodes() {
+        this._additionalBarcodes = [];
+        return this.didChange();
+    }
+    static get recommendedCameraSettings() {
+        return BarcodeCount.barcodeCountDefaults.RecommendedCameraSettings;
+    }
+    didChange() {
+        var _a, _b;
+        return (_b = (_a = this.controller) === null || _a === void 0 ? void 0 : _a.updateMode()) !== null && _b !== void 0 ? _b : Promise.resolve();
+    }
+    unsubscribeNativeListeners() {
+        var _a;
+        (_a = this.controller) === null || _a === void 0 ? void 0 : _a.removeModeListener();
+    }
+}
+__decorate([
+    nameForSerialization('feedback')
+], BarcodeCount.prototype, "_feedback", void 0);
+__decorate([
+    nameForSerialization('isEnabled')
+], BarcodeCount.prototype, "_isEnabled", void 0);
+__decorate([
+    nameForSerialization('hasListeners')
+], BarcodeCount.prototype, "_hasListeners", void 0);
+__decorate([
+    ignoreFromSerialization
+], BarcodeCount.prototype, "listeners", void 0);
+__decorate([
+    nameForSerialization('additionalBarcodes')
+], BarcodeCount.prototype, "_additionalBarcodes", void 0);
+__decorate([
+    ignoreFromSerialization
+], BarcodeCount.prototype, "privateContext", void 0);
+__decorate([
+    ignoreFromSerialization
+], BarcodeCount.prototype, "_controller", void 0);
+__decorate([
+    ignoreFromSerialization
+], BarcodeCount, "barcodeCountDefaults", null);
 
 class BarcodeCountCaptureListSession extends DefaultSerializeable {
     get correctBarcodes() {
@@ -4166,12 +4597,12 @@ class BarcodeCountCaptureListSession extends DefaultSerializeable {
     }
     static fromJSON(json) {
         var _a, _b, _c, _d, _e, _f;
-        const correctBarcodes = (_a = json.correctBarcodes) !== null && _a !== undefined ? _a : [];
-        const wrongBarcodes = (_b = json.wrongBarcodes) !== null && _b !== undefined ? _b : [];
-        const missingBarcodes = (_c = json.missingBarcodes) !== null && _c !== undefined ? _c : [];
-        const additionalBarcodes = (_d = json.additionalBarcodes) !== null && _d !== undefined ? _d : [];
-        const acceptedBarcodes = (_e = json.acceptedBarcodes) !== null && _e !== undefined ? _e : [];
-        const rejectedBarcodes = (_f = json.rejectedBarcodes) !== null && _f !== undefined ? _f : [];
+        const correctBarcodes = (_a = json.correctBarcodes) !== null && _a !== void 0 ? _a : [];
+        const wrongBarcodes = (_b = json.wrongBarcodes) !== null && _b !== void 0 ? _b : [];
+        const missingBarcodes = (_c = json.missingBarcodes) !== null && _c !== void 0 ? _c : [];
+        const additionalBarcodes = (_d = json.additionalBarcodes) !== null && _d !== void 0 ? _d : [];
+        const acceptedBarcodes = (_e = json.acceptedBarcodes) !== null && _e !== void 0 ? _e : [];
+        const rejectedBarcodes = (_f = json.rejectedBarcodes) !== null && _f !== void 0 ? _f : [];
         return new BarcodeCountCaptureListSession({
             correctBarcodes,
             wrongBarcodes,
@@ -4193,22 +4624,33 @@ class BarcodeCountCaptureListSession extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('correctBarcodes')
-], BarcodeCountCaptureListSession.prototype, "_correctBarcodes", undefined);
+], BarcodeCountCaptureListSession.prototype, "_correctBarcodes", void 0);
 __decorate([
     nameForSerialization('wrongBarcodes')
-], BarcodeCountCaptureListSession.prototype, "_wrongBarcodes", undefined);
+], BarcodeCountCaptureListSession.prototype, "_wrongBarcodes", void 0);
 __decorate([
     nameForSerialization('missingBarcodes')
-], BarcodeCountCaptureListSession.prototype, "_missingBarcodes", undefined);
+], BarcodeCountCaptureListSession.prototype, "_missingBarcodes", void 0);
 __decorate([
     nameForSerialization('additionalBarcodes')
-], BarcodeCountCaptureListSession.prototype, "_additionalBarcodes", undefined);
+], BarcodeCountCaptureListSession.prototype, "_additionalBarcodes", void 0);
 __decorate([
     nameForSerialization('acceptedBarcodes')
-], BarcodeCountCaptureListSession.prototype, "_acceptedBarcodes", undefined);
+], BarcodeCountCaptureListSession.prototype, "_acceptedBarcodes", void 0);
 __decorate([
     nameForSerialization('rejectedBarcodes')
-], BarcodeCountCaptureListSession.prototype, "_rejectedBarcodes", undefined);
+], BarcodeCountCaptureListSession.prototype, "_rejectedBarcodes", void 0);
+
+var BarcodeCountViewStyle;
+(function (BarcodeCountViewStyle) {
+    BarcodeCountViewStyle["Icon"] = "icon";
+    BarcodeCountViewStyle["Dot"] = "dot";
+})(BarcodeCountViewStyle || (BarcodeCountViewStyle = {}));
+
+var BarcodeFilterHighlightType;
+(function (BarcodeFilterHighlightType) {
+    BarcodeFilterHighlightType["Brush"] = "brush";
+})(BarcodeFilterHighlightType || (BarcodeFilterHighlightType = {}));
 
 class EncodingRange {
     get ianaName() { return this._ianaName; }
@@ -4286,46 +4728,46 @@ class Barcode extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('symbology')
-], Barcode.prototype, "_symbology", undefined);
+], Barcode.prototype, "_symbology", void 0);
 __decorate([
     nameForSerialization('data')
-], Barcode.prototype, "_data", undefined);
+], Barcode.prototype, "_data", void 0);
 __decorate([
     nameForSerialization('rawData')
-], Barcode.prototype, "_rawData", undefined);
+], Barcode.prototype, "_rawData", void 0);
 __decorate([
     nameForSerialization('compositeData')
-], Barcode.prototype, "_compositeData", undefined);
+], Barcode.prototype, "_compositeData", void 0);
 __decorate([
     nameForSerialization('compositeRawData')
-], Barcode.prototype, "_compositeRawData", undefined);
+], Barcode.prototype, "_compositeRawData", void 0);
 __decorate([
     nameForSerialization('addOnData')
-], Barcode.prototype, "_addOnData", undefined);
+], Barcode.prototype, "_addOnData", void 0);
 __decorate([
     nameForSerialization('encodingRanges')
-], Barcode.prototype, "_encodingRanges", undefined);
+], Barcode.prototype, "_encodingRanges", void 0);
 __decorate([
     nameForSerialization('location')
-], Barcode.prototype, "_location", undefined);
+], Barcode.prototype, "_location", void 0);
 __decorate([
     nameForSerialization('isGS1DataCarrier')
-], Barcode.prototype, "_isGS1DataCarrier", undefined);
+], Barcode.prototype, "_isGS1DataCarrier", void 0);
 __decorate([
     nameForSerialization('compositeFlag')
-], Barcode.prototype, "_compositeFlag", undefined);
+], Barcode.prototype, "_compositeFlag", void 0);
 __decorate([
     nameForSerialization('isColorInverted')
-], Barcode.prototype, "_isColorInverted", undefined);
+], Barcode.prototype, "_isColorInverted", void 0);
 __decorate([
     nameForSerialization('symbolCount')
-], Barcode.prototype, "_symbolCount", undefined);
+], Barcode.prototype, "_symbolCount", void 0);
 __decorate([
     nameForSerialization('frameID')
-], Barcode.prototype, "_frameID", undefined);
+], Barcode.prototype, "_frameID", void 0);
 __decorate([
     nameForSerialization('structuredAppendData')
-], Barcode.prototype, "_structuredAppendData", undefined);
+], Barcode.prototype, "_structuredAppendData", void 0);
 
 var BatterySavingMode;
 (function (BatterySavingMode) {
@@ -4382,10 +4824,10 @@ class TargetBarcode extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('data')
-], TargetBarcode.prototype, "_data", undefined);
+], TargetBarcode.prototype, "_data", void 0);
 __decorate([
     nameForSerialization('quantity')
-], TargetBarcode.prototype, "_quantity", undefined);
+], TargetBarcode.prototype, "_quantity", void 0);
 
 class TrackedBarcode {
     get barcode() { return this._barcode; }
@@ -4445,24 +4887,25 @@ class BarcodeSpatialGrid extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('rows')
-], BarcodeSpatialGrid.prototype, "_rows", undefined);
+], BarcodeSpatialGrid.prototype, "_rows", void 0);
 __decorate([
     nameForSerialization('columns')
-], BarcodeSpatialGrid.prototype, "_columns", undefined);
+], BarcodeSpatialGrid.prototype, "_columns", void 0);
 __decorate([
     nameForSerialization('grid')
-], BarcodeSpatialGrid.prototype, "_grid", undefined);
+], BarcodeSpatialGrid.prototype, "_grid", void 0);
 
-class BarcodeCountSessionController extends BaseController {
-    constructor() {
+class BarcodeCountSessionController extends BaseNewController {
+    constructor(viewId) {
         super('BarcodeCountSessionProxy');
+        this.viewId = viewId;
     }
     resetSession() {
-        return this._proxy.$resetSession();
+        return this._proxy.$resetBarcodeCountSession({ viewId: this.viewId });
     }
     getSpatialMap() {
-        return __awaiter(this, undefined, undefined, function* () {
-            const result = yield this._proxy.$getSpatialMap();
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield this._proxy.$getBarcodeCountSpatialMap({ viewId: this.viewId });
             if (result) {
                 const payload = JSON.parse(result.data);
                 return BarcodeSpatialGrid.fromJSON(payload);
@@ -4470,8 +4913,8 @@ class BarcodeCountSessionController extends BaseController {
         });
     }
     getSpatialMapWithHints(expectedNumberOfRows, expectedNumberOfColumns) {
-        return __awaiter(this, undefined, undefined, function* () {
-            const result = yield this._proxy.$getSpatialMapWithHints({ expectedNumberOfRows, expectedNumberOfColumns });
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield this._proxy.$getBarcodeCountSpatialMapWithHints({ viewId: this.viewId, expectedNumberOfRows, expectedNumberOfColumns });
             if (result) {
                 const payload = JSON.parse(result.data);
                 return BarcodeSpatialGrid.fromJSON(payload);
@@ -4484,16 +4927,16 @@ class BarcodeCountSession extends DefaultSerializeable {
     static fromJSON(json) {
         var _a;
         const sessionJson = JSON.parse(json.session);
-        const session = new BarcodeCountSession();
+        const session = new BarcodeCountSession(json.viewId);
         session._frameSequenceID = sessionJson.frameSequenceId;
         session._additionalBarcodes = sessionJson.additionalBarcodes;
         session._recognizedBarcodes = sessionJson.recognizedBarcodes.map(Barcode.fromJSON);
-        session.frameId = (_a = json.frameId) !== null && _a !== undefined ? _a : '';
+        session.frameId = (_a = json.frameId) !== null && _a !== void 0 ? _a : '';
         return session;
     }
-    constructor() {
+    constructor(viewId) {
         super();
-        this.sessionController = new BarcodeCountSessionController();
+        this.sessionController = new BarcodeCountSessionController(viewId);
     }
     get recognizedBarcodes() {
         return this._recognizedBarcodes;
@@ -4508,256 +4951,33 @@ class BarcodeCountSession extends DefaultSerializeable {
         return this.sessionController.resetSession();
     }
     getSpatialMap() {
-        return __awaiter(this, undefined, undefined, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             var _a;
-            return (_a = yield this.sessionController.getSpatialMap()) !== null && _a !== undefined ? _a : null;
+            return (_a = yield this.sessionController.getSpatialMap()) !== null && _a !== void 0 ? _a : null;
         });
     }
     getSpatialMapWithHints(expectedNumberOfRows, expectedNumberOfColumns) {
-        return __awaiter(this, undefined, undefined, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             var _a;
-            return (_a = yield this.sessionController.getSpatialMapWithHints(expectedNumberOfRows, expectedNumberOfColumns)) !== null && _a !== undefined ? _a : null;
+            return (_a = yield this.sessionController.getSpatialMapWithHints(expectedNumberOfRows, expectedNumberOfColumns)) !== null && _a !== void 0 ? _a : null;
         });
     }
 }
 __decorate([
     nameForSerialization('recognizedBarcodes')
-], BarcodeCountSession.prototype, "_recognizedBarcodes", undefined);
+], BarcodeCountSession.prototype, "_recognizedBarcodes", void 0);
 __decorate([
     nameForSerialization('additionalBarcodes')
-], BarcodeCountSession.prototype, "_additionalBarcodes", undefined);
+], BarcodeCountSession.prototype, "_additionalBarcodes", void 0);
 __decorate([
     nameForSerialization('frameSequenceID')
-], BarcodeCountSession.prototype, "_frameSequenceID", undefined);
+], BarcodeCountSession.prototype, "_frameSequenceID", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCountSession.prototype, "sessionController", undefined);
+], BarcodeCountSession.prototype, "sessionController", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCountSession.prototype, "frameId", undefined);
-
-var BarcodeCountListenerEvents;
-(function (BarcodeCountListenerEvents) {
-    BarcodeCountListenerEvents["didUpdateSession"] = "BarcodeCountCaptureListListener.didUpdateSession";
-    BarcodeCountListenerEvents["didScan"] = "BarcodeCountListener.onScan";
-})(BarcodeCountListenerEvents || (BarcodeCountListenerEvents = {}));
-class BarcodeCountListenerController extends BaseController {
-    constructor() {
-        super('BarcodeCountListenerProxy');
-    }
-    static forBarcodeCount(barcodeCount) {
-        const controller = new BarcodeCountListenerController();
-        controller.barcodeCount = barcodeCount;
-        return controller;
-    }
-    update() {
-        const barcodeCount = this.barcodeCount.toJSON();
-        const json = JSON.stringify(barcodeCount);
-        return this._proxy.$updateBarcodeCountMode({ barcodeCountJson: json });
-    }
-    reset() {
-        return this._proxy.$resetBarcodeCount();
-    }
-    setModeEnabledState(enabled) {
-        this._proxy.$setBarcodeCountModeEnabledState({ isEnabled: enabled });
-    }
-    subscribeListener() {
-        return __awaiter(this, undefined, undefined, function* () {
-            yield this._proxy.$registerBarcodeCountListener();
-            this._proxy.on$didScan = (ev) => __awaiter(this, undefined, undefined, function* () {
-                const payload = EventDataParser.parse(ev.data);
-                if (payload === null) {
-                    console.error('BarcodeCountListenerController didScan payload is null');
-                    return;
-                }
-                const session = BarcodeCountSession.fromJSON(payload);
-                yield this.notifyListenersOfDidScanSession(session);
-                yield this._proxy.$finishBarcodeCountOnScan();
-            });
-            this._proxy.on$didUpdateSession = (ev) => __awaiter(this, undefined, undefined, function* () {
-                const payload = EventDataParser.parse(ev.data);
-                if (payload === null) {
-                    console.error('BarcodeCountListenerController.subscribeListener: didListSessionUpdate payload is null');
-                    return;
-                }
-                const session = BarcodeCountCaptureListSession
-                    .fromJSON(JSON.parse(payload.session));
-                this.notifyListenersOfDidListSessionUpdate(session);
-            });
-        });
-    }
-    unsubscribeListener() {
-        return __awaiter(this, undefined, undefined, function* () {
-            yield this._proxy.$unregisterBarcodeCountListener();
-            this._proxy.dispose();
-        });
-    }
-    startScanningPhase() {
-        this._proxy.$startBarcodeCountScanningPhase();
-    }
-    endScanningPhase() {
-        this._proxy.$endBarcodeCountScanningPhase();
-    }
-    updateFeedback(feedbackJson) {
-        this._proxy.$updateBarcodeCountFeedback({ feedbackJson });
-    }
-    setBarcodeCountCaptureList(barcodeCountCaptureList) {
-        this._barcodeCountCaptureList = barcodeCountCaptureList;
-        this._proxy.$setBarcodeCountCaptureList({ captureListJson: JSON.stringify(barcodeCountCaptureList.targetBarcodes) });
-    }
-    notifyListenersOfDidScanSession(session) {
-        return __awaiter(this, undefined, undefined, function* () {
-            const mode = this.barcodeCount;
-            for (const listener of mode.listeners) {
-                if (listener.didScan) {
-                    yield listener.didScan(this.barcodeCount, session, () => CameraController.getFrame(session.frameId));
-                }
-            }
-        });
-    }
-    notifyListenersOfDidListSessionUpdate(session) {
-        var _a;
-        const barcodeCountCaptureListListener = (_a = this._barcodeCountCaptureList) === null || _a === undefined ? undefined : _a.listener;
-        if (barcodeCountCaptureListListener && (barcodeCountCaptureListListener === null || barcodeCountCaptureListListener === undefined ? undefined : barcodeCountCaptureListListener.didUpdateSession)) {
-            barcodeCountCaptureListListener === null || barcodeCountCaptureListListener === undefined ? undefined : barcodeCountCaptureListListener.didUpdateSession(this._barcodeCountCaptureList, session);
-        }
-    }
-}
-
-class BarcodeCount extends DefaultSerializeable {
-    get isEnabled() {
-        return this._isEnabled;
-    }
-    set isEnabled(isEnabled) {
-        this._isEnabled = isEnabled;
-        this.listenerController.setModeEnabledState(isEnabled);
-    }
-    get context() {
-        return this._context;
-    }
-    get feedback() {
-        return this._feedback;
-    }
-    set feedback(feedback) {
-        this._feedback = feedback;
-        this._feedback.listenerController = this.listenerController;
-        this.listenerController.updateFeedback(JSON.stringify(feedback.toJSON()));
-    }
-    get _context() {
-        return this.privateContext;
-    }
-    set _context(newContext) {
-        this.privateContext = newContext;
-    }
-    static forContext(context, settings) {
-        const barcodeCount = new BarcodeCount();
-        barcodeCount.settings = settings;
-        return barcodeCount;
-    }
-    static get barcodeCountDefaults() {
-        return getBarcodeCountDefaults();
-    }
-    constructor() {
-        super();
-        this.type = 'barcodeCount';
-        this._feedback = BarcodeCountFeedback.default;
-        this._isEnabled = true;
-        this.listeners = [];
-        this._additionalBarcodes = [];
-        this.privateContext = null;
-        this.listenerController = BarcodeCountListenerController.forBarcodeCount(this);
-        this._feedback.listenerController = this.listenerController;
-    }
-    applySettings(settings) {
-        this.settings = settings;
-        return this.didChange();
-    }
-    addListener(listener) {
-        this.checkAndSubscribeListeners();
-        if (this.listeners.includes(listener)) {
-            return;
-        }
-        this.listeners.push(listener);
-    }
-    checkAndSubscribeListeners() {
-        if (this.listeners.length === 0) {
-            this.listenerController.subscribeListener();
-        }
-    }
-    removeListener(listener) {
-        if (!this.listeners.includes(listener)) {
-            return;
-        }
-        this.listeners.splice(this.listeners.indexOf(listener));
-        this.checkAndUnsubscribeListeners();
-    }
-    checkAndUnsubscribeListeners() {
-        if (this.listeners.length === 0) {
-            this.listenerController.unsubscribeListener();
-        }
-    }
-    reset() {
-        return this.listenerController.reset();
-    }
-    startScanningPhase() {
-        this.listenerController.startScanningPhase();
-    }
-    endScanningPhase() {
-        this.listenerController.endScanningPhase();
-    }
-    setBarcodeCountCaptureList(barcodeCountCaptureList) {
-        this.listenerController.setBarcodeCountCaptureList(barcodeCountCaptureList);
-    }
-    setAdditionalBarcodes(barcodes) {
-        this._additionalBarcodes = barcodes;
-        return this.didChange();
-    }
-    clearAdditionalBarcodes() {
-        this._additionalBarcodes = [];
-        return this.didChange();
-    }
-    static get recommendedCameraSettings() {
-        return BarcodeCount.barcodeCountDefaults.RecommendedCameraSettings;
-    }
-    didChange() {
-        return this.listenerController.update();
-    }
-    unsubscribeNativeListeners() {
-        this.listenerController.unsubscribeListener();
-    }
-}
-__decorate([
-    nameForSerialization('feedback')
-], BarcodeCount.prototype, "_feedback", undefined);
-__decorate([
-    ignoreFromSerialization
-], BarcodeCount.prototype, "_isEnabled", undefined);
-__decorate([
-    ignoreFromSerialization
-], BarcodeCount.prototype, "listeners", undefined);
-__decorate([
-    nameForSerialization('additionalBarcodes')
-], BarcodeCount.prototype, "_additionalBarcodes", undefined);
-__decorate([
-    ignoreFromSerialization
-], BarcodeCount.prototype, "privateContext", undefined);
-__decorate([
-    ignoreFromSerialization
-], BarcodeCount.prototype, "listenerController", undefined);
-__decorate([
-    ignoreFromSerialization
-], BarcodeCount, "barcodeCountDefaults", null);
-
-var BarcodeCountViewStyle;
-(function (BarcodeCountViewStyle) {
-    BarcodeCountViewStyle["Icon"] = "icon";
-    BarcodeCountViewStyle["Dot"] = "dot";
-})(BarcodeCountViewStyle || (BarcodeCountViewStyle = {}));
-
-var BarcodeFilterHighlightType;
-(function (BarcodeFilterHighlightType) {
-    BarcodeFilterHighlightType["Brush"] = "brush";
-})(BarcodeFilterHighlightType || (BarcodeFilterHighlightType = {}));
+], BarcodeCountSession.prototype, "frameId", void 0);
 
 class BarcodeCountSettings extends DefaultSerializeable {
     static get barcodeCountDefaults() {
@@ -4816,13 +5036,13 @@ class BarcodeCountSettings extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('barcodeFilterSettings')
-], BarcodeCountSettings.prototype, "_filterSettings", undefined);
+], BarcodeCountSettings.prototype, "_filterSettings", void 0);
 __decorate([
     nameForSerialization('expectOnlyUniqueBarcodes')
-], BarcodeCountSettings.prototype, "_expectsOnlyUniqueBarcodes", undefined);
+], BarcodeCountSettings.prototype, "_expectsOnlyUniqueBarcodes", void 0);
 __decorate([
     nameForSerialization('mappingEnabled')
-], BarcodeCountSettings.prototype, "_mappingEnabled", undefined);
+], BarcodeCountSettings.prototype, "_mappingEnabled", void 0);
 __decorate([
     ignoreFromSerialization
 ], BarcodeCountSettings, "barcodeCountDefaults", null);
@@ -4862,6 +5082,302 @@ __decorate([
     ignoreFromSerialization
 ], BarcodeCountToolbarSettings, "barcodeCountDefaults", null);
 
+class BarcodeCountViewEventHandlers {
+    constructor(view, barcodeCount, proxy) {
+        this.view = view;
+        this.barcodeCount = barcodeCount;
+        this.proxy = proxy;
+        // Bind all handler methods to 'this' to ensure the correct context when they are used as callbacks.
+        // Without this, 'this' would be undefined or incorrect when the methods are called by the proxy event system.
+        this.handleSingleScanButtonTapped = this.handleSingleScanButtonTapped.bind(this);
+        this.handleListButtonTapped = this.handleListButtonTapped.bind(this);
+        this.handleExitButtonTapped = this.handleExitButtonTapped.bind(this);
+        this.handleBrushForRecognizedBarcode = this.handleBrushForRecognizedBarcode.bind(this);
+        this.handleBrushForRecognizedBarcodeNotInList = this.handleBrushForRecognizedBarcodeNotInList.bind(this);
+        this.handleBrushForAcceptedBarcode = this.handleBrushForAcceptedBarcode.bind(this);
+        this.handleBrushForRejectedBarcode = this.handleBrushForRejectedBarcode.bind(this);
+        this.handleFilteredBarcodeTapped = this.handleFilteredBarcodeTapped.bind(this);
+        this.handleRecognizedBarcodeNotInListTapped = this.handleRecognizedBarcodeNotInListTapped.bind(this);
+        this.handleRecognizedBarcodeTapped = this.handleRecognizedBarcodeTapped.bind(this);
+        this.handleAcceptedBarcodeTapped = this.handleAcceptedBarcodeTapped.bind(this);
+        this.handleRejectedBarcodeTapped = this.handleRejectedBarcodeTapped.bind(this);
+        this.handleCaptureListCompleted = this.handleCaptureListCompleted.bind(this);
+        this.handleDidScan = this.handleDidScan.bind(this);
+        this.handleDidUpdateSession = this.handleDidUpdateSession.bind(this);
+    }
+    handleSingleScanButtonTapped(ev) {
+        var _a, _b;
+        const payload = EventDataParser.parse(ev.data);
+        if (payload === null) {
+            console.error('BarcodeCountViewController listButtonTapped payload is null');
+            return;
+        }
+        if (payload.viewId !== this.view.viewId) {
+            return;
+        }
+        (_b = (_a = this.view.uiListener) === null || _a === void 0 ? void 0 : _a.didTapSingleScanButton) === null || _b === void 0 ? void 0 : _b.call(_a, this.view.platformView);
+    }
+    handleListButtonTapped(ev) {
+        var _a, _b;
+        const payload = EventDataParser.parse(ev.data);
+        if (payload === null) {
+            console.error('BarcodeCountViewController listButtonTapped payload is null');
+            return;
+        }
+        if (payload.viewId !== this.view.viewId) {
+            return;
+        }
+        (_b = (_a = this.view.uiListener) === null || _a === void 0 ? void 0 : _a.didTapListButton) === null || _b === void 0 ? void 0 : _b.call(_a, this.view.platformView);
+    }
+    handleExitButtonTapped(ev) {
+        var _a, _b;
+        const payload = EventDataParser.parse(ev.data);
+        if (payload === null) {
+            console.error('BarcodeCountViewController exitButtonTapped payload is null');
+            return;
+        }
+        if (payload.viewId !== this.view.viewId) {
+            return;
+        }
+        (_b = (_a = this.view.uiListener) === null || _a === void 0 ? void 0 : _a.didTapExitButton) === null || _b === void 0 ? void 0 : _b.call(_a, this.view.platformView);
+    }
+    handleBrushForRecognizedBarcode(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('BarcodeCountViewController brushForRecognizedBarcode payload is null');
+                return;
+            }
+            if (payload.viewId !== this.view.viewId) {
+                return;
+            }
+            const trackedBarcode = TrackedBarcode
+                .fromJSON(JSON.parse(payload.trackedBarcode));
+            let brush = this.view.recognizedBrush;
+            if (this.view.listener && this.view.listener.brushForRecognizedBarcode) {
+                brush = this.view.listener.brushForRecognizedBarcode(this.view.platformView, trackedBarcode);
+            }
+            const finishPayload = this.buildTrackedBarcodeBrushPayload(trackedBarcode, brush);
+            yield this.proxy.$finishBarcodeCountBrushForRecognizedBarcode({ viewId: this.view.viewId, brushJson: finishPayload.brush, trackedBarcodeId: finishPayload.trackedBarcodeID });
+        });
+    }
+    handleBrushForRecognizedBarcodeNotInList(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('BarcodeCountViewController brushForRecognizedBarcodeNotInList payload is null');
+                return;
+            }
+            if (payload.viewId !== this.view.viewId) {
+                return;
+            }
+            const trackedBarcode = TrackedBarcode
+                .fromJSON(JSON.parse(payload.trackedBarcode));
+            let brush = this.view.notInListBrush;
+            if (this.view.listener && this.view.listener.brushForRecognizedBarcodeNotInList) {
+                brush = this.view.listener.brushForRecognizedBarcodeNotInList(this.view.platformView, trackedBarcode);
+            }
+            const finishPayload = this.buildTrackedBarcodeBrushPayload(trackedBarcode, brush);
+            yield this.proxy.$finishBarcodeCountBrushForRecognizedBarcodeNotInList({ viewId: this.view.viewId, brushJson: finishPayload.brush, trackedBarcodeId: finishPayload.trackedBarcodeID });
+        });
+    }
+    handleBrushForAcceptedBarcode(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('BarcodeCountViewController brushForAcceptedBarcode payload is null');
+                return;
+            }
+            if (payload.viewId !== this.view.viewId) {
+                return;
+            }
+            const trackedBarcode = TrackedBarcode
+                .fromJSON(JSON.parse(payload.trackedBarcode));
+            let brush = this.view.acceptedBrush;
+            if (this.view.listener && this.view.listener.brushForAcceptedBarcode) {
+                brush = this.view.listener.brushForAcceptedBarcode(this.view.platformView, trackedBarcode);
+            }
+            const finishPayload = this.buildTrackedBarcodeBrushPayload(trackedBarcode, brush);
+            yield this.proxy.$finishBarcodeCountBrushForAcceptedBarcode({ viewId: this.view.viewId, brushJson: finishPayload.brush, trackedBarcodeId: finishPayload.trackedBarcodeID });
+        });
+    }
+    handleBrushForRejectedBarcode(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('BarcodeCountViewController brushForRejectedBarcode payload is null');
+                return;
+            }
+            if (payload.viewId !== this.view.viewId) {
+                return;
+            }
+            const trackedBarcode = TrackedBarcode
+                .fromJSON(JSON.parse(payload.trackedBarcode));
+            let brush = this.view.rejectedBrush;
+            if (this.view.listener && this.view.listener.brushForRejectedBarcode) {
+                brush = this.view.listener.brushForRejectedBarcode(this.view.platformView, trackedBarcode);
+            }
+            const finishPayload = this.buildTrackedBarcodeBrushPayload(trackedBarcode, brush);
+            yield this.proxy.$finishBarcodeCountBrushForRejectedBarcode({ viewId: this.view.viewId, brushJson: finishPayload.brush, trackedBarcodeId: finishPayload.trackedBarcodeID });
+        });
+    }
+    handleFilteredBarcodeTapped(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('BarcodeCountViewController filteredBarcodeTapped payload is null');
+                return;
+            }
+            if (payload.viewId !== this.view.viewId) {
+                return;
+            }
+            const trackedBarcode = TrackedBarcode
+                .fromJSON(JSON.parse(payload.trackedBarcode));
+            if (this.view.listener && this.view.listener.didTapFilteredBarcode) {
+                this.view.listener.didTapFilteredBarcode(this.view.platformView, trackedBarcode);
+            }
+        });
+    }
+    handleRecognizedBarcodeNotInListTapped(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('BarcodeCountViewController recognizedBarcodeNotInListTapped payload is null');
+                return;
+            }
+            if (payload.viewId !== this.view.viewId) {
+                return;
+            }
+            const trackedBarcode = TrackedBarcode
+                .fromJSON(JSON.parse(payload.trackedBarcode));
+            if (this.view.listener && this.view.listener.didTapRecognizedBarcodeNotInList) {
+                this.view.listener.didTapRecognizedBarcodeNotInList(this.view.platformView, trackedBarcode);
+            }
+        });
+    }
+    handleRecognizedBarcodeTapped(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('BarcodeCountViewController recognizedBarcodeTapped payload is null');
+                return;
+            }
+            if (payload.viewId !== this.view.viewId) {
+                return;
+            }
+            const trackedBarcode = TrackedBarcode
+                .fromJSON(JSON.parse(payload.trackedBarcode));
+            if (this.view.listener && this.view.listener.didTapRecognizedBarcode) {
+                this.view.listener.didTapRecognizedBarcode(this.view.platformView, trackedBarcode);
+            }
+        });
+    }
+    handleAcceptedBarcodeTapped(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('BarcodeCountViewController acceptedBarcodeTapped payload is null');
+                return;
+            }
+            if (payload.viewId !== this.view.viewId) {
+                return;
+            }
+            const trackedBarcode = TrackedBarcode
+                .fromJSON(JSON.parse(payload.trackedBarcode));
+            if (this.view.listener && this.view.listener.didTapAcceptedBarcode) {
+                this.view.listener.didTapAcceptedBarcode(this.view.platformView, trackedBarcode);
+            }
+        });
+    }
+    handleRejectedBarcodeTapped(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('BarcodeCountViewController rejectedBarcodeTapped payload is null');
+                return;
+            }
+            if (payload.viewId !== this.view.viewId) {
+                return;
+            }
+            const trackedBarcode = TrackedBarcode
+                .fromJSON(JSON.parse(payload.trackedBarcode));
+            if (this.view.listener && this.view.listener.didTapRejectedBarcode) {
+                this.view.listener.didTapRejectedBarcode(this.view.platformView, trackedBarcode);
+            }
+        });
+    }
+    handleCaptureListCompleted(ev) {
+        const payload = EventDataParser.parse(ev.data);
+        if (payload === null) {
+            console.error('BarcodeCountViewController captureListCompleted payload is null');
+            return;
+        }
+        if (payload.viewId !== this.view.viewId) {
+            return;
+        }
+        if (this.view.listener && this.view.listener.didCompleteCaptureList) {
+            this.view.listener.didCompleteCaptureList(this.view.platformView);
+        }
+    }
+    handleDidScan(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('BarcodeCountListenerController didScan payload is null');
+                return;
+            }
+            if (payload.viewId !== this.view.viewId) {
+                return;
+            }
+            const session = BarcodeCountSession.fromJSON(payload);
+            yield this.notifyListenersOfDidScanSession(session);
+            yield this.proxy.$finishBarcodeCountOnScan({ viewId: this.view.viewId });
+        });
+    }
+    handleDidUpdateSession(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('BarcodeCountListenerController.subscribeListener: didListSessionUpdate payload is null');
+                return;
+            }
+            if (payload.viewId !== this.view.viewId) {
+                return;
+            }
+            const session = BarcodeCountCaptureListSession
+                .fromJSON(JSON.parse(payload.session));
+            this.notifyListenersOfDidListSessionUpdate(session);
+        });
+    }
+    buildTrackedBarcodeBrushPayload(trackedBarcode, brush) {
+        return {
+            trackedBarcodeID: trackedBarcode.identifier,
+            brush: brush ? JSON.stringify(brush.toJSON()) : null,
+        };
+    }
+    notifyListenersOfDidScanSession(session) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const mode = this.barcodeCount;
+            for (const listener of mode.listeners) {
+                if (listener.didScan) {
+                    yield listener.didScan(this.barcodeCount, session, () => CameraController.getFrame(session.frameId));
+                }
+            }
+        });
+    }
+    setBarcodeCountCaptureList(barcodeCountCaptureList) {
+        this._barcodeCountCaptureList = barcodeCountCaptureList;
+        this.proxy.$setBarcodeCountCaptureList({ viewId: this.view.viewId, captureListJson: JSON.stringify(barcodeCountCaptureList.targetBarcodes) });
+    }
+    notifyListenersOfDidListSessionUpdate(session) {
+        var _a;
+        const barcodeCountCaptureListListener = (_a = this._barcodeCountCaptureList) === null || _a === void 0 ? void 0 : _a.listener;
+        if (barcodeCountCaptureListListener && (barcodeCountCaptureListListener === null || barcodeCountCaptureListListener === void 0 ? void 0 : barcodeCountCaptureListListener.didUpdateSession)) {
+            barcodeCountCaptureListListener === null || barcodeCountCaptureListListener === void 0 ? void 0 : barcodeCountCaptureListListener.didUpdateSession(this._barcodeCountCaptureList, session);
+        }
+    }
+}
+
 var BarcodeCountViewEvents;
 (function (BarcodeCountViewEvents) {
     BarcodeCountViewEvents["singleScanButtonTapped"] = "BarcodeCountViewUiListener.onSingleScanButtonTapped";
@@ -4877,73 +5393,100 @@ var BarcodeCountViewEvents;
     BarcodeCountViewEvents["acceptedBarcodeTapped"] = "BarcodeCountViewListener.didTapAcceptedBarcode";
     BarcodeCountViewEvents["rejectedBarcodeTapped"] = "BarcodeCountViewListener.didTapRejectedBarcode";
     BarcodeCountViewEvents["captureListCompleted"] = "BarcodeCountViewListener.didCompleteCaptureList";
+    BarcodeCountViewEvents["didUpdateSession"] = "BarcodeCountCaptureListListener.didUpdateSession";
+    BarcodeCountViewEvents["didScan"] = "BarcodeCountListener.onScan";
 })(BarcodeCountViewEvents || (BarcodeCountViewEvents = {}));
-class BarcodeCountViewController extends BaseController {
+class BarcodeCountViewController extends BaseNewController {
     static forBarcodeCountAndBarcodeCountView(view, barcodeCount) {
         const controller = new BarcodeCountViewController({ view, barcodeCount });
-        // We call update because it returns a promise, this guarantees, that by the time
-        // we need the deserialized context, it will be set in the native layer.
+        controller.barcodeCount.controller = controller;
+        controller.initialize();
         return controller;
     }
     constructor({ view, barcodeCount }) {
         super('BarcodeCountViewProxy');
         this.view = view;
         this.barcodeCount = barcodeCount;
+        this.eventHandlers = new BarcodeCountViewEventHandlers(this.view, this.barcodeCount, this._proxy);
     }
-    initialize(autoCreateNativeView) {
-        return __awaiter(this, undefined, undefined, function* () {
-            const context = this.view.context;
-            yield context.update();
-            if (autoCreateNativeView) {
-                yield this.createView();
+    initialize() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.setupEventListeners();
+            if (this.barcodeCount._hasListeners) {
+                this.registerModeListener();
             }
-            yield this.subscribeListeners();
+            if (this.view.uiListener) {
+                this.registerUiListener();
+            }
+            if (this.view.listener) {
+                this.registerViewListener();
+            }
         });
+    }
+    registerModeListener() {
+        if (!this.isViewCreated) {
+            return;
+        }
+        this._proxy.$registerBarcodeCountListener({ viewId: this.view.viewId });
+    }
+    registerUiListener() {
+        if (!this.isViewCreated) {
+            return;
+        }
+        this._proxy.$registerBarcodeCountViewUiListener({ viewId: this.view.viewId });
+    }
+    registerViewListener() {
+        if (!this.isViewCreated) {
+            return;
+        }
+        this._proxy.$registerBarcodeCountViewListener({ viewId: this.view.viewId });
     }
     update() {
         const barcodeCountView = this.view.toJSON();
         const json = barcodeCountView.View;
-        return this._proxy.$updateBarcodeCountView({ viewJson: JSON.stringify(json) });
+        return this._proxy.$updateBarcodeCountView({ viewId: this.view.viewId, viewJson: JSON.stringify(json) });
     }
     createNativeView() {
         return this.createView();
     }
     removeNativeView() {
-        var _a, _b, _c;
-        return (_c = (_b = (_a = this._proxy).$removeBarcodeCountView) === null || _b === undefined ? undefined : _b.call(_a)) !== null && _c !== undefined ? _c : Promise.resolve();
+        var _a;
+        return (_a = this._proxy.$removeBarcodeCountView({ viewId: this.view.viewId })) !== null && _a !== void 0 ? _a : Promise.resolve();
     }
     createView() {
         const barcodeCountViewJson = this.view.toJSON();
-        return this._proxy.$createBarcodeCountView({ viewJson: JSON.stringify(barcodeCountViewJson) });
+        return this._proxy.$createBarcodeCountView({ viewId: this.view.viewId, viewJson: JSON.stringify(barcodeCountViewJson) });
     }
     setUiListener(listener) {
-        return __awaiter(this, undefined, undefined, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             if (listener != null) {
-                yield this._proxy.$registerBarcodeCountViewUiListener();
+                this.registerUiListener();
             }
             else {
-                yield this._proxy.$unregisterBarcodeCountViewUiListener();
+                yield this._proxy.$unregisterBarcodeCountViewUiListener({ viewId: this.view.viewId });
             }
         });
     }
     setViewListener(listener) {
-        return __awaiter(this, undefined, undefined, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             if (listener != null) {
-                yield this._proxy.$registerBarcodeCountViewListener();
+                this.registerViewListener();
             }
             else {
-                yield this._proxy.$unregisterBarcodeCountViewListener();
+                yield this._proxy.$unregisterBarcodeCountViewListener({ viewId: this.view.viewId });
             }
         });
     }
     clearHighlights() {
-        return __awaiter(this, undefined, undefined, function* () {
-            yield this._proxy.$clearBarcodeCountHighlights();
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this._proxy.$clearBarcodeCountHighlights({ viewId: this.view.viewId });
         });
     }
     dispose() {
-        return __awaiter(this, undefined, undefined, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             yield this.unsubscribeListeners();
+            this._proxy.$disposeBarcodeCountView({ viewId: this.view.viewId });
+            this._proxy.dispose();
         });
     }
     setPositionAndSize(top, left, width, height, shouldBeUnderWebView) {
@@ -4953,32 +5496,32 @@ class BarcodeCountViewController extends BaseController {
         if (!this.view.context) {
             throw new Error('There should be a context attached to a view that should be shown');
         }
-        return this._proxy.$showBarcodeCountView();
+        return this._proxy.$showBarcodeCountView({ viewId: this.view.viewId });
     }
     hide() {
         if (!this.view.context) {
             throw new Error('There should be a context attached to a view that should be shown');
         }
-        return this._proxy.$hideBarcodeCountView();
+        return this._proxy.$hideBarcodeCountView({ viewId: this.view.viewId });
     }
     setBrushForRecognizedBarcode(trackedBarcode, brush) {
         const payload = this.buildTrackedBarcodeBrushPayload(trackedBarcode, brush);
-        return this._proxy.$finishBarcodeCountBrushForRecognizedBarcode({ brushJson: payload.brush, trackedBarcodeId: payload.trackedBarcodeID });
+        return this._proxy.$finishBarcodeCountBrushForRecognizedBarcode({ viewId: this.view.viewId, brushJson: payload.brush, trackedBarcodeId: payload.trackedBarcodeID });
     }
     setBrushForRecognizedBarcodeNotInList(trackedBarcode, brush) {
         const payload = this.buildTrackedBarcodeBrushPayload(trackedBarcode, brush);
-        return this._proxy.$finishBarcodeCountBrushForRecognizedBarcodeNotInList({ brushJson: payload.brush, trackedBarcodeId: payload.trackedBarcodeID });
+        return this._proxy.$finishBarcodeCountBrushForRecognizedBarcodeNotInList({ viewId: this.view.viewId, brushJson: payload.brush, trackedBarcodeId: payload.trackedBarcodeID });
     }
     setBrushForAcceptedBarcode(trackedBarcode, brush) {
         const payload = this.buildTrackedBarcodeBrushPayload(trackedBarcode, brush);
-        return this._proxy.$finishBarcodeCountBrushForAcceptedBarcode({ brushJson: payload.brush, trackedBarcodeId: payload.trackedBarcodeID });
+        return this._proxy.$finishBarcodeCountBrushForAcceptedBarcode({ viewId: this.view.viewId, brushJson: payload.brush, trackedBarcodeId: payload.trackedBarcodeID });
     }
     setBrushForRejectedBarcode(trackedBarcode, brush) {
         const payload = this.buildTrackedBarcodeBrushPayload(trackedBarcode, brush);
-        return this._proxy.$finishBarcodeCountBrushForRejectedBarcode({ brushJson: payload.brush, trackedBarcodeId: payload.trackedBarcodeID });
+        return this._proxy.$finishBarcodeCountBrushForRejectedBarcode({ viewId: this.view.viewId, brushJson: payload.brush, trackedBarcodeId: payload.trackedBarcodeID });
     }
     enableHardwareTrigger(hardwareTriggerKeyCode) {
-        return this._proxy.$enableBarcodeCountHardwareTrigger({ hardwareTriggerKeyCode });
+        return this._proxy.$enableBarcodeCountHardwareTrigger({ viewId: this.view.viewId, hardwareTriggerKeyCode });
     }
     buildTrackedBarcodeBrushPayload(trackedBarcode, brush) {
         return {
@@ -4986,154 +5529,71 @@ class BarcodeCountViewController extends BaseController {
             brush: brush ? JSON.stringify(brush.toJSON()) : null,
         };
     }
-    subscribeListeners() {
-        return __awaiter(this, undefined, undefined, function* () {
-            yield this._proxy.$registerBarcodeCountViewListener();
-            this._proxy.on$singleScanButtonTapped = () => {
-                var _a, _b;
-                (_b = (_a = this.view.uiListener) === null || _a === undefined ? undefined : _a.didTapSingleScanButton) === null || _b === undefined ? undefined : _b.call(_a, this.view.nativeView);
-            };
-            this._proxy.on$listButtonTapped = () => {
-                var _a, _b;
-                (_b = (_a = this.view.uiListener) === null || _a === undefined ? undefined : _a.didTapListButton) === null || _b === undefined ? undefined : _b.call(_a, this.view.nativeView);
-            };
-            this._proxy.on$exitButtonTapped = () => {
-                var _a, _b;
-                (_b = (_a = this.view.uiListener) === null || _a === undefined ? undefined : _a.didTapExitButton) === null || _b === undefined ? undefined : _b.call(_a, this.view.nativeView);
-            };
-            this._proxy.on$brushForRecognizedBarcode = (ev) => __awaiter(this, undefined, undefined, function* () {
-                const payload = EventDataParser.parse(ev.data);
-                if (payload === null) {
-                    console.error('BarcodeCountViewController brushForRecognizedBarcode payload is null');
-                    return;
-                }
-                const trackedBarcode = TrackedBarcode
-                    .fromJSON(JSON.parse(payload.trackedBarcode));
-                let brush = this.view.recognizedBrush;
-                if (this.view.listener && this.view.listener.brushForRecognizedBarcode) {
-                    brush = this.view.listener.brushForRecognizedBarcode(this.view.nativeView, trackedBarcode);
-                }
-                const finishPayload = this.buildTrackedBarcodeBrushPayload(trackedBarcode, brush);
-                yield this._proxy.$finishBarcodeCountBrushForRecognizedBarcode({ brushJson: finishPayload.brush, trackedBarcodeId: finishPayload.trackedBarcodeID });
-            });
-            this._proxy.on$brushForRecognizedBarcodeNotInList = (ev) => __awaiter(this, undefined, undefined, function* () {
-                const payload = EventDataParser.parse(ev.data);
-                if (payload === null) {
-                    console.error('BarcodeCountViewController brushForRecognizedBarcodeNotInList payload is null');
-                    return;
-                }
-                const trackedBarcode = TrackedBarcode
-                    .fromJSON(JSON.parse(payload.trackedBarcode));
-                let brush = this.view.notInListBrush;
-                if (this.view.listener && this.view.listener.brushForRecognizedBarcodeNotInList) {
-                    brush = this.view.listener.brushForRecognizedBarcodeNotInList(this.view.nativeView, trackedBarcode);
-                }
-                const finishPayload = this.buildTrackedBarcodeBrushPayload(trackedBarcode, brush);
-                yield this._proxy.$finishBarcodeCountBrushForRecognizedBarcodeNotInList({ brushJson: finishPayload.brush, trackedBarcodeId: finishPayload.trackedBarcodeID });
-            });
-            this._proxy.on$brushForAcceptedBarcode = (ev) => __awaiter(this, undefined, undefined, function* () {
-                const payload = EventDataParser.parse(ev.data);
-                if (payload === null) {
-                    console.error('BarcodeCountViewController brushForAcceptedBarcode payload is null');
-                    return;
-                }
-                const trackedBarcode = TrackedBarcode
-                    .fromJSON(JSON.parse(payload.trackedBarcode));
-                let brush = this.view.acceptedBrush;
-                if (this.view.listener && this.view.listener.brushForAcceptedBarcode) {
-                    brush = this.view.listener.brushForAcceptedBarcode(this.view.nativeView, trackedBarcode);
-                }
-                const finishPayload = this.buildTrackedBarcodeBrushPayload(trackedBarcode, brush);
-                yield this._proxy.$finishBarcodeCountBrushForAcceptedBarcode({ brushJson: finishPayload.brush, trackedBarcodeId: finishPayload.trackedBarcodeID });
-            });
-            this._proxy.on$brushForRejectedBarcode = (ev) => __awaiter(this, undefined, undefined, function* () {
-                const payload = EventDataParser.parse(ev.data);
-                if (payload === null) {
-                    console.error('BarcodeCountViewController brushForRejectedBarcode payload is null');
-                    return;
-                }
-                const trackedBarcode = TrackedBarcode
-                    .fromJSON(JSON.parse(payload.trackedBarcode));
-                let brush = this.view.rejectedBrush;
-                if (this.view.listener && this.view.listener.brushForRejectedBarcode) {
-                    brush = this.view.listener.brushForRejectedBarcode(this.view.nativeView, trackedBarcode);
-                }
-                const finishPayload = this.buildTrackedBarcodeBrushPayload(trackedBarcode, brush);
-                yield this._proxy.$finishBarcodeCountBrushForRejectedBarcode({ brushJson: finishPayload.brush, trackedBarcodeId: finishPayload.trackedBarcodeID });
-            });
-            this._proxy.on$filteredBarcodeTapped = (ev) => __awaiter(this, undefined, undefined, function* () {
-                const payload = EventDataParser.parse(ev.data);
-                if (payload === null) {
-                    console.error('BarcodeCountViewController filteredBarcodeTapped payload is null');
-                    return;
-                }
-                const trackedBarcode = TrackedBarcode
-                    .fromJSON(JSON.parse(payload.trackedBarcode));
-                if (this.view.listener && this.view.listener.didTapFilteredBarcode) {
-                    this.view.listener.didTapFilteredBarcode(this.view.nativeView, trackedBarcode);
-                }
-            });
-            this._proxy.on$recognizedBarcodeNotInListTapped = (ev) => __awaiter(this, undefined, undefined, function* () {
-                const payload = EventDataParser.parse(ev.data);
-                if (payload === null) {
-                    console.error('BarcodeCountViewController recognizedBarcodeNotInListTapped payload is null');
-                    return;
-                }
-                const trackedBarcode = TrackedBarcode
-                    .fromJSON(JSON.parse(payload.trackedBarcode));
-                if (this.view.listener && this.view.listener.didTapRecognizedBarcodeNotInList) {
-                    this.view.listener.didTapRecognizedBarcodeNotInList(this.view.nativeView, trackedBarcode);
-                }
-            });
-            this._proxy.on$recognizedBarcodeTapped = (ev) => __awaiter(this, undefined, undefined, function* () {
-                const payload = EventDataParser.parse(ev.data);
-                if (payload === null) {
-                    console.error('BarcodeCountViewController recognizedBarcodeTapped payload is null');
-                    return;
-                }
-                const trackedBarcode = TrackedBarcode
-                    .fromJSON(JSON.parse(payload.trackedBarcode));
-                if (this.view.listener && this.view.listener.didTapRecognizedBarcode) {
-                    this.view.listener.didTapRecognizedBarcode(this.view.nativeView, trackedBarcode);
-                }
-            });
-            this._proxy.on$acceptedBarcodeTapped = (ev) => __awaiter(this, undefined, undefined, function* () {
-                const payload = EventDataParser.parse(ev.data);
-                if (payload === null) {
-                    console.error('BarcodeCountViewController acceptedBarcodeTapped payload is null');
-                    return;
-                }
-                const trackedBarcode = TrackedBarcode
-                    .fromJSON(JSON.parse(payload.trackedBarcode));
-                if (this.view.listener && this.view.listener.didTapAcceptedBarcode) {
-                    this.view.listener.didTapAcceptedBarcode(this.view.nativeView, trackedBarcode);
-                }
-            });
-            this._proxy.on$rejectedBarcodeTapped = (ev) => __awaiter(this, undefined, undefined, function* () {
-                const payload = EventDataParser.parse(ev.data);
-                if (payload === null) {
-                    console.error('BarcodeCountViewController rejectedBarcodeTapped payload is null');
-                    return;
-                }
-                const trackedBarcode = TrackedBarcode
-                    .fromJSON(JSON.parse(payload.trackedBarcode));
-                if (this.view.listener && this.view.listener.didTapRejectedBarcode) {
-                    this.view.listener.didTapRejectedBarcode(this.view.nativeView, trackedBarcode);
-                }
-            });
-            this._proxy.on$captureListCompleted = () => {
-                if (this.view.listener && this.view.listener.didCompleteCaptureList) {
-                    this.view.listener.didCompleteCaptureList(this.view.nativeView);
-                }
-            };
+    setupEventListeners() {
+        return __awaiter(this, void 0, void 0, function* () {
+            this._proxy.on$singleScanButtonTapped = this.eventHandlers.handleSingleScanButtonTapped;
+            this._proxy.on$listButtonTapped = this.eventHandlers.handleListButtonTapped;
+            this._proxy.on$exitButtonTapped = this.eventHandlers.handleExitButtonTapped;
+            this._proxy.on$brushForRecognizedBarcode = this.eventHandlers.handleBrushForRecognizedBarcode;
+            this._proxy.on$brushForRecognizedBarcodeNotInList = this.eventHandlers.handleBrushForRecognizedBarcodeNotInList;
+            this._proxy.on$brushForAcceptedBarcode = this.eventHandlers.handleBrushForAcceptedBarcode;
+            this._proxy.on$brushForRejectedBarcode = this.eventHandlers.handleBrushForRejectedBarcode;
+            this._proxy.on$filteredBarcodeTapped = this.eventHandlers.handleFilteredBarcodeTapped;
+            this._proxy.on$recognizedBarcodeNotInListTapped = this.eventHandlers.handleRecognizedBarcodeNotInListTapped;
+            this._proxy.on$recognizedBarcodeTapped = this.eventHandlers.handleRecognizedBarcodeTapped;
+            this._proxy.on$acceptedBarcodeTapped = this.eventHandlers.handleAcceptedBarcodeTapped;
+            this._proxy.on$rejectedBarcodeTapped = this.eventHandlers.handleRejectedBarcodeTapped;
+            this._proxy.on$captureListCompleted = this.eventHandlers.handleCaptureListCompleted;
+            this._proxy.on$didScan = this.eventHandlers.handleDidScan;
+            this._proxy.on$didUpdateSession = this.eventHandlers.handleDidUpdateSession;
         });
     }
     unsubscribeListeners() {
-        return __awaiter(this, undefined, undefined, function* () {
-            this._proxy.dispose();
-            yield this._proxy.$unregisterBarcodeCountViewListener();
-            yield this._proxy.$unregisterBarcodeCountViewUiListener();
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this._proxy.$unregisterBarcodeCountViewListener({ viewId: this.view.viewId });
+            yield this._proxy.$unregisterBarcodeCountViewUiListener({ viewId: this.view.viewId });
         });
+    }
+    // From Listener Controller
+    updateMode() {
+        if (!this.isViewCreated) {
+            return Promise.resolve();
+        }
+        const barcodeCount = this.barcodeCount.toJSON();
+        const json = JSON.stringify(barcodeCount);
+        return this._proxy.$updateBarcodeCountMode({ viewId: this.view.viewId, barcodeCountJson: json });
+    }
+    reset() {
+        if (!this.isViewCreated) {
+            return Promise.resolve();
+        }
+        return this._proxy.$resetBarcodeCount({ viewId: this.view.viewId });
+    }
+    setModeEnabledState(enabled) {
+        if (!this.isViewCreated) {
+            return;
+        }
+        this._proxy.$setBarcodeCountModeEnabledState({ viewId: this.view.viewId, isEnabled: enabled });
+    }
+    removeModeListener() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this._proxy.$unregisterBarcodeCountListener({ viewId: this.view.viewId });
+        });
+    }
+    startScanningPhase() {
+        this._proxy.$startBarcodeCountScanningPhase({ viewId: this.view.viewId });
+    }
+    endScanningPhase() {
+        this._proxy.$endBarcodeCountScanningPhase({ viewId: this.view.viewId });
+    }
+    updateFeedback(feedbackJson) {
+        this._proxy.$updateBarcodeCountFeedback({ viewId: this.view.viewId, feedbackJson });
+    }
+    setBarcodeCountCaptureList(barcodeCountCaptureList) {
+        this.eventHandlers.setBarcodeCountCaptureList(barcodeCountCaptureList);
+    }
+    get isViewCreated() {
+        return this.view.viewId !== -1;
     }
 }
 
@@ -5252,49 +5712,49 @@ class BarcodeCountNotInListActionSettings extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('enabled')
-], BarcodeCountNotInListActionSettings.prototype, "_enabled", undefined);
+], BarcodeCountNotInListActionSettings.prototype, "_enabled", void 0);
 __decorate([
     nameForSerialization('acceptButtonText')
-], BarcodeCountNotInListActionSettings.prototype, "_acceptButtonText", undefined);
+], BarcodeCountNotInListActionSettings.prototype, "_acceptButtonText", void 0);
 __decorate([
     nameForSerialization('acceptButtonAccessibilityLabel')
-], BarcodeCountNotInListActionSettings.prototype, "_acceptButtonAccessibilityLabel", undefined);
+], BarcodeCountNotInListActionSettings.prototype, "_acceptButtonAccessibilityLabel", void 0);
 __decorate([
     nameForSerialization('acceptButtonAccessibilityHint')
-], BarcodeCountNotInListActionSettings.prototype, "_acceptButtonAccessibilityHint", undefined);
+], BarcodeCountNotInListActionSettings.prototype, "_acceptButtonAccessibilityHint", void 0);
 __decorate([
     nameForSerialization('acceptButtonContentDescription')
-], BarcodeCountNotInListActionSettings.prototype, "_acceptButtonContentDescription", undefined);
+], BarcodeCountNotInListActionSettings.prototype, "_acceptButtonContentDescription", void 0);
 __decorate([
     nameForSerialization('rejectButtonText')
-], BarcodeCountNotInListActionSettings.prototype, "_rejectButtonText", undefined);
+], BarcodeCountNotInListActionSettings.prototype, "_rejectButtonText", void 0);
 __decorate([
     nameForSerialization('rejectButtonAccessibilityLabel')
-], BarcodeCountNotInListActionSettings.prototype, "_rejectButtonAccessibilityLabel", undefined);
+], BarcodeCountNotInListActionSettings.prototype, "_rejectButtonAccessibilityLabel", void 0);
 __decorate([
     nameForSerialization('rejectButtonAccessibilityHint')
-], BarcodeCountNotInListActionSettings.prototype, "_rejectButtonAccessibilityHint", undefined);
+], BarcodeCountNotInListActionSettings.prototype, "_rejectButtonAccessibilityHint", void 0);
 __decorate([
     nameForSerialization('rejectButtonContentDescription')
-], BarcodeCountNotInListActionSettings.prototype, "_rejectButtonContentDescription", undefined);
+], BarcodeCountNotInListActionSettings.prototype, "_rejectButtonContentDescription", void 0);
 __decorate([
     nameForSerialization('cancelButtonText')
-], BarcodeCountNotInListActionSettings.prototype, "_cancelButtonText", undefined);
+], BarcodeCountNotInListActionSettings.prototype, "_cancelButtonText", void 0);
 __decorate([
     nameForSerialization('cancelButtonAccessibilityLabel')
-], BarcodeCountNotInListActionSettings.prototype, "_cancelButtonAccessibilityLabel", undefined);
+], BarcodeCountNotInListActionSettings.prototype, "_cancelButtonAccessibilityLabel", void 0);
 __decorate([
     nameForSerialization('cancelButtonAccessibilityHint')
-], BarcodeCountNotInListActionSettings.prototype, "_cancelButtonAccessibilityHint", undefined);
+], BarcodeCountNotInListActionSettings.prototype, "_cancelButtonAccessibilityHint", void 0);
 __decorate([
     nameForSerialization('cancelButtonContentDescription')
-], BarcodeCountNotInListActionSettings.prototype, "_cancelButtonContentDescription", undefined);
+], BarcodeCountNotInListActionSettings.prototype, "_cancelButtonContentDescription", void 0);
 __decorate([
     nameForSerialization('barcodeAcceptedHint')
-], BarcodeCountNotInListActionSettings.prototype, "_barcodeAcceptedHint", undefined);
+], BarcodeCountNotInListActionSettings.prototype, "_barcodeAcceptedHint", void 0);
 __decorate([
     nameForSerialization('barcodeRejectedHint')
-], BarcodeCountNotInListActionSettings.prototype, "_barcodeRejectedHint", undefined);
+], BarcodeCountNotInListActionSettings.prototype, "_barcodeRejectedHint", void 0);
 
 class BaseBarcodeCountView {
     static get defaultRecognizedBrush() {
@@ -5311,6 +5771,9 @@ class BaseBarcodeCountView {
     }
     static get hardwareTriggerSupported() {
         return BaseBarcodeCountView.barcodeCountDefaults.BarcodeCountView.hardwareTriggerSupported;
+    }
+    get viewId() {
+        return this._viewId;
     }
     get uiListener() {
         return this._uiListener;
@@ -5439,7 +5902,7 @@ class BaseBarcodeCountView {
         this.updateNative();
     }
     get style() {
-        return this._style;
+        return this._viewStyle;
     }
     get listButtonAccessibilityHint() {
         return this._listButtonAccessibilityHint;
@@ -5661,10 +6124,167 @@ class BaseBarcodeCountView {
     static get barcodeCountDefaults() {
         return getBarcodeCountDefaults();
     }
+    static withProps(props, platformView) {
+        const view = new BaseBarcodeCountView({
+            context: props.context,
+            barcodeCount: props.barcodeCount,
+            viewStyle: props.viewStyle,
+            platformView: platformView
+        });
+        if (props.uiListener) {
+            view.uiListener = props.uiListener;
+        }
+        if (props.listener) {
+            view.listener = props.listener;
+        }
+        if (props.shouldDisableModeOnExitButtonTapped !== undefined) {
+            view._shouldDisableModeOnExitButtonTapped = props.shouldDisableModeOnExitButtonTapped;
+        }
+        if (props.shouldShowUserGuidanceView !== undefined) {
+            view._shouldShowUserGuidanceView = props.shouldShowUserGuidanceView;
+        }
+        if (props.shouldShowListButton !== undefined) {
+            view._shouldShowListButton = props.shouldShowListButton;
+        }
+        if (props.shouldShowExitButton !== undefined) {
+            view._shouldShowExitButton = props.shouldShowExitButton;
+        }
+        if (props.shouldShowShutterButton !== undefined) {
+            view._shouldShowShutterButton = props.shouldShowShutterButton;
+        }
+        if (props.shouldShowHints !== undefined) {
+            view._shouldShowHints = props.shouldShowHints;
+        }
+        if (props.shouldShowClearHighlightsButton !== undefined) {
+            view._shouldShowClearHighlightsButton = props.shouldShowClearHighlightsButton;
+        }
+        if (props.shouldShowSingleScanButton !== undefined) {
+            view._shouldShowSingleScanButton = props.shouldShowSingleScanButton;
+        }
+        if (props.shouldShowFloatingShutterButton !== undefined) {
+            view._shouldShowFloatingShutterButton = props.shouldShowFloatingShutterButton;
+        }
+        if (props.shouldShowToolbar !== undefined) {
+            view._shouldShowToolbar = props.shouldShowToolbar;
+        }
+        if (props.shouldShowScanAreaGuides !== undefined) {
+            view._shouldShowScanAreaGuides = props.shouldShowScanAreaGuides;
+        }
+        if (props.recognizedBrush !== undefined) {
+            view._recognizedBrush = props.recognizedBrush;
+        }
+        if (props.notInListBrush !== undefined) {
+            view._notInListBrush = props.notInListBrush;
+        }
+        if (props.acceptedBrush !== undefined) {
+            view._acceptedBrush = props.acceptedBrush;
+        }
+        if (props.rejectedBrush !== undefined) {
+            view._rejectedBrush = props.rejectedBrush;
+        }
+        if (props.filterSettings !== undefined) {
+            view._filterSettings = props.filterSettings;
+        }
+        if (props.listButtonAccessibilityHint !== undefined) {
+            view._listButtonAccessibilityHint = props.listButtonAccessibilityHint;
+        }
+        if (props.listButtonAccessibilityLabel !== undefined) {
+            view._listButtonAccessibilityLabel = props.listButtonAccessibilityLabel;
+        }
+        if (props.listButtonContentDescription !== undefined) {
+            view._listButtonContentDescription = props.listButtonContentDescription;
+        }
+        if (props.exitButtonAccessibilityHint !== undefined) {
+            view._exitButtonAccessibilityHint = props.exitButtonAccessibilityHint;
+        }
+        if (props.exitButtonAccessibilityLabel !== undefined) {
+            view._exitButtonAccessibilityLabel = props.exitButtonAccessibilityLabel;
+        }
+        if (props.exitButtonContentDescription !== undefined) {
+            view._exitButtonContentDescription = props.exitButtonContentDescription;
+        }
+        if (props.shutterButtonAccessibilityHint !== undefined) {
+            view._shutterButtonAccessibilityHint = props.shutterButtonAccessibilityHint;
+        }
+        if (props.shutterButtonAccessibilityLabel !== undefined) {
+            view._shutterButtonAccessibilityLabel = props.shutterButtonAccessibilityLabel;
+        }
+        if (props.shutterButtonContentDescription !== undefined) {
+            view._shutterButtonContentDescription = props.shutterButtonContentDescription;
+        }
+        if (props.floatingShutterButtonAccessibilityHint !== undefined) {
+            view._floatingShutterButtonAccessibilityHint = props.floatingShutterButtonAccessibilityHint;
+        }
+        if (props.floatingShutterButtonAccessibilityLabel !== undefined) {
+            view._floatingShutterButtonAccessibilityLabel = props.floatingShutterButtonAccessibilityLabel;
+        }
+        if (props.floatingShutterButtonContentDescription !== undefined) {
+            view._floatingShutterButtonContentDescription = props.floatingShutterButtonContentDescription;
+        }
+        if (props.clearHighlightsButtonAccessibilityHint !== undefined) {
+            view._clearHighlightsButtonAccessibilityHint = props.clearHighlightsButtonAccessibilityHint;
+        }
+        if (props.clearHighlightsButtonAccessibilityLabel !== undefined) {
+            view._clearHighlightsButtonAccessibilityLabel = props.clearHighlightsButtonAccessibilityLabel;
+        }
+        if (props.clearHighlightsButtonContentDescription !== undefined) {
+            view._clearHighlightsButtonContentDescription = props.clearHighlightsButtonContentDescription;
+        }
+        if (props.singleScanButtonAccessibilityHint !== undefined) {
+            view._singleScanButtonAccessibilityHint = props.singleScanButtonAccessibilityHint;
+        }
+        if (props.singleScanButtonAccessibilityLabel !== undefined) {
+            view._singleScanButtonAccessibilityLabel = props.singleScanButtonAccessibilityLabel;
+        }
+        if (props.singleScanButtonContentDescription !== undefined) {
+            view._singleScanButtonContentDescription = props.singleScanButtonContentDescription;
+        }
+        if (props.clearHighlightsButtonText !== undefined) {
+            view._clearHighlightsButtonText = props.clearHighlightsButtonText;
+        }
+        if (props.exitButtonText !== undefined) {
+            view._exitButtonText = props.exitButtonText;
+        }
+        if (props.textForTapShutterToScanHint !== undefined) {
+            view._textForTapShutterToScanHint = props.textForTapShutterToScanHint;
+        }
+        if (props.textForScanningHint !== undefined) {
+            view._textForScanningHint = props.textForScanningHint;
+        }
+        if (props.textForMoveCloserAndRescanHint !== undefined) {
+            view._textForMoveCloserAndRescanHint = props.textForMoveCloserAndRescanHint;
+        }
+        if (props.textForMoveFurtherAndRescanHint !== undefined) {
+            view._textForMoveFurtherAndRescanHint = props.textForMoveFurtherAndRescanHint;
+        }
+        if (props.shouldShowListProgressBar !== undefined) {
+            view._shouldShowListProgressBar = props.shouldShowListProgressBar;
+        }
+        if (props.shouldShowTorchControl !== undefined) {
+            view._shouldShowTorchControl = props.shouldShowTorchControl;
+        }
+        if (props.torchControlPosition !== undefined) {
+            view._torchControlPosition = props.torchControlPosition;
+        }
+        if (props.tapToUncountEnabled !== undefined) {
+            view._tapToUncountEnabled = props.tapToUncountEnabled;
+        }
+        if (props.textForTapToUncountHint !== undefined) {
+            view._textForTapToUncountHint = props.textForTapToUncountHint;
+        }
+        if (props.barcodeNotInListActionSettings !== undefined) {
+            view._barcodeNotInListActionSettings = props.barcodeNotInListActionSettings;
+        }
+        if (props.hardwareTriggerEnabled !== undefined) {
+            view._hardwareTriggerEnabled = props.hardwareTriggerEnabled;
+        }
+        return view;
+    }
     get context() {
         return this._context;
     }
-    constructor({ context, barcodeCount, style, nativeView, autoCreateNativeView = true }) {
+    constructor({ context, barcodeCount, viewStyle, platformView }) {
+        this._viewId = -1; // -1 means the view is not created yet
         this._uiListener = null;
         this._listener = null;
         this._shouldDisableModeOnExitButtonTapped = BaseBarcodeCountView.barcodeCountDefaults.BarcodeCountView.shouldDisableModeOnExitButtonTapped;
@@ -5713,23 +6333,19 @@ class BaseBarcodeCountView {
         this._torchControlPosition = BaseBarcodeCountView.barcodeCountDefaults.BarcodeCountView.torchControlPosition;
         this._tapToUncountEnabled = BaseBarcodeCountView.barcodeCountDefaults.BarcodeCountView.tapToUncountEnabled;
         this._textForTapToUncountHint = BaseBarcodeCountView.barcodeCountDefaults.BarcodeCountView.textForTapToUncountHint;
-        this._style = BaseBarcodeCountView.barcodeCountDefaults.BarcodeCountView.style;
+        this._viewStyle = BaseBarcodeCountView.barcodeCountDefaults.BarcodeCountView.style;
         this._barcodeNotInListActionSettings = new BarcodeCountNotInListActionSettings();
         this._hardwareTriggerEnabled = false;
         this.isViewCreated = false;
-        this.autoCreateNativeView = true;
-        this._style = style;
+        this._viewStyle = viewStyle;
         this._context = context;
         this._barcodeCount = barcodeCount;
-        this.nativeView = nativeView;
-        this.autoCreateNativeView = autoCreateNativeView;
-        this.isViewCreated = autoCreateNativeView;
+        this.platformView = platformView;
         barcodeCount._context = context;
         this._controller = BarcodeCountViewController.forBarcodeCountAndBarcodeCountView(this, this._barcodeCount);
-        this._controller.initialize(autoCreateNativeView);
     }
     dispose() {
-        return __awaiter(this, undefined, undefined, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             yield this._controller.dispose();
             this.isViewCreated = false;
         });
@@ -5765,17 +6381,18 @@ class BaseBarcodeCountView {
     enableHardwareTrigger(hardwareTriggerKeyCode) {
         return this._controller.enableHardwareTrigger(hardwareTriggerKeyCode);
     }
-    createNativeView() {
-        return __awaiter(this, undefined, undefined, function* () {
+    createNativeView(viewId) {
+        return __awaiter(this, void 0, void 0, function* () {
             if (this.isViewCreated) {
                 return Promise.resolve();
             }
+            this._viewId = viewId;
             yield this._controller.createNativeView();
             this.isViewCreated = true;
         });
     }
     removeNativeView() {
-        return __awaiter(this, undefined, undefined, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             yield this._controller.removeNativeView();
             this.isViewCreated = false;
         });
@@ -5787,6 +6404,7 @@ class BaseBarcodeCountView {
         var _a, _b, _c, _d, _e, _f, _g, _h;
         const json = {
             View: {
+                viewId: this._viewId,
                 style: this.style,
                 shouldDisableModeOnExitButtonTapped: this.shouldDisableModeOnExitButtonTapped,
                 shouldShowUserGuidanceView: this.shouldShowUserGuidanceView,
@@ -5799,17 +6417,19 @@ class BaseBarcodeCountView {
                 shouldShowFloatingShutterButton: this.shouldShowFloatingShutterButton,
                 shouldShowToolbar: this.shouldShowToolbar,
                 shouldShowScanAreaGuides: this.shouldShowScanAreaGuides,
-                toolbarSettings: (_a = this._toolbarSettings) === null || _a === undefined ? undefined : _a.toJSON(),
+                toolbarSettings: (_a = this._toolbarSettings) === null || _a === void 0 ? void 0 : _a.toJSON(),
                 shouldShowTorchControl: this.shouldShowTorchControl,
                 torchControlPosition: this.torchControlPosition,
                 tapToUncountEnabled: this.tapToUncountEnabled,
                 textForTapToUncountHint: this.textForTapToUncountHint,
                 barcodeNotInListActionSettings: this.barcodeNotInListActionSettings.toJSON(),
-                recognizedBrush: (_b = this.recognizedBrush) === null || _b === undefined ? undefined : _b.toJSON(),
-                notInListBrush: (_c = this.notInListBrush) === null || _c === undefined ? undefined : _c.toJSON(),
-                acceptedBrush: (_d = this.acceptedBrush) === null || _d === undefined ? undefined : _d.toJSON(),
-                rejectedBrush: (_e = this.rejectedBrush) === null || _e === undefined ? undefined : _e.toJSON(),
-                hardwareTriggerEnabled: this._hardwareTriggerEnabled
+                recognizedBrush: (_b = this.recognizedBrush) === null || _b === void 0 ? void 0 : _b.toJSON(),
+                notInListBrush: (_c = this.notInListBrush) === null || _c === void 0 ? void 0 : _c.toJSON(),
+                acceptedBrush: (_d = this.acceptedBrush) === null || _d === void 0 ? void 0 : _d.toJSON(),
+                rejectedBrush: (_e = this.rejectedBrush) === null || _e === void 0 ? void 0 : _e.toJSON(),
+                hardwareTriggerEnabled: this._hardwareTriggerEnabled,
+                hasUiListener: this.uiListener !== null,
+                hasListener: this.listener !== null,
             },
             BarcodeCount: this._barcodeCount.toJSON()
         };
@@ -5889,23 +6509,227 @@ class BaseBarcodeCountView {
             json.View.shouldShowListProgressBar = this.shouldShowListProgressBar;
         }
         if (this.recognizedBrush) {
-            json.View.recognizedBrush = (_f = this.recognizedBrush) === null || _f === undefined ? undefined : _f.toJSON();
+            json.View.recognizedBrush = (_f = this.recognizedBrush) === null || _f === void 0 ? void 0 : _f.toJSON();
         }
         if (this.notInListBrush) {
-            json.View.notInListBrush = (_g = this.notInListBrush) === null || _g === undefined ? undefined : _g.toJSON();
+            json.View.notInListBrush = (_g = this.notInListBrush) === null || _g === void 0 ? void 0 : _g.toJSON();
         }
         if (this.filterSettings) {
-            json.View.filterSettings = (_h = this.filterSettings) === null || _h === undefined ? undefined : _h.toJSON();
+            json.View.filterSettings = (_h = this.filterSettings) === null || _h === void 0 ? void 0 : _h.toJSON();
         }
         return json;
+    }
+    updateWithProps(prevProps, props) {
+        // Update listeners
+        if (props.uiListener !== prevProps.uiListener) {
+            this.uiListener = props.uiListener || null;
+        }
+        if (props.listener !== prevProps.listener) {
+            this.listener = props.listener || null;
+        }
+        // Update boolean flags
+        if (props.shouldDisableModeOnExitButtonTapped !== prevProps.shouldDisableModeOnExitButtonTapped &&
+            props.shouldDisableModeOnExitButtonTapped !== undefined) {
+            this.shouldDisableModeOnExitButtonTapped = props.shouldDisableModeOnExitButtonTapped;
+        }
+        if (props.shouldShowUserGuidanceView !== prevProps.shouldShowUserGuidanceView &&
+            props.shouldShowUserGuidanceView !== undefined) {
+            this.shouldShowUserGuidanceView = props.shouldShowUserGuidanceView;
+        }
+        if (props.shouldShowListButton !== prevProps.shouldShowListButton &&
+            props.shouldShowListButton !== undefined) {
+            this.shouldShowListButton = props.shouldShowListButton;
+        }
+        if (props.shouldShowExitButton !== prevProps.shouldShowExitButton &&
+            props.shouldShowExitButton !== undefined) {
+            this.shouldShowExitButton = props.shouldShowExitButton;
+        }
+        if (props.shouldShowShutterButton !== prevProps.shouldShowShutterButton &&
+            props.shouldShowShutterButton !== undefined) {
+            this.shouldShowShutterButton = props.shouldShowShutterButton;
+        }
+        if (props.shouldShowHints !== prevProps.shouldShowHints &&
+            props.shouldShowHints !== undefined) {
+            this.shouldShowHints = props.shouldShowHints;
+        }
+        if (props.shouldShowClearHighlightsButton !== prevProps.shouldShowClearHighlightsButton &&
+            props.shouldShowClearHighlightsButton !== undefined) {
+            this.shouldShowClearHighlightsButton = props.shouldShowClearHighlightsButton;
+        }
+        if (props.shouldShowSingleScanButton !== prevProps.shouldShowSingleScanButton &&
+            props.shouldShowSingleScanButton !== undefined) {
+            this.shouldShowSingleScanButton = props.shouldShowSingleScanButton;
+        }
+        if (props.shouldShowFloatingShutterButton !== prevProps.shouldShowFloatingShutterButton &&
+            props.shouldShowFloatingShutterButton !== undefined) {
+            this.shouldShowFloatingShutterButton = props.shouldShowFloatingShutterButton;
+        }
+        if (props.shouldShowToolbar !== prevProps.shouldShowToolbar &&
+            props.shouldShowToolbar !== undefined) {
+            this.shouldShowToolbar = props.shouldShowToolbar;
+        }
+        if (props.shouldShowScanAreaGuides !== prevProps.shouldShowScanAreaGuides &&
+            props.shouldShowScanAreaGuides !== undefined) {
+            this.shouldShowScanAreaGuides = props.shouldShowScanAreaGuides;
+        }
+        if (props.shouldShowListProgressBar !== prevProps.shouldShowListProgressBar &&
+            props.shouldShowListProgressBar !== undefined) {
+            this.shouldShowListProgressBar = props.shouldShowListProgressBar;
+        }
+        if (props.shouldShowTorchControl !== prevProps.shouldShowTorchControl &&
+            props.shouldShowTorchControl !== undefined) {
+            this.shouldShowTorchControl = props.shouldShowTorchControl;
+        }
+        if (props.tapToUncountEnabled !== prevProps.tapToUncountEnabled &&
+            props.tapToUncountEnabled !== undefined) {
+            this.tapToUncountEnabled = props.tapToUncountEnabled;
+        }
+        if (props.hardwareTriggerEnabled !== prevProps.hardwareTriggerEnabled &&
+            props.hardwareTriggerEnabled !== undefined) {
+            this.hardwareTriggerEnabled = props.hardwareTriggerEnabled;
+        }
+        // Update brushes
+        if (props.recognizedBrush !== prevProps.recognizedBrush &&
+            props.recognizedBrush !== undefined) {
+            this.recognizedBrush = props.recognizedBrush;
+        }
+        if (props.notInListBrush !== prevProps.notInListBrush &&
+            props.notInListBrush !== undefined) {
+            this.notInListBrush = props.notInListBrush;
+        }
+        if (props.acceptedBrush !== prevProps.acceptedBrush &&
+            props.acceptedBrush !== undefined) {
+            this.acceptedBrush = props.acceptedBrush;
+        }
+        if (props.rejectedBrush !== prevProps.rejectedBrush &&
+            props.rejectedBrush !== undefined) {
+            this.rejectedBrush = props.rejectedBrush;
+        }
+        // Update filter settings
+        if (props.filterSettings !== prevProps.filterSettings &&
+            props.filterSettings !== undefined) {
+            this.filterSettings = props.filterSettings;
+        }
+        // Update accessibility hints, labels and descriptions
+        if (props.listButtonAccessibilityHint !== prevProps.listButtonAccessibilityHint &&
+            props.listButtonAccessibilityHint !== undefined) {
+            this.listButtonAccessibilityHint = props.listButtonAccessibilityHint;
+        }
+        if (props.listButtonAccessibilityLabel !== prevProps.listButtonAccessibilityLabel &&
+            props.listButtonAccessibilityLabel !== undefined) {
+            this.listButtonAccessibilityLabel = props.listButtonAccessibilityLabel;
+        }
+        if (props.listButtonContentDescription !== prevProps.listButtonContentDescription &&
+            props.listButtonContentDescription !== undefined) {
+            this.listButtonContentDescription = props.listButtonContentDescription;
+        }
+        if (props.exitButtonAccessibilityHint !== prevProps.exitButtonAccessibilityHint &&
+            props.exitButtonAccessibilityHint !== undefined) {
+            this.exitButtonAccessibilityHint = props.exitButtonAccessibilityHint;
+        }
+        if (props.exitButtonAccessibilityLabel !== prevProps.exitButtonAccessibilityLabel &&
+            props.exitButtonAccessibilityLabel !== undefined) {
+            this.exitButtonAccessibilityLabel = props.exitButtonAccessibilityLabel;
+        }
+        if (props.exitButtonContentDescription !== prevProps.exitButtonContentDescription &&
+            props.exitButtonContentDescription !== undefined) {
+            this.exitButtonContentDescription = props.exitButtonContentDescription;
+        }
+        if (props.shutterButtonAccessibilityHint !== prevProps.shutterButtonAccessibilityHint &&
+            props.shutterButtonAccessibilityHint !== undefined) {
+            this.shutterButtonAccessibilityHint = props.shutterButtonAccessibilityHint;
+        }
+        if (props.shutterButtonAccessibilityLabel !== prevProps.shutterButtonAccessibilityLabel &&
+            props.shutterButtonAccessibilityLabel !== undefined) {
+            this.shutterButtonAccessibilityLabel = props.shutterButtonAccessibilityLabel;
+        }
+        if (props.shutterButtonContentDescription !== prevProps.shutterButtonContentDescription &&
+            props.shutterButtonContentDescription !== undefined) {
+            this.shutterButtonContentDescription = props.shutterButtonContentDescription;
+        }
+        if (props.floatingShutterButtonAccessibilityHint !== prevProps.floatingShutterButtonAccessibilityHint &&
+            props.floatingShutterButtonAccessibilityHint !== undefined) {
+            this.floatingShutterButtonAccessibilityHint = props.floatingShutterButtonAccessibilityHint;
+        }
+        if (props.floatingShutterButtonAccessibilityLabel !== prevProps.floatingShutterButtonAccessibilityLabel &&
+            props.floatingShutterButtonAccessibilityLabel !== undefined) {
+            this.floatingShutterButtonAccessibilityLabel = props.floatingShutterButtonAccessibilityLabel;
+        }
+        if (props.floatingShutterButtonContentDescription !== prevProps.floatingShutterButtonContentDescription &&
+            props.floatingShutterButtonContentDescription !== undefined) {
+            this.floatingShutterButtonContentDescription = props.floatingShutterButtonContentDescription;
+        }
+        if (props.clearHighlightsButtonAccessibilityHint !== prevProps.clearHighlightsButtonAccessibilityHint &&
+            props.clearHighlightsButtonAccessibilityHint !== undefined) {
+            this.clearHighlightsButtonAccessibilityHint = props.clearHighlightsButtonAccessibilityHint;
+        }
+        if (props.clearHighlightsButtonAccessibilityLabel !== prevProps.clearHighlightsButtonAccessibilityLabel &&
+            props.clearHighlightsButtonAccessibilityLabel !== undefined) {
+            this.clearHighlightsButtonAccessibilityLabel = props.clearHighlightsButtonAccessibilityLabel;
+        }
+        if (props.clearHighlightsButtonContentDescription !== prevProps.clearHighlightsButtonContentDescription &&
+            props.clearHighlightsButtonContentDescription !== undefined) {
+            this.clearHighlightsButtonContentDescription = props.clearHighlightsButtonContentDescription;
+        }
+        if (props.singleScanButtonAccessibilityHint !== prevProps.singleScanButtonAccessibilityHint &&
+            props.singleScanButtonAccessibilityHint !== undefined) {
+            this.singleScanButtonAccessibilityHint = props.singleScanButtonAccessibilityHint;
+        }
+        if (props.singleScanButtonAccessibilityLabel !== prevProps.singleScanButtonAccessibilityLabel &&
+            props.singleScanButtonAccessibilityLabel !== undefined) {
+            this.singleScanButtonAccessibilityLabel = props.singleScanButtonAccessibilityLabel;
+        }
+        if (props.singleScanButtonContentDescription !== prevProps.singleScanButtonContentDescription &&
+            props.singleScanButtonContentDescription !== undefined) {
+            this.singleScanButtonContentDescription = props.singleScanButtonContentDescription;
+        }
+        // Update text labels
+        if (props.clearHighlightsButtonText !== prevProps.clearHighlightsButtonText &&
+            props.clearHighlightsButtonText !== undefined) {
+            this.clearHighlightsButtonText = props.clearHighlightsButtonText;
+        }
+        if (props.exitButtonText !== prevProps.exitButtonText &&
+            props.exitButtonText !== undefined) {
+            this.exitButtonText = props.exitButtonText;
+        }
+        if (props.textForTapShutterToScanHint !== prevProps.textForTapShutterToScanHint &&
+            props.textForTapShutterToScanHint !== undefined) {
+            this.textForTapShutterToScanHint = props.textForTapShutterToScanHint;
+        }
+        if (props.textForScanningHint !== prevProps.textForScanningHint &&
+            props.textForScanningHint !== undefined) {
+            this.textForScanningHint = props.textForScanningHint;
+        }
+        if (props.textForMoveCloserAndRescanHint !== prevProps.textForMoveCloserAndRescanHint &&
+            props.textForMoveCloserAndRescanHint !== undefined) {
+            this.textForMoveCloserAndRescanHint = props.textForMoveCloserAndRescanHint;
+        }
+        if (props.textForMoveFurtherAndRescanHint !== prevProps.textForMoveFurtherAndRescanHint &&
+            props.textForMoveFurtherAndRescanHint !== undefined) {
+            this.textForMoveFurtherAndRescanHint = props.textForMoveFurtherAndRescanHint;
+        }
+        if (props.textForTapToUncountHint !== prevProps.textForTapToUncountHint &&
+            props.textForTapToUncountHint !== undefined) {
+            this.textForTapToUncountHint = props.textForTapToUncountHint;
+        }
+        // Update other objects
+        if (props.torchControlPosition !== prevProps.torchControlPosition &&
+            props.torchControlPosition !== undefined) {
+            this.torchControlPosition = props.torchControlPosition;
+        }
+        if (props.barcodeNotInListActionSettings !== prevProps.barcodeNotInListActionSettings &&
+            props.barcodeNotInListActionSettings !== undefined) {
+            this.barcodeNotInListActionSettings = props.barcodeNotInListActionSettings;
+        }
+        if (props.viewStyle !== prevProps.viewStyle) {
+            this._viewStyle = props.viewStyle;
+            this.updateNative();
+        }
     }
 }
 __decorate([
     ignoreFromSerialization
-], BaseBarcodeCountView.prototype, "isViewCreated", undefined);
-__decorate([
-    ignoreFromSerialization
-], BaseBarcodeCountView.prototype, "autoCreateNativeView", undefined);
+], BaseBarcodeCountView.prototype, "isViewCreated", void 0);
 __decorate([
     ignoreFromSerialization
 ], BaseBarcodeCountView, "barcodeCountDefaults", null);
@@ -5929,10 +6753,10 @@ class BarcodeFilterHighlightSettingsBrush extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('highlightType')
-], BarcodeFilterHighlightSettingsBrush.prototype, "_highlightType", undefined);
+], BarcodeFilterHighlightSettingsBrush.prototype, "_highlightType", void 0);
 __decorate([
     nameForSerialization('brush')
-], BarcodeFilterHighlightSettingsBrush.prototype, "_brush", undefined);
+], BarcodeFilterHighlightSettingsBrush.prototype, "_brush", void 0);
 
 class BarcodeFilterSettings extends DefaultSerializeable {
     get excludeEan13() {
@@ -5989,19 +6813,19 @@ class BarcodeFilterSettings extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('excludeEan13')
-], BarcodeFilterSettings.prototype, "_excludeEan13", undefined);
+], BarcodeFilterSettings.prototype, "_excludeEan13", void 0);
 __decorate([
     nameForSerialization('excludeUpca')
-], BarcodeFilterSettings.prototype, "_excludeUpca", undefined);
+], BarcodeFilterSettings.prototype, "_excludeUpca", void 0);
 __decorate([
     nameForSerialization('excludedCodesRegex')
-], BarcodeFilterSettings.prototype, "_excludedCodesRegex", undefined);
+], BarcodeFilterSettings.prototype, "_excludedCodesRegex", void 0);
 __decorate([
     nameForSerialization('excludedSymbolCounts')
-], BarcodeFilterSettings.prototype, "_excludedSymbolCounts", undefined);
+], BarcodeFilterSettings.prototype, "_excludedSymbolCounts", void 0);
 __decorate([
     nameForSerialization('excludedSymbologies')
-], BarcodeFilterSettings.prototype, "_excludedSymbologies", undefined);
+], BarcodeFilterSettings.prototype, "_excludedSymbologies", void 0);
 
 function getBarcodeCountDefaults() {
     return FactoryMaker.getInstance('BarcodeCountDefaults');
@@ -6043,7 +6867,7 @@ class BarcodeCaptureSession {
         session._newlyLocalizedBarcodes = sessionJson.newlyLocalizedBarcodes
             .map(LocalizedOnlyBarcode.fromJSON);
         session._frameSequenceID = sessionJson.frameSequenceId;
-        session.frameId = (_a = json.frameId) !== null && _a !== undefined ? _a : '';
+        session.frameId = (_a = json.frameId) !== null && _a !== void 0 ? _a : '';
         return session;
     }
     reset() {
@@ -6064,6 +6888,27 @@ class BarcodeCaptureListenerController extends BaseNewController {
     }
     constructor() {
         super('BarcodeCaptureListenerProxy');
+        this.isListeningForEvents = false;
+        this.handleDidUpdateSession = (ev) => __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('BarcodeCaptureListenerController.subscribeListener: didUpdateSession payload is null');
+                return;
+            }
+            const session = BarcodeCaptureSession.fromJSON(payload);
+            yield this.notifyListenersOfDidUpdateSession(session);
+            this._proxy.$finishBarcodeCaptureDidUpdateSession({ enabled: this.barcodeCapture.isEnabled });
+        });
+        this.handleDidScan = (ev) => __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('BarcodeCaptureListenerController.subscribeListener: didScan payload is null');
+                return;
+            }
+            const session = BarcodeCaptureSession.fromJSON(payload);
+            yield this.notifyListenersOfDidScan(session);
+            this._proxy.$finishBarcodeCaptureDidScan({ enabled: this.barcodeCapture.isEnabled });
+        });
     }
     reset() {
         return this._proxy.$resetBarcodeCaptureSession();
@@ -6081,34 +6926,31 @@ class BarcodeCaptureListenerController extends BaseNewController {
         return this._proxy.$updateBarcodeCaptureOverlay({ overlayJson: JSON.stringify(overlay.toJSON()) });
     }
     subscribeListener() {
+        if (this.isListeningForEvents) {
+            return;
+        }
+        this._proxy.subscribeForEvents(Object.values(BarcodeCaptureListenerEvents));
         this._proxy.$registerBarcodeCaptureListenerForEvents();
-        this._proxy.on$didUpdateSession = (ev) => __awaiter(this, undefined, undefined, function* () {
-            const payload = EventDataParser.parse(ev.data);
-            if (payload === null) {
-                console.error('BarcodeCaptureListenerController.subscribeListener: didUpdateSession payload is null');
-                return;
-            }
-            const session = BarcodeCaptureSession.fromJSON(payload);
-            yield this.notifyListenersOfDidUpdateSession(session);
-            this._proxy.$finishBarcodeCaptureDidUpdateSession({ enabled: this.barcodeCapture.isEnabled });
-        });
-        this._proxy.on$didScan = (ev) => __awaiter(this, undefined, undefined, function* () {
-            const payload = EventDataParser.parse(ev.data);
-            if (payload === null) {
-                console.error('BarcodeCaptureListenerController.subscribeListener: didScan payload is null');
-                return;
-            }
-            const session = BarcodeCaptureSession.fromJSON(payload);
-            yield this.notifyListenersOfDidScan(session);
-            this._proxy.$finishBarcodeCaptureDidScan({ enabled: this.barcodeCapture.isEnabled });
-        });
+        this._proxy.eventEmitter.on(BarcodeCaptureListenerEvents.didUpdateSession, this.handleDidUpdateSession);
+        this._proxy.eventEmitter.on(BarcodeCaptureListenerEvents.didScan, this.handleDidScan);
+        this.isListeningForEvents = true;
     }
     unsubscribeListener() {
+        if (!this.isListeningForEvents) {
+            return;
+        }
         this._proxy.$unregisterBarcodeCaptureListenerForEvents();
+        this._proxy.unsubscribeFromEvents(Object.values(BarcodeCaptureListenerEvents));
+        this._proxy.eventEmitter.off(BarcodeCaptureListenerEvents.didUpdateSession, this.handleDidUpdateSession);
+        this._proxy.eventEmitter.off(BarcodeCaptureListenerEvents.didScan, this.handleDidScan);
+        this.isListeningForEvents = false;
+    }
+    dispose() {
+        this.unsubscribeListener();
         this._proxy.dispose();
     }
     notifyListenersOfDidUpdateSession(session) {
-        return __awaiter(this, undefined, undefined, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             const mode = this.barcodeCapture;
             for (const listener of mode.listeners) {
                 if (listener.didUpdateSession) {
@@ -6118,7 +6960,7 @@ class BarcodeCaptureListenerController extends BaseNewController {
         });
     }
     notifyListenersOfDidScan(session) {
-        return __awaiter(this, undefined, undefined, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             const mode = this.barcodeCapture;
             for (const listener of mode.listeners) {
                 if (listener.didScan) {
@@ -6200,22 +7042,30 @@ class BarcodeCapture extends DefaultSerializeable {
 }
 __decorate([
     ignoreFromSerialization
-], BarcodeCapture.prototype, "_isEnabled", undefined);
+], BarcodeCapture.prototype, "_isEnabled", void 0);
 __decorate([
     nameForSerialization('feedback')
-], BarcodeCapture.prototype, "_feedback", undefined);
+], BarcodeCapture.prototype, "_feedback", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCapture.prototype, "privateContext", undefined);
+], BarcodeCapture.prototype, "privateContext", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCapture.prototype, "listeners", undefined);
+], BarcodeCapture.prototype, "listeners", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCapture.prototype, "controller", undefined);
+], BarcodeCapture.prototype, "controller", void 0);
 __decorate([
     ignoreFromSerialization
 ], BarcodeCapture, "barcodeCaptureDefaults", null);
+
+/**
+ * @deprecated BarcodeCaptureOverlayStyle is deprecated and will be removed in a future release.
+ */
+var BarcodeCaptureOverlayStyle;
+(function (BarcodeCaptureOverlayStyle) {
+    BarcodeCaptureOverlayStyle["Frame"] = "frame";
+})(BarcodeCaptureOverlayStyle || (BarcodeCaptureOverlayStyle = {}));
 
 class BarcodeCaptureOverlay extends DefaultSerializeable {
     static get barcodeCaptureDefaults() {
@@ -6248,6 +7098,9 @@ class BarcodeCaptureOverlay extends DefaultSerializeable {
         this._shouldShowScanAreaGuides = shouldShow;
         this.barcodeCapture.controller.updateBarcodeCaptureOverlay(this);
     }
+    /**
+     * @deprecated The style property is deprecated and will be removed in a future release.
+     */
     get style() {
         return this._style;
     }
@@ -6255,8 +7108,11 @@ class BarcodeCaptureOverlay extends DefaultSerializeable {
         return BarcodeCaptureOverlay.withBarcodeCaptureForView(barcodeCapture, null);
     }
     static withBarcodeCaptureForView(barcodeCapture, view) {
-        return this.withBarcodeCaptureForViewWithStyle(barcodeCapture, view, BarcodeCaptureOverlay.barcodeCaptureDefaults.BarcodeCaptureOverlay.defaultStyle);
+        return this.withBarcodeCaptureForViewWithStyle(barcodeCapture, view, BarcodeCaptureOverlayStyle.Frame);
     }
+    /**
+     * @deprecated withBarcodeCaptureForViewWithStyle is deprecated and will be removed in a future release. Use the version without style parameter instead.
+     */
     static withBarcodeCaptureForViewWithStyle(barcodeCapture, view, style) {
         const overlay = new BarcodeCaptureOverlay();
         overlay.barcodeCapture = barcodeCapture;
@@ -6284,34 +7140,29 @@ class BarcodeCaptureOverlay extends DefaultSerializeable {
 }
 __decorate([
     ignoreFromSerialization
-], BarcodeCaptureOverlay.prototype, "barcodeCapture", undefined);
+], BarcodeCaptureOverlay.prototype, "barcodeCapture", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCaptureOverlay.prototype, "view", undefined);
+], BarcodeCaptureOverlay.prototype, "view", void 0);
 __decorate([
     nameForSerialization('shouldShowScanAreaGuides')
-], BarcodeCaptureOverlay.prototype, "_shouldShowScanAreaGuides", undefined);
+], BarcodeCaptureOverlay.prototype, "_shouldShowScanAreaGuides", void 0);
 __decorate([
     serializationDefault(NoViewfinder),
     nameForSerialization('viewfinder')
-], BarcodeCaptureOverlay.prototype, "_viewfinder", undefined);
+], BarcodeCaptureOverlay.prototype, "_viewfinder", void 0);
 __decorate([
     nameForSerialization('style')
-], BarcodeCaptureOverlay.prototype, "_style", undefined);
+], BarcodeCaptureOverlay.prototype, "_style", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCaptureOverlay.prototype, "eventEmitter", undefined);
+], BarcodeCaptureOverlay.prototype, "eventEmitter", void 0);
 __decorate([
     nameForSerialization('brush')
-], BarcodeCaptureOverlay.prototype, "_brush", undefined);
+], BarcodeCaptureOverlay.prototype, "_brush", void 0);
 __decorate([
     ignoreFromSerialization
 ], BarcodeCaptureOverlay, "barcodeCaptureDefaults", null);
-
-var BarcodeCaptureOverlayStyle;
-(function (BarcodeCaptureOverlayStyle) {
-    BarcodeCaptureOverlayStyle["Frame"] = "frame";
-})(BarcodeCaptureOverlayStyle || (BarcodeCaptureOverlayStyle = {}));
 
 class BarcodeCaptureSettings extends DefaultSerializeable {
     get enabledSymbologies() {
@@ -6382,13 +7233,13 @@ class BarcodeCaptureSettings extends DefaultSerializeable {
 }
 __decorate([
     serializationDefault(NoneLocationSelection)
-], BarcodeCaptureSettings.prototype, "locationSelection", undefined);
+], BarcodeCaptureSettings.prototype, "locationSelection", void 0);
 __decorate([
     nameForSerialization('codeDuplicateFilter')
-], BarcodeCaptureSettings.prototype, "_codeDuplicateFilter", undefined);
+], BarcodeCaptureSettings.prototype, "_codeDuplicateFilter", void 0);
 __decorate([
     nameForSerialization('arucoDictionary')
-], BarcodeCaptureSettings.prototype, "_arucoDictionary", undefined);
+], BarcodeCaptureSettings.prototype, "_arucoDictionary", void 0);
 __decorate([
     ignoreFromSerialization
 ], BarcodeCaptureSettings, "barcodeDefaults", null);
@@ -6396,20 +7247,20 @@ __decorate([
     ignoreFromSerialization
 ], BarcodeCaptureSettings, "barcodeCaptureDefaults", null);
 
-class BarcodeCheckFeedback extends DefaultSerializeable {
+class BarcodeArFeedback extends DefaultSerializeable {
     static get defaultFeedback() {
-        const feedback = new BarcodeCheckFeedback();
-        feedback.scanned = BarcodeCheckFeedback.barcodeCheckDefaults.Feedback.scanned;
-        feedback.tapped = BarcodeCheckFeedback.barcodeCheckDefaults.Feedback.tapped;
+        const feedback = new BarcodeArFeedback();
+        feedback.scanned = BarcodeArFeedback.barcodeArDefaults.Feedback.scanned;
+        feedback.tapped = BarcodeArFeedback.barcodeArDefaults.Feedback.tapped;
         return feedback;
     }
-    static get barcodeCheckDefaults() {
-        return getBarcodeCheckDefaults();
+    static get barcodeArDefaults() {
+        return getBarcodeArDefaults();
     }
     static fromJSON(json) {
         const scanned = Feedback.fromJSON(json.scanned);
         const tapped = Feedback.fromJSON(json.tapped);
-        const feedback = new BarcodeCheckFeedback();
+        const feedback = new BarcodeArFeedback();
         feedback.scanned = scanned;
         feedback.tapped = tapped;
         return feedback;
@@ -6430,171 +7281,56 @@ class BarcodeCheckFeedback extends DefaultSerializeable {
     }
     updateFeedback() {
         var _a;
-        (_a = this.listenerController) === null || _a === undefined ? undefined : _a.updateFeedback(JSON.stringify(this.toJSON()));
+        (_a = this.controller) === null || _a === void 0 ? void 0 : _a.updateFeedback(JSON.stringify(this.toJSON()));
     }
     constructor() {
         super();
-        this.listenerController = null;
-        this._scanned = BarcodeCheckFeedback.barcodeCheckDefaults.Feedback.scanned;
-        this._tapped = BarcodeCheckFeedback.barcodeCheckDefaults.Feedback.tapped;
+        this.controller = null;
+        this._scanned = BarcodeArFeedback.barcodeArDefaults.Feedback.scanned;
+        this._tapped = BarcodeArFeedback.barcodeArDefaults.Feedback.tapped;
         this.scanned = new Feedback(null, null);
         this.tapped = new Feedback(null, null);
     }
 }
 __decorate([
     ignoreFromSerialization
-], BarcodeCheckFeedback.prototype, "listenerController", undefined);
+], BarcodeArFeedback.prototype, "controller", void 0);
 __decorate([
     nameForSerialization('scanned')
-], BarcodeCheckFeedback.prototype, "_scanned", undefined);
+], BarcodeArFeedback.prototype, "_scanned", void 0);
 __decorate([
     nameForSerialization('tapped')
-], BarcodeCheckFeedback.prototype, "_tapped", undefined);
+], BarcodeArFeedback.prototype, "_tapped", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCheckFeedback, "barcodeCheckDefaults", null);
+], BarcodeArFeedback, "barcodeArDefaults", null);
 
-class BarcodeCheckSessionController {
-    get _proxy() {
-        return FactoryMaker.getInstance('BarcodeCheckSessionProxy');
+class BarcodeAr extends DefaultSerializeable {
+    get controller() {
+        return this._controller;
     }
-    resetSession() {
-        return this._proxy.resetSession();
+    set controller(newController) {
+        this._controller = newController;
+        this._feedback.controller = this.controller;
     }
-}
-
-class BarcodeCheckSession extends DefaultSerializeable {
-    static fromJSON(json) {
-        const sessionJson = JSON.parse(json);
-        const session = new BarcodeCheckSession();
-        session._addedTrackedBarcodes = sessionJson.addedTrackedBarcodes
-            .map((trackedBarcodeJSON) => {
-            return TrackedBarcode
-                .fromJSON(trackedBarcodeJSON, sessionJson.frameSequenceId);
-        });
-        session._removedTrackedBarcodes = sessionJson.removedTrackedBarcodes;
-        session._trackedBarcodes = Object.keys(sessionJson.allTrackedBarcodes)
-            .reduce((trackedBarcodes, identifier) => {
-            trackedBarcodes[identifier] = TrackedBarcode
-                .fromJSON(sessionJson.allTrackedBarcodes[identifier], sessionJson.frameSequenceId);
-            return trackedBarcodes;
-        }, {});
-        return session;
-    }
-    constructor() {
-        super();
-        this.sessionController = new BarcodeCheckSessionController();
-    }
-    get addedTrackedBarcodes() {
-        return this._addedTrackedBarcodes;
-    }
-    get removedTrackedBarcodes() {
-        return this._removedTrackedBarcodes;
-    }
-    get trackedBarcodes() {
-        return this._trackedBarcodes;
-    }
-    reset() {
-        return this.sessionController.resetSession();
-    }
-}
-__decorate([
-    nameForSerialization('addedTrackedBarcodes')
-], BarcodeCheckSession.prototype, "_addedTrackedBarcodes", undefined);
-__decorate([
-    nameForSerialization('removedTrackedBarcodes')
-], BarcodeCheckSession.prototype, "_removedTrackedBarcodes", undefined);
-__decorate([
-    nameForSerialization('trackedBarcodes')
-], BarcodeCheckSession.prototype, "_trackedBarcodes", undefined);
-__decorate([
-    ignoreFromSerialization
-], BarcodeCheckSession.prototype, "sessionController", undefined);
-
-var BarcodeCheckListenerEvents;
-(function (BarcodeCheckListenerEvents) {
-    BarcodeCheckListenerEvents["didUpdateSession"] = "BarcodeCheckListener.didUpdateSession";
-})(BarcodeCheckListenerEvents || (BarcodeCheckListenerEvents = {}));
-class BarcodeCheckListenerController {
-    constructor() {
-        this.eventEmitter = FactoryMaker.getInstance('EventEmitter');
-    }
-    static forBarcodeCheck(barcodeCheck) {
-        const controller = new BarcodeCheckListenerController();
-        controller.barcodeCheck = barcodeCheck;
-        return controller;
-    }
-    update() {
-        const barcodeCheck = this.barcodeCheck.toJSON();
-        const json = JSON.stringify(barcodeCheck);
-        return this._proxy.updateMode(json);
-    }
-    reset() {
-        return this._proxy.resetBarcodeCheck();
-    }
-    setModeEnabledState(enabled) {
-        this._proxy.setModeEnabledState(enabled);
-    }
-    subscribeListener() {
-        var _a, _b;
-        this._proxy.registerBarcodeCheckListener();
-        (_b = (_a = this._proxy).subscribeDidUpdateSession) === null || _b === undefined ? undefined : _b.call(_a);
-        this.eventEmitter.on(BarcodeCheckListenerEvents.didUpdateSession, (data) => __awaiter(this, undefined, undefined, function* () {
-            const payload = EventDataParser.parse(data);
-            if (payload === null) {
-                console.error('BarcodeCheckListenerController didUpdateSession payload is null');
-                return;
-            }
-            const session = BarcodeCheckSession.fromJSON(payload.session);
-            yield this.notifyListenersOfDidUpdateSession(session, payload.frameId);
-            this._proxy.finishOnDidUpdateSession();
-        }));
-    }
-    unsubscribeListener() {
-        this._proxy.unregisterBarcodeCheckListener();
-        this.eventEmitter.removeAllListeners(BarcodeCheckListenerEvents.didUpdateSession);
-    }
-    updateFeedback(feedbackJson) {
-        this._proxy.updateFeedback(feedbackJson);
-    }
-    get _proxy() {
-        return FactoryMaker.getInstance('BarcodeCheckListenerProxy');
-    }
-    notifyListenersOfDidUpdateSession(session, frameId) {
-        return __awaiter(this, undefined, undefined, function* () {
-            const mode = this.barcodeCheck;
-            mode.isInListenerCallback = true;
-            for (const listener of mode.listeners) {
-                if (listener.didUpdateSession) {
-                    yield listener.didUpdateSession(this.barcodeCheck, session, () => CameraController.getFrame(frameId));
-                }
-            }
-            mode.isInListenerCallback = false;
-        });
-    }
-}
-
-class BarcodeCheck extends DefaultSerializeable {
-    static get barcodeCheckDefaults() {
-        return getBarcodeCheckDefaults();
+    static get barcodeArDefaults() {
+        return getBarcodeArDefaults();
     }
     static get recommendedCameraSettings() {
-        return BarcodeCheck.barcodeCheckDefaults.RecommendedCameraSettings;
+        return BarcodeAr.barcodeArDefaults.RecommendedCameraSettings;
     }
     static forContext(context, settings) {
-        return new BarcodeCheck(context, settings);
+        return new BarcodeAr(context, settings);
     }
     constructor(context, settings) {
         super();
-        this.type = 'barcodeCheck';
+        this.type = 'barcodeAr';
         this.privateContext = null;
-        this.isInListenerCallback = false;
-        this._feedback = BarcodeCheckFeedback.defaultFeedback;
+        this._feedback = BarcodeArFeedback.defaultFeedback;
         this.listeners = [];
+        this._controller = null;
         this._context = context;
         this._settings = settings;
-        this.listenerController = BarcodeCheckListenerController.forBarcodeCheck(this);
-        this._feedback.listenerController = this.listenerController;
     }
     applySettings(settings) {
         this._settings = settings;
@@ -6609,7 +7345,7 @@ class BarcodeCheck extends DefaultSerializeable {
     }
     checkAndSubscribeListeners() {
         if (this.listeners.length === 0) {
-            this.listenerController.subscribeListener();
+            this.subscribeNativeListeners();
         }
     }
     removeListener(listener) {
@@ -6621,17 +7357,20 @@ class BarcodeCheck extends DefaultSerializeable {
     }
     checkAndUnsubscribeListeners() {
         if (this.listeners.length === 0) {
-            this.listenerController.unsubscribeListener();
+            this.unsubscribeNativeListeners();
         }
     }
     subscribeNativeListeners() {
-        this.listenerController.subscribeListener();
+        var _a;
+        (_a = this.controller) === null || _a === void 0 ? void 0 : _a.registerModeListener();
     }
     unsubscribeNativeListeners() {
-        this.listenerController.unsubscribeListener();
+        var _a;
+        (_a = this.controller) === null || _a === void 0 ? void 0 : _a.unregisterModeListener();
     }
     didChange() {
-        return this.listenerController.update();
+        var _a, _b;
+        return (_b = (_a = this.controller) === null || _a === void 0 ? void 0 : _a.updateMode()) !== null && _b !== void 0 ? _b : Promise.resolve();
     }
     get _context() {
         return this.privateContext;
@@ -6643,45 +7382,47 @@ class BarcodeCheck extends DefaultSerializeable {
         return this._feedback;
     }
     set feedback(feedback) {
+        var _a;
         this._feedback = feedback;
-        this._feedback.listenerController = this.listenerController;
-        this.listenerController.updateFeedback(JSON.stringify(feedback.toJSON()));
+        this._feedback.controller = this.controller;
+        (_a = this.controller) === null || _a === void 0 ? void 0 : _a.updateFeedback(JSON.stringify(feedback.toJSON()));
+    }
+    toJSON() {
+        const json = Object.assign(Object.assign({}, super.toJSON()), { hasModeListener: this.listeners.length > 0 });
+        return json;
     }
 }
 __decorate([
     ignoreFromSerialization
-], BarcodeCheck.prototype, "privateContext", undefined);
-__decorate([
-    ignoreFromSerialization
-], BarcodeCheck.prototype, "listenerController", undefined);
-__decorate([
-    ignoreFromSerialization
-], BarcodeCheck.prototype, "isInListenerCallback", undefined);
+], BarcodeAr.prototype, "privateContext", void 0);
 __decorate([
     nameForSerialization('feedback')
-], BarcodeCheck.prototype, "_feedback", undefined);
+], BarcodeAr.prototype, "_feedback", void 0);
 __decorate([
     nameForSerialization('settings')
-], BarcodeCheck.prototype, "_settings", undefined);
+], BarcodeAr.prototype, "_settings", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCheck.prototype, "listeners", undefined);
+], BarcodeAr.prototype, "listeners", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCheck, "barcodeCheckDefaults", null);
+], BarcodeAr.prototype, "_controller", void 0);
+__decorate([
+    ignoreFromSerialization
+], BarcodeAr, "barcodeArDefaults", null);
 
-class BarcodeCheckCircleHighlight extends Observable {
-    static get barcodeCheckDefaults() {
-        return getBarcodeCheckDefaults();
+class BarcodeArCircleHighlight extends Observable {
+    static get barcodeArDefaults() {
+        return getBarcodeArDefaults();
     }
     constructor(barcode, preset) {
         super();
-        this._type = 'barcodeCheckCircleHighlight';
+        this._type = 'barcodeArCircleHighlight';
         this._barcode = barcode;
         this._preset = preset;
-        this._brush = BarcodeCheckCircleHighlight.barcodeCheckDefaults.BarcodeCheckView.circleHighlightPresets[preset].brush;
-        this._size = BarcodeCheckCircleHighlight.barcodeCheckDefaults.BarcodeCheckView.circleHighlightPresets[preset].size;
-        this._icon = BarcodeCheckCircleHighlight.barcodeCheckDefaults.BarcodeCheckView.defaultHighlightIcon;
+        this._brush = BarcodeArCircleHighlight.barcodeArDefaults.BarcodeArView.circleHighlightPresets[preset].brush;
+        this._size = BarcodeArCircleHighlight.barcodeArDefaults.BarcodeArView.circleHighlightPresets[preset].size;
+        this._icon = BarcodeArCircleHighlight.barcodeArDefaults.BarcodeArView.defaultHighlightIcon;
     }
     get barcode() {
         return this._barcode;
@@ -6710,49 +7451,49 @@ class BarcodeCheckCircleHighlight extends Observable {
 }
 __decorate([
     nameForSerialization('type')
-], BarcodeCheckCircleHighlight.prototype, "_type", undefined);
+], BarcodeArCircleHighlight.prototype, "_type", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCheckCircleHighlight.prototype, "_barcode", undefined);
+], BarcodeArCircleHighlight.prototype, "_barcode", void 0);
 __decorate([
     nameForSerialization('brush')
-], BarcodeCheckCircleHighlight.prototype, "_brush", undefined);
+], BarcodeArCircleHighlight.prototype, "_brush", void 0);
 __decorate([
     nameForSerialization('icon')
-], BarcodeCheckCircleHighlight.prototype, "_icon", undefined);
+], BarcodeArCircleHighlight.prototype, "_icon", void 0);
 __decorate([
     nameForSerialization('preset')
-], BarcodeCheckCircleHighlight.prototype, "_preset", undefined);
+], BarcodeArCircleHighlight.prototype, "_preset", void 0);
 __decorate([
     nameForSerialization('size')
-], BarcodeCheckCircleHighlight.prototype, "_size", undefined);
+], BarcodeArCircleHighlight.prototype, "_size", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCheckCircleHighlight, "barcodeCheckDefaults", null);
+], BarcodeArCircleHighlight, "barcodeArDefaults", null);
 
-class BarcodeCheckInfoAnnotation extends Observable {
-    static get barcodeCheckDefaults() {
-        return getBarcodeCheckDefaults();
+class BarcodeArInfoAnnotation extends Observable {
+    static get barcodeArDefaults() {
+        return getBarcodeArDefaults();
     }
     constructor(barcode) {
         super();
-        this._type = 'barcodeCheckInfoAnnotation';
-        this._annotationTrigger = BarcodeCheckInfoAnnotation.barcodeCheckDefaults
-            .BarcodeCheckView.defaultInfoAnnotationTrigger;
-        this._anchor = BarcodeCheckInfoAnnotation.barcodeCheckDefaults
-            .BarcodeCheckView.defaultInfoAnnotationAnchor;
-        this._backgroundColor = BarcodeCheckInfoAnnotation.barcodeCheckDefaults
-            .BarcodeCheckView.defaultInfoAnnotationBackgroundColor;
+        this._type = 'barcodeArInfoAnnotation';
+        this._annotationTrigger = BarcodeArInfoAnnotation.barcodeArDefaults
+            .BarcodeArView.defaultInfoAnnotationTrigger;
+        this._anchor = BarcodeArInfoAnnotation.barcodeArDefaults
+            .BarcodeArView.defaultInfoAnnotationAnchor;
+        this._backgroundColor = BarcodeArInfoAnnotation.barcodeArDefaults
+            .BarcodeArView.defaultInfoAnnotationBackgroundColor;
         this._body = [];
         this._footer = null;
-        this._hasTip = BarcodeCheckInfoAnnotation.barcodeCheckDefaults
-            .BarcodeCheckView.defaultInfoAnnotationHasTip;
+        this._hasTip = BarcodeArInfoAnnotation.barcodeArDefaults
+            .BarcodeArView.defaultInfoAnnotationHasTip;
         this._header = null;
-        this._isEntireAnnotationTappable = BarcodeCheckInfoAnnotation.barcodeCheckDefaults
-            .BarcodeCheckView.defaultInfoAnnotationEntireAnnotationTappable;
+        this._isEntireAnnotationTappable = BarcodeArInfoAnnotation.barcodeArDefaults
+            .BarcodeArView.defaultInfoAnnotationEntireAnnotationTappable;
         this._listener = null;
         this._hasListener = false;
-        this._width = BarcodeCheckInfoAnnotation.barcodeCheckDefaults.BarcodeCheckView.defaultInfoAnnotationWidth;
+        this._width = BarcodeArInfoAnnotation.barcodeArDefaults.BarcodeArView.defaultInfoAnnotationWidth;
         this.footerChangedListener = () => {
             this.notifyListeners('footer', this._footer);
         };
@@ -6802,9 +7543,9 @@ class BarcodeCheckInfoAnnotation extends Observable {
     }
     set footer(newValue) {
         var _a, _b;
-        (_a = this._footer) === null || _a === undefined ? undefined : _a.removeListener(this.footerChangedListener);
+        (_a = this._footer) === null || _a === void 0 ? void 0 : _a.removeListener(this.footerChangedListener);
         this._footer = newValue;
-        (_b = this._footer) === null || _b === undefined ? undefined : _b.addListener(this.footerChangedListener);
+        (_b = this._footer) === null || _b === void 0 ? void 0 : _b.addListener(this.footerChangedListener);
         this.notifyListeners('footer', newValue);
     }
     get hasTip() {
@@ -6819,9 +7560,9 @@ class BarcodeCheckInfoAnnotation extends Observable {
     }
     set header(newValue) {
         var _a, _b;
-        (_a = this._header) === null || _a === undefined ? undefined : _a.removeListener(this.headerChangedListener);
+        (_a = this._header) === null || _a === void 0 ? void 0 : _a.removeListener(this.headerChangedListener);
         this._header = newValue;
-        (_b = this._header) === null || _b === undefined ? undefined : _b.addListener(this.headerChangedListener);
+        (_b = this._header) === null || _b === void 0 ? void 0 : _b.addListener(this.headerChangedListener);
         this.notifyListeners('header', newValue);
     }
     get isEntireAnnotationTappable() {
@@ -6849,69 +7590,69 @@ class BarcodeCheckInfoAnnotation extends Observable {
 }
 __decorate([
     ignoreFromSerialization
-], BarcodeCheckInfoAnnotation.prototype, "_barcode", undefined);
+], BarcodeArInfoAnnotation.prototype, "_barcode", void 0);
 __decorate([
     nameForSerialization('type')
-], BarcodeCheckInfoAnnotation.prototype, "_type", undefined);
+], BarcodeArInfoAnnotation.prototype, "_type", void 0);
 __decorate([
     nameForSerialization('annotationTrigger')
-], BarcodeCheckInfoAnnotation.prototype, "_annotationTrigger", undefined);
+], BarcodeArInfoAnnotation.prototype, "_annotationTrigger", void 0);
 __decorate([
     nameForSerialization('anchor')
-], BarcodeCheckInfoAnnotation.prototype, "_anchor", undefined);
+], BarcodeArInfoAnnotation.prototype, "_anchor", void 0);
 __decorate([
     nameForSerialization('backgroundColor')
-], BarcodeCheckInfoAnnotation.prototype, "_backgroundColor", undefined);
+], BarcodeArInfoAnnotation.prototype, "_backgroundColor", void 0);
 __decorate([
     nameForSerialization('body')
-], BarcodeCheckInfoAnnotation.prototype, "_body", undefined);
+], BarcodeArInfoAnnotation.prototype, "_body", void 0);
 __decorate([
     nameForSerialization('footer')
-], BarcodeCheckInfoAnnotation.prototype, "_footer", undefined);
+], BarcodeArInfoAnnotation.prototype, "_footer", void 0);
 __decorate([
     nameForSerialization('hasTip')
-], BarcodeCheckInfoAnnotation.prototype, "_hasTip", undefined);
+], BarcodeArInfoAnnotation.prototype, "_hasTip", void 0);
 __decorate([
     nameForSerialization('header')
-], BarcodeCheckInfoAnnotation.prototype, "_header", undefined);
+], BarcodeArInfoAnnotation.prototype, "_header", void 0);
 __decorate([
     nameForSerialization('isEntireAnnotationTappable')
-], BarcodeCheckInfoAnnotation.prototype, "_isEntireAnnotationTappable", undefined);
+], BarcodeArInfoAnnotation.prototype, "_isEntireAnnotationTappable", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCheckInfoAnnotation.prototype, "_listener", undefined);
+], BarcodeArInfoAnnotation.prototype, "_listener", void 0);
 __decorate([
     nameForSerialization('hasListener')
-], BarcodeCheckInfoAnnotation.prototype, "_hasListener", undefined);
+], BarcodeArInfoAnnotation.prototype, "_hasListener", void 0);
 __decorate([
     nameForSerialization('width')
-], BarcodeCheckInfoAnnotation.prototype, "_width", undefined);
+], BarcodeArInfoAnnotation.prototype, "_width", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCheckInfoAnnotation, "barcodeCheckDefaults", null);
+], BarcodeArInfoAnnotation, "barcodeArDefaults", null);
 
-class BarcodeCheckInfoAnnotationBodyComponent extends Observable {
+class BarcodeArInfoAnnotationBodyComponent extends Observable {
     constructor() {
         super(...arguments);
-        this._isRightIconTappable = BarcodeCheckInfoAnnotationBodyComponent
-            .barcodeCheckDefaults.BarcodeCheckView.defaultInfoAnnotationBodyElementRightIconTappable;
-        this._isLeftIconTappable = BarcodeCheckInfoAnnotationBodyComponent
-            .barcodeCheckDefaults.BarcodeCheckView.defaultInfoAnnotationBodyElementLeftIconTappable;
-        this._rightIcon = BarcodeCheckInfoAnnotationBodyComponent
-            .barcodeCheckDefaults.BarcodeCheckView.defaultInfoAnnotationBodyElementRightIcon;
-        this._leftIcon = BarcodeCheckInfoAnnotationBodyComponent
-            .barcodeCheckDefaults.BarcodeCheckView.defaultInfoAnnotationBodyElementLeftIcon;
-        this._text = BarcodeCheckInfoAnnotationBodyComponent
-            .barcodeCheckDefaults.BarcodeCheckView.defaultInfoAnnotationBodyElementText;
+        this._isRightIconTappable = BarcodeArInfoAnnotationBodyComponent
+            .barcodeArDefaults.BarcodeArView.defaultInfoAnnotationBodyElementRightIconTappable;
+        this._isLeftIconTappable = BarcodeArInfoAnnotationBodyComponent
+            .barcodeArDefaults.BarcodeArView.defaultInfoAnnotationBodyElementLeftIconTappable;
+        this._rightIcon = BarcodeArInfoAnnotationBodyComponent
+            .barcodeArDefaults.BarcodeArView.defaultInfoAnnotationBodyElementRightIcon;
+        this._leftIcon = BarcodeArInfoAnnotationBodyComponent
+            .barcodeArDefaults.BarcodeArView.defaultInfoAnnotationBodyElementLeftIcon;
+        this._text = BarcodeArInfoAnnotationBodyComponent
+            .barcodeArDefaults.BarcodeArView.defaultInfoAnnotationBodyElementText;
         this._textAlign = TextAlignment.Center;
-        this._textColor = BarcodeCheckInfoAnnotationBodyComponent
-            .barcodeCheckDefaults.BarcodeCheckView.defaultInfoAnnotationBodyElementTextColor;
-        this._textSize = BarcodeCheckInfoAnnotationBodyComponent
-            .barcodeCheckDefaults.BarcodeCheckView.defaultInfoAnnotationBodyElementTextSize;
+        this._textColor = BarcodeArInfoAnnotationBodyComponent
+            .barcodeArDefaults.BarcodeArView.defaultInfoAnnotationBodyElementTextColor;
+        this._textSize = BarcodeArInfoAnnotationBodyComponent
+            .barcodeArDefaults.BarcodeArView.defaultInfoAnnotationBodyElementTextSize;
         this._fontFamily = FontFamily.SystemDefault;
     }
-    static get barcodeCheckDefaults() {
-        return getBarcodeCheckDefaults();
+    static get barcodeArDefaults() {
+        return getBarcodeArDefaults();
     }
     get isRightIconTappable() {
         return this._isRightIconTappable;
@@ -6979,51 +7720,51 @@ class BarcodeCheckInfoAnnotationBodyComponent extends Observable {
 }
 __decorate([
     nameForSerialization('isRightIconTappable')
-], BarcodeCheckInfoAnnotationBodyComponent.prototype, "_isRightIconTappable", undefined);
+], BarcodeArInfoAnnotationBodyComponent.prototype, "_isRightIconTappable", void 0);
 __decorate([
     nameForSerialization('isLeftIconTappable')
-], BarcodeCheckInfoAnnotationBodyComponent.prototype, "_isLeftIconTappable", undefined);
+], BarcodeArInfoAnnotationBodyComponent.prototype, "_isLeftIconTappable", void 0);
 __decorate([
     nameForSerialization('rightIcon')
-], BarcodeCheckInfoAnnotationBodyComponent.prototype, "_rightIcon", undefined);
+], BarcodeArInfoAnnotationBodyComponent.prototype, "_rightIcon", void 0);
 __decorate([
     nameForSerialization('leftIcon')
-], BarcodeCheckInfoAnnotationBodyComponent.prototype, "_leftIcon", undefined);
+], BarcodeArInfoAnnotationBodyComponent.prototype, "_leftIcon", void 0);
 __decorate([
     nameForSerialization('text')
-], BarcodeCheckInfoAnnotationBodyComponent.prototype, "_text", undefined);
+], BarcodeArInfoAnnotationBodyComponent.prototype, "_text", void 0);
 __decorate([
     nameForSerialization('textAlign')
-], BarcodeCheckInfoAnnotationBodyComponent.prototype, "_textAlign", undefined);
+], BarcodeArInfoAnnotationBodyComponent.prototype, "_textAlign", void 0);
 __decorate([
     nameForSerialization('textColor')
-], BarcodeCheckInfoAnnotationBodyComponent.prototype, "_textColor", undefined);
+], BarcodeArInfoAnnotationBodyComponent.prototype, "_textColor", void 0);
 __decorate([
     nameForSerialization('textSize')
-], BarcodeCheckInfoAnnotationBodyComponent.prototype, "_textSize", undefined);
+], BarcodeArInfoAnnotationBodyComponent.prototype, "_textSize", void 0);
 __decorate([
     nameForSerialization('fontFamily')
-], BarcodeCheckInfoAnnotationBodyComponent.prototype, "_fontFamily", undefined);
+], BarcodeArInfoAnnotationBodyComponent.prototype, "_fontFamily", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCheckInfoAnnotationBodyComponent, "barcodeCheckDefaults", null);
+], BarcodeArInfoAnnotationBodyComponent, "barcodeArDefaults", null);
 
-class BarcodeCheckInfoAnnotationFooter extends Observable {
-    static get barcodeCheckDefaults() {
-        return getBarcodeCheckDefaults();
+class BarcodeArInfoAnnotationFooter extends Observable {
+    static get barcodeArDefaults() {
+        return getBarcodeArDefaults();
     }
     constructor() {
         super();
-        this._text = BarcodeCheckInfoAnnotationFooter.barcodeCheckDefaults
-            .BarcodeCheckView.defaultInfoAnnotationFooterText;
-        this._icon = BarcodeCheckInfoAnnotationFooter.barcodeCheckDefaults
-            .BarcodeCheckView.defaultInfoAnnotationFooterIcon;
-        this._textSize = BarcodeCheckInfoAnnotationFooter.barcodeCheckDefaults
-            .BarcodeCheckView.defaultInfoAnnotationFooterTextSize;
-        this._textColor = BarcodeCheckInfoAnnotationFooter.barcodeCheckDefaults
-            .BarcodeCheckView.defaultInfoAnnotationFooterTextColor;
-        this._backgroundColor = BarcodeCheckInfoAnnotationFooter.barcodeCheckDefaults
-            .BarcodeCheckView.defaultInfoAnnotationFooterBackgroundColor;
+        this._text = BarcodeArInfoAnnotationFooter.barcodeArDefaults
+            .BarcodeArView.defaultInfoAnnotationFooterText;
+        this._icon = BarcodeArInfoAnnotationFooter.barcodeArDefaults
+            .BarcodeArView.defaultInfoAnnotationFooterIcon;
+        this._textSize = BarcodeArInfoAnnotationFooter.barcodeArDefaults
+            .BarcodeArView.defaultInfoAnnotationFooterTextSize;
+        this._textColor = BarcodeArInfoAnnotationFooter.barcodeArDefaults
+            .BarcodeArView.defaultInfoAnnotationFooterTextColor;
+        this._backgroundColor = BarcodeArInfoAnnotationFooter.barcodeArDefaults
+            .BarcodeArView.defaultInfoAnnotationFooterBackgroundColor;
         this._fontFamily = FontFamily.SystemDefault;
     }
     get text() {
@@ -7071,42 +7812,42 @@ class BarcodeCheckInfoAnnotationFooter extends Observable {
 }
 __decorate([
     nameForSerialization('text')
-], BarcodeCheckInfoAnnotationFooter.prototype, "_text", undefined);
+], BarcodeArInfoAnnotationFooter.prototype, "_text", void 0);
 __decorate([
     nameForSerialization('icon')
-], BarcodeCheckInfoAnnotationFooter.prototype, "_icon", undefined);
+], BarcodeArInfoAnnotationFooter.prototype, "_icon", void 0);
 __decorate([
     nameForSerialization('textSize')
-], BarcodeCheckInfoAnnotationFooter.prototype, "_textSize", undefined);
+], BarcodeArInfoAnnotationFooter.prototype, "_textSize", void 0);
 __decorate([
     nameForSerialization('textColor')
-], BarcodeCheckInfoAnnotationFooter.prototype, "_textColor", undefined);
+], BarcodeArInfoAnnotationFooter.prototype, "_textColor", void 0);
 __decorate([
     nameForSerialization('backgroundColor')
-], BarcodeCheckInfoAnnotationFooter.prototype, "_backgroundColor", undefined);
+], BarcodeArInfoAnnotationFooter.prototype, "_backgroundColor", void 0);
 __decorate([
     nameForSerialization('fontFamily')
-], BarcodeCheckInfoAnnotationFooter.prototype, "_fontFamily", undefined);
+], BarcodeArInfoAnnotationFooter.prototype, "_fontFamily", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCheckInfoAnnotationFooter, "barcodeCheckDefaults", null);
+], BarcodeArInfoAnnotationFooter, "barcodeArDefaults", null);
 
-class BarcodeCheckInfoAnnotationHeader extends Observable {
-    static get barcodeCheckDefaults() {
-        return getBarcodeCheckDefaults();
+class BarcodeArInfoAnnotationHeader extends Observable {
+    static get barcodeArDefaults() {
+        return getBarcodeArDefaults();
     }
     constructor() {
         super();
-        this._text = BarcodeCheckInfoAnnotationHeader.barcodeCheckDefaults
-            .BarcodeCheckView.defaultInfoAnnotationHeaderText;
-        this._icon = BarcodeCheckInfoAnnotationHeader.barcodeCheckDefaults
-            .BarcodeCheckView.defaultInfoAnnotationHeaderIcon;
-        this._textSize = BarcodeCheckInfoAnnotationHeader.barcodeCheckDefaults
-            .BarcodeCheckView.defaultInfoAnnotationHeaderTextSize;
-        this._textColor = BarcodeCheckInfoAnnotationHeader.barcodeCheckDefaults
-            .BarcodeCheckView.defaultInfoAnnotationHeaderTextColor;
-        this._backgroundColor = BarcodeCheckInfoAnnotationHeader.barcodeCheckDefaults
-            .BarcodeCheckView.defaultInfoAnnotationHeaderBackgroundColor;
+        this._text = BarcodeArInfoAnnotationHeader.barcodeArDefaults
+            .BarcodeArView.defaultInfoAnnotationHeaderText;
+        this._icon = BarcodeArInfoAnnotationHeader.barcodeArDefaults
+            .BarcodeArView.defaultInfoAnnotationHeaderIcon;
+        this._textSize = BarcodeArInfoAnnotationHeader.barcodeArDefaults
+            .BarcodeArView.defaultInfoAnnotationHeaderTextSize;
+        this._textColor = BarcodeArInfoAnnotationHeader.barcodeArDefaults
+            .BarcodeArView.defaultInfoAnnotationHeaderTextColor;
+        this._backgroundColor = BarcodeArInfoAnnotationHeader.barcodeArDefaults
+            .BarcodeArView.defaultInfoAnnotationHeaderBackgroundColor;
         this._fontFamily = FontFamily.SystemDefault;
     }
     get text() {
@@ -7154,39 +7895,39 @@ class BarcodeCheckInfoAnnotationHeader extends Observable {
 }
 __decorate([
     nameForSerialization('text')
-], BarcodeCheckInfoAnnotationHeader.prototype, "_text", undefined);
+], BarcodeArInfoAnnotationHeader.prototype, "_text", void 0);
 __decorate([
     nameForSerialization('icon')
-], BarcodeCheckInfoAnnotationHeader.prototype, "_icon", undefined);
+], BarcodeArInfoAnnotationHeader.prototype, "_icon", void 0);
 __decorate([
     nameForSerialization('textSize')
-], BarcodeCheckInfoAnnotationHeader.prototype, "_textSize", undefined);
+], BarcodeArInfoAnnotationHeader.prototype, "_textSize", void 0);
 __decorate([
     nameForSerialization('textColor')
-], BarcodeCheckInfoAnnotationHeader.prototype, "_textColor", undefined);
+], BarcodeArInfoAnnotationHeader.prototype, "_textColor", void 0);
 __decorate([
     nameForSerialization('backgroundColor')
-], BarcodeCheckInfoAnnotationHeader.prototype, "_backgroundColor", undefined);
+], BarcodeArInfoAnnotationHeader.prototype, "_backgroundColor", void 0);
 __decorate([
     nameForSerialization('fontFamily')
-], BarcodeCheckInfoAnnotationHeader.prototype, "_fontFamily", undefined);
+], BarcodeArInfoAnnotationHeader.prototype, "_fontFamily", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCheckInfoAnnotationHeader, "barcodeCheckDefaults", null);
+], BarcodeArInfoAnnotationHeader, "barcodeArDefaults", null);
 
-class BarcodeCheckPopoverAnnotation extends Observable {
-    static get barcodeCheckDefaults() {
-        return getBarcodeCheckDefaults();
+class BarcodeArPopoverAnnotation extends Observable {
+    static get barcodeArDefaults() {
+        return getBarcodeArDefaults();
     }
     constructor(barcode, buttons) {
         super();
-        this._type = 'barcodeCheckPopoverAnnotation';
-        this._isEntirePopoverTappable = BarcodeCheckPopoverAnnotation.barcodeCheckDefaults
-            .BarcodeCheckView.defaultIsEntirePopoverTappable;
+        this._type = 'barcodeArPopoverAnnotation';
+        this._isEntirePopoverTappable = BarcodeArPopoverAnnotation.barcodeArDefaults
+            .BarcodeArView.defaultIsEntirePopoverTappable;
         this._listener = null;
         this._hasListener = false;
-        this._annotationTrigger = BarcodeCheckPopoverAnnotation.barcodeCheckDefaults
-            .BarcodeCheckView.defaultInfoAnnotationTrigger;
+        this._annotationTrigger = BarcodeArPopoverAnnotation.barcodeArDefaults
+            .BarcodeArView.defaultInfoAnnotationTrigger;
         this.buttonChangedListener = (property, index) => {
             this.notifyListeners(property, index);
         };
@@ -7194,7 +7935,7 @@ class BarcodeCheckPopoverAnnotation extends Observable {
         this._buttons = buttons;
         for (const button of buttons) {
             button.addListener(() => {
-                this.buttonChangedListener('BarcodeCheckPopoverAnnotation.button', buttons.indexOf(button));
+                this.buttonChangedListener('BarcodeArPopoverAnnotation.button', buttons.indexOf(button));
             });
         }
     }
@@ -7229,39 +7970,39 @@ class BarcodeCheckPopoverAnnotation extends Observable {
 }
 __decorate([
     nameForSerialization('type')
-], BarcodeCheckPopoverAnnotation.prototype, "_type", undefined);
+], BarcodeArPopoverAnnotation.prototype, "_type", void 0);
 __decorate([
     nameForSerialization('isEntirePopoverTappable')
-], BarcodeCheckPopoverAnnotation.prototype, "_isEntirePopoverTappable", undefined);
+], BarcodeArPopoverAnnotation.prototype, "_isEntirePopoverTappable", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCheckPopoverAnnotation.prototype, "_listener", undefined);
+], BarcodeArPopoverAnnotation.prototype, "_listener", void 0);
 __decorate([
     nameForSerialization('hasListener')
-], BarcodeCheckPopoverAnnotation.prototype, "_hasListener", undefined);
+], BarcodeArPopoverAnnotation.prototype, "_hasListener", void 0);
 __decorate([
     nameForSerialization('annotationTrigger')
-], BarcodeCheckPopoverAnnotation.prototype, "_annotationTrigger", undefined);
+], BarcodeArPopoverAnnotation.prototype, "_annotationTrigger", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCheckPopoverAnnotation.prototype, "_barcode", undefined);
+], BarcodeArPopoverAnnotation.prototype, "_barcode", void 0);
 __decorate([
     nameForSerialization('buttons')
-], BarcodeCheckPopoverAnnotation.prototype, "_buttons", undefined);
+], BarcodeArPopoverAnnotation.prototype, "_buttons", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCheckPopoverAnnotation, "barcodeCheckDefaults", null);
+], BarcodeArPopoverAnnotation, "barcodeArDefaults", null);
 
-class BarcodeCheckPopoverAnnotationButton extends Observable {
-    static get barcodeCheckDefaults() {
-        return getBarcodeCheckDefaults();
+class BarcodeArPopoverAnnotationButton extends Observable {
+    static get barcodeArDefaults() {
+        return getBarcodeArDefaults();
     }
     constructor(icon, text) {
         super();
-        this._textColor = BarcodeCheckPopoverAnnotationButton
-            .barcodeCheckDefaults.BarcodeCheckView.defaultBarcodeCheckPopoverAnnotationButtonTextColor;
-        this._textSize = BarcodeCheckPopoverAnnotationButton
-            .barcodeCheckDefaults.BarcodeCheckView.defaultBarcodeCheckPopoverAnnotationButtonTextSize;
+        this._textColor = BarcodeArPopoverAnnotationButton
+            .barcodeArDefaults.BarcodeArView.defaultBarcodeArPopoverAnnotationButtonTextColor;
+        this._textSize = BarcodeArPopoverAnnotationButton
+            .barcodeArDefaults.BarcodeArView.defaultBarcodeArPopoverAnnotationButtonTextSize;
         this._fontFamily = FontFamily.SystemDefault;
         this._icon = icon;
         this._text = text;
@@ -7296,34 +8037,34 @@ class BarcodeCheckPopoverAnnotationButton extends Observable {
 }
 __decorate([
     nameForSerialization('textColor')
-], BarcodeCheckPopoverAnnotationButton.prototype, "_textColor", undefined);
+], BarcodeArPopoverAnnotationButton.prototype, "_textColor", void 0);
 __decorate([
     nameForSerialization('textSize')
-], BarcodeCheckPopoverAnnotationButton.prototype, "_textSize", undefined);
+], BarcodeArPopoverAnnotationButton.prototype, "_textSize", void 0);
 __decorate([
     nameForSerialization('fontFamily')
-], BarcodeCheckPopoverAnnotationButton.prototype, "_fontFamily", undefined);
+], BarcodeArPopoverAnnotationButton.prototype, "_fontFamily", void 0);
 __decorate([
     nameForSerialization('icon')
-], BarcodeCheckPopoverAnnotationButton.prototype, "_icon", undefined);
+], BarcodeArPopoverAnnotationButton.prototype, "_icon", void 0);
 __decorate([
     nameForSerialization('text')
-], BarcodeCheckPopoverAnnotationButton.prototype, "_text", undefined);
+], BarcodeArPopoverAnnotationButton.prototype, "_text", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCheckPopoverAnnotationButton, "barcodeCheckDefaults", null);
+], BarcodeArPopoverAnnotationButton, "barcodeArDefaults", null);
 
-class BarcodeCheckRectangleHighlight extends Observable {
-    static get barcodeCheckDefaults() {
-        return getBarcodeCheckDefaults();
+class BarcodeArRectangleHighlight extends Observable {
+    static get barcodeArDefaults() {
+        return getBarcodeArDefaults();
     }
     constructor(barcode) {
         super();
-        this._type = 'barcodeCheckRectangleHighlight';
-        this._brush = BarcodeCheckRectangleHighlight
-            .barcodeCheckDefaults.BarcodeCheckView.defaultRectangleHighlightBrush;
-        this._icon = BarcodeCheckRectangleHighlight
-            .barcodeCheckDefaults.BarcodeCheckView.defaultHighlightIcon;
+        this._type = 'barcodeArRectangleHighlight';
+        this._brush = BarcodeArRectangleHighlight
+            .barcodeArDefaults.BarcodeArView.defaultRectangleHighlightBrush;
+        this._icon = BarcodeArRectangleHighlight
+            .barcodeArDefaults.BarcodeArView.defaultHighlightIcon;
         this._barcode = barcode;
     }
     get barcode() {
@@ -7346,21 +8087,79 @@ class BarcodeCheckRectangleHighlight extends Observable {
 }
 __decorate([
     ignoreFromSerialization
-], BarcodeCheckRectangleHighlight.prototype, "_barcode", undefined);
+], BarcodeArRectangleHighlight.prototype, "_barcode", void 0);
 __decorate([
     nameForSerialization('type')
-], BarcodeCheckRectangleHighlight.prototype, "_type", undefined);
+], BarcodeArRectangleHighlight.prototype, "_type", void 0);
 __decorate([
     nameForSerialization('brush')
-], BarcodeCheckRectangleHighlight.prototype, "_brush", undefined);
+], BarcodeArRectangleHighlight.prototype, "_brush", void 0);
 __decorate([
     nameForSerialization('icon')
-], BarcodeCheckRectangleHighlight.prototype, "_icon", undefined);
+], BarcodeArRectangleHighlight.prototype, "_icon", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCheckRectangleHighlight, "barcodeCheckDefaults", null);
+], BarcodeArRectangleHighlight, "barcodeArDefaults", null);
 
-class BarcodeCheckSettings extends DefaultSerializeable {
+class BarcodeArSessionController extends BaseNewController {
+    constructor(viewId) {
+        super('BarcodeArSessionProxy');
+        this.viewId = viewId;
+    }
+    $resetBarcodeArSession() {
+        return this._proxy.$resetBarcodeArSession({ viewId: this.viewId });
+    }
+}
+
+class BarcodeArSession extends DefaultSerializeable {
+    static fromJSON(json) {
+        const sessionJson = JSON.parse(json);
+        const session = new BarcodeArSession(json.viewId);
+        session._addedTrackedBarcodes = sessionJson.addedTrackedBarcodes
+            .map((trackedBarcodeJSON) => {
+            return TrackedBarcode
+                .fromJSON(trackedBarcodeJSON, sessionJson.frameSequenceId);
+        });
+        session._removedTrackedBarcodes = sessionJson.removedTrackedBarcodes;
+        session._trackedBarcodes = Object.keys(sessionJson.allTrackedBarcodes)
+            .reduce((trackedBarcodes, identifier) => {
+            trackedBarcodes[identifier] = TrackedBarcode
+                .fromJSON(sessionJson.allTrackedBarcodes[identifier], sessionJson.frameSequenceId);
+            return trackedBarcodes;
+        }, {});
+        return session;
+    }
+    constructor(viewId) {
+        super();
+        this.sessionController = new BarcodeArSessionController(viewId);
+    }
+    get addedTrackedBarcodes() {
+        return this._addedTrackedBarcodes;
+    }
+    get removedTrackedBarcodes() {
+        return this._removedTrackedBarcodes;
+    }
+    get trackedBarcodes() {
+        return this._trackedBarcodes;
+    }
+    reset() {
+        return this.sessionController.$resetBarcodeArSession();
+    }
+}
+__decorate([
+    nameForSerialization('addedTrackedBarcodes')
+], BarcodeArSession.prototype, "_addedTrackedBarcodes", void 0);
+__decorate([
+    nameForSerialization('removedTrackedBarcodes')
+], BarcodeArSession.prototype, "_removedTrackedBarcodes", void 0);
+__decorate([
+    nameForSerialization('trackedBarcodes')
+], BarcodeArSession.prototype, "_trackedBarcodes", void 0);
+__decorate([
+    ignoreFromSerialization
+], BarcodeArSession.prototype, "sessionController", void 0);
+
+class BarcodeArSettings extends DefaultSerializeable {
     constructor() {
         super(...arguments);
         this.symbologies = {};
@@ -7375,7 +8174,7 @@ class BarcodeCheckSettings extends DefaultSerializeable {
     }
     settingsForSymbology(symbology) {
         if (!this.symbologies[symbology]) {
-            const symbologySettings = BarcodeCheckSettings.barcodeDefaults.SymbologySettings[symbology];
+            const symbologySettings = BarcodeArSettings.barcodeDefaults.SymbologySettings[symbology];
             symbologySettings._symbology = symbology;
             this.symbologies[symbology] = symbologySettings;
         }
@@ -7396,27 +8195,27 @@ class BarcodeCheckSettings extends DefaultSerializeable {
 }
 __decorate([
     ignoreFromSerialization
-], BarcodeCheckSettings, "barcodeDefaults", null);
+], BarcodeArSettings, "barcodeDefaults", null);
 
-class BarcodeCheckStatusIconAnnotation extends Observable {
-    static get barcodeCheckDefaults() {
-        return getBarcodeCheckDefaults();
+class BarcodeArStatusIconAnnotation extends Observable {
+    static get barcodeArDefaults() {
+        return getBarcodeArDefaults();
     }
     constructor(barcode) {
         super();
-        this._type = 'barcodeCheckStatusIconAnnotation';
-        this._hasTip = BarcodeCheckStatusIconAnnotation
-            .barcodeCheckDefaults.BarcodeCheckView.defaultStatusIconAnnotationHasTip;
-        this._icon = BarcodeCheckStatusIconAnnotation
-            .barcodeCheckDefaults.BarcodeCheckView.defaultStatusIconAnnotationIcon;
-        this._text = BarcodeCheckStatusIconAnnotation
-            .barcodeCheckDefaults.BarcodeCheckView.defaultStatusIconAnnotationText;
-        this._textColor = BarcodeCheckStatusIconAnnotation
-            .barcodeCheckDefaults.BarcodeCheckView.defaultStatusIconAnnotationTextColor;
-        this._backgroundColor = BarcodeCheckStatusIconAnnotation
-            .barcodeCheckDefaults.BarcodeCheckView.defaultStatusIconAnnotationBackgroundColor;
-        this._annotationTrigger = BarcodeCheckStatusIconAnnotation
-            .barcodeCheckDefaults.BarcodeCheckView.defaultStatusIconAnnotationTrigger;
+        this._type = 'barcodeArStatusIconAnnotation';
+        this._hasTip = BarcodeArStatusIconAnnotation
+            .barcodeArDefaults.BarcodeArView.defaultStatusIconAnnotationHasTip;
+        this._icon = BarcodeArStatusIconAnnotation
+            .barcodeArDefaults.BarcodeArView.defaultStatusIconAnnotationIcon;
+        this._text = BarcodeArStatusIconAnnotation
+            .barcodeArDefaults.BarcodeArView.defaultStatusIconAnnotationText;
+        this._textColor = BarcodeArStatusIconAnnotation
+            .barcodeArDefaults.BarcodeArView.defaultStatusIconAnnotationTextColor;
+        this._backgroundColor = BarcodeArStatusIconAnnotation
+            .barcodeArDefaults.BarcodeArView.defaultStatusIconAnnotationBackgroundColor;
+        this._annotationTrigger = BarcodeArStatusIconAnnotation
+            .barcodeArDefaults.BarcodeArView.defaultStatusIconAnnotationTrigger;
         this._barcode = barcode;
     }
     get barcode() {
@@ -7467,102 +8266,68 @@ class BarcodeCheckStatusIconAnnotation extends Observable {
 }
 __decorate([
     nameForSerialization('type')
-], BarcodeCheckStatusIconAnnotation.prototype, "_type", undefined);
+], BarcodeArStatusIconAnnotation.prototype, "_type", void 0);
 __decorate([
     nameForSerialization('barcode')
-], BarcodeCheckStatusIconAnnotation.prototype, "_barcode", undefined);
+], BarcodeArStatusIconAnnotation.prototype, "_barcode", void 0);
 __decorate([
     nameForSerialization('hasTip')
-], BarcodeCheckStatusIconAnnotation.prototype, "_hasTip", undefined);
+], BarcodeArStatusIconAnnotation.prototype, "_hasTip", void 0);
 __decorate([
     nameForSerialization('icon')
-], BarcodeCheckStatusIconAnnotation.prototype, "_icon", undefined);
+], BarcodeArStatusIconAnnotation.prototype, "_icon", void 0);
 __decorate([
     nameForSerialization('text')
-], BarcodeCheckStatusIconAnnotation.prototype, "_text", undefined);
+], BarcodeArStatusIconAnnotation.prototype, "_text", void 0);
 __decorate([
     nameForSerialization('textColor')
-], BarcodeCheckStatusIconAnnotation.prototype, "_textColor", undefined);
+], BarcodeArStatusIconAnnotation.prototype, "_textColor", void 0);
 __decorate([
     nameForSerialization('backgroundColor')
-], BarcodeCheckStatusIconAnnotation.prototype, "_backgroundColor", undefined);
+], BarcodeArStatusIconAnnotation.prototype, "_backgroundColor", void 0);
 __decorate([
     nameForSerialization('annotationTrigger')
-], BarcodeCheckStatusIconAnnotation.prototype, "_annotationTrigger", undefined);
+], BarcodeArStatusIconAnnotation.prototype, "_annotationTrigger", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCheckStatusIconAnnotation, "barcodeCheckDefaults", null);
+], BarcodeArStatusIconAnnotation, "barcodeArDefaults", null);
 
-var BarcodeCheckViewEvents;
-(function (BarcodeCheckViewEvents) {
-    BarcodeCheckViewEvents["didTapHighlightForBarcode"] = "BarcodeCheckViewUiListener.didTapHighlightForBarcode";
-    BarcodeCheckViewEvents["highlightForBarcode"] = "BarcodeCheckHighlightProvider.highlightForBarcode";
-    BarcodeCheckViewEvents["annotationForBarcode"] = "BarcodeCheckAnnotationProvider.annotationForBarcode";
-    BarcodeCheckViewEvents["didTapPopoverEvent"] = "BarcodeCheckPopoverAnnotationListener.didTapPopover";
-    BarcodeCheckViewEvents["didTapPopoverButtonEvent"] = "BarcodeCheckPopoverAnnotationListener.didTapPopoverButton";
-    BarcodeCheckViewEvents["didTapInfoAnnotationRightIconEvent"] = "BarcodeCheckInfoAnnotationListener.didTapInfoAnnotationRightIcon";
-    BarcodeCheckViewEvents["didTapInfoAnnotationLeftIconEvent"] = "BarcodeCheckInfoAnnotationListener.didTapInfoAnnotationLeftIcon";
-    BarcodeCheckViewEvents["didTapInfoAnnotationEvent"] = "BarcodeCheckInfoAnnotationListener.didTapInfoAnnotation";
-    BarcodeCheckViewEvents["didTapInfoAnnotationHeaderEvent"] = "BarcodeCheckInfoAnnotationListener.didTapInfoAnnotationHeader";
-    BarcodeCheckViewEvents["didTapInfoAnnotationFooterEvent"] = "BarcodeCheckInfoAnnotationListener.didTapInfoAnnotationFooter";
-})(BarcodeCheckViewEvents || (BarcodeCheckViewEvents = {}));
-class BarcodeCheckViewController extends BaseController {
-    constructor() {
-        super('BarcodeCheckViewProxy');
-        this.autoCreateNativeView = true;
-        this.isListenerEnabled = false;
+class BarcodeArViewEventHandlers {
+    constructor(view, barcodeAr, proxy) {
+        this.view = view;
+        this.barcodeAr = barcodeAr;
+        this.proxy = proxy;
+        this.highlightCache = {};
+        this.annotationsCache = {};
+        // Bind all handler methods to 'this' to ensure the correct context when they are used as callbacks
+        this.handleDidTapHighlightForBarcode = this.handleDidTapHighlightForBarcode.bind(this);
+        this.handleHighlightForBarcode = this.handleHighlightForBarcode.bind(this);
+        this.handleAnnotationForBarcode = this.handleAnnotationForBarcode.bind(this);
+        this.handleDidTapPopoverEvent = this.handleDidTapPopoverEvent.bind(this);
+        this.handleDidTapPopoverButtonEvent = this.handleDidTapPopoverButtonEvent.bind(this);
+        this.handleDidTapInfoAnnotationRightIconEvent = this.handleDidTapInfoAnnotationRightIconEvent.bind(this);
+        this.handleDidTapInfoAnnotationLeftIconEvent = this.handleDidTapInfoAnnotationLeftIconEvent.bind(this);
+        this.handleDidTapInfoAnnotationEvent = this.handleDidTapInfoAnnotationEvent.bind(this);
+        this.handleDidTapInfoAnnotationHeaderEvent = this.handleDidTapInfoAnnotationHeaderEvent.bind(this);
+        this.handleDidTapInfoAnnotationFooterEvent = this.handleDidTapInfoAnnotationFooterEvent.bind(this);
+        this.handleDidUpdateSession = this.handleDidUpdateSession.bind(this);
+    }
+    clearCaches() {
         this.highlightCache = {};
         this.annotationsCache = {};
     }
-    dispose() {
-        this.highlightCache = {};
-        this.annotationsCache = {};
-        this.setHighlightProvider(null);
-        this.setAnnotationProvider(null);
-        this.setUiListener(null);
-    }
-    static forBarcodeCheckView(barcodeCheck, baseView, autoCreateNativeView = true) {
-        const viewController = new BarcodeCheckViewController();
-        viewController.baseView = baseView;
-        viewController.autoCreateNativeView = autoCreateNativeView;
-        viewController.barcodeCheck = barcodeCheck;
-        viewController.initialize();
-        if (baseView.barcodeCheckViewUiListener) {
-            viewController.subscribeForUiListenerEvents();
-        }
-        if (baseView.annotationProvider) {
-            viewController.subscribeForAnnotationProviderEvents();
-        }
-        if (baseView.highlightProvider) {
-            viewController.subscribeForHighlightProviderEvents();
-        }
-        return viewController;
-    }
-    initialize() {
-        return __awaiter(this, undefined, undefined, function* () {
-            yield this.baseView.context.update();
-            if (this.autoCreateNativeView) {
-                yield this.createView();
-            }
-        });
-    }
-    createView() {
-        return __awaiter(this, undefined, undefined, function* () {
-            const barcodeCheckView = this.baseView.toJSON();
-            const json = JSON.stringify(barcodeCheckView);
-            return this._proxy.createView(this.baseView.nativeView, json);
-        });
-    }
-    subscribeForUiListenerEvents() {
-        this.unsubscribeForUiListenerEvents();
-        this.eventEmitter.on(BarcodeCheckViewEvents.didTapHighlightForBarcode, (data) => {
+    handleDidTapHighlightForBarcode(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
-            if (!this.baseView.barcodeCheckViewUiListener) {
+            if (!this.view.barcodeArViewUiListener) {
                 return;
             }
-            const payload = EventDataParser.parse(data);
+            const payload = EventDataParser.parse(ev.data);
             if (payload === null) {
-                console.error('BarcodeCheckViewController didTapHighlightForBarcode payload is null');
+                console.error('BarcodeArViewController didTapHighlightForBarcode payload is null');
+                return;
+            }
+            if (payload.viewId !== this.view.viewId) {
                 return;
             }
             const barcodeJson = JSON.parse(payload.barcode);
@@ -7571,31 +8336,58 @@ class BarcodeCheckViewController extends BaseController {
             if (!highlight) {
                 return;
             }
-            (_b = (_a = this.baseView) === null || _a === undefined ? undefined : _a.barcodeCheckViewUiListener) === null || _b === undefined ? undefined : _b.didTapHighlightForBarcode(this.barcodeCheck, barcode, highlight);
+            (_b = (_a = this.view) === null || _a === void 0 ? void 0 : _a.barcodeArViewUiListener) === null || _b === void 0 ? void 0 : _b.didTapHighlightForBarcode(this.barcodeAr, barcode, highlight);
         });
-        this._proxy.subscribeViewListeners();
     }
-    unsubscribeForUiListenerEvents() {
-        this._proxy.unsubscribeViewListeners();
-        this.eventEmitter.off(BarcodeCheckViewEvents.didTapHighlightForBarcode);
-    }
-    subscribeForAnnotationProviderEvents() {
-        this.unsubscribeForAnnotationProviderEvents();
-        this.eventEmitter.on(BarcodeCheckViewEvents.annotationForBarcode, (data) => __awaiter(this, undefined, undefined, function* () {
+    handleHighlightForBarcode(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
-            const payload = EventDataParser.parse(data);
+            const payload = EventDataParser.parse(ev.data);
             if (payload === null) {
-                console.error('BarcodeCheckViewController annotationForBarcode payload is null');
+                console.error('BarcodeArViewController highlightForBarcode payload is null');
+                return;
+            }
+            if (payload.viewId !== this.view.viewId) {
                 return;
             }
             const barcodeJson = JSON.parse(payload.barcode);
             const barcode = Barcode.fromJSON(barcodeJson);
             barcode.barcodeId = payload.barcodeId;
-            const annotation = yield ((_b = (_a = this.baseView) === null || _a === undefined ? undefined : _a.annotationProvider) === null || _b === undefined ? undefined : _b.annotationForBarcode(barcode));
+            const highlight = yield ((_b = (_a = this.view) === null || _a === void 0 ? void 0 : _a.highlightProvider) === null || _b === void 0 ? void 0 : _b.highlightForBarcode(barcode));
+            if (highlight) {
+                this.highlightCache[payload.barcodeId] = highlight;
+                highlight.addListener(() => {
+                    const highlightJson = highlight.toJSON();
+                    highlightJson.barcodeId = payload.barcodeId;
+                    this.proxy.$updateBarcodeArHighlight({ viewId: this.view.viewId, highlightJson: JSON.stringify(highlightJson) });
+                });
+            }
+            const result = {
+                barcodeId: payload.barcodeId,
+                highlight: highlight === null || highlight === void 0 ? void 0 : highlight.toJSON()
+            };
+            this.proxy.$finishBarcodeArHighlightForBarcode({ viewId: this.view.viewId, highlightJson: JSON.stringify(result) });
+        });
+    }
+    handleAnnotationForBarcode(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('BarcodeArViewController annotationForBarcode payload is null');
+                return;
+            }
+            if (payload.viewId !== this.view.viewId) {
+                return;
+            }
+            const barcodeJson = JSON.parse(payload.barcode);
+            const barcode = Barcode.fromJSON(barcodeJson);
+            barcode.barcodeId = payload.barcodeId;
+            const annotation = yield ((_b = (_a = this.view) === null || _a === void 0 ? void 0 : _a.annotationProvider) === null || _b === void 0 ? void 0 : _b.annotationForBarcode(barcode));
             if (annotation) {
                 this.annotationsCache[payload.barcodeId] = annotation;
                 annotation.addListener((property, value) => {
-                    if (property === 'BarcodeCheckPopoverAnnotation.button') {
+                    if (property === 'BarcodeArPopoverAnnotation.button') {
                         const popover = annotation;
                         const button = popover.buttons[value];
                         const buttonJson = button.toJSON();
@@ -7604,38 +8396,48 @@ class BarcodeCheckViewController extends BaseController {
                             'button': buttonJson,
                             'barcodeId': payload.barcodeId,
                         };
-                        this._proxy.updatePopoverButton(JSON.stringify(popoverButtonPayload));
+                        this.proxy.$updateBarcodeArPopoverButtonAtIndex({ viewId: this.view.viewId, updateJson: JSON.stringify(popoverButtonPayload) });
                         return;
                     }
                     const annotationJson = annotation.toJSON();
                     annotationJson.barcodeId = payload.barcodeId;
-                    this._proxy.updateAnnotation(JSON.stringify(annotationJson));
+                    this.proxy.$updateBarcodeArAnnotation({ viewId: this.view.viewId, annotationJson: JSON.stringify(annotationJson) });
                 });
             }
             const result = {
                 barcodeId: payload.barcodeId,
-                annotation: annotation === null || annotation === undefined ? undefined : annotation.toJSON()
+                annotation: annotation === null || annotation === void 0 ? void 0 : annotation.toJSON()
             };
-            this._proxy.finishAnnotationForBarcode(JSON.stringify(result));
-        }));
-        this.eventEmitter.on(BarcodeCheckViewEvents.didTapPopoverEvent, (data) => __awaiter(this, undefined, undefined, function* () {
+            this.proxy.$finishBarcodeArAnnotationForBarcode({ viewId: this.view.viewId, annotationJson: JSON.stringify(result) });
+        });
+    }
+    handleDidTapPopoverEvent(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
-            const payload = EventDataParser.parse(data);
+            const payload = EventDataParser.parse(ev.data);
             if (payload === null) {
-                console.error('BarcodeCheckViewController didTapPopoverEvent payload is null');
+                console.error('BarcodeArViewController didTapPopoverEvent payload is null');
+                return;
+            }
+            if (payload.viewId !== this.view.viewId) {
                 return;
             }
             const popover = this.annotationsCache[payload.barcodeId];
             if (!popover) {
                 return;
             }
-            (_b = (_a = popover.listener) === null || _a === undefined ? undefined : _a.didTap) === null || _b === undefined ? undefined : _b.call(_a, popover);
-        }));
-        this.eventEmitter.on(BarcodeCheckViewEvents.didTapPopoverButtonEvent, (data) => __awaiter(this, undefined, undefined, function* () {
+            (_b = (_a = popover.listener) === null || _a === void 0 ? void 0 : _a.didTap) === null || _b === void 0 ? void 0 : _b.call(_a, popover);
+        });
+    }
+    handleDidTapPopoverButtonEvent(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
-            const payload = EventDataParser.parse(data);
+            const payload = EventDataParser.parse(ev.data);
             if (payload === null) {
-                console.error('BarcodeCheckViewController didTapPopoverButtonEvent payload is null');
+                console.error('BarcodeArViewController didTapPopoverButtonEvent payload is null');
+                return;
+            }
+            if (payload.viewId !== this.view.viewId) {
                 return;
             }
             const popover = this.annotationsCache[payload.barcodeId];
@@ -7643,13 +8445,18 @@ class BarcodeCheckViewController extends BaseController {
                 return;
             }
             const button = popover.buttons[payload.index];
-            (_b = (_a = popover.listener) === null || _a === undefined ? undefined : _a.didTapButton) === null || _b === undefined ? undefined : _b.call(_a, popover, button, payload.index);
-        }));
-        this.eventEmitter.on(BarcodeCheckViewEvents.didTapInfoAnnotationRightIconEvent, (data) => __awaiter(this, undefined, undefined, function* () {
+            (_b = (_a = popover.listener) === null || _a === void 0 ? void 0 : _a.didTapButton) === null || _b === void 0 ? void 0 : _b.call(_a, popover, button, payload.index);
+        });
+    }
+    handleDidTapInfoAnnotationRightIconEvent(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
-            const payload = EventDataParser.parse(data);
+            const payload = EventDataParser.parse(ev.data);
             if (payload === null) {
-                console.error('BarcodeCheckViewController didTapInfoAnnotationRightIconEvent payload is null');
+                console.error('BarcodeArViewController didTapInfoAnnotationRightIconEvent payload is null');
+                return;
+            }
+            if (payload.viewId !== this.view.viewId) {
                 return;
             }
             const infoAnnotation = this.annotationsCache[payload.barcodeId];
@@ -7657,13 +8464,18 @@ class BarcodeCheckViewController extends BaseController {
                 return;
             }
             const component = infoAnnotation.body[payload.componentIndex];
-            (_b = (_a = infoAnnotation.listener) === null || _a === undefined ? undefined : _a.didTapRightIcon) === null || _b === undefined ? undefined : _b.call(_a, infoAnnotation, component, payload.componentIndex);
-        }));
-        this.eventEmitter.on(BarcodeCheckViewEvents.didTapInfoAnnotationLeftIconEvent, (data) => __awaiter(this, undefined, undefined, function* () {
+            (_b = (_a = infoAnnotation.listener) === null || _a === void 0 ? void 0 : _a.didTapRightIcon) === null || _b === void 0 ? void 0 : _b.call(_a, infoAnnotation, component, payload.componentIndex);
+        });
+    }
+    handleDidTapInfoAnnotationLeftIconEvent(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
-            const payload = EventDataParser.parse(data);
+            const payload = EventDataParser.parse(ev.data);
             if (payload === null) {
-                console.error('BarcodeCheckViewController didTapInfoAnnotationLeftIconEvent payload is null');
+                console.error('BarcodeArViewController didTapInfoAnnotationLeftIconEvent payload is null');
+                return;
+            }
+            if (payload.viewId !== this.view.viewId) {
                 return;
             }
             const infoAnnotation = this.annotationsCache[payload.barcodeId];
@@ -7671,218 +8483,479 @@ class BarcodeCheckViewController extends BaseController {
                 return;
             }
             const component = infoAnnotation.body[payload.componentIndex];
-            (_b = (_a = infoAnnotation.listener) === null || _a === undefined ? undefined : _a.didTapLeftIcon) === null || _b === undefined ? undefined : _b.call(_a, infoAnnotation, component, payload.componentIndex);
-        }));
-        this.eventEmitter.on(BarcodeCheckViewEvents.didTapInfoAnnotationEvent, (data) => __awaiter(this, undefined, undefined, function* () {
-            var _a, _b;
-            const payload = EventDataParser.parse(data);
-            if (payload === null) {
-                console.error('BarcodeCheckViewController didTapInfoAnnotationEvent payload is null');
-                return;
-            }
-            const infoAnnotation = this.annotationsCache[payload.barcodeId];
-            if (infoAnnotation == null) {
-                return;
-            }
-            (_b = (_a = infoAnnotation.listener) === null || _a === undefined ? undefined : _a.didTap) === null || _b === undefined ? undefined : _b.call(_a, infoAnnotation);
-        }));
-        this.eventEmitter.on(BarcodeCheckViewEvents.didTapInfoAnnotationHeaderEvent, (data) => __awaiter(this, undefined, undefined, function* () {
-            var _a, _b;
-            const payload = EventDataParser.parse(data);
-            if (payload === null) {
-                console.error('BarcodeCheckViewController didTapInfoAnnotationHeaderEvent payload is null');
-                return;
-            }
-            const infoAnnotation = this.annotationsCache[payload.barcodeId];
-            if (infoAnnotation == null) {
-                return;
-            }
-            (_b = (_a = infoAnnotation.listener) === null || _a === undefined ? undefined : _a.didTapHeader) === null || _b === undefined ? undefined : _b.call(_a, infoAnnotation);
-        }));
-        this.eventEmitter.on(BarcodeCheckViewEvents.didTapInfoAnnotationFooterEvent, (data) => __awaiter(this, undefined, undefined, function* () {
-            var _a, _b;
-            const payload = EventDataParser.parse(data);
-            if (payload === null) {
-                console.error('BarcodeCheckViewController didTapInfoAnnotationFooterEvent payload is null');
-                return;
-            }
-            const infoAnnotation = this.annotationsCache[payload.barcodeId];
-            if (infoAnnotation == null) {
-                return;
-            }
-            (_b = (_a = infoAnnotation.listener) === null || _a === undefined ? undefined : _a.didTapFooter) === null || _b === undefined ? undefined : _b.call(_a, infoAnnotation);
-        }));
-        this._proxy.subscribeToAnnotationProviderEvents();
-    }
-    unsubscribeForAnnotationProviderEvents() {
-        this._proxy.unsubscribeFromAnnotationProviderEvents();
-        this.eventEmitter.off(BarcodeCheckViewEvents.annotationForBarcode);
-    }
-    subscribeForHighlightProviderEvents() {
-        this.unsubscribeForHighlightProviderEvents();
-        this.eventEmitter.on(BarcodeCheckViewEvents.highlightForBarcode, (data) => __awaiter(this, undefined, undefined, function* () {
-            var _a, _b;
-            const payload = EventDataParser.parse(data);
-            if (payload === null) {
-                console.error('BarcodeCheckViewController highlightForBarcode payload is null');
-                return;
-            }
-            const barcodeJson = JSON.parse(payload.barcode);
-            const barcode = Barcode.fromJSON(barcodeJson);
-            barcode.barcodeId = payload.barcodeId;
-            const highlight = yield ((_b = (_a = this.baseView) === null || _a === undefined ? undefined : _a.highlightProvider) === null || _b === undefined ? undefined : _b.highlightForBarcode(barcode));
-            if (highlight) {
-                this.highlightCache[payload.barcodeId] = highlight;
-                highlight.addListener(() => {
-                    const highlightJson = highlight.toJSON();
-                    highlightJson.barcodeId = payload.barcodeId;
-                    this._proxy.updateHighlight(JSON.stringify(highlightJson));
-                });
-            }
-            const result = {
-                barcodeId: payload.barcodeId,
-                highlight: highlight === null || highlight === undefined ? undefined : highlight.toJSON()
-            };
-            this._proxy.finishHighlightForBarcode(JSON.stringify(result));
-        }));
-        this._proxy.subscribeToHighlightProviderEvents();
-    }
-    unsubscribeForHighlightProviderEvents() {
-        this._proxy.unsubscribeFromHighlightProviderEvents();
-        this.eventEmitter.off(BarcodeCheckViewEvents.highlightForBarcode);
-    }
-    setUiListener(listener) {
-        return __awaiter(this, undefined, undefined, function* () {
-            if (listener && !this.isListenerEnabled) {
-                this.isListenerEnabled = true;
-                this.subscribeForUiListenerEvents();
-            }
-            if (listener == null) {
-                this.isListenerEnabled = false;
-                this.unsubscribeForUiListenerEvents();
-            }
+            (_b = (_a = infoAnnotation.listener) === null || _a === void 0 ? void 0 : _a.didTapLeftIcon) === null || _b === void 0 ? void 0 : _b.call(_a, infoAnnotation, component, payload.componentIndex);
         });
     }
-    setAnnotationProvider(provider) {
-        return __awaiter(this, undefined, undefined, function* () {
-            if (provider != null) {
-                yield this._proxy.registerBarcodeCheckAnnotationProvider();
-                this.subscribeForAnnotationProviderEvents();
+    handleDidTapInfoAnnotationEvent(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('BarcodeArViewController didTapInfoAnnotationEvent payload is null');
+                return;
             }
-            else {
-                yield this._proxy.unregisterBarcodeCheckAnnotationProvider();
-                this.unsubscribeForAnnotationProviderEvents();
+            if (payload.viewId !== this.view.viewId) {
+                return;
             }
+            const infoAnnotation = this.annotationsCache[payload.barcodeId];
+            if (infoAnnotation == null) {
+                return;
+            }
+            (_b = (_a = infoAnnotation.listener) === null || _a === void 0 ? void 0 : _a.didTap) === null || _b === void 0 ? void 0 : _b.call(_a, infoAnnotation);
         });
     }
-    setHighlightProvider(provider) {
-        return __awaiter(this, undefined, undefined, function* () {
-            if (provider != null) {
-                yield this._proxy.registerBarcodeCheckHighlightProvider();
-                this.subscribeForHighlightProviderEvents();
+    handleDidTapInfoAnnotationHeaderEvent(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('BarcodeArViewController didTapInfoAnnotationHeaderEvent payload is null');
+                return;
             }
-            else {
-                yield this._proxy.unregisterBarcodeCheckHighlightProvider();
-                this.unsubscribeForHighlightProviderEvents();
+            if (payload.viewId !== this.view.viewId) {
+                return;
             }
+            const infoAnnotation = this.annotationsCache[payload.barcodeId];
+            if (infoAnnotation == null) {
+                return;
+            }
+            (_b = (_a = infoAnnotation.listener) === null || _a === void 0 ? void 0 : _a.didTapHeader) === null || _b === void 0 ? void 0 : _b.call(_a, infoAnnotation);
+        });
+    }
+    handleDidTapInfoAnnotationFooterEvent(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('BarcodeArViewController didTapInfoAnnotationFooterEvent payload is null');
+                return;
+            }
+            if (payload.viewId !== this.view.viewId) {
+                return;
+            }
+            const infoAnnotation = this.annotationsCache[payload.barcodeId];
+            if (infoAnnotation == null) {
+                return;
+            }
+            (_b = (_a = infoAnnotation.listener) === null || _a === void 0 ? void 0 : _a.didTapFooter) === null || _b === void 0 ? void 0 : _b.call(_a, infoAnnotation);
+        });
+    }
+    handleDidUpdateSession(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('BarcodeArViewController didUpdateSession payload is null');
+                return;
+            }
+            if (payload.viewId !== this.view.viewId) {
+                return;
+            }
+            const session = BarcodeArSession.fromJSON(payload.session);
+            yield this.notifyListenersOfDidUpdateSession(session, payload.frameId);
+            this.proxy.$finishBarcodeArOnDidUpdateSession({ viewId: this.view.viewId });
+        });
+    }
+    notifyListenersOfDidUpdateSession(session, frameId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const mode = this.barcodeAr;
+            mode.isInListenerCallback = true;
+            for (const listener of mode.listeners) {
+                if (listener.didUpdateSession) {
+                    yield listener.didUpdateSession(this.barcodeAr, session, () => CameraController.getFrame(frameId));
+                }
+            }
+            mode.isInListenerCallback = false;
+        });
+    }
+}
+
+var BarcodeArViewEvents;
+(function (BarcodeArViewEvents) {
+    BarcodeArViewEvents["didTapHighlightForBarcode"] = "BarcodeArViewUiListener.didTapHighlightForBarcode";
+})(BarcodeArViewEvents || (BarcodeArViewEvents = {}));
+var BarcodeArHighlightProviderEvents;
+(function (BarcodeArHighlightProviderEvents) {
+    BarcodeArHighlightProviderEvents["highlightForBarcode"] = "BarcodeArHighlightProvider.highlightForBarcode";
+})(BarcodeArHighlightProviderEvents || (BarcodeArHighlightProviderEvents = {}));
+var BarcodeArAnnotationProviderEvents;
+(function (BarcodeArAnnotationProviderEvents) {
+    BarcodeArAnnotationProviderEvents["annotationForBarcode"] = "BarcodeArAnnotationProvider.annotationForBarcode";
+    BarcodeArAnnotationProviderEvents["didTapInfoAnnotationRightIconEvent"] = "BarcodeArInfoAnnotationListener.didTapInfoAnnotationRightIcon";
+    BarcodeArAnnotationProviderEvents["didTapInfoAnnotationLeftIconEvent"] = "BarcodeArInfoAnnotationListener.didTapInfoAnnotationLeftIcon";
+    BarcodeArAnnotationProviderEvents["didTapInfoAnnotationEvent"] = "BarcodeArInfoAnnotationListener.didTapInfoAnnotation";
+    BarcodeArAnnotationProviderEvents["didTapInfoAnnotationHeaderEvent"] = "BarcodeArInfoAnnotationListener.didTapInfoAnnotationHeader";
+    BarcodeArAnnotationProviderEvents["didTapInfoAnnotationFooterEvent"] = "BarcodeArInfoAnnotationListener.didTapInfoAnnotationFooter";
+    BarcodeArAnnotationProviderEvents["didTapPopoverEvent"] = "BarcodeArPopoverAnnotationListener.didTapPopover";
+    BarcodeArAnnotationProviderEvents["didTapPopoverButtonEvent"] = "BarcodeArPopoverAnnotationListener.didTapPopoverButton";
+})(BarcodeArAnnotationProviderEvents || (BarcodeArAnnotationProviderEvents = {}));
+var BarcodeArEvents;
+(function (BarcodeArEvents) {
+    // Listener Events
+    BarcodeArEvents["didUpdateSession"] = "BarcodeArListener.didUpdateSession";
+})(BarcodeArEvents || (BarcodeArEvents = {}));
+class BarcodeArViewController extends BaseNewController {
+    constructor(baseView, barcodeAr) {
+        super('BarcodeArViewProxy');
+        // Bound event handlers - using nullable function references instead of boolean flags
+        this.boundHandleDidUpdateSession = null;
+        this.boundHandleDidTapHighlightForBarcode = null;
+        this.boundHandleAnnotationForBarcode = null;
+        this.boundHandleDidTapPopoverEvent = null;
+        this.boundHandleDidTapPopoverButtonEvent = null;
+        this.boundHandleDidTapInfoAnnotationRightIconEvent = null;
+        this.boundHandleDidTapInfoAnnotationLeftIconEvent = null;
+        this.boundHandleDidTapInfoAnnotationEvent = null;
+        this.boundHandleDidTapInfoAnnotationHeaderEvent = null;
+        this.boundHandleDidTapInfoAnnotationFooterEvent = null;
+        this.boundHandleHighlightForBarcode = null;
+        this.baseView = baseView;
+        this.barcodeAr = barcodeAr;
+        this.eventHandlers = new BarcodeArViewEventHandlers(baseView, barcodeAr, this._proxy);
+    }
+    dispose() {
+        this.eventHandlers.clearCaches();
+        this._proxy.$removeBarcodeArView({ viewId: this.baseView.viewId });
+        this._proxy.dispose();
+    }
+    static forBarcodeArView(barcodeAr, baseView) {
+        const viewController = new BarcodeArViewController(baseView, barcodeAr);
+        viewController.barcodeAr.controller = viewController;
+        return viewController;
+    }
+    initialize() {
+        // check if listeners are there to subscribe
+        if (this.barcodeAr.listeners.length > 0) {
+            this.registerModeListener();
+        }
+        if (this.baseView.barcodeArViewUiListener) {
+            this.registerUiListener();
+        }
+        if (this.baseView.annotationProvider) {
+            this.registerAnnotationProvider();
+        }
+        if (this.baseView.highlightProvider) {
+            this.registerHighlightProvider();
+        }
+    }
+    createView() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const barcodeArView = this.baseView.toJSON();
+            const viewJson = JSON.stringify(barcodeArView);
+            return this._proxy.$createBarcodeArView({ viewId: this.baseView.viewId, viewJson });
+        });
+    }
+    createNativeView() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.createView();
+            this.initialize();
+        });
+    }
+    registerModeListener() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.isViewCreated) {
+                return Promise.resolve();
+            }
+            if (this.boundHandleDidUpdateSession) {
+                return Promise.resolve();
+            }
+            this.boundHandleDidUpdateSession = this.eventHandlers.handleDidUpdateSession.bind(this);
+            this._proxy.subscribeForEvents(Object.values(BarcodeArEvents));
+            this._proxy.eventEmitter.on(BarcodeArEvents.didUpdateSession, this.boundHandleDidUpdateSession);
+            yield this._proxy.$registerBarcodeArListener({ viewId: this.baseView.viewId });
+        });
+    }
+    unregisterModeListener() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.isViewCreated) {
+                return Promise.resolve();
+            }
+            if (!this.boundHandleDidUpdateSession) {
+                return Promise.resolve();
+            }
+            this._proxy.unsubscribeFromEvents(Object.values(BarcodeArEvents));
+            this._proxy.eventEmitter.off(BarcodeArEvents.didUpdateSession, this.boundHandleDidUpdateSession);
+            yield this._proxy.$unregisterBarcodeArListener({ viewId: this.baseView.viewId });
+            this.boundHandleDidUpdateSession = null;
+        });
+    }
+    registerUiListener() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.isViewCreated) {
+                return Promise.resolve();
+            }
+            if (this.boundHandleDidTapHighlightForBarcode) {
+                return Promise.resolve();
+            }
+            this.boundHandleDidTapHighlightForBarcode = this.eventHandlers.handleDidTapHighlightForBarcode.bind(this);
+            this._proxy.subscribeForEvents(Object.values(BarcodeArViewEvents));
+            this._proxy.eventEmitter.on(BarcodeArViewEvents.didTapHighlightForBarcode, this.boundHandleDidTapHighlightForBarcode);
+            this._proxy.$registerBarcodeArViewUiListener({ viewId: this.baseView.viewId });
+        });
+    }
+    unregisterUiListener() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.isViewCreated) {
+                return Promise.resolve();
+            }
+            if (!this.boundHandleDidTapHighlightForBarcode) {
+                return Promise.resolve();
+            }
+            this._proxy.unsubscribeFromEvents(Object.values(BarcodeArViewEvents));
+            this._proxy.eventEmitter.off(BarcodeArViewEvents.didTapHighlightForBarcode, this.boundHandleDidTapHighlightForBarcode);
+            this._proxy.$unregisterBarcodeArViewUiListener({ viewId: this.baseView.viewId });
+            this.boundHandleDidTapHighlightForBarcode = null;
+        });
+    }
+    registerAnnotationProvider() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.isViewCreated) {
+                return Promise.resolve();
+            }
+            if (this.boundHandleAnnotationForBarcode) {
+                return Promise.resolve();
+            }
+            // Create all bound functions
+            this.boundHandleAnnotationForBarcode = this.eventHandlers.handleAnnotationForBarcode.bind(this);
+            this.boundHandleDidTapPopoverEvent = this.eventHandlers.handleDidTapPopoverEvent.bind(this);
+            this.boundHandleDidTapPopoverButtonEvent = this.eventHandlers.handleDidTapPopoverButtonEvent.bind(this);
+            this.boundHandleDidTapInfoAnnotationRightIconEvent = this.eventHandlers.handleDidTapInfoAnnotationRightIconEvent.bind(this);
+            this.boundHandleDidTapInfoAnnotationLeftIconEvent = this.eventHandlers.handleDidTapInfoAnnotationLeftIconEvent.bind(this);
+            this.boundHandleDidTapInfoAnnotationEvent = this.eventHandlers.handleDidTapInfoAnnotationEvent.bind(this);
+            this.boundHandleDidTapInfoAnnotationHeaderEvent = this.eventHandlers.handleDidTapInfoAnnotationHeaderEvent.bind(this);
+            this.boundHandleDidTapInfoAnnotationFooterEvent = this.eventHandlers.handleDidTapInfoAnnotationFooterEvent.bind(this);
+            this._proxy.subscribeForEvents(Object.values(BarcodeArAnnotationProviderEvents));
+            this._proxy.eventEmitter.on(BarcodeArAnnotationProviderEvents.annotationForBarcode, this.boundHandleAnnotationForBarcode);
+            this._proxy.eventEmitter.on(BarcodeArAnnotationProviderEvents.didTapPopoverEvent, this.boundHandleDidTapPopoverEvent);
+            this._proxy.eventEmitter.on(BarcodeArAnnotationProviderEvents.didTapPopoverButtonEvent, this.boundHandleDidTapPopoverButtonEvent);
+            this._proxy.eventEmitter.on(BarcodeArAnnotationProviderEvents.didTapInfoAnnotationRightIconEvent, this.boundHandleDidTapInfoAnnotationRightIconEvent);
+            this._proxy.eventEmitter.on(BarcodeArAnnotationProviderEvents.didTapInfoAnnotationLeftIconEvent, this.boundHandleDidTapInfoAnnotationLeftIconEvent);
+            this._proxy.eventEmitter.on(BarcodeArAnnotationProviderEvents.didTapInfoAnnotationEvent, this.boundHandleDidTapInfoAnnotationEvent);
+            this._proxy.eventEmitter.on(BarcodeArAnnotationProviderEvents.didTapInfoAnnotationHeaderEvent, this.boundHandleDidTapInfoAnnotationHeaderEvent);
+            this._proxy.eventEmitter.on(BarcodeArAnnotationProviderEvents.didTapInfoAnnotationFooterEvent, this.boundHandleDidTapInfoAnnotationFooterEvent);
+            this._proxy.$registerBarcodeArAnnotationProvider({ viewId: this.baseView.viewId });
+        });
+    }
+    unregisterAnnotationProvider() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.isViewCreated) {
+                return Promise.resolve();
+            }
+            if (!this.boundHandleAnnotationForBarcode) {
+                return Promise.resolve();
+            }
+            this._proxy.unsubscribeFromEvents(Object.values(BarcodeArAnnotationProviderEvents));
+            // Remove all bound functions with null checks
+            if (this.boundHandleAnnotationForBarcode) {
+                this._proxy.eventEmitter.off(BarcodeArAnnotationProviderEvents.annotationForBarcode, this.boundHandleAnnotationForBarcode);
+            }
+            if (this.boundHandleDidTapPopoverEvent) {
+                this._proxy.eventEmitter.off(BarcodeArAnnotationProviderEvents.didTapPopoverEvent, this.boundHandleDidTapPopoverEvent);
+            }
+            if (this.boundHandleDidTapPopoverButtonEvent) {
+                this._proxy.eventEmitter.off(BarcodeArAnnotationProviderEvents.didTapPopoverButtonEvent, this.boundHandleDidTapPopoverButtonEvent);
+            }
+            if (this.boundHandleDidTapInfoAnnotationRightIconEvent) {
+                this._proxy.eventEmitter.off(BarcodeArAnnotationProviderEvents.didTapInfoAnnotationRightIconEvent, this.boundHandleDidTapInfoAnnotationRightIconEvent);
+            }
+            if (this.boundHandleDidTapInfoAnnotationLeftIconEvent) {
+                this._proxy.eventEmitter.off(BarcodeArAnnotationProviderEvents.didTapInfoAnnotationLeftIconEvent, this.boundHandleDidTapInfoAnnotationLeftIconEvent);
+            }
+            if (this.boundHandleDidTapInfoAnnotationEvent) {
+                this._proxy.eventEmitter.off(BarcodeArAnnotationProviderEvents.didTapInfoAnnotationEvent, this.boundHandleDidTapInfoAnnotationEvent);
+            }
+            if (this.boundHandleDidTapInfoAnnotationHeaderEvent) {
+                this._proxy.eventEmitter.off(BarcodeArAnnotationProviderEvents.didTapInfoAnnotationHeaderEvent, this.boundHandleDidTapInfoAnnotationHeaderEvent);
+            }
+            if (this.boundHandleDidTapInfoAnnotationFooterEvent) {
+                this._proxy.eventEmitter.off(BarcodeArAnnotationProviderEvents.didTapInfoAnnotationFooterEvent, this.boundHandleDidTapInfoAnnotationFooterEvent);
+            }
+            this._proxy.$unregisterBarcodeArAnnotationProvider({ viewId: this.baseView.viewId });
+            // Clear all bound functions
+            this.boundHandleAnnotationForBarcode = null;
+            this.boundHandleDidTapPopoverEvent = null;
+            this.boundHandleDidTapPopoverButtonEvent = null;
+            this.boundHandleDidTapInfoAnnotationRightIconEvent = null;
+            this.boundHandleDidTapInfoAnnotationLeftIconEvent = null;
+            this.boundHandleDidTapInfoAnnotationEvent = null;
+            this.boundHandleDidTapInfoAnnotationHeaderEvent = null;
+            this.boundHandleDidTapInfoAnnotationFooterEvent = null;
+        });
+    }
+    registerHighlightProvider() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.isViewCreated) {
+                return Promise.resolve();
+            }
+            if (this.boundHandleHighlightForBarcode) {
+                return Promise.resolve();
+            }
+            this.boundHandleHighlightForBarcode = this.eventHandlers.handleHighlightForBarcode.bind(this);
+            this._proxy.subscribeForEvents(Object.values(BarcodeArHighlightProviderEvents));
+            this._proxy.eventEmitter.on(BarcodeArHighlightProviderEvents.highlightForBarcode, this.boundHandleHighlightForBarcode);
+            this._proxy.$registerBarcodeArHighlightProvider({ viewId: this.baseView.viewId });
+        });
+    }
+    unregisterHighlightProvider() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.isViewCreated) {
+                return Promise.resolve();
+            }
+            if (!this.boundHandleHighlightForBarcode) {
+                return Promise.resolve();
+            }
+            this._proxy.unsubscribeFromEvents(Object.values(BarcodeArHighlightProviderEvents));
+            this._proxy.eventEmitter.off(BarcodeArHighlightProviderEvents.highlightForBarcode, this.boundHandleHighlightForBarcode);
+            this._proxy.$unregisterBarcodeArHighlightProvider({ viewId: this.baseView.viewId });
+            this.boundHandleHighlightForBarcode = null;
         });
     }
     start() {
-        this.highlightCache = {};
-        this.annotationsCache = {};
-        return this._proxy.start();
+        this.eventHandlers.clearCaches();
+        return this._proxy.$barcodeArViewStart({ viewId: this.baseView.viewId });
     }
     stop() {
-        this.highlightCache = {};
-        this.annotationsCache = {};
-        return this._proxy.stop();
+        this.eventHandlers.clearCaches();
+        return this._proxy.$barcodeArViewStop({ viewId: this.baseView.viewId });
     }
     pause() {
-        this.highlightCache = {};
-        this.annotationsCache = {};
-        return this._proxy.pause();
+        this.eventHandlers.clearCaches();
+        return this._proxy.$barcodeArViewPause({ viewId: this.baseView.viewId });
     }
     update() {
-        const barcodeCheckView = this.baseView.toJSON().View;
-        const json = JSON.stringify(barcodeCheckView);
-        return this._proxy.update(json);
+        const barcodeArView = this.baseView.toJSON().View;
+        const json = JSON.stringify(barcodeArView);
+        return this._proxy.$updateBarcodeArView({ viewId: this.baseView.viewId, viewJson: json });
+    }
+    removeNativeView() {
+        var _a;
+        return (_a = this._proxy.$removeBarcodeArView({ viewId: this.baseView.viewId })) !== null && _a !== void 0 ? _a : Promise.resolve();
     }
     reset() {
-        this.highlightCache = {};
-        this.annotationsCache = {};
-        return this._proxy.barcodeCheckViewReset();
+        this.eventHandlers.clearCaches();
+        return this._proxy.$barcodeArViewReset({ viewId: this.baseView.viewId });
+    }
+    // From Listener Controller methods
+    updateMode() {
+        if (!this.isViewCreated) {
+            return Promise.resolve();
+        }
+        const barcodeAr = this.barcodeAr.toJSON();
+        const json = JSON.stringify(barcodeAr);
+        return this._proxy.$updateBarcodeArMode({ viewId: this.baseView.viewId, barcodeArJson: json });
+    }
+    resetMode() {
+        if (!this.isViewCreated) {
+            return Promise.resolve();
+        }
+        return this._proxy.$resetBarcodeAr({ viewId: this.baseView.viewId });
+    }
+    updateFeedback(feedbackJson) {
+        if (!this.isViewCreated) {
+            return;
+        }
+        this._proxy.$updateBarcodeArFeedback({ viewId: this.baseView.viewId, feedbackJson });
+    }
+    get isViewCreated() {
+        return this.baseView.viewId !== -1;
     }
 }
-__decorate([
-    ignoreFromSerialization
-], BarcodeCheckViewController.prototype, "autoCreateNativeView", undefined);
-__decorate([
-    ignoreFromSerialization
-], BarcodeCheckViewController.prototype, "highlightCache", undefined);
-__decorate([
-    ignoreFromSerialization
-], BarcodeCheckViewController.prototype, "annotationsCache", undefined);
 
-class BaseBarcodeCheckView extends DefaultSerializeable {
-    static get barcodeCheckDefaults() {
-        return getBarcodeCheckDefaults();
+class BaseBarcodeArView extends DefaultSerializeable {
+    static get barcodeArDefaults() {
+        return getBarcodeArDefaults();
     }
-    constructor(context, barcodeCheck, nativeView = null, barcodeCheckViewSettings, cameraSettings, annotationProvider, highlightProvider, uiListener, autoCreateNativeView = true) {
+    constructor(context, barcodeAr, nativeView = null, barcodeArViewSettings, cameraSettings, annotationProvider, highlightProvider, uiListener) {
         super();
-        this._autoCreateNativeView = true;
         this._annotationProvider = null;
-        this._barcodeCheckViewUiListener = null;
+        this._barcodeArViewUiListener = null;
         this._highlightProvider = null;
         this.nativeView = null;
         this._isStarted = false;
         this._shouldShowMacroControl = false;
-        this._macroModeControlPosition = BaseBarcodeCheckView
-            .barcodeCheckDefaults.BarcodeCheckView.defaultCameraSwitchControlPosition;
+        this._macroModeControlPosition = BaseBarcodeArView
+            .barcodeArDefaults.BarcodeArView.defaultCameraSwitchControlPosition;
         this._shouldShowTorchControl = false;
-        this._torchControlPosition = BaseBarcodeCheckView
-            .barcodeCheckDefaults.BarcodeCheckView.defaultTorchControlPosition;
-        this._shouldShowZoomControl = BaseBarcodeCheckView
-            .barcodeCheckDefaults.BarcodeCheckView.defaultShouldShowZoomControl;
-        this._zoomControlPosition = BaseBarcodeCheckView
-            .barcodeCheckDefaults.BarcodeCheckView.defaultZoomControlPosition;
+        this._torchControlPosition = BaseBarcodeArView
+            .barcodeArDefaults.BarcodeArView.defaultTorchControlPosition;
+        this._shouldShowZoomControl = BaseBarcodeArView
+            .barcodeArDefaults.BarcodeArView.defaultShouldShowZoomControl;
+        this._zoomControlPosition = BaseBarcodeArView
+            .barcodeArDefaults.BarcodeArView.defaultZoomControlPosition;
+        this.isViewCreated = false;
+        this._viewId = -1; // -1 means the view is not created yet
         this._dataCaptureContext = context;
-        this._barcodeCheck = barcodeCheck;
-        this._barcodeCheckViewSettings = barcodeCheckViewSettings;
+        this._barcodeAr = barcodeAr;
+        this._barcodeArViewSettings = barcodeArViewSettings;
         this._cameraSettings = cameraSettings;
-        this._autoCreateNativeView = autoCreateNativeView;
-        this._annotationProvider = annotationProvider !== null && annotationProvider !== undefined ? annotationProvider : null;
-        this._highlightProvider = highlightProvider !== null && highlightProvider !== undefined ? highlightProvider : null;
-        this._barcodeCheckViewUiListener = uiListener !== null && uiListener !== undefined ? uiListener : null;
+        this._annotationProvider = annotationProvider !== null && annotationProvider !== void 0 ? annotationProvider : null;
+        this._highlightProvider = highlightProvider !== null && highlightProvider !== void 0 ? highlightProvider : null;
+        this._barcodeArViewUiListener = uiListener !== null && uiListener !== void 0 ? uiListener : null;
         this.nativeView = nativeView;
-        this.controller = BarcodeCheckViewController.forBarcodeCheckView(this._barcodeCheck, this, this._autoCreateNativeView);
+        this.controller = BarcodeArViewController.forBarcodeArView(this._barcodeAr, this);
+        this._barcodeAr.controller = this.controller;
     }
     dispose() {
         this.controller.dispose();
-        this._barcodeCheck.unsubscribeNativeListeners();
+        this.isViewCreated = false;
+        this._barcodeAr.unsubscribeNativeListeners();
+    }
+    createNativeView(viewId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.isViewCreated) {
+                return Promise.resolve();
+            }
+            this._viewId = viewId;
+            yield this.controller.createNativeView();
+            this.isViewCreated = true;
+        });
+    }
+    removeNativeView() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.controller.removeNativeView();
+            this.isViewCreated = false;
+        });
     }
     updateNative() {
         return this.controller.update();
     }
-    get barcodeCheckViewUiListener() {
-        return this._barcodeCheckViewUiListener;
+    get viewId() {
+        return this._viewId;
     }
-    set barcodeCheckViewUiListener(value) {
-        this._barcodeCheckViewUiListener = value;
-        this.controller.setUiListener(value);
+    get barcodeArViewUiListener() {
+        return this._barcodeArViewUiListener;
+    }
+    set barcodeArViewUiListener(value) {
+        this._barcodeArViewUiListener = value;
+        if (value) {
+            this.controller.registerUiListener();
+        }
+        else {
+            this.controller.unregisterUiListener();
+        }
     }
     get annotationProvider() {
         return this._annotationProvider;
     }
     set annotationProvider(value) {
         this._annotationProvider = value;
-        this.controller.setAnnotationProvider(value);
+        if (value != null) {
+            this.controller.registerAnnotationProvider();
+        }
+        else {
+            this.controller.unregisterAnnotationProvider();
+        }
     }
     get highlightProvider() {
         return this._highlightProvider;
     }
     set highlightProvider(value) {
         this._highlightProvider = value;
-        this.controller.setHighlightProvider(value);
+        if (value != null) {
+            this.controller.registerHighlightProvider();
+        }
+        else {
+            this.controller.unregisterHighlightProvider();
+        }
     }
     get context() {
         return this._dataCaptureContext;
@@ -7961,7 +9034,8 @@ class BaseBarcodeCheckView extends DefaultSerializeable {
     toJSON() {
         const json = {
             View: {
-                barcodeCheckViewSettings: this._barcodeCheckViewSettings,
+                viewId: this._viewId,
+                barcodeArViewSettings: this._barcodeArViewSettings,
                 cameraSettings: this._cameraSettings,
                 shouldShowMacroControl: this._shouldShowMacroControl,
                 macroModeControlPosition: this._macroModeControlPosition,
@@ -7970,82 +9044,82 @@ class BaseBarcodeCheckView extends DefaultSerializeable {
                 shouldShowZoomControl: this._shouldShowZoomControl,
                 zoomControlPosition: this._zoomControlPosition,
                 annotationProvider: this._annotationProvider,
-                barcodeCheckViewUiListener: this._barcodeCheckViewUiListener,
+                barcodeArViewUiListener: this._barcodeArViewUiListener,
                 highlightProvider: this._highlightProvider,
                 isStarted: this._isStarted,
-                hasUiListener: this._barcodeCheckViewUiListener != null,
+                hasUiListener: this._barcodeArViewUiListener != null,
                 hasHighlightProvider: this._highlightProvider != null,
                 hasAnnotationProvider: this._annotationProvider != null,
             },
-            BarcodeCheck: this._barcodeCheck.toJSON(),
+            BarcodeAr: this._barcodeAr.toJSON(),
         };
         return json;
     }
 }
 __decorate([
     ignoreFromSerialization
-], BaseBarcodeCheckView.prototype, "_autoCreateNativeView", undefined);
+], BaseBarcodeArView.prototype, "_annotationProvider", void 0);
 __decorate([
     ignoreFromSerialization
-], BaseBarcodeCheckView.prototype, "_annotationProvider", undefined);
+], BaseBarcodeArView.prototype, "_barcodeArViewUiListener", void 0);
 __decorate([
     ignoreFromSerialization
-], BaseBarcodeCheckView.prototype, "_barcodeCheckViewUiListener", undefined);
+], BaseBarcodeArView.prototype, "_highlightProvider", void 0);
 __decorate([
     ignoreFromSerialization
-], BaseBarcodeCheckView.prototype, "_highlightProvider", undefined);
+], BaseBarcodeArView.prototype, "nativeView", void 0);
 __decorate([
-    ignoreFromSerialization
-], BaseBarcodeCheckView.prototype, "nativeView", undefined);
-__decorate([
-    nameForSerialization('barcodeCheck')
-], BaseBarcodeCheckView.prototype, "_barcodeCheck", undefined);
+    nameForSerialization('barcodeAr')
+], BaseBarcodeArView.prototype, "_barcodeAr", void 0);
 __decorate([
     nameForSerialization('isStarted')
-], BaseBarcodeCheckView.prototype, "_isStarted", undefined);
+], BaseBarcodeArView.prototype, "_isStarted", void 0);
 __decorate([
     nameForSerialization('viewSettings')
-], BaseBarcodeCheckView.prototype, "_barcodeCheckViewSettings", undefined);
+], BaseBarcodeArView.prototype, "_barcodeArViewSettings", void 0);
 __decorate([
     nameForSerialization('cameraSettings')
-], BaseBarcodeCheckView.prototype, "_cameraSettings", undefined);
+], BaseBarcodeArView.prototype, "_cameraSettings", void 0);
 __decorate([
     nameForSerialization('dataCaptureContext')
-], BaseBarcodeCheckView.prototype, "_dataCaptureContext", undefined);
+], BaseBarcodeArView.prototype, "_dataCaptureContext", void 0);
 __decorate([
     nameForSerialization('shouldShowMacroControl')
-], BaseBarcodeCheckView.prototype, "_shouldShowMacroControl", undefined);
+], BaseBarcodeArView.prototype, "_shouldShowMacroControl", void 0);
 __decorate([
     nameForSerialization('macroModeControlPosition')
-], BaseBarcodeCheckView.prototype, "_macroModeControlPosition", undefined);
+], BaseBarcodeArView.prototype, "_macroModeControlPosition", void 0);
 __decorate([
     nameForSerialization('shouldShowTorchControl')
-], BaseBarcodeCheckView.prototype, "_shouldShowTorchControl", undefined);
+], BaseBarcodeArView.prototype, "_shouldShowTorchControl", void 0);
 __decorate([
     nameForSerialization('torchControlPosition')
-], BaseBarcodeCheckView.prototype, "_torchControlPosition", undefined);
+], BaseBarcodeArView.prototype, "_torchControlPosition", void 0);
 __decorate([
     nameForSerialization('shouldShowZoomControl')
-], BaseBarcodeCheckView.prototype, "_shouldShowZoomControl", undefined);
+], BaseBarcodeArView.prototype, "_shouldShowZoomControl", void 0);
 __decorate([
     nameForSerialization('zoomControlPosition')
-], BaseBarcodeCheckView.prototype, "_zoomControlPosition", undefined);
+], BaseBarcodeArView.prototype, "_zoomControlPosition", void 0);
 __decorate([
     ignoreFromSerialization
-], BaseBarcodeCheckView, "barcodeCheckDefaults", null);
+], BaseBarcodeArView.prototype, "isViewCreated", void 0);
+__decorate([
+    ignoreFromSerialization
+], BaseBarcodeArView, "barcodeArDefaults", null);
 
-class BarcodeCheckViewSettings extends DefaultSerializeable {
-    static get barcodeCheckDefaults() {
-        return getBarcodeCheckDefaults();
+class BarcodeArViewSettings extends DefaultSerializeable {
+    static get barcodeArDefaults() {
+        return getBarcodeArDefaults();
     }
     constructor() {
         super();
-        this._soundEnabled = BarcodeCheckViewSettings
-            .barcodeCheckDefaults.BarcodeCheckView.defaultSoundEnabled;
-        this._hapticEnabled = BarcodeCheckViewSettings
-            .barcodeCheckDefaults.BarcodeCheckView.defaultHapticsEnabled;
-        this._defaultCameraPosition = BarcodeCheckViewSettings
-            .barcodeCheckDefaults.BarcodeCheckView.defaultCameraPosition;
+        this._soundEnabled = BarcodeArViewSettings
+            .barcodeArDefaults.BarcodeArView.defaultSoundEnabled;
+        this._hapticEnabled = BarcodeArViewSettings
+            .barcodeArDefaults.BarcodeArView.defaultHapticsEnabled;
+        this._defaultCameraPosition = BarcodeArViewSettings
+            .barcodeArDefaults.BarcodeArView.defaultCameraPosition;
     }
     get soundEnabled() {
         return this._soundEnabled;
@@ -8068,43 +9142,43 @@ class BarcodeCheckViewSettings extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization("soundEnabled")
-], BarcodeCheckViewSettings.prototype, "_soundEnabled", undefined);
+], BarcodeArViewSettings.prototype, "_soundEnabled", void 0);
 __decorate([
     nameForSerialization("hapticEnabled")
-], BarcodeCheckViewSettings.prototype, "_hapticEnabled", undefined);
+], BarcodeArViewSettings.prototype, "_hapticEnabled", void 0);
 __decorate([
     nameForSerialization("defaultCameraPosition")
-], BarcodeCheckViewSettings.prototype, "_defaultCameraPosition", undefined);
+], BarcodeArViewSettings.prototype, "_defaultCameraPosition", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeCheckViewSettings, "barcodeCheckDefaults", null);
+], BarcodeArViewSettings, "barcodeArDefaults", null);
 
-var BarcodeCheckAnnotationTrigger;
-(function (BarcodeCheckAnnotationTrigger) {
-    BarcodeCheckAnnotationTrigger["HighlightTap"] = "highlightTap";
-    BarcodeCheckAnnotationTrigger["HighlightTapAndBarcodeScan"] = "highlightTapAndBarcodeScan";
-})(BarcodeCheckAnnotationTrigger || (BarcodeCheckAnnotationTrigger = {}));
+var BarcodeArAnnotationTrigger;
+(function (BarcodeArAnnotationTrigger) {
+    BarcodeArAnnotationTrigger["HighlightTap"] = "highlightTap";
+    BarcodeArAnnotationTrigger["HighlightTapAndBarcodeScan"] = "highlightTapAndBarcodeScan";
+})(BarcodeArAnnotationTrigger || (BarcodeArAnnotationTrigger = {}));
 
-var BarcodeCheckCircleHighlightPreset;
-(function (BarcodeCheckCircleHighlightPreset) {
-    BarcodeCheckCircleHighlightPreset["Dot"] = "dot";
-    BarcodeCheckCircleHighlightPreset["Icon"] = "icon";
-})(BarcodeCheckCircleHighlightPreset || (BarcodeCheckCircleHighlightPreset = {}));
+var BarcodeArCircleHighlightPreset;
+(function (BarcodeArCircleHighlightPreset) {
+    BarcodeArCircleHighlightPreset["Dot"] = "dot";
+    BarcodeArCircleHighlightPreset["Icon"] = "icon";
+})(BarcodeArCircleHighlightPreset || (BarcodeArCircleHighlightPreset = {}));
 
-var BarcodeCheckInfoAnnotationAnchor;
-(function (BarcodeCheckInfoAnnotationAnchor) {
-    BarcodeCheckInfoAnnotationAnchor["Top"] = "top";
-    BarcodeCheckInfoAnnotationAnchor["Bottom"] = "bottom";
-    BarcodeCheckInfoAnnotationAnchor["Left"] = "left";
-    BarcodeCheckInfoAnnotationAnchor["Right"] = "right";
-})(BarcodeCheckInfoAnnotationAnchor || (BarcodeCheckInfoAnnotationAnchor = {}));
+var BarcodeArInfoAnnotationAnchor;
+(function (BarcodeArInfoAnnotationAnchor) {
+    BarcodeArInfoAnnotationAnchor["Top"] = "top";
+    BarcodeArInfoAnnotationAnchor["Bottom"] = "bottom";
+    BarcodeArInfoAnnotationAnchor["Left"] = "left";
+    BarcodeArInfoAnnotationAnchor["Right"] = "right";
+})(BarcodeArInfoAnnotationAnchor || (BarcodeArInfoAnnotationAnchor = {}));
 
-var BarcodeCheckInfoAnnotationWidthPreset;
-(function (BarcodeCheckInfoAnnotationWidthPreset) {
-    BarcodeCheckInfoAnnotationWidthPreset["Small"] = "small";
-    BarcodeCheckInfoAnnotationWidthPreset["Medium"] = "medium";
-    BarcodeCheckInfoAnnotationWidthPreset["Large"] = "large";
-})(BarcodeCheckInfoAnnotationWidthPreset || (BarcodeCheckInfoAnnotationWidthPreset = {}));
+var BarcodeArInfoAnnotationWidthPreset;
+(function (BarcodeArInfoAnnotationWidthPreset) {
+    BarcodeArInfoAnnotationWidthPreset["Small"] = "small";
+    BarcodeArInfoAnnotationWidthPreset["Medium"] = "medium";
+    BarcodeArInfoAnnotationWidthPreset["Large"] = "large";
+})(BarcodeArInfoAnnotationWidthPreset || (BarcodeArInfoAnnotationWidthPreset = {}));
 
 class BarcodeSelectionFeedback extends DefaultSerializeable {
     constructor() {
@@ -8127,15 +9201,15 @@ class BarcodeSelectionFeedback extends DefaultSerializeable {
     }
     updateFeedback() {
         var _a;
-        (_a = this.controller) === null || _a === undefined ? undefined : _a.updateFeedback(JSON.stringify(this.toJSON()));
+        (_a = this.controller) === null || _a === void 0 ? void 0 : _a.updateFeedback(JSON.stringify(this.toJSON()));
     }
 }
 __decorate([
     ignoreFromSerialization
-], BarcodeSelectionFeedback.prototype, "controller", undefined);
+], BarcodeSelectionFeedback.prototype, "controller", void 0);
 __decorate([
     nameForSerialization('selection')
-], BarcodeSelectionFeedback.prototype, "_selection", undefined);
+], BarcodeSelectionFeedback.prototype, "_selection", void 0);
 __decorate([
     ignoreFromSerialization
 ], BarcodeSelectionFeedback, "barcodeSelectionDefaults", null);
@@ -8164,7 +9238,7 @@ class BarcodeSelectionSession {
         session._newlyUnselectedBarcodes = sessionJson.newlyUnselectedBarcodes
             .map(Barcode.fromJSON);
         session._frameSequenceID = sessionJson.frameSequenceId;
-        session.frameId = (_a = json.frameId) !== null && _a !== undefined ? _a : '';
+        session.frameId = (_a = json.frameId) !== null && _a !== void 0 ? _a : '';
         return session;
     }
     getCount(barcode) {
@@ -8191,7 +9265,7 @@ class BarcodeSelectionListenerController extends BaseNewController {
         super('BarcodeSelectionListenerProxy');
     }
     getCount(barcode) {
-        return __awaiter(this, undefined, undefined, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             const result = yield this._proxy.$getCountForBarcodeInBarcodeSelectionSession({ selectionIdentifier: barcode.selectionIdentifier });
             if (result == null) {
                 return 0;
@@ -8204,7 +9278,7 @@ class BarcodeSelectionListenerController extends BaseNewController {
     }
     subscribeListener() {
         this._proxy.$registerBarcodeSelectionListenerForEvents();
-        this._proxy.on$didUpdateSelection = (ev) => __awaiter(this, undefined, undefined, function* () {
+        this._proxy.on$didUpdateSelection = (ev) => __awaiter(this, void 0, void 0, function* () {
             const payload = EventDataParser.parse(ev.data);
             if (payload === null) {
                 console.error('BarcodeSelectionListenerController didUpdateSelection payload is null');
@@ -8215,7 +9289,7 @@ class BarcodeSelectionListenerController extends BaseNewController {
             yield this.notifyListenersOfDidUpdateSelection(session);
             this._proxy.$finishBarcodeSelectionDidSelect({ enabled: this.barcodeSelection.isEnabled });
         });
-        this._proxy.on$didUpdateSession = (ev) => __awaiter(this, undefined, undefined, function* () {
+        this._proxy.on$didUpdateSession = (ev) => __awaiter(this, void 0, void 0, function* () {
             const payload = EventDataParser.parse(ev.data);
             if (payload === null) {
                 console.error('BarcodeSelectionListenerController didUpdateSession payload is null');
@@ -8232,7 +9306,7 @@ class BarcodeSelectionListenerController extends BaseNewController {
         this._proxy.dispose();
     }
     notifyListenersOfDidUpdateSelection(session) {
-        return __awaiter(this, undefined, undefined, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             const mode = this.barcodeSelection;
             for (const listener of mode.listeners) {
                 if (listener.didUpdateSelection) {
@@ -8242,7 +9316,7 @@ class BarcodeSelectionListenerController extends BaseNewController {
         });
     }
     notifyListenersOfDidUpdateSession(session) {
-        return __awaiter(this, undefined, undefined, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             const mode = this.barcodeSelection;
             for (const listener of mode.listeners) {
                 if (listener.didUpdateSession) {
@@ -8404,25 +9478,25 @@ class BarcodeSelection extends DefaultSerializeable {
 }
 __decorate([
     ignoreFromSerialization
-], BarcodeSelection.prototype, "_isEnabled", undefined);
+], BarcodeSelection.prototype, "_isEnabled", void 0);
 __decorate([
     nameForSerialization('feedback')
-], BarcodeSelection.prototype, "_feedback", undefined);
+], BarcodeSelection.prototype, "_feedback", void 0);
 __decorate([
     nameForSerialization('pointOfInterest')
-], BarcodeSelection.prototype, "_pointOfInterest", undefined);
+], BarcodeSelection.prototype, "_pointOfInterest", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeSelection.prototype, "privateContext", undefined);
+], BarcodeSelection.prototype, "privateContext", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeSelection.prototype, "listeners", undefined);
+], BarcodeSelection.prototype, "listeners", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeSelection.prototype, "listenerController", undefined);
+], BarcodeSelection.prototype, "listenerController", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeSelection.prototype, "modeController", undefined);
+], BarcodeSelection.prototype, "modeController", void 0);
 __decorate([
     ignoreFromSerialization
 ], BarcodeSelection, "barcodeSelectionDefaults", null);
@@ -8467,7 +9541,7 @@ class BarcodeSelectionOverlayController extends BaseNewController {
         super('BarcodeSelectionOverlayProxy');
     }
     setTextForAimToSelectAutoHint(text) {
-        return __awaiter(this, undefined, undefined, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             return yield this._proxy.$setTextForAimToSelectAutoHint({ text });
         });
     }
@@ -8622,37 +9696,37 @@ class BarcodeSelectionBasicOverlay extends DefaultSerializeable {
 }
 __decorate([
     ignoreFromSerialization
-], BarcodeSelectionBasicOverlay.prototype, "barcodeSelection", undefined);
+], BarcodeSelectionBasicOverlay.prototype, "barcodeSelection", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeSelectionBasicOverlay.prototype, "overlayController", undefined);
+], BarcodeSelectionBasicOverlay.prototype, "overlayController", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeSelectionBasicOverlay.prototype, "view", undefined);
+], BarcodeSelectionBasicOverlay.prototype, "view", void 0);
 __decorate([
     nameForSerialization('shouldShowScanAreaGuides')
-], BarcodeSelectionBasicOverlay.prototype, "_shouldShowScanAreaGuides", undefined);
+], BarcodeSelectionBasicOverlay.prototype, "_shouldShowScanAreaGuides", void 0);
 __decorate([
     nameForSerialization('shouldShowHints')
-], BarcodeSelectionBasicOverlay.prototype, "_shouldShowHints", undefined);
+], BarcodeSelectionBasicOverlay.prototype, "_shouldShowHints", void 0);
 __decorate([
     nameForSerialization('viewfinder')
-], BarcodeSelectionBasicOverlay.prototype, "_viewfinder", undefined);
+], BarcodeSelectionBasicOverlay.prototype, "_viewfinder", void 0);
 __decorate([
     nameForSerialization('style')
-], BarcodeSelectionBasicOverlay.prototype, "_style", undefined);
+], BarcodeSelectionBasicOverlay.prototype, "_style", void 0);
 __decorate([
     nameForSerialization('trackedBrush')
-], BarcodeSelectionBasicOverlay.prototype, "_trackedBrush", undefined);
+], BarcodeSelectionBasicOverlay.prototype, "_trackedBrush", void 0);
 __decorate([
     nameForSerialization('aimedBrush')
-], BarcodeSelectionBasicOverlay.prototype, "_aimedBrush", undefined);
+], BarcodeSelectionBasicOverlay.prototype, "_aimedBrush", void 0);
 __decorate([
     nameForSerialization('selectedBrush')
-], BarcodeSelectionBasicOverlay.prototype, "_selectedBrush", undefined);
+], BarcodeSelectionBasicOverlay.prototype, "_selectedBrush", void 0);
 __decorate([
     nameForSerialization('selectingBrush')
-], BarcodeSelectionBasicOverlay.prototype, "_selectingBrush", undefined);
+], BarcodeSelectionBasicOverlay.prototype, "_selectingBrush", void 0);
 __decorate([
     ignoreFromSerialization
 ], BarcodeSelectionBasicOverlay, "barcodeSelectionDefaults", null);
@@ -8798,7 +9872,7 @@ class BarcodeSelectionSettings extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('singleBarcodeAutoDetectionEnabled')
-], BarcodeSelectionSettings.prototype, "singleBarcodeAutoDetection", undefined);
+], BarcodeSelectionSettings.prototype, "singleBarcodeAutoDetection", void 0);
 __decorate([
     ignoreFromSerialization
 ], BarcodeSelectionSettings, "barcodeSelectionDefaults", null);
@@ -8859,7 +9933,7 @@ class BarcodeBatchSession {
                 .fromJSON(sessionJson.trackedBarcodes[identifier], sessionJson.frameSequenceId);
             return trackedBarcodes;
         }, {});
-        session.frameId = (_a = json.frameId) !== null && _a !== undefined ? _a : '';
+        session.frameId = (_a = json.frameId) !== null && _a !== void 0 ? _a : '';
         return session;
     }
     reset() {
@@ -8869,67 +9943,76 @@ class BarcodeBatchSession {
 
 var BarcodeBatchListenerEvents;
 (function (BarcodeBatchListenerEvents) {
-    BarcodeBatchListenerEvents["inCallback"] = "BarcodeBatchListener.inCallback";
     BarcodeBatchListenerEvents["didUpdateSession"] = "BarcodeBatchListener.didUpdateSession";
 })(BarcodeBatchListenerEvents || (BarcodeBatchListenerEvents = {}));
-class BarcodeBatchListenerController {
-    get _proxy() {
-        return FactoryMaker.getInstance("BarcodeBatchListenerProxy");
-    }
+class BarcodeBatchListenerController extends BaseNewController {
     static forBarcodeBatch(barcodeBatch) {
         const controller = new BarcodeBatchListenerController();
-        controller.barcodeBatch = barcodeBatch;
+        controller.mode = barcodeBatch;
         controller._proxy.isModeEnabled = () => barcodeBatch.isEnabled;
         return controller;
     }
     constructor() {
-        this.eventEmitter = FactoryMaker.getInstance('EventEmitter');
+        super('BarcodeBatchListenerProxy');
+        this.boundHandleDidUpdateSessionEvent = null;
     }
     resetSession() {
-        return this._proxy.resetSession();
+        return this._proxy.$resetBarcodeBatchSession();
     }
     subscribeListener() {
-        var _a, _b;
-        this._proxy.registerListenerForEvents();
-        (_b = (_a = this._proxy).subscribeDidUpdateSession) === null || _b === undefined ? undefined : _b.call(_a);
-        this.eventEmitter.on(BarcodeBatchListenerEvents.inCallback, (value) => {
-            this.barcodeBatch.isInListenerCallback = value;
-        });
-        this.eventEmitter.on(BarcodeBatchListenerEvents.didUpdateSession, (data) => __awaiter(this, undefined, undefined, function* () {
-            const payload = EventDataParser.parse(data);
+        if (this.boundHandleDidUpdateSessionEvent) {
+            return;
+        }
+        this.boundHandleDidUpdateSessionEvent = this.handleDidUpdateSessionEvent.bind(this);
+        this._proxy.subscribeForEvents(Object.values(BarcodeBatchListenerEvents));
+        this._proxy.$registerBarcodeBatchListenerForEvents({ modeId: this.mode.modeId });
+        this._proxy.eventEmitter.on(BarcodeBatchListenerEvents.didUpdateSession, this.boundHandleDidUpdateSessionEvent);
+    }
+    unsubscribeListener() {
+        if (!this.boundHandleDidUpdateSessionEvent) {
+            return;
+        }
+        this._proxy.$unregisterBarcodeBatchListenerForEvents({ modeId: this.mode.modeId });
+        this._proxy.unsubscribeFromEvents(Object.values(BarcodeBatchListenerEvents));
+        this._proxy.eventEmitter.off(BarcodeBatchListenerEvents.didUpdateSession, this.boundHandleDidUpdateSessionEvent);
+        this.boundHandleDidUpdateSessionEvent = null;
+    }
+    dispose() {
+        this.unsubscribeListener();
+        this._proxy.dispose();
+    }
+    setModeEnabledState(enabled) {
+        this._proxy.$setBarcodeBatchModeEnabledState({ modeId: this.mode.modeId, enabled });
+    }
+    updateBarcodeBatchMode() {
+        return this._proxy.$updateBarcodeBatchMode({ modeJson: JSON.stringify(this.mode.toJSON()) });
+    }
+    applyBarcodeBatchModeSettings(newSettings) {
+        return this._proxy.$applyBarcodeBatchModeSettings({ modeId: this.mode.modeId, modeSettingsJson: JSON.stringify(newSettings.toJSON()) });
+    }
+    handleDidUpdateSessionEvent(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
             if (payload === null) {
                 console.error('BarcodeBatchListenerController didUpdateSession payload is null');
                 return;
             }
+            if (payload.modeId !== this.mode.modeId) {
+                return;
+            }
             const session = BarcodeBatchSession.fromJSON(payload);
             yield this.notifyListenersOfDidUpdateSession(session);
-            this._proxy.finishDidUpdateSessionCallback(this.barcodeBatch.isEnabled);
-        }));
-    }
-    unsubscribeListener() {
-        this._proxy.unregisterListenerForEvents();
-        this.eventEmitter.removeAllListeners(BarcodeBatchListenerEvents.inCallback);
-        this.eventEmitter.removeAllListeners(BarcodeBatchListenerEvents.didUpdateSession);
-    }
-    setModeEnabledState(enabled) {
-        this._proxy.setModeEnabledState(enabled);
-    }
-    updateBarcodeBatchMode() {
-        return this._proxy.updateBarcodeBatchMode(JSON.stringify(this.barcodeBatch.toJSON()));
-    }
-    applyBarcodeBatchModeSettings(newSettings) {
-        return this._proxy.applyBarcodeBatchModeSettings(JSON.stringify(newSettings.toJSON()));
+            this._proxy.$finishBarcodeBatchDidUpdateSessionCallback({ modeId: this.mode.modeId, enabled: this.mode.isEnabled });
+        });
     }
     notifyListenersOfDidUpdateSession(session) {
-        return __awaiter(this, undefined, undefined, function* () {
-            const mode = this.barcodeBatch;
-            mode.isInListenerCallback = true;
+        return __awaiter(this, void 0, void 0, function* () {
+            const mode = this.mode;
             for (const listener of mode.listeners) {
                 if (listener.didUpdateSession) {
-                    yield listener.didUpdateSession(this.barcodeBatch, session, () => CameraController.getFrame(session.frameId));
+                    yield listener.didUpdateSession(this.mode, session, () => CameraController.getFrame(session.frameId));
                 }
             }
-            mode.isInListenerCallback = false;
         });
     }
 }
@@ -8974,9 +10057,12 @@ class BarcodeBatch extends DefaultSerializeable {
     constructor() {
         super();
         this.type = 'barcodeTracking';
+        this.modeId = Math.floor(Math.random() * 1000000);
         this._isEnabled = true;
         this.privateContext = null;
+        this.parentId = null;
         this.listeners = [];
+        this.hasListeners = false;
         this.isInListenerCallback = false;
         this.listenerController = BarcodeBatchListenerController.forBarcodeBatch(this);
     }
@@ -8989,33 +10075,39 @@ class BarcodeBatch extends DefaultSerializeable {
             return;
         }
         this.listeners.push(listener);
+        this.hasListeners = this.listeners.length > 0;
     }
     removeListener(listener) {
         if (!this.listeners.includes(listener)) {
             return;
         }
         this.listeners.splice(this.listeners.indexOf(listener), 1);
+        this.hasListeners = this.listeners.length > 0;
     }
     reset() {
         var _a, _b;
-        return (_b = (_a = this.listenerController) === null || _a === undefined ? undefined : _a.resetSession()) !== null && _b !== undefined ? _b : Promise.resolve();
+        return (_b = (_a = this.listenerController) === null || _a === void 0 ? void 0 : _a.resetSession()) !== null && _b !== void 0 ? _b : Promise.resolve();
     }
 }
 __decorate([
-    ignoreFromSerialization
-], BarcodeBatch.prototype, "_isEnabled", undefined);
+    nameForSerialization('enabled')
+], BarcodeBatch.prototype, "_isEnabled", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeBatch.prototype, "privateContext", undefined);
+], BarcodeBatch.prototype, "privateContext", void 0);
+__decorate([
+    nameForSerialization('parentId'),
+    ignoreFromSerializationIfNull
+], BarcodeBatch.prototype, "parentId", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeBatch.prototype, "listeners", undefined);
+], BarcodeBatch.prototype, "listeners", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeBatch.prototype, "listenerController", undefined);
+], BarcodeBatch.prototype, "listenerController", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeBatch.prototype, "isInListenerCallback", undefined);
+], BarcodeBatch.prototype, "isInListenerCallback", void 0);
 __decorate([
     ignoreFromSerialization
 ], BarcodeBatch, "barcodeBatchDefaults", null);
@@ -9027,49 +10119,138 @@ var BarcodeBatchAdvancedOverlayListenerEvents;
     BarcodeBatchAdvancedOverlayListenerEvents["anchorForTrackedBarcode"] = "BarcodeBatchAdvancedOverlayListener.anchorForTrackedBarcode";
     BarcodeBatchAdvancedOverlayListenerEvents["offsetForTrackedBarcode"] = "BarcodeBatchAdvancedOverlayListener.offsetForTrackedBarcode";
 })(BarcodeBatchAdvancedOverlayListenerEvents || (BarcodeBatchAdvancedOverlayListenerEvents = {}));
-class BarcodeBatchAdvancedOverlayController {
-    get _proxy() {
-        return FactoryMaker.getInstance("BarcodeBatchAdvancedOverlayProxy");
-    }
+class BarcodeBatchAdvancedOverlayController extends BaseNewController {
     static forOverlay(overlay) {
-        const controller = new BarcodeBatchAdvancedOverlayController();
-        controller.overlay = overlay;
+        const controller = new BarcodeBatchAdvancedOverlayController(overlay);
         return controller;
     }
-    constructor() {
-        this.eventEmitter = FactoryMaker.getInstance('EventEmitter');
+    constructor(overlay) {
+        super('BarcodeBatchAdvancedOverlayProxy');
+        // Bound event handlers - using nullable function references instead of boolean flags
+        this.boundHandleViewForTrackedBarcode = null;
+        this.boundHandleAnchorForTrackedBarcode = null;
+        this.boundHandleOffsetForTrackedBarcode = null;
+        this.boundHandleDidTapViewForTrackedBarcode = null;
+        this.overlay = overlay;
     }
     setBrushForTrackedBarcode(brush, trackedBarcode) {
-        return this._proxy.setBrushForTrackedBarcode(JSON.stringify(brush.toJSON()), trackedBarcode.sessionFrameSequenceID, trackedBarcode.identifier);
-    }
-    setViewForTrackedBarcode(view, trackedBarcode) {
-        return __awaiter(this, undefined, undefined, function* () {
-            const awitedView = yield view;
-            const viewJson = this._proxy.getJSONStringForView(awitedView);
-            return this._proxy.setViewForTrackedBarcode(viewJson, trackedBarcode.identifier, trackedBarcode.sessionFrameSequenceID);
+        return this._proxy.$setBrushForTrackedBarcode({
+            dataCaptureViewId: this.dataCaptureViewId,
+            brushJson: JSON.stringify(brush.toJSON()),
+            sessionFrameSequenceID: trackedBarcode.sessionFrameSequenceID,
+            trackedBarcodeIdentifier: trackedBarcode.identifier,
         });
     }
+    setViewForTrackedBarcode(view, trackedBarcode) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const awitedView = yield view;
+            const viewJson = this.getJSONStringForView(awitedView);
+            return this._proxy.$setViewForTrackedBarcode({
+                dataCaptureViewId: this.dataCaptureViewId,
+                viewJson,
+                trackedBarcodeIdentifier: trackedBarcode.identifier,
+                sessionFrameSequenceID: trackedBarcode.sessionFrameSequenceID
+            });
+        });
+    }
+    updateSizeOfTrackedBarcodeView(trackedBarcodeIdentifier, width, height) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this._proxy.$updateSizeOfTrackedBarcodeView({
+                dataCaptureViewId: this.dataCaptureViewId,
+                trackedBarcodeIdentifier,
+                width,
+                height
+            });
+        });
+    }
+    getJSONStringForView(view) {
+        if (view == null) {
+            return null;
+        }
+        // If view doesn't have moduleName, just return it. If it does have moduleName, we process it further for React Native
+        if (view.moduleName === undefined) {
+            return view;
+        }
+        if (!this.isSerializeable(view.props)) {
+            // react-navigation does something like this: https://reactnavigation.org/docs/troubleshooting/#i-get-the-warning-non-serializable-values-were-found-in-the-navigation-state
+            throw new Error('Non-serializable values were found in the view passed passed to a BarcodeBatchAdvancedOverlay, which can break usage. This might happen if you have non-serializable values such as function, class instances etc. in the props for the view component that you are passing.');
+        }
+        const viewJSON = {
+            moduleName: view.moduleName,
+            initialProperties: view.props,
+        };
+        return JSON.stringify(viewJSON);
+    }
+    isSerializeable(o) {
+        if (o === undefined || o === null ||
+            typeof o === 'boolean' || typeof o === 'number' || typeof o === 'string') {
+            return true;
+        }
+        if (Object.prototype.toString.call(o) !== '[object Object]' &&
+            !Array.isArray(o)) {
+            return false;
+        }
+        if (Array.isArray(o)) {
+            for (const it of o) {
+                if (!this.isSerializeable(it)) {
+                    return false;
+                }
+            }
+        }
+        else {
+            for (const key in o) {
+                if (!this.isSerializeable(o[key])) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
     setAnchorForTrackedBarcode(anchor, trackedBarcode) {
-        return this._proxy.setAnchorForTrackedBarcode(anchor, trackedBarcode.identifier, trackedBarcode.sessionFrameSequenceID);
+        return this._proxy.$setAnchorForTrackedBarcode({
+            dataCaptureViewId: this.dataCaptureViewId,
+            anchor,
+            trackedBarcodeIdentifier: trackedBarcode.identifier,
+            sessionFrameSequenceID: trackedBarcode.sessionFrameSequenceID
+        });
     }
     setOffsetForTrackedBarcode(offset, trackedBarcode) {
-        return this._proxy.setOffsetForTrackedBarcode(JSON.stringify(offset.toJSON()), trackedBarcode.identifier, trackedBarcode.sessionFrameSequenceID);
+        return this._proxy.$setOffsetForTrackedBarcode({
+            dataCaptureViewId: this.dataCaptureViewId,
+            offsetJson: JSON.stringify(offset.toJSON()),
+            trackedBarcodeIdentifier: trackedBarcode.identifier,
+            sessionFrameSequenceID: trackedBarcode.sessionFrameSequenceID
+        });
     }
     clearTrackedBarcodeViews() {
-        return this._proxy.clearTrackedBarcodeViews();
+        return this._proxy.$clearTrackedBarcodeViews({ dataCaptureViewId: this.dataCaptureViewId });
     }
     updateBarcodeBatchAdvancedOverlay() {
-        return this._proxy.updateBarcodeBatchAdvancedOverlay(JSON.stringify(this.overlay.toJSON()));
+        return this._proxy.$updateBarcodeBatchAdvancedOverlay({
+            dataCaptureViewId: this.dataCaptureViewId,
+            overlayJson: JSON.stringify(this.overlay.toJSON())
+        });
     }
     subscribeListener() {
-        var _a, _b, _c, _d, _e, _f, _g, _h;
-        this._proxy.registerListenerForAdvancedOverlayEvents();
-        (_b = (_a = this._proxy).subscribeViewForTrackedBarcode) === null || _b === undefined ? undefined : _b.call(_a);
-        (_d = (_c = this._proxy).subscribeAnchorForTrackedBarcode) === null || _d === undefined ? undefined : _d.call(_c);
-        (_f = (_e = this._proxy).subscribeOffsetForTrackedBarcode) === null || _f === undefined ? undefined : _f.call(_e);
-        (_h = (_g = this._proxy).subscribeDidTapViewForTrackedBarcode) === null || _h === undefined ? undefined : _h.call(_g);
-        this.eventEmitter.on(BarcodeBatchAdvancedOverlayListenerEvents.viewForTrackedBarcode, (data) => __awaiter(this, undefined, undefined, function* () {
-            const payload = EventDataParser.parse(data);
+        if (this.boundHandleViewForTrackedBarcode !== null) {
+            return;
+        }
+        this.boundHandleViewForTrackedBarcode = this.handleViewForTrackedBarcode.bind(this);
+        this.boundHandleAnchorForTrackedBarcode = this.handleAnchorForTrackedBarcode.bind(this);
+        this.boundHandleOffsetForTrackedBarcode = this.handleOffsetForTrackedBarcode.bind(this);
+        this.boundHandleDidTapViewForTrackedBarcode = this.handleDidTapViewForTrackedBarcode.bind(this);
+        if (this.dataCaptureViewId !== -1) {
+            this._proxy.$registerListenerForAdvancedOverlayEvents({ dataCaptureViewId: this.dataCaptureViewId });
+        }
+        this._proxy.subscribeForEvents(Object.values(BarcodeBatchAdvancedOverlayListenerEvents));
+        this._proxy.eventEmitter.on(BarcodeBatchAdvancedOverlayListenerEvents.viewForTrackedBarcode, this.boundHandleViewForTrackedBarcode);
+        this._proxy.eventEmitter.on(BarcodeBatchAdvancedOverlayListenerEvents.anchorForTrackedBarcode, this.boundHandleAnchorForTrackedBarcode);
+        this._proxy.eventEmitter.on(BarcodeBatchAdvancedOverlayListenerEvents.offsetForTrackedBarcode, this.boundHandleOffsetForTrackedBarcode);
+        this._proxy.eventEmitter.on(BarcodeBatchAdvancedOverlayListenerEvents.didTapViewForTrackedBarcode, this.boundHandleDidTapViewForTrackedBarcode);
+    }
+    handleViewForTrackedBarcode(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
             if (payload === null) {
                 console.error('BarcodeBatchAdvancedOverlayController viewForTrackedBarcode payload is null');
                 return;
@@ -9078,54 +10259,92 @@ class BarcodeBatchAdvancedOverlayController {
                 .fromJSON(JSON.parse(payload.trackedBarcode));
             if (this.overlay.listener && this.overlay.listener.viewForTrackedBarcode) {
                 const view = yield this.overlay.listener.viewForTrackedBarcode(this.overlay, trackedBarcode);
-                this._proxy.setViewForTrackedBarcode(this._proxy.getJSONStringForView(view), trackedBarcode.identifier, trackedBarcode.sessionFrameSequenceID);
+                this._proxy.$setViewForTrackedBarcode({
+                    dataCaptureViewId: this.dataCaptureViewId,
+                    viewJson: this.getJSONStringForView(view),
+                    trackedBarcodeIdentifier: trackedBarcode.identifier,
+                    sessionFrameSequenceID: trackedBarcode.sessionFrameSequenceID
+                });
             }
-        }));
-        this.eventEmitter.on(BarcodeBatchAdvancedOverlayListenerEvents.anchorForTrackedBarcode, (data) => {
-            const payload = EventDataParser.parse(data);
+        });
+    }
+    handleAnchorForTrackedBarcode(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
             if (payload === null) {
                 console.error('BarcodeBatchAdvancedOverlayController anchorForTrackedBarcode payload is null');
                 return;
             }
             const trackedBarcode = TrackedBarcode
                 .fromJSON(JSON.parse(payload.trackedBarcode));
-            let anchor = exports.Anchor.Center;
             if (this.overlay.listener && this.overlay.listener.anchorForTrackedBarcode) {
-                anchor = this.overlay.listener.anchorForTrackedBarcode(this.overlay, trackedBarcode);
+                const anchor = this.overlay.listener.anchorForTrackedBarcode(this.overlay, trackedBarcode);
+                this.setAnchorForTrackedBarcode(anchor, trackedBarcode);
             }
-            this.setAnchorForTrackedBarcode(anchor, trackedBarcode);
         });
-        this.eventEmitter.on(BarcodeBatchAdvancedOverlayListenerEvents.offsetForTrackedBarcode, (data) => {
-            const payload = EventDataParser.parse(data);
+    }
+    handleOffsetForTrackedBarcode(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
             if (payload === null) {
                 console.error('BarcodeBatchAdvancedOverlayController offsetForTrackedBarcode payload is null');
                 return;
             }
             const trackedBarcode = TrackedBarcode
                 .fromJSON(JSON.parse(payload.trackedBarcode));
-            let offset = PointWithUnit.zero;
             if (this.overlay.listener && this.overlay.listener.offsetForTrackedBarcode) {
-                offset = this.overlay.listener.offsetForTrackedBarcode(this.overlay, trackedBarcode);
+                const offset = this.overlay.listener.offsetForTrackedBarcode(this.overlay, trackedBarcode);
+                this.setOffsetForTrackedBarcode(offset, trackedBarcode);
             }
-            this.setOffsetForTrackedBarcode(offset, trackedBarcode);
         });
-        this.eventEmitter.on(BarcodeBatchAdvancedOverlayListenerEvents.didTapViewForTrackedBarcode, (data) => {
+    }
+    handleDidTapViewForTrackedBarcode(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
-            const payload = EventDataParser.parse(data);
+            const payload = EventDataParser.parse(ev.data);
             if (payload === null) {
                 console.error('BarcodeBatchAdvancedOverlayController didTapViewForTrackedBarcode payload is null');
                 return;
             }
             const trackedBarcode = TrackedBarcode
                 .fromJSON(JSON.parse(payload.trackedBarcode));
-            (_b = (_a = this.overlay.listener) === null || _a === undefined ? undefined : _a.didTapViewForTrackedBarcode) === null || _b === undefined ? undefined : _b.call(_a, this.overlay, trackedBarcode);
+            (_b = (_a = this.overlay.listener) === null || _a === void 0 ? void 0 : _a.didTapViewForTrackedBarcode) === null || _b === void 0 ? void 0 : _b.call(_a, this.overlay, trackedBarcode);
         });
     }
     unsubscribeListener() {
-        this._proxy.unregisterListenerForAdvancedOverlayEvents();
-        this.eventEmitter.removeAllListeners(BarcodeBatchAdvancedOverlayListenerEvents.anchorForTrackedBarcode);
-        this.eventEmitter.removeAllListeners(BarcodeBatchAdvancedOverlayListenerEvents.offsetForTrackedBarcode);
-        this.eventEmitter.removeAllListeners(BarcodeBatchAdvancedOverlayListenerEvents.viewForTrackedBarcode);
+        if (this.boundHandleViewForTrackedBarcode === null) {
+            return;
+        }
+        if (this.dataCaptureViewId !== -1) {
+            this._proxy.$unregisterListenerForAdvancedOverlayEvents({ dataCaptureViewId: this.dataCaptureViewId });
+        }
+        this._proxy.unsubscribeFromEvents(Object.values(BarcodeBatchAdvancedOverlayListenerEvents));
+        // Remove event listeners using bound functions
+        if (this.boundHandleViewForTrackedBarcode) {
+            this._proxy.eventEmitter.off(BarcodeBatchAdvancedOverlayListenerEvents.viewForTrackedBarcode, this.boundHandleViewForTrackedBarcode);
+        }
+        if (this.boundHandleAnchorForTrackedBarcode) {
+            this._proxy.eventEmitter.off(BarcodeBatchAdvancedOverlayListenerEvents.anchorForTrackedBarcode, this.boundHandleAnchorForTrackedBarcode);
+        }
+        if (this.boundHandleOffsetForTrackedBarcode) {
+            this._proxy.eventEmitter.off(BarcodeBatchAdvancedOverlayListenerEvents.offsetForTrackedBarcode, this.boundHandleOffsetForTrackedBarcode);
+        }
+        if (this.boundHandleDidTapViewForTrackedBarcode) {
+            this._proxy.eventEmitter.off(BarcodeBatchAdvancedOverlayListenerEvents.didTapViewForTrackedBarcode, this.boundHandleDidTapViewForTrackedBarcode);
+        }
+        // Clear bound functions
+        this.boundHandleViewForTrackedBarcode = null;
+        this.boundHandleAnchorForTrackedBarcode = null;
+        this.boundHandleOffsetForTrackedBarcode = null;
+        this.boundHandleDidTapViewForTrackedBarcode = null;
+    }
+    get dataCaptureViewId() {
+        var _a, _b;
+        return (_b = (_a = this.overlay.view) === null || _a === void 0 ? void 0 : _a.viewId) !== null && _b !== void 0 ? _b : -1;
+    }
+    dispose() {
+        this.unsubscribeListener();
+        this._proxy.dispose();
     }
 }
 
@@ -9134,34 +10353,50 @@ var BarcodeBatchBasicOverlayListenerEvents;
     BarcodeBatchBasicOverlayListenerEvents["brushForTrackedBarcode"] = "BarcodeBatchBasicOverlayListener.brushForTrackedBarcode";
     BarcodeBatchBasicOverlayListenerEvents["didTapTrackedBarcode"] = "BarcodeBatchBasicOverlayListener.didTapTrackedBarcode";
 })(BarcodeBatchBasicOverlayListenerEvents || (BarcodeBatchBasicOverlayListenerEvents = {}));
-class BarcodeBatchBasicOverlayController {
-    get _proxy() {
-        return FactoryMaker.getInstance("BarcodeBatchBasicOverlayProxy");
-    }
+class BarcodeBatchBasicOverlayController extends BaseNewController {
     static forOverlay(overlay) {
         const controller = new BarcodeBatchBasicOverlayController();
         controller.overlay = overlay;
         return controller;
     }
     constructor() {
-        this.eventEmitter = FactoryMaker.getInstance('EventEmitter');
+        super('BarcodeBatchBasicOverlayProxy');
+        this.boundHandleBrushForTrackedBarcode = null;
+        this.boundHandleDidTapTrackedBarcode = null;
     }
     setBrushForTrackedBarcode(brush, trackedBarcode) {
-        return this._proxy.setBrushForTrackedBarcode(brush ? JSON.stringify(brush.toJSON()) : null, trackedBarcode.identifier, trackedBarcode.sessionFrameSequenceID);
+        return this._proxy.$setBrushForTrackedBarcode({
+            dataCaptureViewId: this.dataCaptureViewId,
+            brushJson: brush ? JSON.stringify(brush.toJSON()) : null,
+            trackedBarcodeIdentifier: trackedBarcode.identifier,
+            sessionFrameSequenceID: trackedBarcode.sessionFrameSequenceID
+        });
     }
     clearTrackedBarcodeBrushes() {
-        return this._proxy.clearTrackedBarcodeBrushes();
+        return this._proxy.$clearTrackedBarcodeBrushes();
     }
     updateBarcodeBatchBasicOverlay() {
-        return this._proxy.updateBarcodeBatchBasicOverlay(JSON.stringify(this.overlay.toJSON()));
+        return this._proxy.$updateBarcodeBatchBasicOverlay({
+            dataCaptureViewId: this.dataCaptureViewId,
+            overlayJson: JSON.stringify(this.overlay.toJSON())
+        });
     }
     subscribeListener() {
-        var _a, _b, _c, _d;
-        this._proxy.registerListenerForBasicOverlayEvents();
-        (_b = (_a = this._proxy).subscribeBrushForTrackedBarcode) === null || _b === undefined ? undefined : _b.call(_a);
-        (_d = (_c = this._proxy).subscribeDidTapTrackedBarcode) === null || _d === undefined ? undefined : _d.call(_c);
-        this.eventEmitter.on(BarcodeBatchBasicOverlayListenerEvents.brushForTrackedBarcode, (data) => {
-            const payload = EventDataParser.parse(data);
+        if (this.boundHandleBrushForTrackedBarcode) {
+            return;
+        }
+        this.boundHandleBrushForTrackedBarcode = this.handleBrushForTrackedBarcode.bind(this);
+        this.boundHandleDidTapTrackedBarcode = this.handleDidTapTrackedBarcode.bind(this);
+        if (this.dataCaptureViewId !== -1) {
+            this._proxy.$registerListenerForBasicOverlayEvents({ dataCaptureViewId: this.dataCaptureViewId });
+        }
+        this._proxy.subscribeForEvents(Object.values(BarcodeBatchBasicOverlayListenerEvents));
+        this._proxy.eventEmitter.on(BarcodeBatchBasicOverlayListenerEvents.brushForTrackedBarcode, this.boundHandleBrushForTrackedBarcode);
+        this._proxy.eventEmitter.on(BarcodeBatchBasicOverlayListenerEvents.didTapTrackedBarcode, this.boundHandleDidTapTrackedBarcode);
+    }
+    handleBrushForTrackedBarcode(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
             if (payload === null) {
                 console.error('BarcodeBatchBasicOverlayController brushForTrackedBarcode payload is null');
                 return;
@@ -9173,8 +10408,10 @@ class BarcodeBatchBasicOverlayController {
                 this.setBrushForTrackedBarcode(brush, trackedBarcode);
             }
         });
-        this.eventEmitter.on(BarcodeBatchBasicOverlayListenerEvents.didTapTrackedBarcode, (data) => {
-            const payload = EventDataParser.parse(data);
+    }
+    handleDidTapTrackedBarcode(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
             if (payload === null) {
                 console.error('BarcodeBatchBasicOverlayController didTapTrackedBarcode payload is null');
                 return;
@@ -9186,21 +10423,56 @@ class BarcodeBatchBasicOverlayController {
         });
     }
     unsubscribeListener() {
-        this._proxy.unregisterListenerForBasicOverlayEvents();
-        this.eventEmitter.removeAllListeners(BarcodeBatchBasicOverlayListenerEvents.brushForTrackedBarcode);
-        this.eventEmitter.removeAllListeners(BarcodeBatchBasicOverlayListenerEvents.didTapTrackedBarcode);
+        if (!this.boundHandleBrushForTrackedBarcode) {
+            return;
+        }
+        if (this.dataCaptureViewId !== -1) {
+            this._proxy.$unregisterListenerForBasicOverlayEvents({ dataCaptureViewId: this.dataCaptureViewId });
+        }
+        this._proxy.unsubscribeFromEvents(Object.values(BarcodeBatchBasicOverlayListenerEvents));
+        if (this.boundHandleBrushForTrackedBarcode) {
+            this._proxy.eventEmitter.off(BarcodeBatchBasicOverlayListenerEvents.brushForTrackedBarcode, this.boundHandleBrushForTrackedBarcode);
+        }
+        if (this.boundHandleDidTapTrackedBarcode) {
+            this._proxy.eventEmitter.off(BarcodeBatchBasicOverlayListenerEvents.didTapTrackedBarcode, this.boundHandleDidTapTrackedBarcode);
+        }
+        this.boundHandleBrushForTrackedBarcode = null;
+        this.boundHandleDidTapTrackedBarcode = null;
+    }
+    get dataCaptureViewId() {
+        var _a, _b;
+        return (_b = (_a = this.overlay.view) === null || _a === void 0 ? void 0 : _a.viewId) !== null && _b !== void 0 ? _b : -1;
+    }
+    dispose() {
+        this.unsubscribeListener();
+        this._proxy.dispose();
     }
 }
 
 class BarcodeBatchBasicOverlay extends DefaultSerializeable {
-    set view(newView) {
-        if (newView == null) {
-            this.controller.unsubscribeListener();
-        }
-        else if (this._view == null) {
+    get listener() {
+        return this._listener;
+    }
+    set listener(newListener) {
+        this._hasListener = newListener != null;
+        this._listener = newListener;
+        if (this._listener != null) {
             this.controller.subscribeListener();
         }
+        else {
+            this.controller.unsubscribeListener();
+        }
+    }
+    set view(newView) {
+        var _a;
         this._view = newView;
+        this._dataCaptureViewId = (_a = newView === null || newView === void 0 ? void 0 : newView.viewId) !== null && _a !== void 0 ? _a : -1;
+        if (this._view != null && this._hasListener) {
+            this.controller.subscribeListener();
+        }
+        else {
+            this.controller.unsubscribeListener();
+        }
     }
     get view() {
         return this._view;
@@ -9250,9 +10522,12 @@ class BarcodeBatchBasicOverlay extends DefaultSerializeable {
     constructor() {
         super();
         this.type = 'barcodeTrackingBasic';
+        this._view = null;
+        this._hasListener = false;
+        this._dataCaptureViewId = -1;
+        this._listener = null;
         this._brush = BarcodeBatchBasicOverlay.barcodeBatchDefaults.BarcodeBatchBasicOverlay.DefaultBrush;
         this._shouldShowScanAreaGuides = false;
-        this.listener = null;
         this.controller = BarcodeBatchBasicOverlayController.forOverlay(this);
     }
     setBrushForTrackedBarcode(brush, trackedBarcode) {
@@ -9264,28 +10539,34 @@ class BarcodeBatchBasicOverlay extends DefaultSerializeable {
 }
 __decorate([
     ignoreFromSerialization
-], BarcodeBatchBasicOverlay.prototype, "barcodeBatch", undefined);
+], BarcodeBatchBasicOverlay.prototype, "barcodeBatch", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeBatchBasicOverlay.prototype, "_view", undefined);
+], BarcodeBatchBasicOverlay.prototype, "_view", void 0);
 __decorate([
     nameForSerialization('style')
-], BarcodeBatchBasicOverlay.prototype, "_style", undefined);
+], BarcodeBatchBasicOverlay.prototype, "_style", void 0);
+__decorate([
+    nameForSerialization('hasListener')
+], BarcodeBatchBasicOverlay.prototype, "_hasListener", void 0);
+__decorate([
+    nameForSerialization('dataCaptureViewId')
+], BarcodeBatchBasicOverlay.prototype, "_dataCaptureViewId", void 0);
+__decorate([
+    ignoreFromSerialization
+], BarcodeBatchBasicOverlay.prototype, "_listener", void 0);
 __decorate([
     ignoreFromSerialization
 ], BarcodeBatchBasicOverlay.prototype, "defaultBrush", null);
 __decorate([
     nameForSerialization('defaultBrush')
-], BarcodeBatchBasicOverlay.prototype, "_brush", undefined);
+], BarcodeBatchBasicOverlay.prototype, "_brush", void 0);
 __decorate([
     nameForSerialization('shouldShowScanAreaGuides')
-], BarcodeBatchBasicOverlay.prototype, "_shouldShowScanAreaGuides", undefined);
+], BarcodeBatchBasicOverlay.prototype, "_shouldShowScanAreaGuides", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeBatchBasicOverlay.prototype, "listener", undefined);
-__decorate([
-    ignoreFromSerialization
-], BarcodeBatchBasicOverlay.prototype, "controller", undefined);
+], BarcodeBatchBasicOverlay.prototype, "controller", void 0);
 __decorate([
     ignoreFromSerialization
 ], BarcodeBatchBasicOverlay, "barcodeBatchDefaults", null);
@@ -9340,7 +10621,7 @@ class BarcodeBatchSettings extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('arucoDictionary')
-], BarcodeBatchSettings.prototype, "_arucoDictionary", undefined);
+], BarcodeBatchSettings.prototype, "_arucoDictionary", void 0);
 __decorate([
     ignoreFromSerialization
 ], BarcodeBatchSettings, "barcodeDefaults", null);
@@ -9353,14 +10634,29 @@ class BaseBarcodeBatchAdvancedOverlay extends DefaultSerializeable {
         this._shouldShowScanAreaGuides = shouldShow;
         this.controller.updateBarcodeBatchAdvancedOverlay();
     }
-    set view(newView) {
-        if (newView == null) {
-            this.controller.unsubscribeListener();
-        }
-        else if (this._view == null) {
+    get listener() {
+        return this._listener;
+    }
+    set listener(newListener) {
+        this._hasListener = newListener != null;
+        this._listener = newListener;
+        if (this._listener != null) {
             this.controller.subscribeListener();
         }
+        else {
+            this.controller.unsubscribeListener();
+        }
+    }
+    set view(newView) {
+        var _a;
         this._view = newView;
+        this.dataCaptureViewId = (_a = newView === null || newView === void 0 ? void 0 : newView.viewId) !== null && _a !== void 0 ? _a : -1;
+        if (this._view != null && this._hasListener) {
+            this.controller.subscribeListener();
+        }
+        else {
+            this.controller.unsubscribeListener();
+        }
     }
     get view() {
         return this._view;
@@ -9375,7 +10671,10 @@ class BaseBarcodeBatchAdvancedOverlay extends DefaultSerializeable {
         super();
         this.type = 'barcodeTrackingAdvanced';
         this._shouldShowScanAreaGuides = false;
-        this.listener = null;
+        this._hasListener = false;
+        this.dataCaptureViewId = -1;
+        this._listener = null;
+        this._view = null;
         this.controller = BarcodeBatchAdvancedOverlayController.forOverlay(this);
     }
     setViewForTrackedBarcode(view, trackedBarcode) {
@@ -9390,143 +10689,40 @@ class BaseBarcodeBatchAdvancedOverlay extends DefaultSerializeable {
     clearTrackedBarcodeViews() {
         return this.controller.clearTrackedBarcodeViews();
     }
+    updateSizeOfTrackedBarcodeView(trackedBarcodeIdentifier, width, height) {
+        return this.controller.updateSizeOfTrackedBarcodeView(trackedBarcodeIdentifier, width, height);
+    }
 }
 __decorate([
     nameForSerialization('shouldShowScanAreaGuides')
-], BaseBarcodeBatchAdvancedOverlay.prototype, "_shouldShowScanAreaGuides", undefined);
+], BaseBarcodeBatchAdvancedOverlay.prototype, "_shouldShowScanAreaGuides", void 0);
 __decorate([
     ignoreFromSerialization
-], BaseBarcodeBatchAdvancedOverlay.prototype, "barcodeBatch", undefined);
+], BaseBarcodeBatchAdvancedOverlay.prototype, "barcodeBatch", void 0);
+__decorate([
+    nameForSerialization('hasListener')
+], BaseBarcodeBatchAdvancedOverlay.prototype, "_hasListener", void 0);
+__decorate([
+    nameForSerialization('dataCaptureViewId')
+], BaseBarcodeBatchAdvancedOverlay.prototype, "dataCaptureViewId", void 0);
 __decorate([
     ignoreFromSerialization
-], BaseBarcodeBatchAdvancedOverlay.prototype, "listener", undefined);
+], BaseBarcodeBatchAdvancedOverlay.prototype, "_listener", void 0);
 __decorate([
     ignoreFromSerialization
-], BaseBarcodeBatchAdvancedOverlay.prototype, "controller", undefined);
+], BaseBarcodeBatchAdvancedOverlay.prototype, "controller", void 0);
 __decorate([
     ignoreFromSerialization
-], BaseBarcodeBatchAdvancedOverlay.prototype, "_view", undefined);
-
-class SparkScanSession {
-    static fromJSON(json) {
-        var _a;
-        const sessionJson = JSON.parse(json.session);
-        const session = new SparkScanSession();
-        session._newlyRecognizedBarcode = sessionJson.newlyRecognizedBarcode != null ?
-            Barcode.fromJSON(sessionJson.newlyRecognizedBarcode) :
-            null;
-        session._frameSequenceID = sessionJson.frameSequenceId;
-        session.frameId = (_a = json.frameId) !== null && _a !== undefined ? _a : '';
-        return session;
-    }
-    get newlyRecognizedBarcode() {
-        return this._newlyRecognizedBarcode;
-    }
-    get frameSequenceID() {
-        return this._frameSequenceID;
-    }
-    reset() {
-        return this.listenerController.reset();
-    }
-}
-
-var SparkScanListenerEvents;
-(function (SparkScanListenerEvents) {
-    SparkScanListenerEvents["didUpdateSession"] = "SparkScanListener.didUpdateSession";
-    SparkScanListenerEvents["didScan"] = "SparkScanListener.didScan";
-})(SparkScanListenerEvents || (SparkScanListenerEvents = {}));
-class SparkScanListenerController extends BaseNewController {
-    static forSparkScan(sparkScan) {
-        const controller = new SparkScanListenerController();
-        controller.sparkScan = sparkScan;
-        return controller;
-    }
-    constructor() {
-        super('SparkScanListenerProxy');
-        this.hasNativeListenerSubscriptions = false;
-        this.didUpdateSessionListener = (data) => __awaiter(this, undefined, undefined, function* () {
-            const payload = EventDataParser.parse(data);
-            if (payload === null) {
-                console.error('SparkScanListenerController didUpdateSession payload is null');
-                return;
-            }
-            const session = SparkScanSession.fromJSON(payload);
-            yield this.notifyListenersOfDidUpdateSession(session);
-            this._proxy.finishDidUpdateSessionCallback(this.sparkScan.isEnabled);
-        });
-        this.didScanListener = (data) => __awaiter(this, undefined, undefined, function* () {
-            const payload = EventDataParser.parse(data);
-            if (payload === null) {
-                console.error('SparkScanListenerController.subscribeListener: didScan payload is null');
-                return;
-            }
-            const session = SparkScanSession.fromJSON(payload);
-            yield this.notifyListenersOfDidScan(session);
-            this._proxy.finishDidScanCallback(this.sparkScan.isEnabled);
-        });
-    }
-    reset() {
-        return this._proxy.resetSession();
-    }
-    update() {
-        const sparkScanJson = this.sparkScan.toJSON();
-        const json = JSON.stringify(sparkScanJson);
-        return this._proxy.updateMode(json);
-    }
-    subscribeListener() {
-        if (this.hasNativeListenerSubscriptions === false) {
-            this._proxy.registerListenerForEvents();
-            this.hasNativeListenerSubscriptions = true;
-        }
-        this._proxy.subscribeDidScanListener();
-        this._proxy.subscribeDidUpdateSessionListener();
-        this.eventEmitter.on(SparkScanListenerEvents.didUpdateSession, this.didUpdateSessionListener);
-        this.eventEmitter.on(SparkScanListenerEvents.didScan, this.didScanListener);
-    }
-    unsubscribeListener() {
-        if (this.hasNativeListenerSubscriptions === true) {
-            this._proxy.unregisterListenerForEvents();
-            this.hasNativeListenerSubscriptions = false;
-        }
-        this.eventEmitter.off(SparkScanListenerEvents.didUpdateSession, this.didUpdateSessionListener);
-        this.eventEmitter.off(SparkScanListenerEvents.didScan, this.didScanListener);
-    }
-    setModeEnabledState(enabled) {
-        this._proxy.setModeEnabledState(enabled);
-    }
-    notifyListenersOfDidUpdateSession(session) {
-        return __awaiter(this, undefined, undefined, function* () {
-            const mode = this.sparkScan;
-            mode.isInListenerCallback = true;
-            for (const listener of mode.listeners) {
-                if (listener.didUpdateSession) {
-                    yield listener.didUpdateSession(this.sparkScan, session, () => CameraController.getFrameOrNull(session.frameId));
-                }
-            }
-            mode.isInListenerCallback = false;
-        });
-    }
-    notifyListenersOfDidScan(session) {
-        return __awaiter(this, undefined, undefined, function* () {
-            const mode = this.sparkScan;
-            mode.isInListenerCallback = true;
-            for (const listener of mode.listeners) {
-                if (listener.didScan) {
-                    yield listener.didScan(this.sparkScan, session, () => CameraController.getFrameOrNull(session.frameId));
-                }
-            }
-            mode.isInListenerCallback = false;
-        });
-    }
-}
+], BaseBarcodeBatchAdvancedOverlay.prototype, "_view", void 0);
 
 class SparkScan extends DefaultSerializeable {
     get isEnabled() {
         return this._isEnabled;
     }
     set isEnabled(isEnabled) {
+        var _a;
         this._isEnabled = isEnabled;
-        this.listenerController.setModeEnabledState(isEnabled);
+        (_a = this.controller) === null || _a === void 0 ? void 0 : _a.setModeEnabledState(isEnabled);
     }
     get context() {
         return this._context;
@@ -9546,10 +10742,11 @@ class SparkScan extends DefaultSerializeable {
         super();
         this.type = 'sparkScan';
         this._isEnabled = true;
+        this.hasListeners = false;
         this.privateContext = null;
         this.listeners = [];
+        this.controller = null;
         this.isInListenerCallback = false;
-        this.listenerController = SparkScanListenerController.forSparkScan(this);
     }
     applySettings(settings) {
         this.settings = settings;
@@ -9561,15 +10758,18 @@ class SparkScan extends DefaultSerializeable {
             return;
         }
         this.listeners.push(listener);
+        this.hasListeners = this.listeners.length > 0;
     }
     checkAndSubscribeListeners() {
+        var _a;
         if (this.listeners.length === 0) {
-            this.listenerController.subscribeListener();
+            (_a = this.controller) === null || _a === void 0 ? void 0 : _a.subscribeModeListener();
         }
     }
     checkAndUnsubscribeListeners() {
+        var _a;
         if (this.listeners.length === 0) {
-            this.listenerController.unsubscribeListener();
+            (_a = this.controller) === null || _a === void 0 ? void 0 : _a.unsubscribeModeListener();
         }
     }
     removeListener(listener) {
@@ -9577,39 +10777,37 @@ class SparkScan extends DefaultSerializeable {
             return;
         }
         this.listeners.splice(this.listeners.indexOf(listener));
+        this.hasListeners = this.listeners.length > 0;
         this.checkAndUnsubscribeListeners();
     }
     didChange() {
-        if (this.listenerController) {
-            return this.listenerController.update();
+        if (this.controller) {
+            return this.controller.updateMode();
         }
         else {
             return Promise.resolve();
         }
     }
-    unsubscribeNativeListeners() {
-        this.listenerController.unsubscribeListener();
-    }
 }
 __decorate([
-    ignoreFromSerialization
-], SparkScan.prototype, "_isEnabled", undefined);
+    nameForSerialization('isEnabled')
+], SparkScan.prototype, "_isEnabled", void 0);
 __decorate([
     ignoreFromSerialization
-], SparkScan.prototype, "privateContext", undefined);
+], SparkScan.prototype, "privateContext", void 0);
 __decorate([
     ignoreFromSerialization
-], SparkScan.prototype, "listeners", undefined);
+], SparkScan.prototype, "listeners", void 0);
 __decorate([
     ignoreFromSerialization
-], SparkScan.prototype, "listenerController", undefined);
+], SparkScan.prototype, "controller", void 0);
 __decorate([
     ignoreFromSerialization
-], SparkScan.prototype, "isInListenerCallback", undefined);
+], SparkScan.prototype, "isInListenerCallback", void 0);
 
 var SparkScanMiniPreviewSize;
 (function (SparkScanMiniPreviewSize) {
-    SparkScanMiniPreviewSize["Regular"] = "expanded";
+    SparkScanMiniPreviewSize["Regular"] = "regular";
     SparkScanMiniPreviewSize["Expanded"] = "expanded";
 })(SparkScanMiniPreviewSize || (SparkScanMiniPreviewSize = {}));
 
@@ -9730,46 +10928,46 @@ class SparkScanToastSettings extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('toastEnabled')
-], SparkScanToastSettings.prototype, "_toastEnabled", undefined);
+], SparkScanToastSettings.prototype, "_toastEnabled", void 0);
 __decorate([
     nameForSerialization('toastBackgroundColor')
-], SparkScanToastSettings.prototype, "_toastBackgroundColor", undefined);
+], SparkScanToastSettings.prototype, "_toastBackgroundColor", void 0);
 __decorate([
     nameForSerialization('toastTextColor')
-], SparkScanToastSettings.prototype, "_toastTextColor", undefined);
+], SparkScanToastSettings.prototype, "_toastTextColor", void 0);
 __decorate([
     nameForSerialization('targetModeEnabledMessage')
-], SparkScanToastSettings.prototype, "_targetModeEnabledMessage", undefined);
+], SparkScanToastSettings.prototype, "_targetModeEnabledMessage", void 0);
 __decorate([
     nameForSerialization('targetModeDisabledMessage')
-], SparkScanToastSettings.prototype, "_targetModeDisabledMessage", undefined);
+], SparkScanToastSettings.prototype, "_targetModeDisabledMessage", void 0);
 __decorate([
     nameForSerialization('continuousModeEnabledMessage')
-], SparkScanToastSettings.prototype, "_continuousModeEnabledMessage", undefined);
+], SparkScanToastSettings.prototype, "_continuousModeEnabledMessage", void 0);
 __decorate([
     nameForSerialization('continuousModeDisabledMessage')
-], SparkScanToastSettings.prototype, "_continuousModeDisabledMessage", undefined);
+], SparkScanToastSettings.prototype, "_continuousModeDisabledMessage", void 0);
 __decorate([
     nameForSerialization('scanPausedMessage')
-], SparkScanToastSettings.prototype, "_scanPausedMessage", undefined);
+], SparkScanToastSettings.prototype, "_scanPausedMessage", void 0);
 __decorate([
     nameForSerialization('zoomedInMessage')
-], SparkScanToastSettings.prototype, "_zoomedInMessage", undefined);
+], SparkScanToastSettings.prototype, "_zoomedInMessage", void 0);
 __decorate([
     nameForSerialization('zoomedOutMessage')
-], SparkScanToastSettings.prototype, "_zoomedOutMessage", undefined);
+], SparkScanToastSettings.prototype, "_zoomedOutMessage", void 0);
 __decorate([
     nameForSerialization('torchEnabledMessage')
-], SparkScanToastSettings.prototype, "_torchEnabledMessage", undefined);
+], SparkScanToastSettings.prototype, "_torchEnabledMessage", void 0);
 __decorate([
     nameForSerialization('torchDisabledMessage')
-], SparkScanToastSettings.prototype, "_torchDisabledMessage", undefined);
+], SparkScanToastSettings.prototype, "_torchDisabledMessage", void 0);
 __decorate([
     nameForSerialization('userFacingCameraEnabledMessage')
-], SparkScanToastSettings.prototype, "_userFacingCameraEnabledMessage", undefined);
+], SparkScanToastSettings.prototype, "_userFacingCameraEnabledMessage", void 0);
 __decorate([
     nameForSerialization('worldFacingCameraEnabledMessage')
-], SparkScanToastSettings.prototype, "_worldFacingCameraEnabledMessage", undefined);
+], SparkScanToastSettings.prototype, "_worldFacingCameraEnabledMessage", void 0);
 __decorate([
     ignoreFromSerialization
 ], SparkScanToastSettings, "sparkScanDefaults", null);
@@ -9795,10 +10993,10 @@ class PrivateSparkScanScanningModeSettings extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('scanningBehavior')
-], PrivateSparkScanScanningModeSettings.prototype, "_scanningBehavior", undefined);
+], PrivateSparkScanScanningModeSettings.prototype, "_scanningBehavior", void 0);
 __decorate([
     nameForSerialization('previewBehavior')
-], PrivateSparkScanScanningModeSettings.prototype, "_previewBehavior", undefined);
+], PrivateSparkScanScanningModeSettings.prototype, "_previewBehavior", void 0);
 
 class SparkScanScanningModeDefault extends DefaultSerializeable {
     get scanningBehavior() {
@@ -9822,7 +11020,7 @@ class SparkScanScanningModeDefault extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('settings')
-], SparkScanScanningModeDefault.prototype, "_settings", undefined);
+], SparkScanScanningModeDefault.prototype, "_settings", void 0);
 
 class SparkScanScanningModeTarget extends DefaultSerializeable {
     get scanningBehavior() {
@@ -9846,7 +11044,30 @@ class SparkScanScanningModeTarget extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('settings')
-], SparkScanScanningModeTarget.prototype, "_settings", undefined);
+], SparkScanScanningModeTarget.prototype, "_settings", void 0);
+
+class SparkScanSession {
+    static fromJSON(json) {
+        var _a;
+        const sessionJson = JSON.parse(json.session);
+        const session = new SparkScanSession();
+        session._newlyRecognizedBarcode = sessionJson.newlyRecognizedBarcode != null ?
+            Barcode.fromJSON(sessionJson.newlyRecognizedBarcode) :
+            null;
+        session._frameSequenceID = sessionJson.frameSequenceId;
+        session.frameId = (_a = json.frameId) !== null && _a !== void 0 ? _a : '';
+        return session;
+    }
+    get newlyRecognizedBarcode() {
+        return this._newlyRecognizedBarcode;
+    }
+    get frameSequenceID() {
+        return this._frameSequenceID;
+    }
+    reset() {
+        return this.controller.resetSession();
+    }
+}
 
 class SparkScanSettings extends DefaultSerializeable {
     get batterySaving() {
@@ -9903,10 +11124,10 @@ class SparkScanSettings extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('batterySaving')
-], SparkScanSettings.prototype, "_batterySaving", undefined);
+], SparkScanSettings.prototype, "_batterySaving", void 0);
 __decorate([
     nameForSerialization('locationSelection')
-], SparkScanSettings.prototype, "_locationSelection", undefined);
+], SparkScanSettings.prototype, "_locationSelection", void 0);
 __decorate([
     ignoreFromSerialization
 ], SparkScanSettings, "sparkScanDefaults", null);
@@ -9970,12 +11191,828 @@ var SparkScanViewEvents;
 (function (SparkScanViewEvents) {
     SparkScanViewEvents["barcodeFindButtonTapped"] = "SparkScanViewUiListener.barcodeFindButtonTapped";
     SparkScanViewEvents["barcodeCountButtonTapped"] = "SparkScanViewUiListener.barcodeCountButtonTapped";
+    SparkScanViewEvents["labelCaptureButtonTapped"] = "SparkScanViewUiListener.labelCaptureButtonTapped";
     SparkScanViewEvents["didChangeViewState"] = "SparkScanViewUiListener.didChangeViewState";
+    SparkScanViewEvents["feedbackForBarcode"] = "SparkScanFeedbackDelegate.feedbackForBarcode";
+    SparkScanViewEvents["didUpdateSession"] = "SparkScanListener.didUpdateSession";
+    SparkScanViewEvents["didScan"] = "SparkScanListener.didScan";
 })(SparkScanViewEvents || (SparkScanViewEvents = {}));
-var SparkScanFeedbackDelegateEvents;
-(function (SparkScanFeedbackDelegateEvents) {
-    SparkScanFeedbackDelegateEvents["feedbackForBarcode"] = "SparkScanFeedbackDelegate.feedbackForBarcode";
-})(SparkScanFeedbackDelegateEvents || (SparkScanFeedbackDelegateEvents = {}));
+class SparkScanViewController extends BaseNewController {
+    static forSparkScanView(view, sparkScan) {
+        const controller = new SparkScanViewController();
+        controller.view = view;
+        controller.sparkScan = sparkScan;
+        controller.sparkScan.controller = controller;
+        controller.initialize();
+        return controller;
+    }
+    constructor() {
+        super('SparkScanViewProxy');
+        this.hasFeedbackDelegateListener = false;
+        this.hasNativeViewListenerSubscriptions = false;
+        this.hasNativeModeListenerSubscriptions = false;
+        this.viewInstanceId = -1;
+        this.didUpdateSessionListener = (ev) => __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('SparkScanListenerController didUpdateSession payload is null');
+                return;
+            }
+            if (payload.viewId !== this.viewInstanceId) {
+                return;
+            }
+            const session = SparkScanSession.fromJSON(payload);
+            session.controller = this;
+            yield this.notifyListenersOfDidUpdateSession(session);
+            this._proxy.$finishSparkScanDidUpdateSession({ viewId: this.viewInstanceId, isEnabled: this.sparkScan.isEnabled });
+        });
+        this.didScanListener = (ev) => __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('SparkScanListenerController.subscribeListener: didScan payload is null');
+                return;
+            }
+            if (payload.viewId !== this.viewInstanceId) {
+                return;
+            }
+            const session = SparkScanSession.fromJSON(payload);
+            session.controller = this;
+            yield this.notifyListenersOfDidScan(session);
+            this._proxy.$finishSparkScanDidScan({ viewId: this.viewInstanceId, isEnabled: this.sparkScan.isEnabled });
+        });
+        this.barcodeCountButtonTappedListener = (ev) => __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                return;
+            }
+            if (payload.viewId !== this.viewInstanceId) {
+                return;
+            }
+            (_b = (_a = this.view.uiListener) === null || _a === void 0 ? void 0 : _a.didTapBarcodeCountButton) === null || _b === void 0 ? void 0 : _b.call(_a, this.view);
+        });
+        this.barcodeFindButtonTappedListener = (ev) => __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                return;
+            }
+            if (payload.viewId !== this.viewInstanceId) {
+                return;
+            }
+            (_b = (_a = this.view.uiListener) === null || _a === void 0 ? void 0 : _a.didTapBarcodeFindButton) === null || _b === void 0 ? void 0 : _b.call(_a, this.view);
+        });
+        this.labelCaptureButtonTappedListener = (ev) => __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                return;
+            }
+            if (payload.viewId !== this.viewInstanceId) {
+                return;
+            }
+            (_b = (_a = this.view.uiListener) === null || _a === void 0 ? void 0 : _a.didTapLabelCaptureButton) === null || _b === void 0 ? void 0 : _b.call(_a, this.view);
+        });
+        this.didChangeViewStateListener = (ev) => __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('SparkScanViewController didChangeViewState payload is null');
+                return;
+            }
+            if (payload.viewId !== this.viewInstanceId) {
+                return;
+            }
+            const newState = payload.state;
+            (_b = (_a = this.view.uiListener) === null || _a === void 0 ? void 0 : _a.didChangeViewState) === null || _b === void 0 ? void 0 : _b.call(_a, newState);
+        });
+    }
+    initialize() {
+        this._proxy.on$barcodeCountButtonTapped = this.barcodeCountButtonTappedListener;
+        this._proxy.on$barcodeFindButtonTapped = this.barcodeFindButtonTappedListener;
+        this._proxy.on$labelCaptureButtonTapped = this.labelCaptureButtonTappedListener;
+        this._proxy.on$didChangeViewState = this.didChangeViewStateListener;
+        this._proxy.on$didUpdateSession = this.didUpdateSessionListener;
+        this._proxy.on$didScan = this.didScanListener;
+        this._proxy.on$feedbackForBarcode = this.handleFeedbackForBarcode.bind(this);
+        if (this.sparkScan.listeners.length > 0) {
+            this.subscribeModeListener();
+        }
+        if (this.view.uiListener) {
+            this.subscribeViewListeners();
+        }
+        if (this.view.feedbackDelegate) {
+            this.addFeedbackDelegate();
+        }
+    }
+    dispose() {
+        this.unsubscribeModeListener();
+        this.unsubscribeViewListeners();
+        this.removeFeedbackDelegate();
+        this._proxy.$disposeSparkScanView({ viewId: this.viewInstanceId });
+        this._proxy.dispose();
+    }
+    subscribeViewListeners() {
+        if (!this.isViewCreated)
+            return; // view not created yet
+        if (this.hasNativeViewListenerSubscriptions)
+            return;
+        this._proxy.$registerSparkScanViewListenerEvents({ viewId: this.viewInstanceId });
+        this.hasNativeViewListenerSubscriptions = true;
+    }
+    unsubscribeViewListeners() {
+        if (!this.isViewCreated)
+            return; // view not created yet
+        if (this.hasNativeViewListenerSubscriptions === false)
+            return;
+        this._proxy.$unregisterSparkScanViewListenerEvents({ viewId: this.viewInstanceId });
+        this.hasNativeViewListenerSubscriptions = false;
+    }
+    createView() {
+        const viewJson = {
+            SparkScan: this.sparkScan.toJSON(),
+            SparkScanView: this.view.toJSON()
+        };
+        const viewId = this.view.viewId;
+        const json = JSON.stringify(viewJson);
+        return this._proxy.$createSparkScanView({ viewId, viewJson: json }).then(() => {
+            this.viewInstanceId = viewId;
+            this.initialize();
+        });
+    }
+    updateView() {
+        if (!this.isViewCreated) {
+            return Promise.resolve(); // No updates if view not created yet
+        }
+        const sparkScanViewJson = this.view.toJSON();
+        const json = JSON.stringify({ SparkScanView: sparkScanViewJson });
+        return this._proxy.$updateSparkScanView({ viewId: this.viewInstanceId, viewJson: json });
+    }
+    stopScanning() {
+        if (!this.isViewCreated) {
+            return Promise.resolve(); // No updates if view not created yet
+        }
+        return this._proxy.$stopSparkScanViewScanning({ viewId: this.viewInstanceId });
+    }
+    pauseScanning() {
+        if (!this.isViewCreated) {
+            return Promise.resolve(); // No updates if view not created yet
+        }
+        return this._proxy.$pauseSparkScanViewScanning({ viewId: this.viewInstanceId });
+    }
+    startScanning() {
+        if (!this.isViewCreated) {
+            return Promise.resolve(); // No updates if view not created yet
+        }
+        return this._proxy.$startSparkScanViewScanning({ viewId: this.viewInstanceId });
+    }
+    prepareScanning() {
+        if (!this.isViewCreated) {
+            return Promise.resolve(); // No updates if view not created yet
+        }
+        return this._proxy.$prepareSparkScanViewScanning({ viewId: this.viewInstanceId });
+    }
+    showToast(text) {
+        if (!this.isViewCreated) {
+            return Promise.resolve(); // No updates if view not created yet
+        }
+        return this._proxy.$showSparkScanViewToast({ viewId: this.viewInstanceId, text: text });
+    }
+    showView() {
+        if (!this.isViewCreated) {
+            return Promise.resolve(); // No updates if view not created yet
+        }
+        return this._proxy.$showSparkScanView({ viewId: this.viewInstanceId });
+    }
+    hideView() {
+        if (!this.isViewCreated) {
+            return Promise.resolve(); // No updates if view not created yet
+        }
+        return this._proxy.$hideSparkScanView({ viewId: this.viewInstanceId });
+    }
+    addFeedbackDelegate() {
+        if (!this.isViewCreated)
+            return; // view not created yet
+        if (this.hasFeedbackDelegateListener)
+            return;
+        this._proxy.$registerSparkScanFeedbackDelegateForEvents({ viewId: this.viewInstanceId });
+        this.hasFeedbackDelegateListener = true;
+    }
+    removeFeedbackDelegate() {
+        if (!this.isViewCreated)
+            return; // view not created yet
+        if (!this.hasFeedbackDelegateListener)
+            return;
+        this._proxy.$unregisterSparkScanFeedbackDelegateForEvents({ viewId: this.viewInstanceId });
+        this.hasFeedbackDelegateListener = false;
+    }
+    resetSession() {
+        if (!this.isViewCreated) {
+            return Promise.resolve(); // view not created yet
+        }
+        return this._proxy.$resetSparkScanSession({ viewId: this.viewInstanceId });
+    }
+    updateMode() {
+        if (!this.isViewCreated) {
+            return Promise.resolve(); // No updates if view not created yet
+        }
+        const sparkScanJson = this.sparkScan.toJSON();
+        const json = JSON.stringify(sparkScanJson);
+        return this._proxy.$updateSparkScanMode({ viewId: this.viewInstanceId, modeJson: json });
+    }
+    subscribeModeListener() {
+        if (!this.isViewCreated)
+            return; // view not created yet
+        if (this.hasNativeModeListenerSubscriptions)
+            return;
+        this._proxy.$registerSparkScanListenerForEvents({ viewId: this.viewInstanceId });
+        this.hasNativeModeListenerSubscriptions = true;
+    }
+    unsubscribeModeListener() {
+        if (!this.isViewCreated)
+            return; // view not created yet
+        if (this.hasNativeModeListenerSubscriptions == false)
+            return;
+        this._proxy.$unregisterSparkScanListenerForEvents({ viewId: this.viewInstanceId });
+        this.hasNativeModeListenerSubscriptions = false;
+    }
+    setModeEnabledState(enabled) {
+        if (!this.isViewCreated)
+            return; // view not created yet
+        this._proxy.$setSparkScanModeEnabledState({ viewId: this.viewInstanceId, isEnabled: enabled });
+    }
+    get isViewCreated() {
+        return this.viewInstanceId !== -1;
+    }
+    handleFeedbackForBarcode(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('SparkScanViewController feedbackForBarcode payload is null');
+                return;
+            }
+            if (payload.viewId !== this.viewInstanceId) {
+                return;
+            }
+            const barcode = Barcode.fromJSON(JSON.parse(payload.barcode));
+            const feedback = (_b = (_a = this.view.feedbackDelegate) === null || _a === void 0 ? void 0 : _a.feedbackForBarcode) === null || _b === void 0 ? void 0 : _b.call(_a, barcode);
+            if (feedback instanceof Promise) {
+                feedback.then((feedback) => {
+                    this._proxy.$submitSparkScanFeedbackForBarcode({ viewId: this.viewInstanceId, feedbackJson: JSON.stringify(feedback === null || feedback === void 0 ? void 0 : feedback.toJSON()) });
+                });
+            }
+            else {
+                this._proxy.$submitSparkScanFeedbackForBarcode({ viewId: this.viewInstanceId, feedbackJson: JSON.stringify(feedback === null || feedback === void 0 ? void 0 : feedback.toJSON()) });
+            }
+        });
+    }
+    notifyListenersOfDidUpdateSession(session) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const mode = this.sparkScan;
+            mode.isInListenerCallback = true;
+            for (const listener of mode.listeners) {
+                if (listener.didUpdateSession) {
+                    yield listener.didUpdateSession(this.sparkScan, session, () => CameraController.getFrameOrNull(session.frameId));
+                }
+            }
+            mode.isInListenerCallback = false;
+        });
+    }
+    notifyListenersOfDidScan(session) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const mode = this.sparkScan;
+            mode.isInListenerCallback = true;
+            for (const listener of mode.listeners) {
+                if (listener.didScan) {
+                    yield listener.didScan(this.sparkScan, session, () => CameraController.getFrameOrNull(session.frameId));
+                }
+            }
+            mode.isInListenerCallback = false;
+        });
+    }
+}
+
+class BaseSparkScanView {
+    get viewId() {
+        return this._viewId;
+    }
+    get uiListener() {
+        return this._uiListener;
+    }
+    set uiListener(listener) {
+        this._uiListener = listener;
+        if (listener) {
+            this._controller.subscribeViewListeners();
+        }
+        else {
+            this._controller.unsubscribeViewListeners();
+        }
+    }
+    static forContext(context, sparkScan, settings) {
+        const view = new BaseSparkScanView({ context, sparkScan, settings });
+        return view;
+    }
+    static withProps(props) {
+        const view = new BaseSparkScanView({
+            context: props.context,
+            sparkScan: props.sparkScan,
+            settings: props.sparkScanViewSettings,
+        });
+        if (props.uiListener) {
+            view.uiListener = props.uiListener;
+        }
+        if (props.previewSizeControlVisible !== undefined && props.previewSizeControlVisible !== null) {
+            view._previewSizeControlVisible = props.previewSizeControlVisible;
+        }
+        if (props.cameraSwitchButtonVisible !== undefined && props.cameraSwitchButtonVisible !== null) {
+            view._cameraSwitchButtonVisible = props.cameraSwitchButtonVisible;
+        }
+        if (props.scanningBehaviorButtonVisible !== undefined && props.scanningBehaviorButtonVisible !== null) {
+            view._scanningBehaviorButtonVisible = props.scanningBehaviorButtonVisible;
+        }
+        if (props.barcodeCountButtonVisible !== undefined && props.barcodeCountButtonVisible !== null) {
+            view._barcodeCountButtonVisible = props.barcodeCountButtonVisible;
+        }
+        if (props.barcodeFindButtonVisible !== undefined && props.barcodeFindButtonVisible !== null) {
+            view._barcodeFindButtonVisible = props.barcodeFindButtonVisible;
+        }
+        if (props.targetModeButtonVisible !== undefined && props.targetModeButtonVisible !== null) {
+            view._targetModeButtonVisible = props.targetModeButtonVisible;
+        }
+        if (props.labelCaptureButtonVisible !== undefined && props.labelCaptureButtonVisible !== null) {
+            view._labelCaptureButtonVisible = props.labelCaptureButtonVisible;
+        }
+        if (props.torchControlVisible !== undefined && props.torchControlVisible !== null) {
+            view._torchControlVisible = props.torchControlVisible;
+        }
+        if (props.previewCloseControlVisible !== undefined && props.previewCloseControlVisible !== null) {
+            view._previewCloseControlVisible = props.previewCloseControlVisible;
+        }
+        if (props.triggerButtonVisible !== undefined) {
+            view._triggerButtonVisible = props.triggerButtonVisible;
+        }
+        if (props.triggerButtonImage !== undefined) {
+            view._triggerButtonImage = props.triggerButtonImage;
+        }
+        if (props.triggerButtonTintColor !== undefined) {
+            view._triggerButtonTintColor = props.triggerButtonTintColor;
+        }
+        if (props.triggerButtonAnimationColor !== undefined) {
+            view._triggerButtonAnimationColor = props.triggerButtonAnimationColor;
+        }
+        if (props.triggerButtonExpandedColor !== undefined) {
+            view._triggerButtonExpandedColor = props.triggerButtonExpandedColor;
+        }
+        if (props.triggerButtonCollapsedColor !== undefined) {
+            view._triggerButtonCollapsedColor = props.triggerButtonCollapsedColor;
+        }
+        if (props.toolbarBackgroundColor !== undefined) {
+            view._toolbarBackgroundColor = props.toolbarBackgroundColor;
+        }
+        if (props.toolbarIconActiveTintColor !== undefined) {
+            view._toolbarIconActiveTintColor = props.toolbarIconActiveTintColor;
+        }
+        if (props.toolbarIconInactiveTintColor !== undefined) {
+            view._toolbarIconInactiveTintColor = props.toolbarIconInactiveTintColor;
+        }
+        if (props.feedbackDelegate !== undefined) {
+            view.feedbackDelegate = props.feedbackDelegate;
+        }
+        return view;
+    }
+    static get defaultBrush() {
+        return BaseSparkScanView.sparkScanDefaults.SparkScanView.brush;
+    }
+    constructor({ context, sparkScan, settings }) {
+        this._viewId = -1; // -1 means the view is not created yet
+        this._uiListener = null;
+        this._brush = BaseSparkScanView.defaultBrush;
+        this._feedbackDelegate = null;
+        this._previewSizeControlVisible = BaseSparkScanView.sparkScanDefaults.SparkScanView.previewSizeControlVisible;
+        this._cameraSwitchButtonVisible = BaseSparkScanView.sparkScanDefaults.SparkScanView.cameraSwitchButtonVisible;
+        this._scanningBehaviorButtonVisible = BaseSparkScanView.sparkScanDefaults.SparkScanView.scanningBehaviorButtonVisible;
+        this._barcodeCountButtonVisible = BaseSparkScanView.sparkScanDefaults.SparkScanView.barcodeCountButtonVisible;
+        this._barcodeFindButtonVisible = BaseSparkScanView.sparkScanDefaults.SparkScanView.barcodeFindButtonVisible;
+        this._targetModeButtonVisible = BaseSparkScanView.sparkScanDefaults.SparkScanView.targetModeButtonVisible;
+        this._labelCaptureButtonVisible = BaseSparkScanView.sparkScanDefaults.SparkScanView.labelCaptureButtonVisible;
+        this._toolbarBackgroundColor = BaseSparkScanView.sparkScanDefaults.SparkScanView.toolbarBackgroundColor;
+        this._toolbarIconActiveTintColor = BaseSparkScanView.sparkScanDefaults.SparkScanView.toolbarIconActiveTintColor;
+        this._toolbarIconInactiveTintColor = BaseSparkScanView.sparkScanDefaults.SparkScanView.toolbarIconInactiveTintColor;
+        this._triggerButtonAnimationColor = BaseSparkScanView.sparkScanDefaults.SparkScanView.triggerButtonAnimationColor;
+        this._triggerButtonExpandedColor = BaseSparkScanView.sparkScanDefaults.SparkScanView.triggerButtonExpandedColor;
+        this._triggerButtonCollapsedColor = BaseSparkScanView.sparkScanDefaults.SparkScanView.triggerButtonCollapsedColor;
+        this._triggerButtonTintColor = BaseSparkScanView.sparkScanDefaults.SparkScanView.triggerButtonTintColor;
+        this._triggerButtonVisible = BaseSparkScanView.sparkScanDefaults.SparkScanView.triggerButtonVisible;
+        this._triggerButtonImage = BaseSparkScanView.sparkScanDefaults.SparkScanView.triggerButtonImage;
+        this._torchControlVisible = BaseSparkScanView.sparkScanDefaults.SparkScanView.torchControlVisible;
+        this._previewCloseControlVisible = BaseSparkScanView.sparkScanDefaults.SparkScanView.previewSizeControlVisible;
+        this._sparkScan = sparkScan;
+        this.context = context;
+        this._viewSettings = settings !== null && settings !== void 0 ? settings : new SparkScanViewSettings();
+        this._controller = SparkScanViewController.forSparkScanView(this, sparkScan);
+    }
+    get previewSizeControlVisible() {
+        return this._previewSizeControlVisible;
+    }
+    set previewSizeControlVisible(newValue) {
+        this._previewSizeControlVisible = newValue;
+        this.update();
+    }
+    /**
+     * @deprecated The torch button has been moved to the mini preview. Use property `torchControlVisible` instead.
+     */
+    get torchButtonVisible() {
+        return false;
+    }
+    /**
+     * @deprecated The torch button has been moved to the mini preview. Use property `torchControlVisible` instead.
+     */
+    set torchButtonVisible(newValue) {
+        console.warn('The torch button has been moved to the mini preview. Use property `torchControlVisible` instead.');
+    }
+    get torchControlVisible() {
+        return this._torchControlVisible;
+    }
+    set torchControlVisible(newValue) {
+        this._torchControlVisible = newValue;
+        this.update();
+    }
+    get previewCloseControlVisible() {
+        return this._previewCloseControlVisible;
+    }
+    set previewCloseControlVisible(newValue) {
+        this._previewCloseControlVisible = newValue;
+        this.update();
+    }
+    get scanningBehaviorButtonVisible() {
+        return this._scanningBehaviorButtonVisible;
+    }
+    set scanningBehaviorButtonVisible(newValue) {
+        this._scanningBehaviorButtonVisible = newValue;
+        this.update();
+    }
+    get barcodeCountButtonVisible() {
+        return this._barcodeCountButtonVisible;
+    }
+    set barcodeCountButtonVisible(newValue) {
+        this._barcodeCountButtonVisible = newValue;
+        this.update();
+    }
+    get barcodeFindButtonVisible() {
+        return this._barcodeFindButtonVisible;
+    }
+    set barcodeFindButtonVisible(newValue) {
+        this._barcodeFindButtonVisible = newValue;
+        this.update();
+    }
+    get targetModeButtonVisible() {
+        return this._targetModeButtonVisible;
+    }
+    set targetModeButtonVisible(newValue) {
+        this._targetModeButtonVisible = newValue;
+        this.update();
+    }
+    get labelCaptureButtonVisible() {
+        return this._labelCaptureButtonVisible;
+    }
+    set labelCaptureButtonVisible(newValue) {
+        this._labelCaptureButtonVisible = newValue;
+        this.update();
+    }
+    /**
+     * @deprecated The trigger button no longer displays text.
+     */
+    get stopCapturingText() {
+        return null;
+    }
+    /**
+     * @deprecated The trigger button no longer displays text.
+     */
+    set stopCapturingText(newValue) {
+        console.warn('The trigger button no longer displays text.');
+    }
+    /**
+     * @deprecated The trigger button no longer displays text.
+     */
+    get startCapturingText() {
+        return null;
+    }
+    /**
+     * @deprecated The trigger button no longer displays text.
+     */
+    set startCapturingText(newValue) {
+        console.warn('The trigger button no longer displays text.');
+    }
+    /**
+     * @deprecated The trigger button no longer displays text.
+     */
+    get resumeCapturingText() {
+        return null;
+    }
+    /**
+     * @deprecated The trigger button no longer displays text.
+     */
+    set resumeCapturingText(newValue) {
+        console.warn('The trigger button no longer displays text.');
+    }
+    /**
+     * @deprecated The trigger button no longer displays text.
+     */
+    get scanningCapturingText() {
+        return null;
+    }
+    /**
+     * @deprecated The trigger button no longer displays text.
+     */
+    set scanningCapturingText(newValue) {
+        console.warn('The trigger button no longer displays text.');
+    }
+    /**
+     * @deprecated This property is not relevant anymore.
+     */
+    get captureButtonActiveBackgroundColor() {
+        return null;
+    }
+    /**
+     * @deprecated This property is not relevant anymore.
+     */
+    set captureButtonActiveBackgroundColor(newValue) {
+        console.warn('captureButtonActiveBackgroundColor is deprecated.');
+    }
+    /**
+     * @deprecated Use triggerButtonCollapsedColor and triggerButtonExpandedColor instead.
+     */
+    get captureButtonBackgroundColor() {
+        return null;
+    }
+    /**
+     * @deprecated Use triggerButtonCollapsedColor and triggerButtonExpandedColor instead.
+     */
+    set captureButtonBackgroundColor(newValue) {
+        console.warn('captureButtonBackgroundColor is deprecated. ' +
+            'Use triggerButtonCollapsedColor and triggerButtonExpandedColor instead.');
+    }
+    /**
+     * @deprecated use triggerButtonTintColor instead.
+     */
+    get captureButtonTintColor() {
+        return null;
+    }
+    /**
+     * @deprecated use triggerButtonTintColor instead.
+     */
+    set captureButtonTintColor(newValue) {
+        console.warn('triggerButtonTintColor is deprecated. Use triggerButtonTintColor instead.');
+    }
+    get toolbarBackgroundColor() {
+        return this._toolbarBackgroundColor;
+    }
+    set toolbarBackgroundColor(newValue) {
+        this._toolbarBackgroundColor = newValue;
+        this.update();
+    }
+    get toolbarIconActiveTintColor() {
+        return this._toolbarIconActiveTintColor;
+    }
+    set toolbarIconActiveTintColor(newValue) {
+        this._toolbarIconActiveTintColor = newValue;
+        this.update();
+    }
+    get toolbarIconInactiveTintColor() {
+        return this._toolbarIconInactiveTintColor;
+    }
+    set toolbarIconInactiveTintColor(newValue) {
+        this._toolbarIconInactiveTintColor = newValue;
+        this.update();
+    }
+    get cameraSwitchButtonVisible() {
+        return this._cameraSwitchButtonVisible;
+    }
+    set cameraSwitchButtonVisible(newValue) {
+        this._cameraSwitchButtonVisible = newValue;
+        this.update();
+    }
+    get triggerButtonAnimationColor() {
+        return this._triggerButtonAnimationColor;
+    }
+    set triggerButtonAnimationColor(newValue) {
+        this._triggerButtonAnimationColor = newValue;
+        this.update();
+    }
+    get triggerButtonExpandedColor() {
+        return this._triggerButtonExpandedColor;
+    }
+    set triggerButtonExpandedColor(newValue) {
+        this._triggerButtonExpandedColor = newValue;
+        this.update();
+    }
+    get triggerButtonCollapsedColor() {
+        return this._triggerButtonCollapsedColor;
+    }
+    set triggerButtonCollapsedColor(newValue) {
+        this._triggerButtonCollapsedColor = newValue;
+        this.update();
+    }
+    get triggerButtonTintColor() {
+        return this._triggerButtonTintColor;
+    }
+    set triggerButtonTintColor(newValue) {
+        this._triggerButtonTintColor = newValue;
+        this.update();
+    }
+    get triggerButtonImage() {
+        return this._triggerButtonImage;
+    }
+    set triggerButtonImage(newValue) {
+        this._triggerButtonImage = newValue;
+        this.update();
+    }
+    get triggerButtonVisible() {
+        return this._triggerButtonVisible;
+    }
+    set triggerButtonVisible(newValue) {
+        this._triggerButtonVisible = newValue;
+        this.update();
+    }
+    showToast(text) {
+        this._controller.showToast(text);
+    }
+    prepareScanning() {
+        this._controller.prepareScanning();
+    }
+    startScanning() {
+        this._controller.startScanning();
+    }
+    pauseScanning() {
+        this._controller.pauseScanning();
+    }
+    stopScanning() {
+        this._controller.stopScanning();
+    }
+    update() {
+        return this._controller.updateView();
+    }
+    dispose() {
+        this._controller.dispose();
+    }
+    show() {
+        return this._show();
+    }
+    hide() {
+        return this._hide();
+    }
+    createNativeView(viewId) {
+        this._viewId = viewId;
+        return this._controller.createView();
+    }
+    get feedbackDelegate() {
+        return this._feedbackDelegate;
+    }
+    set feedbackDelegate(delegate) {
+        if (this._feedbackDelegate) {
+            this._controller.removeFeedbackDelegate();
+        }
+        this._feedbackDelegate = delegate;
+        if (delegate) {
+            this._controller.addFeedbackDelegate();
+        }
+    }
+    updateWithProps(prevProps, props) {
+        // Update UI Listener
+        if (props.uiListener !== prevProps.uiListener) {
+            this.uiListener = props.uiListener || null;
+        }
+        // Update visibility controls
+        if (props.previewSizeControlVisible !== prevProps.previewSizeControlVisible &&
+            props.previewSizeControlVisible !== undefined) {
+            this.previewSizeControlVisible = props.previewSizeControlVisible;
+        }
+        if (props.scanningBehaviorButtonVisible !== prevProps.scanningBehaviorButtonVisible &&
+            props.scanningBehaviorButtonVisible !== undefined) {
+            this.scanningBehaviorButtonVisible = props.scanningBehaviorButtonVisible;
+        }
+        if (props.barcodeCountButtonVisible !== prevProps.barcodeCountButtonVisible &&
+            props.barcodeCountButtonVisible !== undefined) {
+            this.barcodeCountButtonVisible = props.barcodeCountButtonVisible;
+        }
+        if (props.barcodeFindButtonVisible !== prevProps.barcodeFindButtonVisible &&
+            props.barcodeFindButtonVisible !== undefined) {
+            this.barcodeFindButtonVisible = props.barcodeFindButtonVisible;
+        }
+        if (props.targetModeButtonVisible !== prevProps.targetModeButtonVisible &&
+            props.targetModeButtonVisible !== undefined) {
+            this.targetModeButtonVisible = props.targetModeButtonVisible;
+        }
+        if (props.cameraSwitchButtonVisible !== prevProps.cameraSwitchButtonVisible &&
+            props.cameraSwitchButtonVisible !== undefined) {
+            this.cameraSwitchButtonVisible = props.cameraSwitchButtonVisible;
+        }
+        if (props.torchControlVisible !== prevProps.torchControlVisible &&
+            props.torchControlVisible !== undefined) {
+            this.torchControlVisible = props.torchControlVisible;
+        }
+        if (props.previewCloseControlVisible !== prevProps.previewCloseControlVisible &&
+            props.previewCloseControlVisible !== undefined) {
+            this.previewCloseControlVisible = props.previewCloseControlVisible;
+        }
+        if (props.triggerButtonVisible !== prevProps.triggerButtonVisible &&
+            props.triggerButtonVisible !== undefined) {
+            this.triggerButtonVisible = props.triggerButtonVisible;
+        }
+        // Update color customizations
+        if (props.toolbarBackgroundColor !== prevProps.toolbarBackgroundColor &&
+            props.toolbarBackgroundColor !== undefined) {
+            this.toolbarBackgroundColor = props.toolbarBackgroundColor;
+        }
+        if (props.toolbarIconActiveTintColor !== prevProps.toolbarIconActiveTintColor &&
+            props.toolbarIconActiveTintColor !== undefined) {
+            this.toolbarIconActiveTintColor = props.toolbarIconActiveTintColor;
+        }
+        if (props.toolbarIconInactiveTintColor !== prevProps.toolbarIconInactiveTintColor &&
+            props.toolbarIconInactiveTintColor !== undefined) {
+            this.toolbarIconInactiveTintColor = props.toolbarIconInactiveTintColor;
+        }
+        if (props.triggerButtonAnimationColor !== prevProps.triggerButtonAnimationColor &&
+            props.triggerButtonAnimationColor !== undefined) {
+            this.triggerButtonAnimationColor = props.triggerButtonAnimationColor;
+        }
+        if (props.triggerButtonExpandedColor !== prevProps.triggerButtonExpandedColor &&
+            props.triggerButtonExpandedColor !== undefined) {
+            this.triggerButtonExpandedColor = props.triggerButtonExpandedColor;
+        }
+        if (props.triggerButtonCollapsedColor !== prevProps.triggerButtonCollapsedColor &&
+            props.triggerButtonCollapsedColor !== undefined) {
+            this.triggerButtonCollapsedColor = props.triggerButtonCollapsedColor;
+        }
+        if (props.triggerButtonTintColor !== prevProps.triggerButtonTintColor &&
+            props.triggerButtonTintColor !== undefined) {
+            this.triggerButtonTintColor = props.triggerButtonTintColor;
+        }
+        // Update image customizations
+        if (props.triggerButtonImage !== prevProps.triggerButtonImage &&
+            props.triggerButtonImage !== undefined) {
+            this.triggerButtonImage = props.triggerButtonImage;
+        }
+        // Update feedback delegate
+        if (props.feedbackDelegate !== prevProps.feedbackDelegate &&
+            props.feedbackDelegate !== undefined) {
+            this.feedbackDelegate = props.feedbackDelegate;
+        }
+    }
+    _show() {
+        if (!this.context) {
+            throw new Error('There should be a context attached to a view that should be shown');
+        }
+        return this._controller.showView();
+    }
+    _hide() {
+        if (!this.context) {
+            throw new Error('There should be a context attached to a view that should be shown');
+        }
+        return this._controller.hideView();
+    }
+    static get sparkScanDefaults() {
+        return getSparkScanDefaults();
+    }
+    toJSON() {
+        var _a;
+        const json = {
+            brush: this._brush.toJSON(),
+            scanningBehaviorButtonVisible: this.scanningBehaviorButtonVisible,
+            barcodeCountButtonVisible: this.barcodeCountButtonVisible,
+            barcodeFindButtonVisible: this.barcodeFindButtonVisible,
+            targetModeButtonVisible: this.targetModeButtonVisible,
+            labelCaptureButtonVisible: this.labelCaptureButtonVisible,
+            stopCapturingText: this.stopCapturingText,
+            startCapturingText: this.startCapturingText,
+            resumeCapturingText: this.resumeCapturingText,
+            scanningCapturingText: this.scanningCapturingText,
+            toolbarBackgroundColor: this.toolbarBackgroundColor,
+            toolbarIconActiveTintColor: this.toolbarIconActiveTintColor,
+            toolbarIconInactiveTintColor: this.toolbarIconInactiveTintColor,
+            hasFeedbackDelegate: this._feedbackDelegate != null,
+            cameraSwitchButtonVisible: this.cameraSwitchButtonVisible,
+            triggerButtonAnimationColor: this.triggerButtonAnimationColor,
+            triggerButtonExpandedColor: this.triggerButtonExpandedColor,
+            triggerButtonCollapsedColor: this.triggerButtonCollapsedColor,
+            triggerButtonTintColor: this.triggerButtonTintColor,
+            triggerButtonVisible: this.triggerButtonVisible,
+            triggerButtonImage: this.triggerButtonImage,
+            torchControlVisible: this.torchControlVisible,
+            previewCloseControlVisible: this.previewCloseControlVisible,
+            hasUiListener: this.uiListener !== null,
+            viewId: this.viewId,
+        };
+        if (this._viewSettings != null) {
+            json.viewSettings = (_a = this._viewSettings) === null || _a === void 0 ? void 0 : _a.toJSON();
+        }
+        return json;
+    }
+}
+__decorate([
+    ignoreFromSerialization
+], BaseSparkScanView.prototype, "_viewId", void 0);
 
 class SparkScanBarcodeFeedback extends DefaultSerializeable {
     constructor() {
@@ -10019,7 +12056,7 @@ class SparkScanBarcodeErrorFeedback extends SparkScanBarcodeFeedback {
 }
 __decorate([
     nameForSerialization('barcodeFeedback')
-], SparkScanBarcodeErrorFeedback.prototype, "_barcodeFeedback", undefined);
+], SparkScanBarcodeErrorFeedback.prototype, "_barcodeFeedback", void 0);
 __decorate([
     ignoreFromSerialization
 ], SparkScanBarcodeErrorFeedback, "sparkScanDefaults", null);
@@ -10058,91 +12095,18 @@ class SparkScanBarcodeSuccessFeedback extends SparkScanBarcodeFeedback {
 }
 __decorate([
     nameForSerialization('barcodeFeedback')
-], SparkScanBarcodeSuccessFeedback.prototype, "_barcodeFeedback", undefined);
+], SparkScanBarcodeSuccessFeedback.prototype, "_barcodeFeedback", void 0);
 __decorate([
     ignoreFromSerialization
 ], SparkScanBarcodeSuccessFeedback, "sparkScanDefaults", null);
 
-class BarcodePickScanningSession {
-    get pickedItems() {
-        return this._pickedItems;
-    }
-    get scannedItems() {
-        return this._scannedItems;
-    }
-    static fromJSON(json) {
-        const session = new BarcodePickScanningSession();
-        session._pickedItems = json.pickedObjects;
-        session._scannedItems = json.scannedObjects;
-        return session;
-    }
-}
-
-var BarcodePickListenerEvents;
-(function (BarcodePickListenerEvents) {
-    BarcodePickListenerEvents["DidCompleteScanningSession"] = "BarcodePickScanningListener.didCompleteScanningSession";
-    BarcodePickListenerEvents["DidUpdateScanningSession"] = "BarcodePickScanningListener.didUpdateScanningSession";
-})(BarcodePickListenerEvents || (BarcodePickListenerEvents = {}));
-class BarcodePickListenerController extends BaseController {
-    constructor(barcodePick) {
-        super('BarcodePickListenerProxy');
-        this._barcodePick = barcodePick;
-        this.eventEmitter = FactoryMaker.getInstance('EventEmitter');
-    }
-    static forBarcodePick(barcodePick) {
-        return new BarcodePickListenerController(barcodePick);
-    }
-    subscribeListeners() {
-        this._proxy.subscribeBarcodePickListeners();
-        this.eventEmitter.on(BarcodePickListenerEvents.DidCompleteScanningSession, (data) => {
-            const payload = EventDataParser.parse(data);
-            if (payload === null) {
-                console.error('BarcodePickListenerController DidCompleteScanningSession payload is null');
-                return;
-            }
-            const session = BarcodePickScanningSession
-                .fromJSON(JSON.parse(payload.session));
-            this.notifyListenersOfDidCompleteScanningSession(session);
-        });
-        this.eventEmitter.on(BarcodePickListenerEvents.DidUpdateScanningSession, (data) => {
-            const payload = EventDataParser.parse(data);
-            if (payload === null) {
-                console.error('BarcodePickListenerController DidUpdateScanningSession payload is null');
-                return;
-            }
-            const session = BarcodePickScanningSession
-                .fromJSON(JSON.parse(payload.session));
-            this.notifyListenersOfDidUpdateScanningSession(session);
-        });
-    }
-    notifyListenersOfDidCompleteScanningSession(session) {
-        const mode = this._barcodePick;
-        mode.isInListenerCallback = true;
-        mode.listeners.forEach(listener => {
-            if (listener.didCompleteScanningSession) {
-                listener.didCompleteScanningSession(this._barcodePick, session);
-            }
-        });
-        mode.isInListenerCallback = false;
-    }
-    notifyListenersOfDidUpdateScanningSession(session) {
-        const mode = this._barcodePick;
-        mode.isInListenerCallback = true;
-        mode.listeners.forEach(listener => {
-            if (listener.didUpdateScanningSession) {
-                listener.didUpdateScanningSession(this._barcodePick, session);
-            }
-        });
-        mode.isInListenerCallback = false;
-    }
-    unsubscribeListeners() {
-        this.eventEmitter.removeAllListeners(BarcodePickListenerEvents.DidCompleteScanningSession);
-        this.eventEmitter.removeAllListeners(BarcodePickListenerEvents.DidUpdateScanningSession);
-        this._proxy.unsubscribeBarcodePickListeners();
-    }
-}
-
 class BarcodePick extends DefaultSerializeable {
+    get controller() {
+        return this._controller;
+    }
+    set controller(newController) {
+        this._controller = newController;
+    }
     static createRecommendedCameraSettings() {
         return BarcodePick.barcodePickDefaults.RecommendedCameraSettings;
     }
@@ -10156,54 +12120,99 @@ class BarcodePick extends DefaultSerializeable {
         super();
         this.type = 'barcodePick';
         this.listeners = [];
+        this._hasScanningListeners = false;
+        this.modeListeners = [];
+        this._hasListeners = false;
+        this.isInListenerCallback = false;
+        this._controller = null;
         this.privateContext = dataCaptureContext;
         this._settings = settings;
         this._productProvider = productProvider;
-        this._listenerController = BarcodePickListenerController.forBarcodePick(this);
     }
     addScanningListener(listener) {
-        this.checkAndSubscribeListeners();
+        this.checkAndSubscribeScanningListeners();
         if (this.listeners.includes(listener)) {
             return;
         }
         this.listeners.push(listener);
-    }
-    checkAndSubscribeListeners() {
-        if (this.listeners.length === 0) {
-            this._listenerController.subscribeListeners();
-        }
+        this._hasScanningListeners = this.listeners.length > 0;
     }
     removeScanningListener(listener) {
         if (!this.listeners.includes(listener)) {
             return;
         }
         this.listeners.splice(this.listeners.indexOf(listener));
-        this.checkAndUnsubscribeListeners();
+        this.checkAndUnsubscribeScanningListeners();
+        this._hasScanningListeners = this.listeners.length > 0;
     }
-    checkAndUnsubscribeListeners() {
+    checkAndSubscribeScanningListeners() {
+        var _a;
         if (this.listeners.length === 0) {
-            this._listenerController.unsubscribeListeners();
+            (_a = this.controller) === null || _a === void 0 ? void 0 : _a.subscribeScanningListener();
         }
     }
-    unsubscribeNativeListeners() {
-        this._productProvider._productController.dispose();
+    checkAndUnsubscribeScanningListeners() {
+        var _a;
+        if (this.listeners.length === 0) {
+            (_a = this.controller) === null || _a === void 0 ? void 0 : _a.unsubscribeScanningListener();
+        }
+    }
+    addListener(listener) {
+        this.checkAndSubscribeListeners();
+        if (this.modeListeners.includes(listener)) {
+            return;
+        }
+        this.modeListeners.push(listener);
+        this._hasListeners = this.modeListeners.length > 0;
+    }
+    removeListener(listener) {
+        if (!this.modeListeners.includes(listener)) {
+            return;
+        }
+        this.modeListeners.splice(this.modeListeners.indexOf(listener));
+        this.checkAndUnsubscribeListeners();
+        this._hasListeners = this.modeListeners.length > 0;
+    }
+    checkAndSubscribeListeners() {
+        var _a;
+        if (this.modeListeners.length === 0) {
+            (_a = this.controller) === null || _a === void 0 ? void 0 : _a.subscribePickListener();
+        }
+    }
+    checkAndUnsubscribeListeners() {
+        var _a;
+        if (this.modeListeners.length === 0) {
+            (_a = this.controller) === null || _a === void 0 ? void 0 : _a.unsubscribePickListener();
+        }
     }
 }
 __decorate([
     ignoreFromSerialization
-], BarcodePick.prototype, "privateContext", undefined);
+], BarcodePick.prototype, "privateContext", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodePick.prototype, "_listenerController", undefined);
+], BarcodePick.prototype, "listeners", void 0);
+__decorate([
+    nameForSerialization('hasScanningListeners')
+], BarcodePick.prototype, "_hasScanningListeners", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodePick.prototype, "listeners", undefined);
+], BarcodePick.prototype, "modeListeners", void 0);
+__decorate([
+    nameForSerialization('hasListeners')
+], BarcodePick.prototype, "_hasListeners", void 0);
+__decorate([
+    ignoreFromSerialization
+], BarcodePick.prototype, "isInListenerCallback", void 0);
 __decorate([
     nameForSerialization('settings')
-], BarcodePick.prototype, "_settings", undefined);
+], BarcodePick.prototype, "_settings", void 0);
 __decorate([
     nameForSerialization('ProductProvider')
-], BarcodePick.prototype, "_productProvider", undefined);
+], BarcodePick.prototype, "_productProvider", void 0);
+__decorate([
+    ignoreFromSerialization
+], BarcodePick.prototype, "_controller", void 0);
 __decorate([
     ignoreFromSerialization
 ], BarcodePick, "barcodePickDefaults", null);
@@ -10214,192 +12223,10 @@ class BarcodePickActionCallback {
     }
 }
 
-var BarcodePickViewListenerEvents;
-(function (BarcodePickViewListenerEvents) {
-    BarcodePickViewListenerEvents["DidStartScanning"] = "BarcodePickViewListener.didStartScanning";
-    BarcodePickViewListenerEvents["DidFreezeScanning"] = "BarcodePickViewListener.didFreezeScanning";
-    BarcodePickViewListenerEvents["DidPauseScanning"] = "BarcodePickViewListener.didPauseScanning";
-    BarcodePickViewListenerEvents["DidStopScanning"] = "BarcodePickViewListener.didStopScanning";
-})(BarcodePickViewListenerEvents || (BarcodePickViewListenerEvents = {}));
-var BarcodePickViewUiListenerEvents;
-(function (BarcodePickViewUiListenerEvents) {
-    BarcodePickViewUiListenerEvents["DidTapFinishButton"] = "BarcodePickViewUiListener.didTapFinishButton";
-})(BarcodePickViewUiListenerEvents || (BarcodePickViewUiListenerEvents = {}));
-var BarcodePickEvents;
-(function (BarcodePickEvents) {
-    BarcodePickEvents["DidPick"] = "BarcodePickActionListener.didPick";
-    BarcodePickEvents["DidUnpick"] = "BarcodePickActionListener.didUnpick";
-    BarcodePickEvents["OnProductIdentifierForItems"] = "BarcodePickAsyncMapperProductProviderCallback.onProductIdentifierForItems";
-})(BarcodePickEvents || (BarcodePickEvents = {}));
-class BarcodePickViewController extends BaseController {
-    static forBarcodePick(view, nativeView, autoCreateNativeView = true) {
-        const viewController = new BarcodePickViewController();
-        viewController.view = view;
-        viewController.nativeView = nativeView;
-        viewController.initialize(autoCreateNativeView);
-        return viewController;
-    }
-    constructor() {
-        super('BarcodePickViewProxy');
-    }
-    initialize(autoCreateNativeView) {
-        return __awaiter(this, undefined, undefined, function* () {
-            // We call update because it returns a promise, this guarantees, that by the time
-            // we need the deserialized context, it will be set in the native layer.
-            yield this.view.context.update();
-            if (autoCreateNativeView) {
-                yield this.create();
-            }
-        });
-    }
-    start() {
-        return this._proxy.viewStart();
-    }
-    stop() {
-        return this._proxy.viewStop();
-    }
-    freeze() {
-        return this._proxy.viewFreeze();
-    }
-    pause() {
-        return this._proxy.viewPause();
-    }
-    resume() {
-        return this._proxy.viewResume();
-    }
-    finishPickAction(itemData, result) {
-        return this._proxy.finishPickAction(itemData, result);
-    }
-    createNativeView() {
-        return this.create();
-    }
-    removeNativeView() {
-        var _a, _b, _c;
-        return (_c = (_b = (_a = this._proxy).removeView) === null || _b === undefined ? undefined : _b.call(_a)) !== null && _c !== undefined ? _c : Promise.resolve();
-    }
-    create() {
-        const barcodePickView = this.view.toJSON();
-        const json = JSON.stringify(barcodePickView);
-        const id = this._proxy.findNodeHandle(this.nativeView);
-        return this._proxy.createView(id, json);
-    }
-    dispose() {
-        this.unsubscribeListeners();
-    }
-    setUiListener(listener) {
-        return __awaiter(this, undefined, undefined, function* () {
-            if (listener) {
-                yield this._proxy.subscribeBarcodePickViewUiListener();
-            }
-            if (listener == null) {
-                yield this._proxy.unsubscribeBarcodePickViewUiListener();
-            }
-        });
-    }
-    subscribeListeners() {
-        this._proxy.registerFrameworkEvents();
-        this.eventEmitter.on(BarcodePickEvents.DidPick, (data) => {
-            const payload = EventDataParser.parse(data);
-            if (payload === null) {
-                console.error('BarcodePickViewController DidPick payload is null');
-                return;
-            }
-            const barcodePickActionCallback = new BarcodePickActionCallback();
-            barcodePickActionCallback._viewController = this;
-            barcodePickActionCallback._itemData = payload.itemData;
-            this.view.actionListeners
-                .forEach(listener => listener.didPickItem(payload.itemData, barcodePickActionCallback));
-        });
-        this.eventEmitter.on(BarcodePickEvents.DidUnpick, (data) => {
-            const payload = EventDataParser.parse(data);
-            if (payload === null) {
-                console.error('BarcodePickViewController DidUnpick payload is null');
-                return;
-            }
-            const barcodePickActionCallback = new BarcodePickActionCallback();
-            barcodePickActionCallback._viewController = this;
-            barcodePickActionCallback._itemData = payload.itemData;
-            this.view.actionListeners
-                .forEach(listener => listener.didUnpickItem(payload.itemData, barcodePickActionCallback));
-        });
-        this.eventEmitter.on(BarcodePickViewUiListenerEvents.DidTapFinishButton, () => {
-            var _a, _b;
-            if (!this.view.uiListener) {
-                return;
-            }
-            (_b = (_a = this.view) === null || _a === undefined ? undefined : _a.uiListener) === null || _b === undefined ? undefined : _b.didTapFinishButton(this);
-        });
-        this.eventEmitter.on(BarcodePickViewListenerEvents.DidStartScanning, () => {
-            this.view.listeners
-                .forEach(listener => listener.didStartScanning(this.view));
-        });
-        this.eventEmitter.on(BarcodePickViewListenerEvents.DidFreezeScanning, () => {
-            this.view.listeners
-                .forEach(listener => listener.didFreezeScanning(this.view));
-        });
-        this.eventEmitter.on(BarcodePickViewListenerEvents.DidPauseScanning, () => {
-            this.view.listeners
-                .forEach(listener => listener.didPauseScanning(this.view));
-        });
-        this.eventEmitter.on(BarcodePickViewListenerEvents.DidStopScanning, () => {
-            this.view.listeners
-                .forEach(listener => listener.didStopScanning(this.view));
-        });
-    }
-    unsubscribeListeners() {
-        this._proxy.unregisterFrameworkEvents();
-        this.eventEmitter.removeAllListeners(BarcodePickEvents.DidPick);
-        this.eventEmitter.removeAllListeners(BarcodePickEvents.DidUnpick);
-        this.eventEmitter.removeAllListeners(BarcodePickViewListenerEvents.DidFreezeScanning);
-        this.eventEmitter.removeAllListeners(BarcodePickViewListenerEvents.DidPauseScanning);
-        this.eventEmitter.removeAllListeners(BarcodePickViewListenerEvents.DidStartScanning);
-        this.eventEmitter.removeAllListeners(BarcodePickViewListenerEvents.DidStopScanning);
-        this.eventEmitter.removeAllListeners(BarcodePickViewUiListenerEvents.DidTapFinishButton);
-    }
-}
-
-class BarcodePickProductController extends BaseController {
-    static create(callback) {
-        const controller = new BarcodePickProductController();
-        controller.barcodePickMapperCallback = callback;
-        controller.subscribeListeners();
-        return controller;
-    }
-    constructor() {
-        super('BarcodePickProductProxy');
-    }
-    finishOnProductIdentifierForItems(data) {
-        return this._proxy.finishOnProductIdentifierForItems(JSON.stringify(data));
-    }
-    dispose() {
-        this.unsubscribeListeners();
-    }
-    subscribeListeners() {
-        this._proxy.subscribeProductIdentifierForItemsListener();
-        this.eventEmitter.on(BarcodePickEvents.OnProductIdentifierForItems, (data) => {
-            const payload = EventDataParser.parse(data);
-            if (payload === null) {
-                console.error('BarcodePickProductController OnProductIdentifierForItems payload is null');
-                return;
-            }
-            this.barcodePickMapperCallback.productIdentifierForItems(payload.itemsData, {
-                onData: (callbackItems) => {
-                    this.finishOnProductIdentifierForItems(callbackItems);
-                }
-            });
-        });
-    }
-    unsubscribeListeners() {
-        this.eventEmitter.removeAllListeners(BarcodePickEvents.OnProductIdentifierForItems);
-        this._proxy.unsubscribeListeners();
-    }
-}
-
 class BarcodePickAsyncMapperProductProvider extends DefaultSerializeable {
     constructor(productsToPick, callback) {
         super();
         this._productsToPickForSerialization = {};
-        this._productController = BarcodePickProductController.create(callback);
         this._productsToPick = productsToPick;
         productsToPick.forEach((product) => {
             this._productsToPickForSerialization[product.identifier] = product.quantityToPick;
@@ -10409,22 +12236,13 @@ class BarcodePickAsyncMapperProductProvider extends DefaultSerializeable {
 }
 __decorate([
     ignoreFromSerialization
-], BarcodePickAsyncMapperProductProvider.prototype, "_callback", undefined);
+], BarcodePickAsyncMapperProductProvider.prototype, "_callback", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodePickAsyncMapperProductProvider.prototype, "_productController", undefined);
-__decorate([
-    ignoreFromSerialization
-], BarcodePickAsyncMapperProductProvider.prototype, "_productsToPick", undefined);
+], BarcodePickAsyncMapperProductProvider.prototype, "_productsToPick", void 0);
 __decorate([
     nameForSerialization('products')
-], BarcodePickAsyncMapperProductProvider.prototype, "_productsToPickForSerialization", undefined);
-
-var BarcodePickIconStyle;
-(function (BarcodePickIconStyle) {
-    BarcodePickIconStyle["Preset_1"] = "preset1";
-    BarcodePickIconStyle["Preset_2"] = "preset2";
-})(BarcodePickIconStyle || (BarcodePickIconStyle = {}));
+], BarcodePickAsyncMapperProductProvider.prototype, "_productsToPickForSerialization", void 0);
 
 class BarcodePickProduct extends DefaultSerializeable {
     constructor(identifier, quantityToPick) {
@@ -10441,10 +12259,10 @@ class BarcodePickProduct extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('identifier')
-], BarcodePickProduct.prototype, "_identifier", undefined);
+], BarcodePickProduct.prototype, "_identifier", void 0);
 __decorate([
     nameForSerialization('quantityToPick')
-], BarcodePickProduct.prototype, "_quantityToPick", undefined);
+], BarcodePickProduct.prototype, "_quantityToPick", void 0);
 
 class BarcodePickProductProviderCallbackItem extends DefaultSerializeable {
     constructor(itemData, productIdentifier) {
@@ -10462,10 +12280,40 @@ class BarcodePickProductProviderCallbackItem extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('itemData')
-], BarcodePickProductProviderCallbackItem.prototype, "_itemData", undefined);
+], BarcodePickProductProviderCallbackItem.prototype, "_itemData", void 0);
 __decorate([
     nameForSerialization('productIdentifier')
-], BarcodePickProductProviderCallbackItem.prototype, "_productIdentifier", undefined);
+], BarcodePickProductProviderCallbackItem.prototype, "_productIdentifier", void 0);
+
+class BarcodePickSession {
+    get trackedItems() {
+        return this._trackedItems;
+    }
+    get addedItems() {
+        return this._addedItems;
+    }
+    static fromJSON(json) {
+        const session = new BarcodePickSession();
+        session._trackedItems = json.trackedItems;
+        session._addedItems = json.addedItems;
+        return session;
+    }
+}
+
+class BarcodePickScanningSession {
+    get pickedItems() {
+        return this._pickedItems;
+    }
+    get scannedItems() {
+        return this._scannedItems;
+    }
+    static fromJSON(json) {
+        const session = new BarcodePickScanningSession();
+        session._pickedItems = json.pickedObjects;
+        session._scannedItems = json.scannedObjects;
+        return session;
+    }
+}
 
 class BarcodePickSettings extends DefaultSerializeable {
     static get barcodePickDefaults() {
@@ -10528,16 +12376,16 @@ class BarcodePickSettings extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('soundEnabled')
-], BarcodePickSettings.prototype, "_soundEnabled", undefined);
+], BarcodePickSettings.prototype, "_soundEnabled", void 0);
 __decorate([
     nameForSerialization('hapticEnabled')
-], BarcodePickSettings.prototype, "_hapticsEnabled", undefined);
+], BarcodePickSettings.prototype, "_hapticsEnabled", void 0);
 __decorate([
     nameForSerialization('cachingEnabled')
-], BarcodePickSettings.prototype, "_cachingEnabled", undefined);
+], BarcodePickSettings.prototype, "_cachingEnabled", void 0);
 __decorate([
     nameForSerialization('arucoDictionary')
-], BarcodePickSettings.prototype, "_arucoDictionary", undefined);
+], BarcodePickSettings.prototype, "_arucoDictionary", void 0);
 __decorate([
     ignoreFromSerialization
 ], BarcodePickSettings, "barcodePickDefaults", null);
@@ -10550,7 +12398,565 @@ var BarcodePickState;
     BarcodePickState["Unknown"] = "unknown";
 })(BarcodePickState || (BarcodePickState = {}));
 
+class BarcodePickViewEventHandlers {
+    constructor(view, barcodePick, proxy, viewController) {
+        this.view = view;
+        this.barcodePick = barcodePick;
+        this.proxy = proxy;
+        this.viewController = viewController;
+        // Bind all handler methods to 'this' to ensure the correct context when they are used as callbacks
+        this.handleDidCompleteScanningSession = this.handleDidCompleteScanningSession.bind(this);
+        this.handleDidUpdateScanningSession = this.handleDidUpdateScanningSession.bind(this);
+        this.handleDidPick = this.handleDidPick.bind(this);
+        this.handleDidUnpick = this.handleDidUnpick.bind(this);
+        this.handleDidTapFinishButton = this.handleDidTapFinishButton.bind(this);
+        this.handleDidStartScanning = this.handleDidStartScanning.bind(this);
+        this.handleDidFreezeScanning = this.handleDidFreezeScanning.bind(this);
+        this.handleDidPauseScanning = this.handleDidPauseScanning.bind(this);
+        this.handleDidStopScanning = this.handleDidStopScanning.bind(this);
+        this.handleProductIdentifierForItems = this.handleProductIdentifierForItems.bind(this);
+    }
+    setBarcodePickMapperCallback(callback) {
+        this.barcodePickMapperCallback = callback;
+    }
+    handleDidCompleteScanningSession(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('BarcodePickViewEventHandlers DidCompleteScanningSession payload is null');
+                return;
+            }
+            if (payload.viewId !== this.view.viewId) {
+                return;
+            }
+            const session = BarcodePickScanningSession
+                .fromJSON(JSON.parse(payload.session));
+            this.notifyListenersOfDidCompleteScanningSession(session);
+        });
+    }
+    handleDidUpdateScanningSession(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('BarcodePickViewEventHandlers DidUpdateScanningSession payload is null');
+                return;
+            }
+            if (payload.viewId !== this.view.viewId) {
+                return;
+            }
+            const session = BarcodePickScanningSession
+                .fromJSON(JSON.parse(payload.session));
+            this.notifyListenersOfDidUpdateScanningSession(session);
+        });
+    }
+    handleDidPick(ev) {
+        const payload = EventDataParser.parse(ev.data);
+        if (payload === null) {
+            console.error('BarcodePickViewEventHandlers DidPick payload is null');
+            return;
+        }
+        if (payload.viewId !== this.view.viewId) {
+            return;
+        }
+        const barcodePickActionCallback = new BarcodePickActionCallback();
+        barcodePickActionCallback._viewController = this.viewController;
+        barcodePickActionCallback._itemData = payload.itemData;
+        this.view.actionListeners
+            .forEach(listener => listener.didPickItem(payload.itemData, barcodePickActionCallback));
+    }
+    handleDidUnpick(ev) {
+        const payload = EventDataParser.parse(ev.data);
+        if (payload === null) {
+            console.error('BarcodePickViewEventHandlers DidUnpick payload is null');
+            return;
+        }
+        if (payload.viewId !== this.view.viewId) {
+            return;
+        }
+        const barcodePickActionCallback = new BarcodePickActionCallback();
+        barcodePickActionCallback._viewController = this.viewController;
+        barcodePickActionCallback._itemData = payload.itemData;
+        this.view.actionListeners
+            .forEach(listener => listener.didUnpickItem(payload.itemData, barcodePickActionCallback));
+    }
+    handleDidTapFinishButton(ev) {
+        var _a, _b;
+        const payload = EventDataParser.parse(ev.data);
+        if (payload === null) {
+            console.error('BarcodePickViewEventHandlers DidTapFinishButton payload is null');
+            return;
+        }
+        if (payload.viewId !== this.view.viewId) {
+            return;
+        }
+        if (!this.view.uiListener) {
+            return;
+        }
+        (_b = (_a = this.view) === null || _a === void 0 ? void 0 : _a.uiListener) === null || _b === void 0 ? void 0 : _b.didTapFinishButton(this.proxy);
+    }
+    handleDidStartScanning(ev) {
+        const payload = EventDataParser.parse(ev.data);
+        if (payload === null) {
+            console.error('BarcodePickViewEventHandlers DidStartScanning payload is null');
+            return;
+        }
+        if (payload.viewId !== this.view.viewId) {
+            return;
+        }
+        this.view.listeners
+            .forEach(listener => listener.didStartScanning(this.view));
+    }
+    handleDidFreezeScanning(ev) {
+        const payload = EventDataParser.parse(ev.data);
+        if (payload === null) {
+            console.error('BarcodePickViewEventHandlers DidFreezeScanning payload is null');
+            return;
+        }
+        if (payload.viewId !== this.view.viewId) {
+            return;
+        }
+        this.view.listeners
+            .forEach(listener => listener.didFreezeScanning(this.view));
+    }
+    handleDidPauseScanning(ev) {
+        const payload = EventDataParser.parse(ev.data);
+        if (payload === null) {
+            console.error('BarcodePickViewEventHandlers DidPauseScanning payload is null');
+            return;
+        }
+        if (payload.viewId !== this.view.viewId) {
+            return;
+        }
+        this.view.listeners
+            .forEach(listener => listener.didPauseScanning(this.view));
+    }
+    handleDidStopScanning(ev) {
+        const payload = EventDataParser.parse(ev.data);
+        if (payload === null) {
+            console.error('BarcodePickViewEventHandlers DidStopScanning payload is null');
+            return;
+        }
+        if (payload.viewId !== this.view.viewId) {
+            return;
+        }
+        this.view.listeners
+            .forEach(listener => listener.didStopScanning(this.view));
+    }
+    handleProductIdentifierForItems(ev) {
+        const payload = EventDataParser.parse(ev.data);
+        if (payload === null) {
+            console.error('BarcodePickViewEventHandlers ProductIdentifierForItems payload is null');
+            return;
+        }
+        if (payload.viewId !== this.view.viewId) {
+            return;
+        }
+        if (!this.barcodePickMapperCallback) {
+            return;
+        }
+        this.barcodePickMapperCallback.productIdentifierForItems(payload.itemsData, {
+            onData: (callbackItems) => {
+                this.finishOnProductIdentifierForItems(callbackItems);
+            }
+        });
+    }
+    handleDidUpdateSession(ev) {
+        const payload = EventDataParser.parse(ev.data);
+        if (payload === null) {
+            console.error('BarcodePickViewEventHandlers DidUpdateSession payload is null');
+            return;
+        }
+        if (payload.viewId !== this.view.viewId) {
+            return;
+        }
+        const session = BarcodePickSession
+            .fromJSON(JSON.parse(payload.session));
+        this.notifyListenersOfDidUpdateSession(session);
+    }
+    finishOnProductIdentifierForItems(data) {
+        return this.proxy.$finishOnProductIdentifierForItems({ viewId: this.view.viewId, itemsJson: JSON.stringify(data) });
+    }
+    notifyListenersOfDidCompleteScanningSession(session) {
+        const mode = this.barcodePick;
+        mode.isInListenerCallback = true;
+        mode.listeners.forEach(listener => {
+            if (listener.didCompleteScanningSession) {
+                listener.didCompleteScanningSession(this.barcodePick, session);
+            }
+        });
+        mode.isInListenerCallback = false;
+    }
+    notifyListenersOfDidUpdateScanningSession(session) {
+        const mode = this.barcodePick;
+        mode.isInListenerCallback = true;
+        mode.listeners.forEach(listener => {
+            if (listener.didUpdateScanningSession) {
+                listener.didUpdateScanningSession(this.barcodePick, session);
+            }
+        });
+        mode.isInListenerCallback = false;
+    }
+    notifyListenersOfDidUpdateSession(session) {
+        const mode = this.barcodePick;
+        mode.isInListenerCallback = true;
+        mode.modeListeners.forEach(listener => {
+            if (listener.didUpdateSession) {
+                listener.didUpdateSession(this.barcodePick, session);
+            }
+        });
+        mode.isInListenerCallback = false;
+    }
+}
+
+var BarcodePickViewEvents;
+(function (BarcodePickViewEvents) {
+    BarcodePickViewEvents["didStartScanning"] = "BarcodePickViewListener.didStartScanning";
+    BarcodePickViewEvents["didFreezeScanning"] = "BarcodePickViewListener.didFreezeScanning";
+    BarcodePickViewEvents["didPauseScanning"] = "BarcodePickViewListener.didPauseScanning";
+    BarcodePickViewEvents["didStopScanning"] = "BarcodePickViewListener.didStopScanning";
+})(BarcodePickViewEvents || (BarcodePickViewEvents = {}));
+var BarcodePickViewUiEvents;
+(function (BarcodePickViewUiEvents) {
+    BarcodePickViewUiEvents["didTapFinishButton"] = "BarcodePickViewUiListener.didTapFinishButton";
+})(BarcodePickViewUiEvents || (BarcodePickViewUiEvents = {}));
+var BarcodePickAsyncMapperProductProviderEvents;
+(function (BarcodePickAsyncMapperProductProviderEvents) {
+    BarcodePickAsyncMapperProductProviderEvents["onProductIdentifierForItems"] = "BarcodePickAsyncMapperProductProviderCallback.onProductIdentifierForItems";
+})(BarcodePickAsyncMapperProductProviderEvents || (BarcodePickAsyncMapperProductProviderEvents = {}));
+var BarcodePickScanningEvents;
+(function (BarcodePickScanningEvents) {
+    BarcodePickScanningEvents["didCompleteScanningSession"] = "BarcodePickScanningListener.didCompleteScanningSession";
+    BarcodePickScanningEvents["didUpdateScanningSession"] = "BarcodePickScanningListener.didUpdateScanningSession";
+})(BarcodePickScanningEvents || (BarcodePickScanningEvents = {}));
+var BarcodePickActionEvents;
+(function (BarcodePickActionEvents) {
+    BarcodePickActionEvents["didPick"] = "BarcodePickActionListener.didPick";
+    BarcodePickActionEvents["didUnpick"] = "BarcodePickActionListener.didUnpick";
+})(BarcodePickActionEvents || (BarcodePickActionEvents = {}));
+var BarcodePickListenerEvents;
+(function (BarcodePickListenerEvents) {
+    BarcodePickListenerEvents["didUpdateSession"] = "BarcodePickListener.didUpdateSession";
+})(BarcodePickListenerEvents || (BarcodePickListenerEvents = {}));
+class BarcodePickViewController extends BaseNewController {
+    static forBarcodePick(view, nativeView) {
+        return new BarcodePickViewController(view, nativeView);
+    }
+    constructor(view, nativeView) {
+        super('BarcodePickViewProxy');
+        this.isListeningForPickListeners = false;
+        this.isListeningForScanningListeners = false;
+        this.isListeningForActionListeners = false;
+        this.isListeningForViewListeners = false;
+        this.isListeningForViewUiListeners = false;
+        this.isListeningForProductListeners = false;
+        this.view = view;
+        this.barcodePick = view.barcodePick;
+        this.nativeView = nativeView;
+        this.eventHandlers = new BarcodePickViewEventHandlers(this.view, this.barcodePick, this._proxy, this);
+    }
+    initialize() {
+        // check if there are listeners to subscribe
+        if (this.barcodePick.listeners.length > 0) {
+            this.subscribeScanningListener();
+        }
+        if (this.barcodePick.modeListeners.length > 0) {
+            this.subscribePickListener();
+        }
+        if (this.view.uiListener) {
+            this.registerUiListener();
+        }
+        if (this.view.listeners.length > 0) {
+            this.subscribePickViewListeners();
+        }
+        if (this.view.actionListeners.length > 0) {
+            this.subscribeActionListeners();
+        }
+        if (this.barcodePick._productProvider) {
+            const productProvider = this.barcodePick._productProvider;
+            if (productProvider instanceof BarcodePickAsyncMapperProductProvider) {
+                const callback = productProvider._callback;
+                this.registerProductListener(callback);
+            }
+        }
+    }
+    start() {
+        if (!this.isViewCreated) {
+            return Promise.resolve();
+        }
+        return this._proxy.$pickViewStart({ viewId: this.view.viewId });
+    }
+    stop() {
+        if (!this.isViewCreated) {
+            return Promise.resolve();
+        }
+        return this._proxy.$pickViewStop({ viewId: this.view.viewId });
+    }
+    freeze() {
+        if (!this.isViewCreated) {
+            return Promise.resolve();
+        }
+        return this._proxy.$pickViewFreeze({ viewId: this.view.viewId });
+    }
+    reset() {
+        if (!this.isViewCreated) {
+            return Promise.resolve();
+        }
+        return this._proxy.$pickViewReset({ viewId: this.view.viewId });
+    }
+    pause() {
+        if (!this.isViewCreated) {
+            return Promise.resolve();
+        }
+        // Android: onPause is called.
+        // iOS: pause is called.
+        return this._proxy.$pickViewPause({ viewId: this.view.viewId });
+    }
+    resume() {
+        if (!this.isViewCreated) {
+            return Promise.resolve();
+        }
+        // Android: onResume is called.
+        // iOS: start is called.
+        return this._proxy.$pickViewResume({ viewId: this.view.viewId });
+    }
+    finishPickAction(itemData, result) {
+        if (!this.isViewCreated) {
+            return Promise.resolve();
+        }
+        return this._proxy.$finishPickAction({ viewId: this.view.viewId, code: itemData, result });
+    }
+    createNativeView() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.create();
+            this.initialize();
+        });
+    }
+    removeNativeView() {
+        if (!this.isViewCreated) {
+            return Promise.resolve();
+        }
+        return this._proxy.$removePickView({ viewId: this.view.viewId });
+    }
+    create() {
+        const barcodePickView = this.view.toJSON();
+        const json = JSON.stringify(barcodePickView);
+        return this._proxy.$createPickView({ viewId: this.view.viewId, json });
+    }
+    dispose() {
+        this.unsubscribeActionListeners();
+        this.unsubscribePickViewListeners();
+        this.unsubscribeScanningListener();
+        this.unsubscribePickListener();
+        this.unregisterUiListener();
+        this.unregisterProductListener();
+        this._proxy.dispose();
+    }
+    subscribeScanningListener() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.isViewCreated) {
+                return Promise.resolve();
+            }
+            if (this.isListeningForScanningListeners) {
+                return Promise.resolve();
+            }
+            this._proxy.subscribeForEvents(Object.values(BarcodePickScanningEvents));
+            this._proxy.$addBarcodePickScanningListener({ viewId: this.view.viewId });
+            this._proxy.eventEmitter.on(BarcodePickScanningEvents.didCompleteScanningSession, this.eventHandlers.handleDidCompleteScanningSession.bind(this));
+            this._proxy.eventEmitter.on(BarcodePickScanningEvents.didUpdateScanningSession, this.eventHandlers.handleDidUpdateScanningSession.bind(this));
+            this.isListeningForScanningListeners = true;
+        });
+    }
+    unsubscribeScanningListener() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.isViewCreated) {
+                return Promise.resolve();
+            }
+            if (!this.isListeningForScanningListeners) {
+                return Promise.resolve();
+            }
+            this._proxy.unsubscribeFromEvents(Object.values(BarcodePickScanningEvents));
+            this._proxy.eventEmitter.off(BarcodePickScanningEvents.didCompleteScanningSession, this.eventHandlers.handleDidCompleteScanningSession.bind(this));
+            this._proxy.eventEmitter.off(BarcodePickScanningEvents.didUpdateScanningSession, this.eventHandlers.handleDidUpdateScanningSession.bind(this));
+            this._proxy.$removeBarcodePickScanningListener({ viewId: this.view.viewId });
+            this.isListeningForScanningListeners = false;
+        });
+    }
+    subscribePickListener() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.isViewCreated) {
+                return Promise.resolve();
+            }
+            if (this.isListeningForPickListeners) {
+                return Promise.resolve();
+            }
+            this._proxy.subscribeForEvents(Object.values(BarcodePickListenerEvents));
+            this._proxy.$addBarcodePickListener({ viewId: this.view.viewId });
+            this._proxy.eventEmitter.on(BarcodePickListenerEvents.didUpdateSession, this.eventHandlers.handleDidUpdateSession.bind(this));
+            this.isListeningForPickListeners = true;
+        });
+    }
+    unsubscribePickListener() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.isViewCreated) {
+                return Promise.resolve();
+            }
+            if (!this.isListeningForPickListeners) {
+                return Promise.resolve();
+            }
+            this._proxy.unsubscribeFromEvents(Object.values(BarcodePickListenerEvents));
+            this._proxy.eventEmitter.off(BarcodePickListenerEvents.didUpdateSession, this.eventHandlers.handleDidUpdateSession.bind(this));
+            this._proxy.$removeBarcodePickListener({ viewId: this.view.viewId });
+            this.isListeningForPickListeners = false;
+        });
+    }
+    registerUiListener() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.isViewCreated) {
+                return Promise.resolve();
+            }
+            if (this.isListeningForViewUiListeners) {
+                return Promise.resolve();
+            }
+            this._proxy.subscribeForEvents(Object.values(BarcodePickViewUiEvents));
+            this._proxy.eventEmitter.on(BarcodePickViewUiEvents.didTapFinishButton, this.eventHandlers.handleDidTapFinishButton.bind(this));
+            yield this._proxy.$registerBarcodePickViewUiListener({ viewId: this.view.viewId });
+            this.isListeningForViewUiListeners = true;
+        });
+    }
+    unregisterUiListener() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.isViewCreated) {
+                return Promise.resolve();
+            }
+            if (!this.isListeningForViewUiListeners) {
+                return Promise.resolve();
+            }
+            this._proxy.unsubscribeFromEvents(Object.values(BarcodePickViewUiEvents));
+            this._proxy.eventEmitter.off(BarcodePickViewUiEvents.didTapFinishButton, this.eventHandlers.handleDidTapFinishButton.bind(this));
+            yield this._proxy.$unregisterBarcodePickViewUiListener({ viewId: this.view.viewId });
+            this.isListeningForViewUiListeners = false;
+        });
+    }
+    setUiListener(listener) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (listener) {
+                yield this.registerUiListener();
+            }
+            else {
+                yield this.unregisterUiListener();
+            }
+        });
+    }
+    subscribeActionListeners() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.isViewCreated) {
+                return Promise.resolve();
+            }
+            if (this.isListeningForActionListeners) {
+                return Promise.resolve();
+            }
+            this._proxy.subscribeForEvents(Object.values(BarcodePickActionEvents));
+            this._proxy.$addPickActionListener({ viewId: this.view.viewId });
+            this._proxy.eventEmitter.on(BarcodePickActionEvents.didPick, this.eventHandlers.handleDidPick.bind(this));
+            this._proxy.eventEmitter.on(BarcodePickActionEvents.didUnpick, this.eventHandlers.handleDidUnpick.bind(this));
+            this.isListeningForActionListeners = true;
+        });
+    }
+    unsubscribeActionListeners() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.isViewCreated) {
+                return Promise.resolve();
+            }
+            if (!this.isListeningForActionListeners) {
+                return Promise.resolve();
+            }
+            this._proxy.unsubscribeFromEvents(Object.values(BarcodePickActionEvents));
+            this._proxy.eventEmitter.off(BarcodePickActionEvents.didPick, this.eventHandlers.handleDidPick.bind(this));
+            this._proxy.eventEmitter.off(BarcodePickActionEvents.didUnpick, this.eventHandlers.handleDidUnpick.bind(this));
+            this._proxy.$removePickActionListener({ viewId: this.view.viewId });
+            this.isListeningForActionListeners = false;
+        });
+    }
+    subscribePickViewListeners() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.isViewCreated) {
+                return Promise.resolve();
+            }
+            if (this.isListeningForViewListeners) {
+                return Promise.resolve();
+            }
+            this._proxy.subscribeForEvents(Object.values(BarcodePickViewEvents));
+            this._proxy.eventEmitter.on(BarcodePickViewEvents.didStartScanning, this.eventHandlers.handleDidStartScanning.bind(this));
+            this._proxy.eventEmitter.on(BarcodePickViewEvents.didFreezeScanning, this.eventHandlers.handleDidFreezeScanning.bind(this));
+            this._proxy.eventEmitter.on(BarcodePickViewEvents.didPauseScanning, this.eventHandlers.handleDidPauseScanning.bind(this));
+            this._proxy.eventEmitter.on(BarcodePickViewEvents.didStopScanning, this.eventHandlers.handleDidStopScanning.bind(this));
+            this._proxy.$addPickViewListener({ viewId: this.view.viewId });
+            this.isListeningForViewListeners = true;
+        });
+    }
+    unsubscribePickViewListeners() {
+        if (!this.isViewCreated) {
+            return Promise.resolve();
+        }
+        if (!this.isListeningForViewListeners) {
+            return Promise.resolve();
+        }
+        this._proxy.unsubscribeFromEvents(Object.values(BarcodePickViewEvents));
+        this._proxy.eventEmitter.off(BarcodePickViewEvents.didStartScanning, this.eventHandlers.handleDidStartScanning.bind(this));
+        this._proxy.eventEmitter.off(BarcodePickViewEvents.didFreezeScanning, this.eventHandlers.handleDidFreezeScanning.bind(this));
+        this._proxy.eventEmitter.off(BarcodePickViewEvents.didPauseScanning, this.eventHandlers.handleDidPauseScanning.bind(this));
+        this._proxy.eventEmitter.off(BarcodePickViewEvents.didStopScanning, this.eventHandlers.handleDidStopScanning.bind(this));
+        this._proxy.$removePickViewListener({ viewId: this.view.viewId });
+        this.isListeningForViewListeners = false;
+    }
+    // Methods migrated from BarcodePickProductController
+    registerProductListener(callback) {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.eventHandlers.setBarcodePickMapperCallback(callback);
+            if (!this.isViewCreated) {
+                return Promise.resolve();
+            }
+            if (this.isListeningForProductListeners) {
+                return Promise.resolve();
+            }
+            this._proxy.subscribeForEvents(Object.values(BarcodePickAsyncMapperProductProviderEvents));
+            this._proxy.$registerOnProductIdentifierForItemsListener({ viewId: this.view.viewId });
+            this._proxy.eventEmitter.on(BarcodePickAsyncMapperProductProviderEvents.onProductIdentifierForItems, this.eventHandlers.handleProductIdentifierForItems.bind(this));
+            this.isListeningForProductListeners = true;
+        });
+    }
+    unregisterProductListener() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.isViewCreated) {
+                return Promise.resolve();
+            }
+            if (!this.isListeningForProductListeners) {
+                return Promise.resolve();
+            }
+            this._proxy.unsubscribeFromEvents(Object.values(BarcodePickAsyncMapperProductProviderEvents));
+            this._proxy.eventEmitter.off(BarcodePickAsyncMapperProductProviderEvents.onProductIdentifierForItems, this.eventHandlers.handleProductIdentifierForItems.bind(this));
+            this._proxy.$unregisterOnProductIdentifierForItemsListener({ viewId: this.view.viewId });
+            this.isListeningForProductListeners = false;
+        });
+    }
+    finishOnProductIdentifierForItems(data) {
+        if (!this.isViewCreated) {
+            return Promise.resolve();
+        }
+        return this._proxy.$finishOnProductIdentifierForItems({
+            viewId: this.view.viewId,
+            itemsJson: JSON.stringify(data),
+        });
+    }
+    get isViewCreated() {
+        return this.view.viewId !== -1;
+    }
+}
+
 class BaseBarcodePickView extends DefaultSerializeable {
+    get viewId() {
+        return this._viewId;
+    }
     get context() {
         return this._context;
     }
@@ -10564,44 +12970,42 @@ class BaseBarcodePickView extends DefaultSerializeable {
         this._barcodePickViewUiListener = value;
         this.viewController.setUiListener(value);
     }
-    constructor({ context, barcodePick, settings, cameraSettings, autoCreateNativeView = true }) {
+    constructor({ context, barcodePick, settings, cameraSettings, }) {
         super();
         this.actionListeners = [];
         this.listeners = [];
         this.isStarted = false;
         this._context = null;
         this.isViewCreated = false;
-        this.autoCreateNativeView = true;
+        this._viewId = -1; // -1 means the view is not created yet
         this._barcodePickViewUiListener = null;
         this.context = context;
         this.barcodePick = barcodePick;
         this.settings = settings;
         this.cameraSettings = cameraSettings;
-        this.autoCreateNativeView = autoCreateNativeView;
-        this.isViewCreated = autoCreateNativeView;
         this.barcodePick.privateContext = context;
     }
     initialize(nativeView) {
-        this.viewController = BarcodePickViewController.forBarcodePick(this, nativeView, this.autoCreateNativeView);
+        this.viewController = BarcodePickViewController.forBarcodePick(this, nativeView);
     }
-    createNativeView() {
-        return __awaiter(this, undefined, undefined, function* () {
+    createNativeView(viewId) {
+        return __awaiter(this, void 0, void 0, function* () {
             if (this.isViewCreated) {
                 return Promise.resolve();
             }
+            this._viewId = viewId;
             yield this.viewController.createNativeView();
             this.isViewCreated = true;
         });
     }
     removeNativeView() {
-        return __awaiter(this, undefined, undefined, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             yield this.viewController.removeNativeView();
             this.isViewCreated = false;
         });
     }
     dispose() {
         this.viewController.dispose();
-        this.barcodePick.unsubscribeNativeListeners();
         this.isViewCreated = false;
     }
     start() {
@@ -10620,9 +13024,18 @@ class BaseBarcodePickView extends DefaultSerializeable {
     resume() {
         this.viewController.resume();
     }
+    reset() {
+        this.viewController.reset();
+    }
     addActionListener(listener) {
+        this.checkAndSubscribeActionListeners();
         if (this.actionListeners.findIndex(l => l === listener) === -1) {
             this.actionListeners.push(listener);
+        }
+    }
+    checkAndSubscribeActionListeners() {
+        if (this.actionListeners.length === 0) {
+            this.viewController.subscribeActionListeners();
         }
     }
     removeActionListener(listener) {
@@ -10630,6 +13043,12 @@ class BaseBarcodePickView extends DefaultSerializeable {
             return;
         }
         this.actionListeners.splice(this.actionListeners.indexOf(listener), 1);
+        this.checkAndUnsubscribeActionListeners();
+    }
+    checkAndUnsubscribeActionListeners() {
+        if (this.actionListeners.length === 0) {
+            this.viewController.unsubscribeActionListeners();
+        }
     }
     addListener(listener) {
         this.checkAndSubscribeListeners();
@@ -10639,7 +13058,7 @@ class BaseBarcodePickView extends DefaultSerializeable {
     }
     checkAndSubscribeListeners() {
         if (this.listeners.length === 0) {
-            this.viewController.subscribeListeners();
+            this.viewController.subscribePickViewListeners();
         }
     }
     removeListener(listener) {
@@ -10651,12 +13070,13 @@ class BaseBarcodePickView extends DefaultSerializeable {
     }
     checkAndUnsubscribeListeners() {
         if (this.listeners.length === 0) {
-            this.viewController.unsubscribeListeners();
+            this.viewController.unsubscribePickViewListeners();
         }
     }
     toJSON() {
         return {
             View: {
+                viewId: this._viewId,
                 hasActionListeners: this.actionListeners.length > 0,
                 hasViewListeners: this.listeners.length > 0,
                 hasViewUiListener: this.uiListener ? true : false,
@@ -10664,34 +13084,31 @@ class BaseBarcodePickView extends DefaultSerializeable {
                 viewSettings: this.settings.toJSON(),
                 cameraSettings: this.cameraSettings.toJSON(),
             },
-            BarcodePick: this.barcodePick.toJSON()
+            BarcodePick: this.barcodePick.toJSON(),
         };
     }
 }
 __decorate([
     ignoreFromSerialization
-], BaseBarcodePickView.prototype, "viewController", undefined);
+], BaseBarcodePickView.prototype, "viewController", void 0);
 __decorate([
     ignoreFromSerialization
-], BaseBarcodePickView.prototype, "actionListeners", undefined);
+], BaseBarcodePickView.prototype, "actionListeners", void 0);
 __decorate([
     ignoreFromSerialization
-], BaseBarcodePickView.prototype, "listeners", undefined);
+], BaseBarcodePickView.prototype, "listeners", void 0);
 __decorate([
     nameForSerialization('isStarted')
-], BaseBarcodePickView.prototype, "isStarted", undefined);
+], BaseBarcodePickView.prototype, "isStarted", void 0);
 __decorate([
     ignoreFromSerialization
-], BaseBarcodePickView.prototype, "_context", undefined);
+], BaseBarcodePickView.prototype, "_context", void 0);
 __decorate([
     ignoreFromSerialization
-], BaseBarcodePickView.prototype, "isViewCreated", undefined);
+], BaseBarcodePickView.prototype, "isViewCreated", void 0);
 __decorate([
     ignoreFromSerialization
-], BaseBarcodePickView.prototype, "autoCreateNativeView", undefined);
-__decorate([
-    ignoreFromSerialization
-], BaseBarcodePickView.prototype, "_barcodePickViewUiListener", undefined);
+], BaseBarcodePickView.prototype, "_barcodePickViewUiListener", void 0);
 
 class BarcodePickViewSettings extends DefaultSerializeable {
     static get barcodePickDefaults() {
@@ -10704,13 +13121,14 @@ class BarcodePickViewSettings extends DefaultSerializeable {
         this._showFinishButton = BarcodePickViewSettings.barcodePickDefaults.ViewSettings.showFinishButton;
         this._showPauseButton = BarcodePickViewSettings.barcodePickDefaults.ViewSettings.showPauseButton;
         this._showZoomButton = BarcodePickViewSettings.barcodePickDefaults.ViewSettings.showZoomButton;
-        this._loadingDialogText = BarcodePickViewSettings.barcodePickDefaults.ViewSettings.loadingDialogText;
+        this._loadingDialogTextForPicking = BarcodePickViewSettings.barcodePickDefaults.ViewSettings.loadingDialogTextForPicking;
+        this._loadingDialogTextForUnpicking = BarcodePickViewSettings.barcodePickDefaults.ViewSettings.loadingDialogTextForUnpicking;
         this._showGuidelines = BarcodePickViewSettings.barcodePickDefaults.ViewSettings.showGuidelines;
         this._initialGuidelineText = BarcodePickViewSettings.barcodePickDefaults.ViewSettings.initialGuidelineText;
         this._moveCloserGuidelineText = BarcodePickViewSettings.barcodePickDefaults.ViewSettings.moveCloserGuidelineText;
         this._showHints = BarcodePickViewSettings.barcodePickDefaults.ViewSettings.showHints;
         this._onFirstItemToPickFoundHintText = BarcodePickViewSettings.barcodePickDefaults.ViewSettings.onFirstItemToPickFoundHintText;
-        this._onFirstItemPickCompletedHintText = BarcodePickViewSettings.barcodePickDefaults.ViewSettings.onFirstItemUnpickCompletedHintText;
+        this._onFirstItemPickCompletedHintText = BarcodePickViewSettings.barcodePickDefaults.ViewSettings.onFirstItemPickCompletedHintText;
         this._onFirstUnmarkedItemPickCompletedHintText = BarcodePickViewSettings.barcodePickDefaults.ViewSettings.onFirstUnmarkedItemPickCompletedHintText;
         this._onFirstItemUnpickCompletedHintText = BarcodePickViewSettings.barcodePickDefaults.ViewSettings.onFirstItemUnpickCompletedHintText;
     }
@@ -10744,11 +13162,17 @@ class BarcodePickViewSettings extends DefaultSerializeable {
     set showZoomButton(show) {
         this._showZoomButton = show;
     }
-    get loadingDialogText() {
-        return this._loadingDialogText;
+    get loadingDialogTextForPicking() {
+        return this._loadingDialogTextForPicking;
     }
-    set loadingDialogText(text) {
-        this._loadingDialogText = text;
+    set loadingDialogTextForPicking(text) {
+        this._loadingDialogTextForPicking = text;
+    }
+    get loadingDialogTextForUnpicking() {
+        return this._loadingDialogTextForUnpicking;
+    }
+    set loadingDialogTextForUnpicking(text) {
+        this._loadingDialogTextForUnpicking = text;
     }
     get showGuidelines() {
         return this._showGuidelines;
@@ -10801,46 +13225,49 @@ class BarcodePickViewSettings extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('highlightStyle')
-], BarcodePickViewSettings.prototype, "_highlightStyle", undefined);
+], BarcodePickViewSettings.prototype, "_highlightStyle", void 0);
 __decorate([
     nameForSerialization('shouldShowLoadingDialog')
-], BarcodePickViewSettings.prototype, "_showLoadingDialog", undefined);
+], BarcodePickViewSettings.prototype, "_showLoadingDialog", void 0);
 __decorate([
     nameForSerialization('showFinishButton')
-], BarcodePickViewSettings.prototype, "_showFinishButton", undefined);
+], BarcodePickViewSettings.prototype, "_showFinishButton", void 0);
 __decorate([
     nameForSerialization('showPauseButton')
-], BarcodePickViewSettings.prototype, "_showPauseButton", undefined);
+], BarcodePickViewSettings.prototype, "_showPauseButton", void 0);
 __decorate([
     nameForSerialization('showZoomButton')
-], BarcodePickViewSettings.prototype, "_showZoomButton", undefined);
+], BarcodePickViewSettings.prototype, "_showZoomButton", void 0);
 __decorate([
-    nameForSerialization('showLoadingDialogText')
-], BarcodePickViewSettings.prototype, "_loadingDialogText", undefined);
+    nameForSerialization('showLoadingDialogTextForPicking')
+], BarcodePickViewSettings.prototype, "_loadingDialogTextForPicking", void 0);
+__decorate([
+    nameForSerialization('showLoadingDialogTextForUnpicking')
+], BarcodePickViewSettings.prototype, "_loadingDialogTextForUnpicking", void 0);
 __decorate([
     nameForSerialization('shouldShowGuidelines')
-], BarcodePickViewSettings.prototype, "_showGuidelines", undefined);
+], BarcodePickViewSettings.prototype, "_showGuidelines", void 0);
 __decorate([
     nameForSerialization('initialGuidelineText')
-], BarcodePickViewSettings.prototype, "_initialGuidelineText", undefined);
+], BarcodePickViewSettings.prototype, "_initialGuidelineText", void 0);
 __decorate([
     nameForSerialization('moveCloserGuidelineText')
-], BarcodePickViewSettings.prototype, "_moveCloserGuidelineText", undefined);
+], BarcodePickViewSettings.prototype, "_moveCloserGuidelineText", void 0);
 __decorate([
     nameForSerialization('shouldShowHints')
-], BarcodePickViewSettings.prototype, "_showHints", undefined);
+], BarcodePickViewSettings.prototype, "_showHints", void 0);
 __decorate([
     nameForSerialization('onFirstItemToPickFoundHintText')
-], BarcodePickViewSettings.prototype, "_onFirstItemToPickFoundHintText", undefined);
+], BarcodePickViewSettings.prototype, "_onFirstItemToPickFoundHintText", void 0);
 __decorate([
     nameForSerialization('onFirstItemPickCompletedHintText')
-], BarcodePickViewSettings.prototype, "_onFirstItemPickCompletedHintText", undefined);
+], BarcodePickViewSettings.prototype, "_onFirstItemPickCompletedHintText", void 0);
 __decorate([
     nameForSerialization('onFirstUnmarkedItemPickCompletedHintText')
-], BarcodePickViewSettings.prototype, "_onFirstUnmarkedItemPickCompletedHintText", undefined);
+], BarcodePickViewSettings.prototype, "_onFirstUnmarkedItemPickCompletedHintText", void 0);
 __decorate([
     nameForSerialization('onFirstItemUnpickCompletedHintText')
-], BarcodePickViewSettings.prototype, "_onFirstItemUnpickCompletedHintText", undefined);
+], BarcodePickViewSettings.prototype, "_onFirstItemUnpickCompletedHintText", void 0);
 __decorate([
     ignoreFromSerialization
 ], BarcodePickViewSettings, "barcodePickDefaults", null);
@@ -10849,10 +13276,10 @@ class BrushForStateObject extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('barcodePickState')
-], BrushForStateObject.prototype, "barcodePickState", undefined);
+], BrushForStateObject.prototype, "barcodePickState", void 0);
 __decorate([
     nameForSerialization('brush')
-], BrushForStateObject.prototype, "brush", undefined);
+], BrushForStateObject.prototype, "brush", void 0);
 
 class BarcodePickStatusIconSettings extends DefaultSerializeable {
     constructor() {
@@ -10887,21 +13314,21 @@ class BarcodePickStatusIconSettings extends DefaultSerializeable {
             return null;
         }
         const barcodePickStatusIconSettings = new BarcodePickStatusIconSettings();
-        barcodePickStatusIconSettings._ratioToHighlightSize = json === null || json === undefined ? undefined : json.ratioToHighlightSize;
-        barcodePickStatusIconSettings._minSize = json === null || json === undefined ? undefined : json.minSize;
-        barcodePickStatusIconSettings._maxSize = json === null || json === undefined ? undefined : json.maxSize;
+        barcodePickStatusIconSettings._ratioToHighlightSize = json === null || json === void 0 ? void 0 : json.ratioToHighlightSize;
+        barcodePickStatusIconSettings._minSize = json === null || json === void 0 ? void 0 : json.minSize;
+        barcodePickStatusIconSettings._maxSize = json === null || json === void 0 ? void 0 : json.maxSize;
         return barcodePickStatusIconSettings;
     }
 }
 __decorate([
     nameForSerialization('ratioToHighlightSize')
-], BarcodePickStatusIconSettings.prototype, "_ratioToHighlightSize", undefined);
+], BarcodePickStatusIconSettings.prototype, "_ratioToHighlightSize", void 0);
 __decorate([
     nameForSerialization('minSize')
-], BarcodePickStatusIconSettings.prototype, "_minSize", undefined);
+], BarcodePickStatusIconSettings.prototype, "_minSize", void 0);
 __decorate([
     nameForSerialization('maxSize')
-], BarcodePickStatusIconSettings.prototype, "_maxSize", undefined);
+], BarcodePickStatusIconSettings.prototype, "_maxSize", void 0);
 __decorate([
     ignoreFromSerialization
 ], BarcodePickStatusIconSettings, "barcodePickDefaults", null);
@@ -10926,10 +13353,10 @@ class Dot extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('type')
-], Dot.prototype, "_type", undefined);
+], Dot.prototype, "_type", void 0);
 __decorate([
     nameForSerialization('brushesForState')
-], Dot.prototype, "_brushesForState", undefined);
+], Dot.prototype, "_brushesForState", void 0);
 __decorate([
     ignoreFromSerialization
 ], Dot, "barcodePickDefaults", null);
@@ -10949,10 +13376,10 @@ class IconForStateObject extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('barcodePickState')
-], IconForStateObject.prototype, "_barcodePickState", undefined);
+], IconForStateObject.prototype, "_barcodePickState", void 0);
 __decorate([
     nameForSerialization('icon')
-], IconForStateObject.prototype, "_icon", undefined);
+], IconForStateObject.prototype, "_icon", void 0);
 
 class DotWithIcons extends DefaultSerializeable {
     static get barcodePickDefaults() {
@@ -10964,7 +13391,6 @@ class DotWithIcons extends DefaultSerializeable {
         this._type = 'dotWithIcons';
         this._brushesForState = DotWithIcons.barcodePickDefaults.BarcodePickViewHighlightStyle.DotWithIcons.brushesForState;
         this._iconsForState = [];
-        this._iconStyle = DotWithIcons.barcodePickDefaults.BarcodePickViewHighlightStyle.DotWithIcons.iconStyle;
     }
     getBrushForState(state) {
         return (this._brushesForState.filter(item => item.barcodePickState === state)[0] || {}).brush;
@@ -10980,25 +13406,16 @@ class DotWithIcons extends DefaultSerializeable {
         }
         this._iconsForState.push(new IconForStateObject(state, image));
     }
-    get iconStyle() {
-        return this._iconStyle;
-    }
-    set iconStyle(style) {
-        this._iconStyle = style;
-    }
 }
 __decorate([
     nameForSerialization('type')
-], DotWithIcons.prototype, "_type", undefined);
+], DotWithIcons.prototype, "_type", void 0);
 __decorate([
     nameForSerialization('brushesForState')
-], DotWithIcons.prototype, "_brushesForState", undefined);
+], DotWithIcons.prototype, "_brushesForState", void 0);
 __decorate([
     nameForSerialization('iconsForState')
-], DotWithIcons.prototype, "_iconsForState", undefined);
-__decorate([
-    nameForSerialization('iconStyle')
-], DotWithIcons.prototype, "_iconStyle", undefined);
+], DotWithIcons.prototype, "_iconsForState", void 0);
 __decorate([
     ignoreFromSerialization
 ], DotWithIcons, "barcodePickDefaults", null);
@@ -11037,16 +13454,16 @@ class Rectangular extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('type')
-], Rectangular.prototype, "_type", undefined);
+], Rectangular.prototype, "_type", void 0);
 __decorate([
     nameForSerialization('brushesForState')
-], Rectangular.prototype, "_brushesForState", undefined);
+], Rectangular.prototype, "_brushesForState", void 0);
 __decorate([
     nameForSerialization('minimumHighlightWidth')
-], Rectangular.prototype, "_minimumHighlightWidth", undefined);
+], Rectangular.prototype, "_minimumHighlightWidth", void 0);
 __decorate([
     nameForSerialization('minimumHighlightHeight')
-], Rectangular.prototype, "_minimumHighlightHeight", undefined);
+], Rectangular.prototype, "_minimumHighlightHeight", void 0);
 __decorate([
     ignoreFromSerialization
 ], Rectangular, "barcodePickDefaults", null);
@@ -11061,7 +13478,6 @@ class RectangularWithIcons extends DefaultSerializeable {
         this._type = 'rectangularWithIcons';
         this._brushesForState = RectangularWithIcons.barcodePickDefaults.BarcodePickViewHighlightStyle.RectangularWithIcons.brushesForState;
         this._iconsForState = [];
-        this._iconStyle = RectangularWithIcons.barcodePickDefaults.BarcodePickViewHighlightStyle.RectangularWithIcons.iconStyle;
         this._minimumHighlightWidth = RectangularWithIcons.barcodePickDefaults.BarcodePickViewHighlightStyle.RectangularWithIcons.minimumHighlightWidth;
         this._minimumHighlightHeight = RectangularWithIcons.barcodePickDefaults.BarcodePickViewHighlightStyle.RectangularWithIcons.minimumHighlightHeight;
     }
@@ -11078,12 +13494,6 @@ class RectangularWithIcons extends DefaultSerializeable {
             this._iconsForState.splice(indexToUpdate, 1);
         }
         this._iconsForState.push(new IconForStateObject(state, image));
-    }
-    get iconStyle() {
-        return this._iconStyle;
-    }
-    set iconStyle(style) {
-        this._iconStyle = style;
     }
     get statusIconSettings() {
         return this._statusIconSettings;
@@ -11106,25 +13516,22 @@ class RectangularWithIcons extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('type')
-], RectangularWithIcons.prototype, "_type", undefined);
+], RectangularWithIcons.prototype, "_type", void 0);
 __decorate([
     nameForSerialization('brushesForState')
-], RectangularWithIcons.prototype, "_brushesForState", undefined);
+], RectangularWithIcons.prototype, "_brushesForState", void 0);
 __decorate([
     nameForSerialization('iconsForState')
-], RectangularWithIcons.prototype, "_iconsForState", undefined);
-__decorate([
-    nameForSerialization('iconStyle')
-], RectangularWithIcons.prototype, "_iconStyle", undefined);
+], RectangularWithIcons.prototype, "_iconsForState", void 0);
 __decorate([
     nameForSerialization('statusIconSettings')
-], RectangularWithIcons.prototype, "_statusIconSettings", undefined);
+], RectangularWithIcons.prototype, "_statusIconSettings", void 0);
 __decorate([
     nameForSerialization('minimumHighlightWidth')
-], RectangularWithIcons.prototype, "_minimumHighlightWidth", undefined);
+], RectangularWithIcons.prototype, "_minimumHighlightWidth", void 0);
 __decorate([
     nameForSerialization('minimumHighlightHeight')
-], RectangularWithIcons.prototype, "_minimumHighlightHeight", undefined);
+], RectangularWithIcons.prototype, "_minimumHighlightHeight", void 0);
 __decorate([
     ignoreFromSerialization
 ], RectangularWithIcons, "barcodePickDefaults", null);
@@ -11152,7 +13559,7 @@ class BarcodeFindFeedback extends DefaultSerializeable {
     }
     updateFeedback() {
         var _a;
-        (_a = this.controller) === null || _a === undefined ? undefined : _a.updateFeedback(JSON.stringify(this.toJSON()));
+        (_a = this.controller) === null || _a === void 0 ? void 0 : _a.updateFeedback(JSON.stringify(this.toJSON()));
     }
     static get barcodeFindDefaults() {
         return getBarcodeFindDefaults();
@@ -11163,112 +13570,13 @@ class BarcodeFindFeedback extends DefaultSerializeable {
 }
 __decorate([
     ignoreFromSerialization
-], BarcodeFindFeedback.prototype, "controller", undefined);
+], BarcodeFindFeedback.prototype, "controller", void 0);
 __decorate([
     nameForSerialization('found')
-], BarcodeFindFeedback.prototype, "_found", undefined);
+], BarcodeFindFeedback.prototype, "_found", void 0);
 __decorate([
     nameForSerialization('itemListUpdated')
-], BarcodeFindFeedback.prototype, "_itemListUpdated", undefined);
-
-var BarcodeFindListenerEvents;
-(function (BarcodeFindListenerEvents) {
-    BarcodeFindListenerEvents["inCallback"] = "BarcodeFindListener.inCallback";
-    BarcodeFindListenerEvents["onSearchStartedEvent"] = "BarcodeFindListener.onSearchStarted";
-    BarcodeFindListenerEvents["onSearchPausedEvent"] = "BarcodeFindListener.onSearchPaused";
-    BarcodeFindListenerEvents["onSearchStoppedEvent"] = "BarcodeFindListener.onSearchStopped";
-    BarcodeFindListenerEvents["onTransformBarcodeData"] = "BarcodeFindTransformer.transformBarcodeData";
-})(BarcodeFindListenerEvents || (BarcodeFindListenerEvents = {}));
-class BarcodeFindController extends BaseController {
-    constructor(barcodeFind) {
-        super('BarcodeFindProxy');
-        this._barcodeFind = barcodeFind;
-        this._proxy.isModeEnabled = () => this._barcodeFind.isEnabled;
-    }
-    static forBarcodeFind(barcodeFind) {
-        return new BarcodeFindController(barcodeFind);
-    }
-    updateMode() {
-        return this._proxy.updateFindMode(JSON.stringify(this._barcodeFind.toJSON()));
-    }
-    setItemList(items) {
-        const jsonString = items.map(item => item.toJSON());
-        return this._proxy.setItemList(JSON.stringify(jsonString));
-    }
-    start() {
-        return this._proxy.barcodeFindModeStart();
-    }
-    pause() {
-        return this._proxy.barcodeFindModePause();
-    }
-    stop() {
-        return this._proxy.barcodeFindModeStop();
-    }
-    setModeEnabledState(isEnabled) {
-        this._proxy.setModeEnabledState(isEnabled);
-    }
-    setBarcodeTransformer() {
-        return __awaiter(this, undefined, undefined, function* () {
-            yield this._proxy.setBarcodeTransformer();
-            this.subscribeBarcodeFindTransformerEvent();
-        });
-    }
-    filterFoundItemsFromEvent(eventBody) {
-        const foundItemsData = JSON.parse(eventBody).foundItems;
-        const itemsToFind = JSON.parse(this._barcodeFind.itemsToFind);
-        const foundItems = itemsToFind.filter((item) => foundItemsData.includes(item.searchOptions.barcodeData));
-        return foundItems;
-    }
-    subscribeBarcodeFindTransformerEvent() {
-        this.eventEmitter.on(BarcodeFindListenerEvents.onTransformBarcodeData, (data) => {
-            var _a;
-            const payload = EventDataParser.parse(data);
-            if (payload === null) {
-                console.error('BarcodeFindController onTransformBarcodeData payload is null');
-                return;
-            }
-            const transformed = (_a = this._barcodeFind.barcodeTransformer) === null || _a === undefined ? undefined : _a.transformBarcodeData(payload.data);
-            this._proxy.submitBarcodeFindTransformerResult(transformed);
-        });
-    }
-    subscribeListeners() {
-        this._proxy.subscribeBarcodeFindListener();
-        this.eventEmitter.on(BarcodeFindListenerEvents.onSearchStartedEvent, () => {
-            var _a;
-            const listeners = this._barcodeFind.listeners;
-            for (const listener of listeners) {
-                (_a = listener === null || listener === undefined ? undefined : listener.didStartSearch) === null || _a === undefined ? undefined : _a.call(listener);
-            }
-        });
-        this.eventEmitter.on(BarcodeFindListenerEvents.onSearchPausedEvent, (data) => {
-            var _a;
-            const foundItems = this.filterFoundItemsFromEvent(data);
-            for (const listener of this._barcodeFind.listeners) {
-                (_a = listener === null || listener === undefined ? undefined : listener.didPauseSearch) === null || _a === undefined ? undefined : _a.call(listener, foundItems);
-            }
-        });
-        this.eventEmitter.on(BarcodeFindListenerEvents.onSearchStoppedEvent, (data) => {
-            var _a;
-            const foundItems = this.filterFoundItemsFromEvent(data);
-            for (const listener of this._barcodeFind.listeners) {
-                (_a = listener === null || listener === undefined ? undefined : listener.didStopSearch) === null || _a === undefined ? undefined : _a.call(listener, foundItems);
-            }
-        });
-    }
-    unsubscribeListeners() {
-        this._proxy.unsubscribeBarcodeFindListener();
-        this.eventEmitter.off(BarcodeFindListenerEvents.onSearchPausedEvent);
-        this.eventEmitter.off(BarcodeFindListenerEvents.onSearchStartedEvent);
-        this.eventEmitter.off(BarcodeFindListenerEvents.onSearchStoppedEvent);
-        this.eventEmitter.off(BarcodeFindListenerEvents.onTransformBarcodeData);
-    }
-    dispose() {
-        this.unsubscribeListeners();
-    }
-    updateFeedback(feedbackJson) {
-        return this._proxy.updateFeedback(feedbackJson);
-    }
-}
+], BarcodeFindFeedback.prototype, "_itemListUpdated", void 0);
 
 class BarcodeFind extends DefaultSerializeable {
     constructor(dataCaptureContext, settings) {
@@ -11279,10 +13587,11 @@ class BarcodeFind extends DefaultSerializeable {
         this._isInCallback = false;
         this.itemsToFind = null;
         this._hasBarcodeTransformer = false;
+        this._hasListeners = false;
         this.listeners = [];
+        this._controller = null;
         this.barcodeTransformer = null;
         this._settings = settings;
-        this._controller = BarcodeFindController.forBarcodeFind(this);
         this._dataCaptureContext = dataCaptureContext;
         this._feedback.controller = this._controller;
         // No need to add the mode to the context
@@ -11303,16 +13612,18 @@ class BarcodeFind extends DefaultSerializeable {
         return this._enabled;
     }
     set isEnabled(value) {
+        var _a;
         this._enabled = value;
-        this._controller.setModeEnabledState(value);
+        (_a = this._controller) === null || _a === void 0 ? void 0 : _a.setModeEnabledState(value);
     }
     get feedback() {
         return this._feedback;
     }
     set feedback(value) {
+        var _a;
         this._feedback = value;
         this._feedback.controller = this._controller;
-        this._controller.updateFeedback(JSON.stringify(value.toJSON()));
+        (_a = this._controller) === null || _a === void 0 ? void 0 : _a.updateFeedback(JSON.stringify(value.toJSON()));
     }
     applySettings(settings) {
         this._settings = settings;
@@ -11324,10 +13635,12 @@ class BarcodeFind extends DefaultSerializeable {
             return;
         }
         this.listeners.push(listener);
+        this._hasListeners = this.listeners.length > 0;
     }
     checkAndSubscribeListeners() {
+        var _a;
         if (this.listeners.length === 0) {
-            this._controller.subscribeListeners();
+            (_a = this.controller) === null || _a === void 0 ? void 0 : _a.subscribeModeEvents();
         }
     }
     removeListener(listener) {
@@ -11336,62 +13649,82 @@ class BarcodeFind extends DefaultSerializeable {
         }
         this.listeners.splice(this.listeners.indexOf(listener));
         this.checkAndUnsubscribeListeners();
+        this._hasListeners = this.listeners.length > 0;
     }
     setBarcodeTransformer(barcodeTransformer) {
+        var _a, _b;
         this.barcodeTransformer = barcodeTransformer;
-        this._hasBarcodeTransformer = this.barcodeTransformer != undefined;
-        this._controller.setBarcodeTransformer();
+        this._hasBarcodeTransformer = this.barcodeTransformer != null;
+        if (this._hasBarcodeTransformer) {
+            (_a = this.controller) === null || _a === void 0 ? void 0 : _a.setBarcodeTransformer();
+        }
+        else {
+            (_b = this.controller) === null || _b === void 0 ? void 0 : _b.unsetBarcodeTransformer();
+        }
     }
     checkAndUnsubscribeListeners() {
+        var _a;
         if (this.listeners.length > 0) {
             return;
         }
-        this._controller.unsubscribeListeners();
+        (_a = this.controller) === null || _a === void 0 ? void 0 : _a.unsubscribeModeEvents();
     }
     setItemList(items) {
+        var _a, _b;
         this.itemsToFind = JSON.stringify(items.map(item => item.toJSON()));
-        return this._controller.setItemList(items);
+        return (_b = (_a = this.controller) === null || _a === void 0 ? void 0 : _a.setItemList(items)) !== null && _b !== void 0 ? _b : Promise.resolve();
     }
     start() {
-        return this._controller.start();
+        var _a, _b;
+        return (_b = (_a = this.controller) === null || _a === void 0 ? void 0 : _a.start()) !== null && _b !== void 0 ? _b : Promise.resolve();
     }
     pause() {
-        return this._controller.pause();
+        var _a, _b;
+        return (_b = (_a = this.controller) === null || _a === void 0 ? void 0 : _a.pause()) !== null && _b !== void 0 ? _b : Promise.resolve();
     }
     stop() {
-        return this._controller.stop();
+        var _a, _b;
+        return (_b = (_a = this.controller) === null || _a === void 0 ? void 0 : _a.stop()) !== null && _b !== void 0 ? _b : Promise.resolve();
     }
     update() {
-        return this._controller.updateMode();
+        var _a, _b;
+        return (_b = (_a = this.controller) === null || _a === void 0 ? void 0 : _a.updateMode()) !== null && _b !== void 0 ? _b : Promise.resolve();
     }
-    unsubscribeNativeListeners() {
-        this._controller.dispose();
+    get controller() {
+        return this._controller;
+    }
+    set controller(newController) {
+        this._controller = newController;
+        this._feedback.controller = this._controller;
     }
 }
 __decorate([
     nameForSerialization('feedback')
-], BarcodeFind.prototype, "_feedback", undefined);
+], BarcodeFind.prototype, "_feedback", void 0);
 __decorate([
     nameForSerialization('enabled')
-], BarcodeFind.prototype, "_enabled", undefined);
+], BarcodeFind.prototype, "_enabled", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeFind.prototype, "_isInCallback", undefined);
+], BarcodeFind.prototype, "_isInCallback", void 0);
 __decorate([
     nameForSerialization('settings')
-], BarcodeFind.prototype, "_settings", undefined);
+], BarcodeFind.prototype, "_settings", void 0);
 __decorate([
     nameForSerialization('hasBarcodeTransformer')
-], BarcodeFind.prototype, "_hasBarcodeTransformer", undefined);
+], BarcodeFind.prototype, "_hasBarcodeTransformer", void 0);
+__decorate([
+    nameForSerialization('hasListeners')
+], BarcodeFind.prototype, "_hasListeners", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeFind.prototype, "listeners", undefined);
+], BarcodeFind.prototype, "listeners", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeFind.prototype, "_controller", undefined);
+], BarcodeFind.prototype, "_controller", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeFind.prototype, "_dataCaptureContext", undefined);
+], BarcodeFind.prototype, "_dataCaptureContext", void 0);
 __decorate([
     ignoreFromSerialization
 ], BarcodeFind, "barcodeFindDefaults", null);
@@ -11411,10 +13744,10 @@ class BarcodeFindItem extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('searchOptions')
-], BarcodeFindItem.prototype, "_searchOptions", undefined);
+], BarcodeFindItem.prototype, "_searchOptions", void 0);
 __decorate([
     nameForSerialization('content')
-], BarcodeFindItem.prototype, "_content", undefined);
+], BarcodeFindItem.prototype, "_content", void 0);
 
 class BarcodeFindItemContent extends DefaultSerializeable {
     constructor(info, additionalInfo, image) {
@@ -11425,26 +13758,26 @@ class BarcodeFindItemContent extends DefaultSerializeable {
     }
     get info() {
         var _a;
-        return (_a = this._info) !== null && _a !== undefined ? _a : null;
+        return (_a = this._info) !== null && _a !== void 0 ? _a : null;
     }
     get additionalInfo() {
         var _a;
-        return (_a = this._additionalInfo) !== null && _a !== undefined ? _a : null;
+        return (_a = this._additionalInfo) !== null && _a !== void 0 ? _a : null;
     }
     get image() {
         var _a;
-        return (_a = this._image) !== null && _a !== undefined ? _a : null;
+        return (_a = this._image) !== null && _a !== void 0 ? _a : null;
     }
 }
 __decorate([
     nameForSerialization('info')
-], BarcodeFindItemContent.prototype, "_info", undefined);
+], BarcodeFindItemContent.prototype, "_info", void 0);
 __decorate([
     nameForSerialization('additionalInfo')
-], BarcodeFindItemContent.prototype, "_additionalInfo", undefined);
+], BarcodeFindItemContent.prototype, "_additionalInfo", void 0);
 __decorate([
     nameForSerialization('image')
-], BarcodeFindItemContent.prototype, "_image", undefined);
+], BarcodeFindItemContent.prototype, "_image", void 0);
 
 class BarcodeFindItemSearchOptions extends DefaultSerializeable {
     constructor(barcodeData) {
@@ -11466,10 +13799,21 @@ class BarcodeFindItemSearchOptions extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization("barcodeData")
-], BarcodeFindItemSearchOptions.prototype, "_barcodeData", undefined);
+], BarcodeFindItemSearchOptions.prototype, "_barcodeData", void 0);
 __decorate([
     nameForSerialization("brush")
-], BarcodeFindItemSearchOptions.prototype, "_brush", undefined);
+], BarcodeFindItemSearchOptions.prototype, "_brush", void 0);
+
+class BarcodeFindSession {
+    get trackedBarcodes() {
+        return this._trackedBarcodes;
+    }
+    static fromJSON(json) {
+        const session = new BarcodeFindSession();
+        session._trackedBarcodes = json.trackedBarcodes;
+        return session;
+    }
+}
 
 class BarcodeFindSettings extends DefaultSerializeable {
     constructor() {
@@ -11507,26 +13851,39 @@ class BarcodeFindSettings extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('symbologies')
-], BarcodeFindSettings.prototype, "_symbologies", undefined);
+], BarcodeFindSettings.prototype, "_symbologies", void 0);
 __decorate([
     nameForSerialization('properties')
-], BarcodeFindSettings.prototype, "_properties", undefined);
+], BarcodeFindSettings.prototype, "_properties", void 0);
 __decorate([
     ignoreFromSerialization
 ], BarcodeFindSettings, "barcodeDefaults", null);
 
 class BarcodeFindViewSettings extends DefaultSerializeable {
-    constructor(inListItemColor, notInListItemColor, soundEnabled, hapticEnabled, hardwareTriggerEnabled, hardwareTriggerKeyCode) {
+    static get barcodeFindViewSettingsDefaults() {
+        return getBarcodeFindDefaults().BarcodeFindViewSettings;
+    }
+    constructor(inListItemColor, notInListItemColor, soundEnabled, hapticEnabled, hardwareTriggerEnabled, hardwareTriggerKeyCode, progressBarStartColor, progressBarFinishColor) {
         super();
+        this._progressBarStartColor = BarcodeFindViewSettings.barcodeFindViewSettingsDefaults.progressBarStartColor;
+        this._progressBarFinishColor = BarcodeFindViewSettings.barcodeFindViewSettingsDefaults.progressBarFinishColor;
         this._inListItemColor = inListItemColor;
         this._notInListItemColor = notInListItemColor;
         this._soundEnabled = soundEnabled;
         this._hapticEnabled = hapticEnabled;
         this._hardwareTriggerEnabled = hardwareTriggerEnabled || false;
         this._hardwareTriggerKeyCode = hardwareTriggerKeyCode || null;
+        progressBarStartColor && (this._progressBarStartColor = progressBarStartColor);
+        progressBarFinishColor && (this._progressBarFinishColor = progressBarFinishColor);
     }
-    withHardwareTriggers(inListItemColor, notInListItemColor, soundEnabled, hapticEnabled, hardwareTriggerEnabled, hardwareTriggerKeyCode) {
+    static withHardwareTriggers(inListItemColor, notInListItemColor, soundEnabled, hapticEnabled, hardwareTriggerEnabled, hardwareTriggerKeyCode) {
         return new BarcodeFindViewSettings(inListItemColor, notInListItemColor, soundEnabled, hapticEnabled, hardwareTriggerEnabled, hardwareTriggerKeyCode);
+    }
+    static withProgressBarColor(inListItemColor, notInListItemColor, soundEnabled, hapticEnabled, progressBarStartColor, progressBarFinishColor) {
+        return new BarcodeFindViewSettings(inListItemColor, notInListItemColor, soundEnabled, hapticEnabled, undefined, undefined, progressBarStartColor, progressBarFinishColor);
+    }
+    static withProgressBarColorAndHardwareTriggers(inListItemColor, notInListItemColor, soundEnabled, hapticEnabled, hardwareTriggerEnabled, hardwareTriggerKeyCode, progressBarStartColor, progressBarFinishColor) {
+        return new BarcodeFindViewSettings(inListItemColor, notInListItemColor, soundEnabled, hapticEnabled, hardwareTriggerEnabled, hardwareTriggerKeyCode, progressBarStartColor, progressBarFinishColor);
     }
     get inListItemColor() {
         return this._inListItemColor;
@@ -11546,120 +13903,352 @@ class BarcodeFindViewSettings extends DefaultSerializeable {
     get hardwareTriggerKeyCode() {
         return this._hardwareTriggerKeyCode;
     }
+    get progressBarStartColor() {
+        return this._progressBarStartColor;
+    }
+    get progressBarFinishColor() {
+        return this._progressBarFinishColor;
+    }
 }
 __decorate([
     nameForSerialization('inListItemColor')
-], BarcodeFindViewSettings.prototype, "_inListItemColor", undefined);
+], BarcodeFindViewSettings.prototype, "_inListItemColor", void 0);
 __decorate([
     nameForSerialization('notInListItemColor')
-], BarcodeFindViewSettings.prototype, "_notInListItemColor", undefined);
+], BarcodeFindViewSettings.prototype, "_notInListItemColor", void 0);
 __decorate([
     nameForSerialization('soundEnabled')
-], BarcodeFindViewSettings.prototype, "_soundEnabled", undefined);
+], BarcodeFindViewSettings.prototype, "_soundEnabled", void 0);
 __decorate([
     nameForSerialization('hapticEnabled')
-], BarcodeFindViewSettings.prototype, "_hapticEnabled", undefined);
+], BarcodeFindViewSettings.prototype, "_hapticEnabled", void 0);
 __decorate([
     nameForSerialization('hardwareTriggerEnabled')
-], BarcodeFindViewSettings.prototype, "_hardwareTriggerEnabled", undefined);
+], BarcodeFindViewSettings.prototype, "_hardwareTriggerEnabled", void 0);
 __decorate([
     nameForSerialization('hardwareTriggerKeyCode')
-], BarcodeFindViewSettings.prototype, "_hardwareTriggerKeyCode", undefined);
+], BarcodeFindViewSettings.prototype, "_hardwareTriggerKeyCode", void 0);
+__decorate([
+    nameForSerialization('progressBarStartColor')
+], BarcodeFindViewSettings.prototype, "_progressBarStartColor", void 0);
+__decorate([
+    nameForSerialization('progressBarFinishColor')
+], BarcodeFindViewSettings.prototype, "_progressBarFinishColor", void 0);
+__decorate([
+    ignoreFromSerialization
+], BarcodeFindViewSettings, "barcodeFindViewSettingsDefaults", null);
 
 var BarcodeFindViewEvents;
 (function (BarcodeFindViewEvents) {
     BarcodeFindViewEvents["onFinishButtonTappedEventName"] = "BarcodeFindViewUiListener.onFinishButtonTapped";
 })(BarcodeFindViewEvents || (BarcodeFindViewEvents = {}));
-class BarcodeFindViewController extends BaseController {
+var BarcodeFindListenerEvents;
+(function (BarcodeFindListenerEvents) {
+    BarcodeFindListenerEvents["onSearchStartedEvent"] = "BarcodeFindListener.onSearchStarted";
+    BarcodeFindListenerEvents["onSearchPausedEvent"] = "BarcodeFindListener.onSearchPaused";
+    BarcodeFindListenerEvents["onSearchStoppedEvent"] = "BarcodeFindListener.onSearchStopped";
+    BarcodeFindListenerEvents["didUpdateSession"] = "BarcodeFindListener.didUpdateSession";
+})(BarcodeFindListenerEvents || (BarcodeFindListenerEvents = {}));
+var BarcodeFindTransformerEvents;
+(function (BarcodeFindTransformerEvents) {
+    BarcodeFindTransformerEvents["onTransformBarcodeData"] = "BarcodeFindTransformer.transformBarcodeData";
+})(BarcodeFindTransformerEvents || (BarcodeFindTransformerEvents = {}));
+class BarcodeFindViewController extends BaseNewController {
     constructor() {
         super('BarcodeFindViewProxy');
-        this.autoCreateNativeView = true;
         this.isListenerEnabled = false;
+        // Bound event handlers
+        this.boundHandleOnFinishButtonTappedEvent = null;
+        this.boundHandleDidUpdateSession = null;
+        this.boundHandleOnSearchStartedEvent = null;
+        this.boundHandleOnSearchPausedEvent = null;
+        this.boundHandleOnSearchStoppedEvent = null;
+        this.boundHandleTransformerEvent = null;
     }
-    static forBarcodeFindView(baseView, nativeView, autoCreateNativeView = true) {
+    static forBarcodeFindView(baseView) {
         const viewController = new BarcodeFindViewController();
         viewController.baseView = baseView;
-        viewController.nativeView = nativeView;
-        viewController.autoCreateNativeView = autoCreateNativeView;
-        viewController.initialize();
         return viewController;
     }
     setUiListener(listener) {
-        return __awaiter(this, undefined, undefined, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.isViewCreated)
+                return; // view not created yet
             if (listener && !this.isListenerEnabled) {
                 this.isListenerEnabled = true;
-                this.subscribeToEvents();
+                this.subscribeViewEvents();
             }
             if (listener == null) {
                 this.isListenerEnabled = false;
-                this.unsubscribeToEvents();
+                this.unsubscribeViewEvents();
             }
         });
     }
     startSearching() {
-        return this._proxy.startSearching();
+        if (!this.isViewCreated)
+            return Promise.resolve(); // view not created yet
+        return this._proxy.$barcodeFindViewStartSearching({ viewId: this.baseView.viewId });
     }
     stopSearching() {
-        return this._proxy.stopSearching();
+        if (!this.isViewCreated)
+            return Promise.resolve(); // view not created yet
+        return this._proxy.$barcodeFindViewStopSearching({ viewId: this.baseView.viewId });
     }
     pauseSearching() {
-        return this._proxy.pauseSearching();
+        if (!this.isViewCreated)
+            return Promise.resolve(); // view not created yet
+        return this._proxy.$barcodeFindViewPauseSearching({ viewId: this.baseView.viewId });
     }
     updateView() {
+        if (!this.isViewCreated)
+            return Promise.resolve(); // view not created yet
         const barcodeFindViewJson = this.baseView.toJSON();
-        return this._proxy.updateView(JSON.stringify(barcodeFindViewJson));
+        return this._proxy.$updateFindView({ viewId: this.baseView.viewId, barcodeFindViewJson: JSON.stringify(barcodeFindViewJson) });
     }
     showView() {
-        return this._proxy.showView();
+        if (!this.isViewCreated)
+            return Promise.resolve(); // view not created yet
+        return this._proxy.$showFindView({ viewId: this.baseView.viewId });
     }
     hideView() {
-        return this._proxy.hideView();
+        if (!this.isViewCreated)
+            return Promise.resolve(); // view not created yet
+        return this._proxy.$hideFindView({ viewId: this.baseView.viewId });
     }
     createNativeView() {
         return this.create();
     }
     removeNativeView() {
-        var _a, _b, _c;
-        return (_c = (_b = (_a = this._proxy).removeView) === null || _b === undefined ? undefined : _b.call(_a)) !== null && _c !== undefined ? _c : Promise.resolve();
+        this.stop();
+        this.unsetBarcodeTransformer();
+        this.unsubscribeViewEvents();
+        this.unsubscribeModeEvents();
+        return this._proxy.$removeFindView({ viewId: this.baseView.viewId });
     }
     create() {
         const barcodeFindView = this.baseView.toJSON();
         const json = JSON.stringify(barcodeFindView);
-        const id = this._proxy.findNodeHandle(this.nativeView);
-        return this._proxy.createView(id, json);
+        return this._proxy.$createFindView({ viewId: this.baseView.viewId, json }).then(() => {
+            this.initialize();
+        });
     }
     initialize() {
-        return __awaiter(this, undefined, undefined, function* () {
-            yield this.baseView.context.update();
-            if (this.autoCreateNativeView) {
-                yield this.create();
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.baseView.barcodeFindViewUiListener) {
+                this.subscribeViewEvents();
+            }
+            if (this.baseView.barcodeFind.listeners.length > 0) {
+                this.subscribeModeEvents();
+            }
+            if (this.baseView.barcodeFind.barcodeTransformer) {
+                this.setBarcodeTransformer();
             }
         });
     }
-    subscribeToEvents() {
-        this._proxy.subscribeBarcodeFindViewListener();
-        this.eventEmitter.on(BarcodeFindViewEvents.onFinishButtonTappedEventName, (data) => {
+    subscribeViewEvents() {
+        if (!this.isViewCreated)
+            return; // view not created yet
+        if (this.boundHandleOnFinishButtonTappedEvent) {
+            return;
+        }
+        this._proxy.subscribeForEvents(Object.values(BarcodeFindViewEvents));
+        this._proxy.$registerBarcodeFindViewListener({ viewId: this.baseView.viewId });
+        this.boundHandleOnFinishButtonTappedEvent = this.handleOnFinishButtonTappedEvent.bind(this);
+        this._proxy.eventEmitter.on(BarcodeFindViewEvents.onFinishButtonTappedEventName, this.boundHandleOnFinishButtonTappedEvent);
+    }
+    handleOnFinishButtonTappedEvent(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
             var _a, _b;
             if (!this.baseView.barcodeFindViewUiListener) {
                 return;
             }
-            const { foundItems: barcodeFindItems = [] } = JSON.parse(data);
-            (_b = (_a = this.baseView) === null || _a === undefined ? undefined : _a.barcodeFindViewUiListener) === null || _b === undefined ? undefined : _b.didTapFinishButton(barcodeFindItems);
+            const { foundItems: barcodeFindItems = [] } = JSON.parse(ev.data);
+            (_b = (_a = this.baseView) === null || _a === void 0 ? void 0 : _a.barcodeFindViewUiListener) === null || _b === void 0 ? void 0 : _b.didTapFinishButton(barcodeFindItems);
         });
     }
-    unsubscribeToEvents() {
-        this._proxy.unsubscribeBarcodeFindViewListener();
-        this.eventEmitter.off(BarcodeFindViewEvents.onFinishButtonTappedEventName);
+    unsubscribeViewEvents() {
+        this._proxy.$unregisterBarcodeFindViewListener({ viewId: this.baseView.viewId });
+        this._proxy.unsubscribeFromEvents(Object.values(BarcodeFindViewEvents));
+        if (this.boundHandleOnFinishButtonTappedEvent) {
+            this._proxy.eventEmitter.off(BarcodeFindViewEvents.onFinishButtonTappedEventName, this.boundHandleOnFinishButtonTappedEvent);
+        }
+        this.boundHandleOnFinishButtonTappedEvent = null;
+    }
+    // Mode
+    updateMode() {
+        if (!this.isViewCreated)
+            return Promise.resolve(); // view not created yet
+        return this._proxy.$updateFindMode({ viewId: this.baseView.viewId, barcodeFindJson: JSON.stringify(this.baseView.barcodeFind.toJSON()) });
+    }
+    setItemList(items) {
+        if (!this.isViewCreated)
+            return Promise.resolve(); // view not created yet
+        const jsonString = items.map(item => item.toJSON());
+        return this._proxy.$barcodeFindSetItemList({ viewId: this.baseView.viewId, itemsJson: JSON.stringify(jsonString) });
+    }
+    start() {
+        if (!this.isViewCreated)
+            return Promise.resolve(); // view not created yet
+        return this._proxy.$barcodeFindModeStart({ viewId: this.baseView.viewId });
+    }
+    pause() {
+        if (!this.isViewCreated)
+            return Promise.resolve(); // view not created yet
+        return this._proxy.$barcodeFindModePause({ viewId: this.baseView.viewId });
+    }
+    stop() {
+        if (!this.isViewCreated)
+            return Promise.resolve(); // view not created yet
+        return this._proxy.$barcodeFindModeStop({ viewId: this.baseView.viewId });
+    }
+    setModeEnabledState(isEnabled) {
+        if (!this.isViewCreated)
+            return; // view not created yet
+        this._proxy.$setBarcodeFindModeEnabledState({ viewId: this.baseView.viewId, enabled: isEnabled });
+    }
+    updateFeedback(feedbackJson) {
+        if (!this.isViewCreated)
+            return Promise.resolve(); // view not created yet
+        return this._proxy.$updateBarcodeFindFeedback({ viewId: this.baseView.viewId, feedbackJson });
+    }
+    setBarcodeTransformer() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.isViewCreated)
+                return; // view not created yet
+            if (this.boundHandleTransformerEvent) {
+                return;
+            }
+            this.boundHandleTransformerEvent = this.handleOnTransformBarcodeDataEvent.bind(this);
+            this._proxy.subscribeForEvents(Object.values(BarcodeFindTransformerEvents));
+            this._proxy.$setBarcodeTransformer({ viewId: this.baseView.viewId });
+            this._proxy.eventEmitter.on(BarcodeFindTransformerEvents.onTransformBarcodeData, this.boundHandleTransformerEvent);
+        });
+    }
+    handleOnTransformBarcodeDataEvent(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('BarcodeFindController onTransformBarcodeData payload is null');
+                return;
+            }
+            if (payload.viewId !== this.baseView.viewId) {
+                return;
+            }
+            const transformed = (_a = this.baseView.barcodeFind.barcodeTransformer) === null || _a === void 0 ? void 0 : _a.transformBarcodeData(payload.data);
+            this._proxy.$submitBarcodeFindTransformerResult({ viewId: this.baseView.viewId, transformedBarcode: transformed });
+        });
+    }
+    unsetBarcodeTransformer() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.boundHandleTransformerEvent)
+                return; // view not created yet
+            this._proxy.$unsetBarcodeTransformer({ viewId: this.baseView.viewId });
+            this._proxy.unsubscribeFromEvents(Object.values(BarcodeFindTransformerEvents));
+            this._proxy.eventEmitter.off(BarcodeFindTransformerEvents.onTransformBarcodeData, this.boundHandleTransformerEvent);
+            this.boundHandleTransformerEvent = null;
+        });
+    }
+    subscribeModeEvents() {
+        if (!this.isViewCreated)
+            return; // view not created yet
+        if (this.boundHandleDidUpdateSession) {
+            return;
+        }
+        this._proxy.subscribeForEvents(Object.values(BarcodeFindListenerEvents));
+        this._proxy.$registerBarcodeFindListener({ viewId: this.baseView.viewId });
+        this.boundHandleDidUpdateSession = this.handleDidUpdateSession.bind(this);
+        this._proxy.eventEmitter.on(BarcodeFindListenerEvents.didUpdateSession, this.boundHandleDidUpdateSession);
+        this.boundHandleOnSearchStartedEvent = this.handleOnSearchStartedEvent.bind(this);
+        this._proxy.eventEmitter.on(BarcodeFindListenerEvents.onSearchStartedEvent, this.boundHandleOnSearchStartedEvent);
+        this.boundHandleOnSearchPausedEvent = this.handleOnSearchPausedEvent.bind(this);
+        this._proxy.eventEmitter.on(BarcodeFindListenerEvents.onSearchPausedEvent, this.boundHandleOnSearchPausedEvent);
+        this.boundHandleOnSearchStoppedEvent = this.handleOnSearchStoppedEvent.bind(this);
+        this._proxy.eventEmitter.on(BarcodeFindListenerEvents.onSearchStoppedEvent, this.boundHandleOnSearchStoppedEvent);
+    }
+    handleDidUpdateSession(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            const payload = EventDataParser.parse(ev.data);
+            if (payload === null) {
+                console.error('BarcodeFindController didUpdateSession payload is null');
+                return;
+            }
+            const session = BarcodeFindSession.fromJSON(JSON.parse(payload.session));
+            for (const listener of this.baseView.barcodeFind.listeners) {
+                (_a = listener === null || listener === void 0 ? void 0 : listener.didUpdateSession) === null || _a === void 0 ? void 0 : _a.call(listener, session);
+            }
+        });
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    handleOnSearchStartedEvent(_ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            for (const listener of this.baseView.barcodeFind.listeners) {
+                (_a = listener === null || listener === void 0 ? void 0 : listener.didStartSearch) === null || _a === void 0 ? void 0 : _a.call(listener);
+            }
+        });
+    }
+    handleOnSearchPausedEvent(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            const foundItems = this.filterFoundItemsFromEvent(ev.data);
+            for (const listener of this.baseView.barcodeFind.listeners) {
+                (_a = listener === null || listener === void 0 ? void 0 : listener.didPauseSearch) === null || _a === void 0 ? void 0 : _a.call(listener, foundItems);
+            }
+        });
+    }
+    handleOnSearchStoppedEvent(ev) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            const foundItems = this.filterFoundItemsFromEvent(ev.data);
+            for (const listener of this.baseView.barcodeFind.listeners) {
+                (_a = listener === null || listener === void 0 ? void 0 : listener.didStopSearch) === null || _a === void 0 ? void 0 : _a.call(listener, foundItems);
+            }
+        });
+    }
+    filterFoundItemsFromEvent(eventBody) {
+        const foundItemsData = JSON.parse(eventBody).foundItems;
+        const itemsToFind = JSON.parse(this.baseView.barcodeFind.itemsToFind);
+        const foundItems = itemsToFind.filter((item) => foundItemsData.includes(item.searchOptions.barcodeData));
+        return foundItems;
+    }
+    unsubscribeModeEvents() {
+        this._proxy.$unregisterBarcodeFindListener({ viewId: this.baseView.viewId });
+        this._proxy.unsubscribeFromEvents(Object.values(BarcodeFindListenerEvents));
+        if (this.boundHandleDidUpdateSession) {
+            this._proxy.eventEmitter.off(BarcodeFindListenerEvents.didUpdateSession, this.boundHandleDidUpdateSession);
+        }
+        if (this.boundHandleOnSearchStartedEvent) {
+            this._proxy.eventEmitter.off(BarcodeFindListenerEvents.onSearchStartedEvent, this.boundHandleOnSearchStartedEvent);
+        }
+        if (this.boundHandleOnSearchPausedEvent) {
+            this._proxy.eventEmitter.off(BarcodeFindListenerEvents.onSearchPausedEvent, this.boundHandleOnSearchPausedEvent);
+        }
+        if (this.boundHandleOnSearchStoppedEvent) {
+            this._proxy.eventEmitter.off(BarcodeFindListenerEvents.onSearchStoppedEvent, this.boundHandleOnSearchStoppedEvent);
+        }
+        this.boundHandleDidUpdateSession = null;
+        this.boundHandleOnSearchStartedEvent = null;
+        this.boundHandleOnSearchPausedEvent = null;
+        this.boundHandleOnSearchStoppedEvent = null;
     }
     dispose() {
-        this.unsubscribeToEvents();
+        this.removeNativeView();
+        this._proxy.dispose();
+    }
+    get isViewCreated() {
+        return this.baseView.viewId !== -1;
     }
 }
-__decorate([
-    ignoreFromSerialization
-], BarcodeFindViewController.prototype, "autoCreateNativeView", undefined);
 
 class BaseBarcodeFindView {
+    get viewId() {
+        return this._viewId;
+    }
+    get barcodeFind() {
+        return this._barcodeFind;
+    }
     get barcodeFindViewUiListener() {
         return this._barcodeFindViewUiListener;
     }
@@ -11670,22 +14259,18 @@ class BaseBarcodeFindView {
     get context() {
         return this._dataCaptureContext;
     }
-    constructor(context, barcodeFind, barcodeFindViewSettings, cameraSettings, autoCreateNativeView = true) {
+    constructor(context, barcodeFind, barcodeFindViewSettings, cameraSettings) {
         this.isViewCreated = false;
-        this.autoCreateNativeView = true;
         this._startSearching = false;
         this._isInitialized = false;
+        this._viewId = -1; // -1 means the view is not created yet
         this._barcodeFindViewUiListener = null;
         this._dataCaptureContext = context;
         this._barcodeFind = barcodeFind;
         this._barcodeFindViewSettings = barcodeFindViewSettings;
         this._cameraSettings = cameraSettings;
-        this.isViewCreated = autoCreateNativeView;
-        this.autoCreateNativeView = autoCreateNativeView;
-    }
-    initialize(nativeView) {
-        this.controller = BarcodeFindViewController.forBarcodeFindView(this, nativeView, this.autoCreateNativeView);
-        this._isInitialized = true;
+        this.controller = BarcodeFindViewController.forBarcodeFindView(this);
+        this._barcodeFind.controller = this.controller;
     }
     static forMode(dataCaptureContext, barcodeFind) {
         return new BaseBarcodeFindView(dataCaptureContext, barcodeFind);
@@ -11720,17 +14305,17 @@ class BaseBarcodeFindView {
     static get hardwareTriggerSupported() {
         return BaseBarcodeFindView.barcodeFindViewDefaults.hardwareTriggerSupported;
     }
-    createNativeView() {
-        return __awaiter(this, undefined, undefined, function* () {
+    createNativeView(viewId) {
+        return __awaiter(this, void 0, void 0, function* () {
             if (this.isViewCreated) {
-                return Promise.resolve();
+                return;
             }
+            this._viewId = viewId;
             yield this.controller.createNativeView();
-            this.isViewCreated = true;
         });
     }
     removeNativeView() {
-        return __awaiter(this, undefined, undefined, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             yield this.controller.removeNativeView();
             this.isViewCreated = false;
         });
@@ -11862,7 +14447,6 @@ class BaseBarcodeFindView {
     }
     dispose() {
         this.controller.dispose();
-        this._barcodeFind.unsubscribeNativeListeners();
         this.isViewCreated = false;
     }
     toJSON() {
@@ -11876,7 +14460,7 @@ class BaseBarcodeFindView {
                 shouldShowFinishButton: this.shouldShowFinishButton,
                 shouldShowProgressBar: this.shouldShowProgressBar,
                 shouldShowTorchControl: this.shouldShowTorchControl,
-                torchControlPosition: (_a = this.torchControlPosition) === null || _a === undefined ? undefined : _a.toString(),
+                torchControlPosition: (_a = this.torchControlPosition) === null || _a === void 0 ? void 0 : _a.toString(),
                 textForCollapseCardsButton: this.textForCollapseCardsButton,
                 textForAllItemsFoundSuccessfullyHint: this.textForAllItemsFoundSuccessfullyHint,
                 textForItemListUpdatedHint: this.textForItemListUpdatedHint,
@@ -11887,25 +14471,27 @@ class BaseBarcodeFindView {
                 textForTapShutterToResumeSearchHint: this.textForTapShutterToResumeSearchHint,
                 startSearching: this._startSearching,
                 viewSettings: undefined,
-                CameraSettings: undefined
+                CameraSettings: undefined,
+                viewId: this._viewId,
+                hasListener: this.barcodeFindViewUiListener != null
             },
             BarcodeFind: this._barcodeFind.toJSON()
         };
         if (this._barcodeFindViewSettings != null) {
-            json.View.viewSettings = (_b = this._barcodeFindViewSettings) === null || _b === undefined ? undefined : _b.toJSON();
+            json.View.viewSettings = (_b = this._barcodeFindViewSettings) === null || _b === void 0 ? void 0 : _b.toJSON();
         }
         if (this._cameraSettings != null) {
-            json.View.cameraSettings = (_c = this._cameraSettings) === null || _c === undefined ? undefined : _c.toJSON();
+            json.View.cameraSettings = (_c = this._cameraSettings) === null || _c === void 0 ? void 0 : _c.toJSON();
         }
         return json;
     }
 }
 __decorate([
     ignoreFromSerialization
-], BaseBarcodeFindView.prototype, "isViewCreated", undefined);
+], BaseBarcodeFindView.prototype, "isViewCreated", void 0);
 __decorate([
     ignoreFromSerialization
-], BaseBarcodeFindView.prototype, "autoCreateNativeView", undefined);
+], BaseBarcodeFindView.prototype, "_viewId", void 0);
 
 class BarcodeGeneratorCreationOptions {
     constructor(backgroundColor = null, foregroundColor = null, errorCorrectionLevel = null, versionNumber = null, minimumErrorCorrectionPercent = null, layers = null) {
@@ -11997,7 +14583,7 @@ class BarcodeGeneratorController {
         return controller;
     }
     initialize() {
-        return __awaiter(this, undefined, undefined, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             // We call update because it returns a promise, this guarantees, that by the time
             // we need the deserialized context, it will be set in the native layer.
             yield this.generator.dataCaptureContext.update();
@@ -12008,7 +14594,7 @@ class BarcodeGeneratorController {
         return this._proxy.create(JSON.stringify(this.generator.toJSON()));
     }
     generateFromBase64EncodedData(data, imageWidth) {
-        return __awaiter(this, undefined, undefined, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             const result = yield this._proxy.generateFromBase64EncodedData(this.generator.id, data, imageWidth);
             if (result == null) {
                 return '';
@@ -12017,7 +14603,7 @@ class BarcodeGeneratorController {
         });
     }
     generate(text, imageWidth) {
-        return __awaiter(this, undefined, undefined, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             const result = yield this._proxy.generate(this.generator.id, text, imageWidth);
             if (result == null) {
                 return '';
@@ -12061,7 +14647,7 @@ class BarcodeGenerator extends DefaultSerializeable {
         this.versionNumber = versionNumber;
     }
     initialize() {
-        return __awaiter(this, undefined, undefined, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             this.controller = BarcodeGeneratorController.forBarcodeGenerator(this);
             this.initializationPromise = this.controller.initialize();
             return this.initializationPromise;
@@ -12073,13 +14659,13 @@ class BarcodeGenerator extends DefaultSerializeable {
         return generator;
     }
     generate(text, imageWidth) {
-        return __awaiter(this, undefined, undefined, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             yield this.initializationPromise;
             return this.controller.generate(text, imageWidth);
         });
     }
     generateFromBase64EncodedData(data, imageWidth) {
-        return __awaiter(this, undefined, undefined, function* () {
+        return __awaiter(this, void 0, void 0, function* () {
             yield this.initializationPromise;
             return this.controller.generateFromBase64EncodedData(data, imageWidth);
         });
@@ -12114,13 +14700,13 @@ class BarcodeGenerator extends DefaultSerializeable {
 }
 __decorate([
     nameForSerialization('id')
-], BarcodeGenerator.prototype, "_id", undefined);
+], BarcodeGenerator.prototype, "_id", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeGenerator.prototype, "dataCaptureContext", undefined);
+], BarcodeGenerator.prototype, "dataCaptureContext", void 0);
 __decorate([
     ignoreFromSerialization
-], BarcodeGenerator.prototype, "controller", undefined);
+], BarcodeGenerator.prototype, "controller", void 0);
 
 exports.QrCodeErrorCorrectionLevel = void 0;
 (function (QrCodeErrorCorrectionLevel) {
@@ -12239,8 +14825,9 @@ class DataCaptureView {
         this.baseDataCaptureView = new BaseDataCaptureView(false);
     }
     connectToElement(element) {
+        const viewId = (Date.now() / 1000) | 0;
         // add view to native hierarchy
-        this.baseDataCaptureView.createNativeView().then(() => {
+        this.baseDataCaptureView.createNativeView(viewId).then(() => {
             this.htmlElement = element;
             this.htmlElementState = new HTMLElementState();
             // Initial update
@@ -12257,7 +14844,8 @@ class DataCaptureView {
     }
     setFrame(frame_1) {
         return __awaiter$1(this, arguments, void 0, function* (frame, isUnderContent = false) {
-            yield this.baseDataCaptureView.createNativeView();
+            const viewId = (Date.now() / 1000) | 0;
+            yield this.baseDataCaptureView.createNativeView(viewId);
             return this.baseDataCaptureView.setFrame(frame, isUnderContent);
         });
     }
@@ -12434,9 +15022,12 @@ exports.DataCaptureView = DataCaptureView;
 exports.DataMatrixBarcodeGeneratorBuilder = DataMatrixBarcodeGeneratorBuilder;
 exports.Ean13BarcodeGeneratorBuilder = Ean13BarcodeGeneratorBuilder;
 exports.Feedback = Feedback;
+exports.FrameDataSettings = FrameDataSettings;
+exports.FrameDataSettingsBuilder = FrameDataSettingsBuilder;
 exports.ImageBuffer = ImageBuffer;
 exports.ImageFrameSource = ImageFrameSource;
 exports.InterleavedTwoOfFiveBarcodeGeneratorBuilder = InterleavedTwoOfFiveBarcodeGeneratorBuilder;
+exports.LaserlineViewfinder = LaserlineViewfinder;
 exports.MarginsWithUnit = MarginsWithUnit;
 exports.NoViewfinder = NoViewfinder;
 exports.NoneLocationSelection = NoneLocationSelection;

@@ -102,9 +102,11 @@ class DataCaptureViewHandler {
     }
 
     fun removeDataCaptureView(dataCaptureView: DataCaptureView) {
-        dataCaptureViewReference = null
+        if (dataCaptureView == dataCaptureViewReference?.get()) {
+            dataCaptureViewReference = null
+            disposeCurrentBackgroundView()
+        }
         removeView(dataCaptureView)
-        disposeCurrentBackgroundView()
     }
 
     private fun removeView(view: View) {
