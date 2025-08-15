@@ -12,7 +12,7 @@ import org.json.JSONObject
 
 class CordovaEventEmitter : Emitter {
     private val callbacks = mutableMapOf<String, CallbackContext>()
-    private val specificCallbacks = mutableMapOf<Int, MutableMap<String, CallbackContext>>()
+    private val viewSpecificCallbacks = mutableMapOf<Int, MutableMap<String, CallbackContext>>()
 
     override fun emit(eventName: String, payload: MutableMap<String, Any?>) {
         val callback = getCallback(eventName, payload) ?: return
@@ -31,21 +31,10 @@ class CordovaEventEmitter : Emitter {
         eventName: String,
         callbackContext: CallbackContext
     ) {
-        if (specificCallbacks[viewId] == null) {
-            specificCallbacks[viewId] = mutableMapOf()
+        if (viewSpecificCallbacks[viewId] == null) {
+            viewSpecificCallbacks[viewId] = mutableMapOf()
         }
-        specificCallbacks[viewId]?.put(eventName, callbackContext)
-    }
-
-    fun registerModeSpecificCallback(
-        mdeId: Int,
-        eventName: String,
-        callbackContext: CallbackContext
-    ) {
-        if (specificCallbacks[mdeId] == null) {
-            specificCallbacks[mdeId] = mutableMapOf()
-        }
-        specificCallbacks[mdeId]?.put(eventName, callbackContext)
+        viewSpecificCallbacks[viewId]?.put(eventName, callbackContext)
     }
 
     fun unregisterCallback(eventName: String) {
@@ -53,32 +42,26 @@ class CordovaEventEmitter : Emitter {
     }
 
     fun unregisterViewSpecificCallback(viewId: Int, eventName: String) {
-        specificCallbacks[viewId]?.remove(eventName)
-    }
-
-    fun unregisterModeSpecificCallback(modeId: Int, eventName: String) {
-        specificCallbacks[modeId]?.remove(eventName)
+        viewSpecificCallbacks[viewId]?.remove(eventName)
     }
 
     fun removeAllCallbacks() {
         callbacks.clear()
-        specificCallbacks.clear()
+        viewSpecificCallbacks.clear()
     }
 
     override fun hasListenersForEvent(eventName: String): Boolean =
         callbacks.containsKey(eventName)
 
     override fun hasViewSpecificListenersForEvent(viewId: Int, eventName: String): Boolean =
-        specificCallbacks[viewId]?.containsKey(eventName) == true
+        viewSpecificCallbacks[viewId]?.containsKey(eventName) == true
 
     private fun getCallback(
         eventName: String,
         payload: MutableMap<String, Any?>
     ): CallbackContext? {
         return if (payload.containsKey("viewId")) {
-            specificCallbacks[payload["viewId"] as Int]?.get(eventName)
-        } else if (payload.containsKey("modeId")) {
-            specificCallbacks[payload["modeId"] as Int]?.get(eventName)
+            viewSpecificCallbacks[payload["viewId"] as Int]?.get(eventName)
         } else {
             callbacks[eventName]
         }
