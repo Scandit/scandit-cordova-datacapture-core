@@ -80,6 +80,10 @@ class ScanditCaptureCore :
         exposedFunctionsToJs =
             this.javaClass.methods.filter { it.getAnnotation(PluginMethod::class.java) != null }
                 .associateBy { it.name }
+
+        // Dispatch initial lifecycle events since the activity may already be resumed
+        // when the plugin initializes on first run
+        lifecycleDispatcher.dispatchOnResume()
     }
 
     override fun onStop() {
@@ -403,7 +407,9 @@ class ScanditCaptureCore :
                 coreModule.dataCaptureViewDisposed(existingView)
                 captureViewHandler.removeDataCaptureView(existingView)
             }
-            captureViewHandler.attachDataCaptureView(view, cordova.activity)
+            mainThread.runOnMainThread {
+                captureViewHandler.attachDataCaptureView(view, cordova.activity)
+            }
         }
         callbackContext.success()
     }
