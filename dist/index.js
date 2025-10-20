@@ -780,13 +780,6 @@ class FrameDataSettingsBuilder {
     }
 }
 
-exports.CameraPosition = void 0;
-(function (CameraPosition) {
-    CameraPosition["WorldFacing"] = "worldFacing";
-    CameraPosition["UserFacing"] = "userFacing";
-    CameraPosition["Unspecified"] = "unspecified";
-})(exports.CameraPosition || (exports.CameraPosition = {}));
-
 var FrameSourceListenerEvents;
 (function (FrameSourceListenerEvents) {
     FrameSourceListenerEvents["didChangeState"] = "FrameSourceListener.onStateChanged";
@@ -1534,19 +1527,30 @@ class HTMLElementState {
     }
 }
 
-class ImageFrameSourceController {
-    static forImage(imageFrameSource) {
-        const controller = new ImageFrameSourceController();
-        controller.imageFrameSource = imageFrameSource;
-        return controller;
+class BaseNewController {
+    get _proxy() {
+        return this._cachedProxy;
     }
-    constructor() {
-        this.eventEmitter = FactoryMaker.getInstance('EventEmitter');
-        this._proxy = FactoryMaker.getInstance('ImageFrameSourceProxy');
+    constructor(proxyName) {
+        this._cachedProxy = FactoryMaker.createInstance(proxyName);
+    }
+}
+
+class ImageFrameSourceController extends BaseNewController {
+    constructor(imageFrameSource) {
+        super('ImageFrameSourceProxy');
+        this.handleDidChangeStateEventWrapper = (ev) => {
+            return this.handleDidChangeStateEvent(ev);
+        };
+        this.imageFrameSource = imageFrameSource;
+        this.subscribeListener();
+    }
+    get privateImageFrameSource() {
+        return this.imageFrameSource;
     }
     getCurrentState() {
         return __awaiter$2(this, void 0, void 0, function* () {
-            const result = yield this._proxy.getCurrentCameraState(this.imageFrameSource.position);
+            const result = yield this._proxy.$getCurrentCameraState({ position: this.privateImageFrameSource.position });
             if (result == null) {
                 return exports.FrameSourceState.Off;
             }
@@ -1554,29 +1558,38 @@ class ImageFrameSourceController {
         });
     }
     switchCameraToDesiredState(desiredStateJson) {
-        return this._proxy.switchCameraToDesiredState(desiredStateJson);
+        return this._proxy.$switchCameraToDesiredState({ desiredStateJson });
     }
     subscribeListener() {
-        var _a, _b;
-        this._proxy.registerListenerForEvents();
-        (_b = (_a = this._proxy).subscribeDidChangeState) === null || _b === void 0 ? void 0 : _b.call(_a);
-        this.eventEmitter.on(FrameSourceListenerEvents.didChangeState, (data) => {
-            const event = EventDataParser.parse(data);
-            if (event === null) {
-                console.error('ImageFrameSourceController didChangeState payload is null');
-                return;
-            }
-            const newState = event.state;
-            this.imageFrameSource.listeners.forEach(listener => {
-                if (listener.didChangeState) {
-                    listener.didChangeState(this.imageFrameSource, newState);
-                }
-            });
+        return __awaiter$2(this, void 0, void 0, function* () {
+            yield this._proxy.$registerListenerForCameraEvents();
+            this._proxy.subscribeForEvents([FrameSourceListenerEvents.didChangeState]);
+            this._proxy.eventEmitter.on(FrameSourceListenerEvents.didChangeState, this.handleDidChangeStateEventWrapper);
         });
     }
     unsubscribeListener() {
-        this._proxy.unregisterListenerForEvents();
-        this.eventEmitter.removeAllListeners(FrameSourceListenerEvents.didChangeState);
+        return __awaiter$2(this, void 0, void 0, function* () {
+            yield this._proxy.$unregisterListenerForCameraEvents();
+            this._proxy.unsubscribeFromEvents([FrameSourceListenerEvents.didChangeState]);
+            this._proxy.eventEmitter.off(FrameSourceListenerEvents.didChangeState, this.handleDidChangeStateEventWrapper);
+        });
+    }
+    dispose() {
+        this.unsubscribeListener();
+        this._proxy.dispose();
+    }
+    handleDidChangeStateEvent(ev) {
+        const event = EventDataParser.parse(ev.data);
+        if (event === null) {
+            console.error('ImageFrameSourceController didChangeState payload is null');
+            return;
+        }
+        const newState = event.state;
+        this.privateImageFrameSource.listeners.forEach(listener => {
+            if (listener.didChangeState) {
+                listener.didChangeState(this.imageFrameSource, newState);
+            }
+        });
     }
 }
 
@@ -1612,7 +1625,7 @@ class ImageFrameSource extends DefaultSerializeable {
         this._desiredState = exports.FrameSourceState.Off;
         this.listeners = [];
         this._context = null;
-        this.controller = ImageFrameSourceController.forImage(this);
+        this.controller = new ImageFrameSourceController(this);
     }
     didChange() {
         if (this.context) {
@@ -1691,14 +1704,12 @@ class PrivateFrameData {
     }
 }
 
-class BaseNewController {
-    get _proxy() {
-        return this._cachedProxy;
-    }
-    constructor(proxyName) {
-        this._cachedProxy = FactoryMaker.createInstance(proxyName);
-    }
-}
+exports.CameraPosition = void 0;
+(function (CameraPosition) {
+    CameraPosition["WorldFacing"] = "worldFacing";
+    CameraPosition["UserFacing"] = "userFacing";
+    CameraPosition["Unspecified"] = "unspecified";
+})(exports.CameraPosition || (exports.CameraPosition = {}));
 
 class CameraController extends BaseNewController {
     static get _proxy() {
@@ -1757,14 +1768,18 @@ class CameraController extends BaseNewController {
         return this._proxy.$switchCameraToDesiredState({ desiredStateJson: desiredState.toString() });
     }
     subscribeListener() {
-        this._proxy.$registerListenerForCameraEvents();
-        this._proxy.subscribeForEvents([FrameSourceListenerEvents.didChangeState]);
-        this._proxy.eventEmitter.on(FrameSourceListenerEvents.didChangeState, this.handleDidChangeStateEvent.bind(this));
+        return __awaiter$2(this, void 0, void 0, function* () {
+            yield this._proxy.$registerListenerForCameraEvents();
+            this._proxy.subscribeForEvents([FrameSourceListenerEvents.didChangeState]);
+            this._proxy.eventEmitter.on(FrameSourceListenerEvents.didChangeState, this.handleDidChangeStateEvent.bind(this));
+        });
     }
     unsubscribeListener() {
-        this._proxy.$unregisterListenerForCameraEvents();
-        this._proxy.unsubscribeFromEvents([FrameSourceListenerEvents.didChangeState]);
-        this._proxy.eventEmitter.off(FrameSourceListenerEvents.didChangeState, this.handleDidChangeStateEvent.bind(this));
+        return __awaiter$2(this, void 0, void 0, function* () {
+            yield this._proxy.$unregisterListenerForCameraEvents();
+            this._proxy.unsubscribeFromEvents([FrameSourceListenerEvents.didChangeState]);
+            this._proxy.eventEmitter.off(FrameSourceListenerEvents.didChangeState, this.handleDidChangeStateEvent.bind(this));
+        });
     }
     dispose() {
         this.unsubscribeListener();
@@ -4068,52 +4083,18 @@ class NativeDataCaptureViewProxy extends BaseNativeProxy {
     }
 }
 
-class NativeImageFrameSourceProxy extends BaseNativeProxy {
-    static get cordovaExec() {
-        return Cordova.exec;
-    }
-    getCurrentCameraState(_position) {
-        return new Promise((resolve, reject) => {
-            NativeImageFrameSourceProxy.cordovaExec(resolve, reject, CordovaFunction.GetCurrentCameraState, null);
-        });
-    }
-    switchCameraToDesiredState(desiredStateJson) {
-        return new Promise((resolve, reject) => {
-            NativeImageFrameSourceProxy.cordovaExec(resolve, reject, CordovaFunction.SwitchCameraToDesiredState, [desiredStateJson]);
-        });
-    }
-    registerListenerForEvents() {
-        NativeImageFrameSourceProxy.cordovaExec(this.notifyListeners.bind(this), null, CordovaFunction.SubscribeFrameSourceListener, null);
-    }
-    unregisterListenerForEvents() {
-        return new Promise((resolve, reject) => {
-            NativeImageFrameSourceProxy.cordovaExec(resolve, reject, CordovaFunction.UnsubscribeFrameSourceListener, null);
-        });
-    }
-    notifyListeners(event) {
-        if (!event) {
-            // The event could be undefined/null in case the plugin result did not pass a "message",
-            // which could happen e.g. in case of "ok" results, which could signal e.g. successful
-            // listener subscriptions.
-            return;
-        }
-        switch (event.name) {
-            case FrameSourceListenerEvents.didChangeState:
-                this.eventEmitter.emit(FrameSourceListenerEvents.didChangeState, event.data);
-                break;
-        }
-    }
-}
-
 function initCoreProxy() {
     FactoryMaker.bindInstance('FeedbackProxy', new NativeFeedbackProxy());
-    FactoryMaker.bindInstance('ImageFrameSourceProxy', new NativeImageFrameSourceProxy());
     FactoryMaker.bindInstance('DataCaptureViewProxy', new NativeDataCaptureViewProxy());
     FactoryMaker.bindLazyInstance('DataCaptureContextProxy', () => {
         const caller = createCordovaNativeCaller(Cordova.exec, Cordova.pluginName, ['subscribeContextListener']);
         return createNativeProxy(caller);
     });
     FactoryMaker.bindLazyInstance('CameraProxy', () => {
+        const caller = createCordovaNativeCaller(Cordova.exec, Cordova.pluginName, ['registerListenerForCameraEvents']);
+        return createNativeProxy(caller);
+    });
+    FactoryMaker.bindLazyInstance('ImageFrameSourceProxy', () => {
         const caller = createCordovaNativeCaller(Cordova.exec, Cordova.pluginName, ['registerListenerForCameraEvents']);
         return createNativeProxy(caller);
     });
@@ -6975,7 +6956,7 @@ class BarcodeCaptureListenerController extends BaseNewController {
         });
     }
     reset() {
-        return this._proxy.$resetBarcodeCaptureSession({ modeId: this.modeId });
+        return this._proxy.$resetBarcodeCaptureSession();
     }
     setModeEnabledState(enabled) {
         this._proxy.$setBarcodeCaptureModeEnabledState({ modeId: this.modeId, enabled });
@@ -11760,10 +11741,12 @@ class SparkScanViewController extends BaseNewController {
         return this._proxy.$stopSparkScanViewScanning({ viewId: this.viewInstanceId });
     }
     pauseScanning() {
-        if (!this.isViewCreated) {
-            return Promise.resolve(); // No updates if view not created yet
-        }
-        return this._proxy.$pauseSparkScanViewScanning({ viewId: this.viewInstanceId });
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.isViewCreated) {
+                return Promise.resolve(); // No updates if view not created yet
+            }
+            return this._proxy.$pauseSparkScanViewScanning({ viewId: this.viewInstanceId });
+        });
     }
     startScanning() {
         if (!this.isViewCreated) {
@@ -11776,6 +11759,12 @@ class SparkScanViewController extends BaseNewController {
             return Promise.resolve(); // No updates if view not created yet
         }
         return this._proxy.$prepareSparkScanViewScanning({ viewId: this.viewInstanceId });
+    }
+    onHostPause() {
+        if (!this.isViewCreated) {
+            return Promise.resolve(); // No updates if view not created yet
+        }
+        return this._proxy.$onHostPauseSparkScanView({ viewId: this.viewInstanceId });
     }
     showToast(text) {
         if (!this.isViewCreated) {
@@ -11931,6 +11920,9 @@ class BaseSparkScanView {
             sparkScan: props.sparkScan,
             settings: props.sparkScanViewSettings,
         });
+        if (props.shouldHandleAndroidLifecycleAutomatically !== undefined && props.shouldHandleAndroidLifecycleAutomatically !== null) {
+            view.shouldHandleAndroidLifecycleAutomatically = props.shouldHandleAndroidLifecycleAutomatically;
+        }
         if (props.uiListener) {
             view.uiListener = props.uiListener;
         }
@@ -12019,6 +12011,7 @@ class BaseSparkScanView {
         this._triggerButtonImage = BaseSparkScanView.sparkScanDefaults.SparkScanView.triggerButtonImage;
         this._torchControlVisible = BaseSparkScanView.sparkScanDefaults.SparkScanView.torchControlVisible;
         this._previewCloseControlVisible = BaseSparkScanView.sparkScanDefaults.SparkScanView.previewSizeControlVisible;
+        this.shouldHandleAndroidLifecycleAutomatically = true;
         this._sparkScan = sparkScan;
         this.context = context;
         this._viewSettings = settings !== null && settings !== void 0 ? settings : new SparkScanViewSettings();
@@ -12248,35 +12241,58 @@ class BaseSparkScanView {
         this.update();
     }
     showToast(text) {
-        this._controller.showToast(text);
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this._controller.showToast(text);
+        });
     }
     prepareScanning() {
-        this._controller.prepareScanning();
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this._controller.prepareScanning();
+        });
     }
     startScanning() {
-        this._controller.startScanning();
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this._controller.startScanning();
+        });
     }
     pauseScanning() {
-        this._controller.pauseScanning();
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this._controller.pauseScanning();
+        });
     }
     stopScanning() {
-        this._controller.stopScanning();
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this._controller.stopScanning();
+        });
+    }
+    onHostPause() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this._controller.onHostPause();
+        });
     }
     update() {
-        return this._controller.updateView();
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this._controller.updateView();
+        });
     }
     dispose() {
         this._controller.dispose();
     }
     show() {
-        return this._show();
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this._show();
+        });
     }
     hide() {
-        return this._hide();
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this._hide();
+        });
     }
     createNativeView(viewId) {
-        this._viewId = viewId;
-        return this._controller.createView();
+        return __awaiter(this, void 0, void 0, function* () {
+            this._viewId = viewId;
+            yield this._controller.createView();
+        });
     }
     get feedbackDelegate() {
         return this._feedbackDelegate;
@@ -12291,6 +12307,10 @@ class BaseSparkScanView {
         }
     }
     updateWithProps(prevProps, props) {
+        if (props.shouldHandleAndroidLifecycleAutomatically !== prevProps.shouldHandleAndroidLifecycleAutomatically &&
+            props.shouldHandleAndroidLifecycleAutomatically !== undefined) {
+            this.shouldHandleAndroidLifecycleAutomatically = props.shouldHandleAndroidLifecycleAutomatically;
+        }
         // Update UI Listener
         if (props.uiListener !== prevProps.uiListener) {
             this.uiListener = props.uiListener || null;
@@ -12415,6 +12435,7 @@ class BaseSparkScanView {
             previewCloseControlVisible: this.previewCloseControlVisible,
             hasUiListener: this.uiListener !== null,
             viewId: this.viewId,
+            shouldHandleAndroidLifecycleAutomatically: this.shouldHandleAndroidLifecycleAutomatically,
         };
         if (this._viewSettings != null) {
             json.viewSettings = (_a = this._viewSettings) === null || _a === void 0 ? void 0 : _a.toJSON();

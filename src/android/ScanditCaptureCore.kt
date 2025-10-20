@@ -160,9 +160,7 @@ class ScanditCaptureCore :
     @PluginMethod
     fun updateContextFromJSON(args: JSONArray, callbackContext: CallbackContext) {
         val contextJson = args.getJSONObject(0).getString("contextJson")
-        mainThread.runOnMainThread {
-            coreModule.updateContextFromJson(contextJson, CordovaResult(callbackContext))
-        }
+        coreModule.updateContextFromJson(contextJson, CordovaResult(callbackContext))
     }
 
     @PluginMethod
