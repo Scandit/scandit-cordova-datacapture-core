@@ -483,20 +483,9 @@ class ScanditCaptureCore :
                 // Switch camera state once the permission has been granted
                 coreModule.switchToDesiredCameraState(latestDesiredFrameSource)
             } else {
-                notifyCameraPermissionDenied()
+                coreModule.notifyCameraPermissionDenied()
             }
         }
-    }
-
-    private fun notifyCameraPermissionDenied() {
-        eventEmitter.emit(
-            FrameworksDataCaptureContextListener.DID_CHANGE_STATUS_EVENT_NAME,
-            mutableMapOf(
-                "code" to 1032,
-                "isValid" to true,
-                "message" to "Camera Authorization Required"
-            )
-        )
     }
 
     private fun onJsonParseError(error: Throwable, callbackContext: CallbackContext) {
