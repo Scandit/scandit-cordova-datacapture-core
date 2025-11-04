@@ -1,8 +1,5 @@
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="scandit-cordova-datacapture-core" version="6.28.7">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="scandit-cordova-datacapture-core" version="8.0.0">
     <name>ScanditCaptureCore</name>
-    <js-module name="Core" src="dist/core.js">
-        <merges target="Scandit" />
-    </js-module>
     <js-module name="Scandit" src="dist/index.js">
         <runs />
         <merges target="Scandit" />
@@ -26,7 +23,6 @@
         <source-file src="src/ios/CordovaEventEmitter.swift" />
         <source-file src="src/ios/CordovaResult.swift" />
         <source-file src="src/ios/NativeViewConstraints.swift" />
-        <header-file src="src/ios/ScanditCaptureCore-Bridging-Header.h" type="BridgingHeader" />
         <source-file src="src/ios/ScanditCaptureCore.swift" />
         <source-file src="src/ios/ScanditCaptureCoreDefaults.swift" />
         <source-file src="src/ios/Command JSONs/CommandJSONArgument.swift" />
@@ -34,21 +30,19 @@
         <source-file src="src/ios/Command JSONs/PointJSON.swift" />
         <source-file src="src/ios/Extensions/WKWebView+Extensions.swift" />
         <source-file src="src/ios/Extensions/CDVPluginResult+Extensions.swift" />
-        <source-file src="src/ios/SDCVolumeButtonObserver.h" />
         <podspec>
             <pods use-frameworks="true">
-                <pod name="scandit-datacapture-frameworks-core" spec="= 6.28.7" />
+                <pod name="scandit-datacapture-frameworks-core" spec="= 8.0.0" />
             </pods>
         </podspec>
     </platform>
-    <platform name="android" kotlin="1.7.21">
+    <platform name="android" kotlin="1.9.25">
         <config-file parent="/*" target="config.xml">
             <feature name="ScanditCaptureCore">
                 <param name="android-package" value="com.scandit.datacapture.cordova.core.ScanditCaptureCore" />
             </feature>
             <preference name="AndroidXEnabled" value="true" />
             <preference name="GradlePluginKotlinEnabled" value="true" />
-            <preference name="GradlePluginKotlinVersion" value="1.7.21" />
         </config-file>
         <config-file parent="/manifest" target="AndroidManifest.xml">
             <uses-permission android:name="android.permission.CAMERA" />
