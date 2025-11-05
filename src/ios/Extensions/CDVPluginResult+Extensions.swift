@@ -67,6 +67,7 @@ struct ListenerEvent {
 struct CommandError {
     enum Code: Int, CaseIterable {
         case invalidJSON = 10001
+        case noViewIdParam = 10002
 
         case couldNotDeserializeContext = 10011
 
@@ -98,10 +99,13 @@ struct CommandError {
 
         case noFeedbackJsonPassed = 10079
         case wrongOrNoArgumentPassed = 10080
+        
     }
 
     public static let invalidJSON = CommandError(code: .invalidJSON,
                                                  message: "Invalid or no JSON passed for command")
+    public static let noViewIdParam = CommandError(code: .noViewIdParam,
+                                                 message: "viewId param is missing in the call.")
 
     public static func couldNotDeserializeContext(reason additionalInformation: String) -> CommandError {
         return CommandError(code: .couldNotDeserializeContext,
