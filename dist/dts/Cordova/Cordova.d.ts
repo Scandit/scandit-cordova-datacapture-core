@@ -1,5 +1,10 @@
 export declare enum CordovaFunction {
     GetDefaults = "getDefaults",
+    ContextFromJSON = "contextFromJSON",
+    DisposeContext = "disposeContext",
+    UpdateContextFromJSON = "updateContextFromJSON",
+    SubscribeContextListener = "subscribeContextListener",
+    UnsubscribeContextListener = "unsubscribeContextListener",
     SubscribeFrameSourceListener = "subscribeFrameSourceListener",
     UnsubscribeFrameSourceListener = "unsubscribeFrameSourceListener",
     SetViewPositionAndSize = "setViewPositionAndSize",
@@ -16,9 +21,13 @@ export declare enum CordovaFunction {
     EmitFeedback = "emitFeedback",
     SubscribeVolumeButtonObserver = "subscribeVolumeButtonObserver",
     UnsubscribeVolumeButtonObserver = "unsubscribeVolumeButtonObserver",
+    AddModeToContext = "addModeToContext",
+    RemoveModeFromContext = "removeModeFromContext",
+    RemoveAllModesFromContext = "removeAllModesFromContext",
     CreateDataCaptureView = "createDataCaptureView",
     UpdateDataCaptureView = "updateDataCaptureView",
-    RemoveDataCaptureView = "removeDataCaptureView"
+    RemoveDataCaptureView = "removeDataCaptureView",
+    GetOpenSourceSoftwareLicenseInfo = "getOpenSourceSoftwareLicenseInfo"
 }
 export declare const Cordova: {
     pluginName: string;

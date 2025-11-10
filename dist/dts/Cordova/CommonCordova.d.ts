@@ -21,8 +21,6 @@ export declare class CordovaNativeCaller implements NativeCaller {
     private eventRegisteredCheckList;
     private get areEventsRegistered();
     constructor(cordovaExec: any, pluginName: string, eventRegisterFnName: string[]);
-    get framework(): string;
-    get frameworkVersion(): string;
     callFn(fnName: string, args: object | undefined | null): Promise<any>;
     eventHook(args: any): any;
     registerEvent(evName: string, handler: (args: any) => Promise<void>): Promise<any>;

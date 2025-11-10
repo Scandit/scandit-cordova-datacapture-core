@@ -34,26 +34,3 @@ public struct CordovaResult: FrameworksResult {
         commandDelegate.send(.failure(with: error), callbackId: callbackId)
     }
 }
-
-
-public struct CordovaResultKeepCallback: FrameworksResult {
-    private let commandDelegate: CDVCommandDelegate
-    private let callbackId: String
-
-    public init(_ commandDelegate: CDVCommandDelegate, _ callbackId: String) {
-        self.commandDelegate = commandDelegate
-        self.callbackId = callbackId
-    }
-
-    public func success(result: Any?) {
-        commandDelegate.send(.keepCallback, callbackId: callbackId)
-    }
-    
-    public func reject(code: String, message: String?, details: Any?) {
-        commandDelegate.send(.failure(with: code), callbackId: callbackId)
-    }
-    
-    public func reject(error: Error) {
-        commandDelegate.send(.failure(with: error), callbackId: callbackId)
-    }
-}

@@ -3,8 +3,8 @@ export { Direction, Color, MarginsWithUnit, MeasureUnit, NumberWithUnit, Orienta
 export { Quadrilateral, Rect, RectWithUnit, Size, SizeWithAspect, SizeWithUnit, SizeWithUnitAndAspect, SizingMode, Anchor, ScanIntention } from 'scandit-datacapture-frameworks-core';
 export { LogoStyle, TorchSwitchControl, ZoomSwitchControl, NoneLocationSelection, RadiusLocationSelection, RectangularLocationSelection } from 'scandit-datacapture-frameworks-core';
 export { LocationSelection, AimerViewfinder, RectangularViewfinder, RectangularViewfinderAnimation } from 'scandit-datacapture-frameworks-core';
-export { RectangularViewfinderLineStyle, RectangularViewfinderStyle, Viewfinder, Brush, NoViewfinder, Camera, CameraSettings, CameraPosition, LaserlineViewfinder } from 'scandit-datacapture-frameworks-core';
-export { FocusGestureStrategy, FocusRange, FrameData, FrameSource, FrameDataSettings, FrameDataSettingsBuilder, FrameSourceState, FrameSourceListener, ImageFrameSource, TorchState, VideoResolution, FocusGesture } from 'scandit-datacapture-frameworks-core';
+export { RectangularViewfinderLineStyle, RectangularViewfinderStyle, Viewfinder, Brush, NoViewfinder, Camera, CameraSettings, CameraPosition } from 'scandit-datacapture-frameworks-core';
+export { FocusGestureStrategy, FocusRange, FrameData, FrameSource, FrameSourceState, FrameSourceListener, ImageFrameSource, TorchState, VideoResolution, FocusGesture } from 'scandit-datacapture-frameworks-core';
 export { ImageBuffer, Feedback, Sound, Vibration, DataCaptureContext, DataCaptureContextSettings, DataCaptureContextCreationOptions, OpenSourceSoftwareLicenseInfo } from 'scandit-datacapture-frameworks-core';
 export { DataCaptureMode, DataCaptureContextListener, ContextStatus, DataCaptureComponent, ZoomGesture, TapToFocus, Control, SwipeToZoom } from 'scandit-datacapture-frameworks-core';
 export { BarcodeGenerator, BarcodeGeneratorBuilder, Code39BarcodeGeneratorBuilder, Code128BarcodeGeneratorBuilder, Ean13BarcodeGeneratorBuilder } from 'scandit-datacapture-frameworks-barcode';

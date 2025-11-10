@@ -1,4 +1,4 @@
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="scandit-cordova-datacapture-core" version="7.6.4">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="scandit-cordova-datacapture-core" version="7.2.6">
     <name>ScanditCaptureCore</name>
     <js-module name="Scandit" src="dist/index.js">
         <runs />
@@ -23,6 +23,7 @@
         <source-file src="src/ios/CordovaEventEmitter.swift" />
         <source-file src="src/ios/CordovaResult.swift" />
         <source-file src="src/ios/NativeViewConstraints.swift" />
+        <header-file src="src/ios/ScanditCaptureCore-Bridging-Header.h" type="BridgingHeader" />
         <source-file src="src/ios/ScanditCaptureCore.swift" />
         <source-file src="src/ios/ScanditCaptureCoreDefaults.swift" />
         <source-file src="src/ios/Command JSONs/CommandJSONArgument.swift" />
@@ -30,9 +31,10 @@
         <source-file src="src/ios/Command JSONs/PointJSON.swift" />
         <source-file src="src/ios/Extensions/WKWebView+Extensions.swift" />
         <source-file src="src/ios/Extensions/CDVPluginResult+Extensions.swift" />
+        <source-file src="src/ios/SDCVolumeButtonObserver.h" />
         <podspec>
             <pods use-frameworks="true">
-                <pod name="scandit-datacapture-frameworks-core" spec="= 7.6.4" />
+                <pod name="scandit-datacapture-frameworks-core" spec="= 7.2.6" />
             </pods>
         </podspec>
     </platform>
