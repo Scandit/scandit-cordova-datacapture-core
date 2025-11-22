@@ -80,10 +80,6 @@ class ScanditCaptureCore :
         exposedFunctionsToJs =
             this.javaClass.methods.filter { it.getAnnotation(PluginMethod::class.java) != null }
                 .associateBy { it.name }
-
-        // Dispatch initial lifecycle events since the activity may already be resumed
-        // when the plugin initializes on first run
-        lifecycleDispatcher.dispatchOnResume()
     }
 
     override fun onStop() {
@@ -153,14 +149,16 @@ class ScanditCaptureCore :
 
     @PluginMethod
     fun contextFromJSON(args: JSONArray, callbackContext: CallbackContext) {
-        val contextJson = args.getJSONObject(0).getString("contextJson")
-        coreModule.createContextFromJson(contextJson, CordovaResult(callbackContext))
+        val jsonString = args.getJSONObject(0).toString()
+        coreModule.createContextFromJson(jsonString, CordovaResult(callbackContext))
     }
 
     @PluginMethod
     fun updateContextFromJSON(args: JSONArray, callbackContext: CallbackContext) {
-        val contextJson = args.getJSONObject(0).getString("contextJson")
-        coreModule.updateContextFromJson(contextJson, CordovaResult(callbackContext))
+        val jsonString = args.getJSONObject(0).toString()
+        mainThread.runOnMainThread {
+            coreModule.updateContextFromJson(jsonString, CordovaResult(callbackContext))
+        }
     }
 
     @PluginMethod
@@ -284,14 +282,10 @@ class ScanditCaptureCore :
 
     @PluginMethod
     fun getCurrentCameraState(
-        args: JSONArray,
+        @Suppress("UNUSED_PARAMETER") args: JSONArray,
         callbackContext: CallbackContext
     ) {
-        val argsJson = args.getJSONObject(0)
-        coreModule.getCameraState(
-            argsJson.getString("position"),
-            CordovaResult(callbackContext)
-        )
+        coreModule.getCurrentCameraState(CordovaResult(callbackContext))
     }
 
     @PluginMethod
@@ -301,16 +295,13 @@ class ScanditCaptureCore :
     }
 
     @PluginMethod
-    fun isTorchAvailable(args: JSONArray, callbackContext: CallbackContext) {
-        val argsJson = args.getJSONObject(0)
-        coreModule.isTorchAvailable(
-            argsJson.getString("position"),
-            CordovaResult(callbackContext)
-        )
+    fun getIsTorchAvailable(args: JSONArray, callbackContext: CallbackContext) {
+        val cameraPositionJson = args[0].toString()
+        coreModule.isTorchAvailable(cameraPositionJson, CordovaResult(callbackContext))
     }
 
     @PluginMethod
-    fun registerListenerForCameraEvents(
+    fun subscribeFrameSourceListener(
         @Suppress("UNUSED_PARAMETER") args: JSONArray,
         callbackContext: CallbackContext
     ) {
@@ -327,7 +318,7 @@ class ScanditCaptureCore :
     }
 
     @PluginMethod
-    fun unregisterListenerForCameraEvents(
+    fun unsubscribeFrameSourceListener(
         @Suppress("UNUSED_PARAMETER") args: JSONArray,
         callbackContext: CallbackContext
     ) {
@@ -343,19 +334,14 @@ class ScanditCaptureCore :
 
     @PluginMethod
     fun getFrame(args: JSONArray, callbackContext: CallbackContext) {
-        val argsJson = args.getJSONObject(0)
-        coreModule.getLastFrameAsJson(
-            argsJson.getString("frameId"),
-            CordovaResult(callbackContext)
-        )
+        coreModule.getLastFrameAsJson(args.defaultArgumentAsString, CordovaResult(callbackContext))
     }
 
     @PluginMethod
     fun switchCameraToDesiredState(args: JSONArray, callbackContext: CallbackContext) {
-        val argsJson = args.getJSONObject(0)
         if (!permissionRequest.checkCameraPermission(this)) {
             latestDesiredFrameSource =
-                FrameSourceStateDeserializer.fromJson(argsJson.getString("desiredStateJson"))
+                FrameSourceStateDeserializer.fromJson(args.defaultArgumentAsString)
 
             permissionRequest.checkOrRequestCameraPermission(this)
             callbackContext.success()
@@ -363,7 +349,7 @@ class ScanditCaptureCore :
         }
 
         coreModule.switchCameraToDesiredState(
-            argsJson.getString("desiredStateJson"),
+            args.defaultArgumentAsString,
             CordovaResult(callbackContext)
         )
         latestDesiredFrameSource = coreModule.getCurrentCameraDesiredState() ?: FrameSourceState.OFF
@@ -371,21 +357,19 @@ class ScanditCaptureCore :
 
     @PluginMethod
     fun addModeToContext(args: JSONArray, callbackContext: CallbackContext) {
-        val modeJson = args.getJSONObject(0).getString("modeJson")
-        coreModule.addModeToContext(modeJson, CordovaResult(callbackContext))
+        coreModule.addModeToContext(args.defaultArgumentAsString, CordovaResult(callbackContext))
     }
 
     @PluginMethod
     fun removeModeFromContext(args: JSONArray, callbackContext: CallbackContext) {
-        val modeJson = args.getJSONObject(0).getString("modeJson")
         coreModule.removeModeFromContext(
-            modeJson,
+            args.defaultArgumentAsString,
             CordovaResult(callbackContext)
         )
     }
 
     @PluginMethod
-    fun removeAllModes(
+    fun removeAllModesFromContext(
         @Suppress("UNUSED_PARAMETER") args: JSONArray,
         callbackContext: CallbackContext
     ) {
@@ -405,9 +389,7 @@ class ScanditCaptureCore :
                 coreModule.dataCaptureViewDisposed(existingView)
                 captureViewHandler.removeDataCaptureView(existingView)
             }
-            mainThread.runOnMainThread {
-                captureViewHandler.attachDataCaptureView(view, cordova.activity)
-            }
+            captureViewHandler.attachDataCaptureView(view, cordova.activity)
         }
         callbackContext.success()
     }
@@ -483,9 +465,20 @@ class ScanditCaptureCore :
                 // Switch camera state once the permission has been granted
                 coreModule.switchToDesiredCameraState(latestDesiredFrameSource)
             } else {
-                coreModule.notifyCameraPermissionDenied()
+                notifyCameraPermissionDenied()
             }
         }
+    }
+
+    private fun notifyCameraPermissionDenied() {
+        eventEmitter.emit(
+            FrameworksDataCaptureContextListener.DID_CHANGE_STATUS_EVENT_NAME,
+            mutableMapOf(
+                "code" to 1032,
+                "isValid" to true,
+                "message" to "Camera Authorization Required"
+            )
+        )
     }
 
     private fun onJsonParseError(error: Throwable, callbackContext: CallbackContext) {
