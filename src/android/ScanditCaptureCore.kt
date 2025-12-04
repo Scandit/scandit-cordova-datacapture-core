@@ -149,15 +149,15 @@ class ScanditCaptureCore :
 
     @PluginMethod
     fun contextFromJSON(args: JSONArray, callbackContext: CallbackContext) {
-        val jsonString = args.getJSONObject(0).toString()
-        coreModule.createContextFromJson(jsonString, CordovaResult(callbackContext))
+        val contextJson = args.getJSONObject(0).getString("contextJson")
+        coreModule.createContextFromJson(contextJson, CordovaResult(callbackContext))
     }
 
     @PluginMethod
     fun updateContextFromJSON(args: JSONArray, callbackContext: CallbackContext) {
-        val jsonString = args.getJSONObject(0).toString()
+        val contextJson = args.getJSONObject(0).getString("contextJson")
         mainThread.runOnMainThread {
-            coreModule.updateContextFromJson(jsonString, CordovaResult(callbackContext))
+            coreModule.updateContextFromJson(contextJson, CordovaResult(callbackContext))
         }
     }
 
@@ -282,10 +282,14 @@ class ScanditCaptureCore :
 
     @PluginMethod
     fun getCurrentCameraState(
-        @Suppress("UNUSED_PARAMETER") args: JSONArray,
+        args: JSONArray,
         callbackContext: CallbackContext
     ) {
-        coreModule.getCurrentCameraState(CordovaResult(callbackContext))
+        val argsJson = args.getJSONObject(0)
+        coreModule.getCameraState(
+            argsJson.getString("position"),
+            CordovaResult(callbackContext)
+        )
     }
 
     @PluginMethod
@@ -295,13 +299,16 @@ class ScanditCaptureCore :
     }
 
     @PluginMethod
-    fun getIsTorchAvailable(args: JSONArray, callbackContext: CallbackContext) {
-        val cameraPositionJson = args[0].toString()
-        coreModule.isTorchAvailable(cameraPositionJson, CordovaResult(callbackContext))
+    fun isTorchAvailable(args: JSONArray, callbackContext: CallbackContext) {
+        val argsJson = args.getJSONObject(0)
+        coreModule.isTorchAvailable(
+            argsJson.getString("position"),
+            CordovaResult(callbackContext)
+        )
     }
 
     @PluginMethod
-    fun subscribeFrameSourceListener(
+    fun registerListenerForCameraEvents(
         @Suppress("UNUSED_PARAMETER") args: JSONArray,
         callbackContext: CallbackContext
     ) {
@@ -318,7 +325,7 @@ class ScanditCaptureCore :
     }
 
     @PluginMethod
-    fun unsubscribeFrameSourceListener(
+    fun unregisterListenerForCameraEvents(
         @Suppress("UNUSED_PARAMETER") args: JSONArray,
         callbackContext: CallbackContext
     ) {
@@ -334,14 +341,19 @@ class ScanditCaptureCore :
 
     @PluginMethod
     fun getFrame(args: JSONArray, callbackContext: CallbackContext) {
-        coreModule.getLastFrameAsJson(args.defaultArgumentAsString, CordovaResult(callbackContext))
+        val argsJson = args.getJSONObject(0)
+        coreModule.getLastFrameAsJson(
+            argsJson.getString("frameId"),
+            CordovaResult(callbackContext)
+        )
     }
 
     @PluginMethod
     fun switchCameraToDesiredState(args: JSONArray, callbackContext: CallbackContext) {
+        val argsJson = args.getJSONObject(0)
         if (!permissionRequest.checkCameraPermission(this)) {
             latestDesiredFrameSource =
-                FrameSourceStateDeserializer.fromJson(args.defaultArgumentAsString)
+                FrameSourceStateDeserializer.fromJson(argsJson.getString("desiredStateJson"))
 
             permissionRequest.checkOrRequestCameraPermission(this)
             callbackContext.success()
@@ -349,7 +361,7 @@ class ScanditCaptureCore :
         }
 
         coreModule.switchCameraToDesiredState(
-            args.defaultArgumentAsString,
+            argsJson.getString("desiredStateJson"),
             CordovaResult(callbackContext)
         )
         latestDesiredFrameSource = coreModule.getCurrentCameraDesiredState() ?: FrameSourceState.OFF
@@ -357,19 +369,21 @@ class ScanditCaptureCore :
 
     @PluginMethod
     fun addModeToContext(args: JSONArray, callbackContext: CallbackContext) {
-        coreModule.addModeToContext(args.defaultArgumentAsString, CordovaResult(callbackContext))
+        val modeJson = args.getJSONObject(0).getString("modeJson")
+        coreModule.addModeToContext(modeJson, CordovaResult(callbackContext))
     }
 
     @PluginMethod
     fun removeModeFromContext(args: JSONArray, callbackContext: CallbackContext) {
+        val modeJson = args.getJSONObject(0).getString("modeJson")
         coreModule.removeModeFromContext(
-            args.defaultArgumentAsString,
+            modeJson,
             CordovaResult(callbackContext)
         )
     }
 
     @PluginMethod
-    fun removeAllModesFromContext(
+    fun removeAllModes(
         @Suppress("UNUSED_PARAMETER") args: JSONArray,
         callbackContext: CallbackContext
     ) {
