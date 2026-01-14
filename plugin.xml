@@ -1,4 +1,4 @@
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="scandit-cordova-datacapture-core" version="8.1.0">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="scandit-cordova-datacapture-core" version="8.0.1">
     <name>ScanditCaptureCore</name>
     <js-module name="Scandit" src="dist/index.js">
         <runs />
@@ -21,7 +21,6 @@
         <source-file src="src/ios/CallbackLocks.swift" />
         <source-file src="src/ios/Callbacks.swift" />
         <source-file src="src/ios/CordovaEventEmitter.swift" />
-        <source-file src="src/ios/CordovaMethodCall.swift" />
         <source-file src="src/ios/CordovaResult.swift" />
         <source-file src="src/ios/NativeViewConstraints.swift" />
         <source-file src="src/ios/ScanditCaptureCore.swift" />
@@ -33,7 +32,7 @@
         <source-file src="src/ios/Extensions/CDVPluginResult+Extensions.swift" />
         <podspec>
             <pods use-frameworks="true">
-                <pod name="scandit-datacapture-frameworks-core" spec="= 8.1.0" />
+                <pod name="scandit-datacapture-frameworks-core" spec="= 8.0.1" />
             </pods>
         </podspec>
     </platform>
@@ -59,11 +58,10 @@
         <source-file src="src/android/data/SerializableCallbackAction.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/data" />
         <source-file src="src/android/data/SerializableFinishModeCallbackData.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/data" />
         <source-file src="src/android/utils/Extensions.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/utils" />
-        <source-file src="src/android/utils/CordovaEventEmitter.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/utils" />
-        <source-file src="src/android/utils/CordovaMethodCall.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/utils" />
         <source-file src="src/android/utils/CordovaResult.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/utils" />
-        <source-file src="src/android/utils/PermissionRequest.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/utils" />
+        <source-file src="src/android/utils/CordovaEventEmitter.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/utils" />
         <source-file src="src/android/utils/PluginMethod.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/utils" />
+        <source-file src="src/android/utils/PermissionRequest.kt" target-dir="kotlin/com/scandit/datacapture/cordova/core/utils" />
         <framework custom="true" src="src/android/build.gradle" type="gradleReference" />
         <hook src="src/hooks/support-kotlin.js" type="after_plugin_install" />
     </platform>

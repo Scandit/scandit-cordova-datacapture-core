@@ -11,7 +11,7 @@ public class CordovaEventEmitter: Emitter {
         self.commandDelegate = commandDelegate
     }
 
-    public func emit(name: String, payload: [String: Any?]) {
+    public func emit(name: String, payload: [String :Any?]) {
         self.lock.wait()
         defer { self.lock.signal() }
 
@@ -20,12 +20,11 @@ public class CordovaEventEmitter: Emitter {
         }
 
         guard let data = try? JSONSerialization.data(withJSONObject: payload),
-            let jsonString = String(data: data, encoding: .utf8)
-        else { return }
+              let jsonString = String(data: data, encoding: .utf8) else { return }
 
         let args: [String: Any] = [
             "name": name,
-            "data": jsonString,
+            "data": jsonString
         ]
         commandDelegate.send(.listenerCallback(args), callbackId: callbackId)
     }
@@ -51,28 +50,29 @@ public class CordovaEventEmitter: Emitter {
         self.lock.wait()
         defer { self.lock.signal() }
 
-        if let callbacksForView = specificCallbacks[viewId], callbacksForView.keys.contains(event) {
+        if let callbacksForView = specificCallbacks[viewId], callbacksForView.keys.contains(event)  {
             return true
         }
         return false
     }
-
+    
     public func hasModeSpecificListenersForEvent(_ modeId: Int, for event: String) -> Bool {
         self.lock.wait()
         defer { self.lock.signal() }
 
-        if let callbacksForView = specificCallbacks[modeId], callbacksForView.keys.contains(event) {
+        if let callbacksForView = specificCallbacks[modeId], callbacksForView.keys.contains(event)  {
             return true
         }
         return false
     }
+
 
     public func registerCallback(with name: String, call: CDVInvokedUrlCommand) {
         self.lock.wait()
         defer { self.lock.signal() }
 
-        if let existingCallbackId = callbacks[name] {
-            commandDelegate.send(.disposeCallback, callbackId: existingCallbackId)
+        if callbacks.keys.contains(name) {
+            commandDelegate.send(.disposeCallback, callbackId: callbacks[name]!)
         }
         callbacks[name] = call.callbackId
     }
@@ -86,9 +86,8 @@ public class CordovaEventEmitter: Emitter {
         }
 
         if let callbacksForView = specificCallbacks[viewId],
-            let existingCallbackId = callbacksForView[name]
-        {
-            commandDelegate.send(.disposeCallback, callbackId: existingCallbackId)
+           callbacksForView.keys.contains(name) {
+            commandDelegate.send(.disposeCallback, callbackId: callbacksForView[name]!)
         }
         specificCallbacks[viewId]?[name] = call.callbackId
     }
@@ -102,9 +101,8 @@ public class CordovaEventEmitter: Emitter {
         }
 
         if let callbacksForView = specificCallbacks[modeId],
-            let existingCallbackId = callbacksForView[name]
-        {
-            commandDelegate.send(.disposeCallback, callbackId: existingCallbackId)
+           callbacksForView.keys.contains(name) {
+            commandDelegate.send(.disposeCallback, callbackId: callbacksForView[name]!)
         }
         specificCallbacks[modeId]?[name] = call.callbackId
     }

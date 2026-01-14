@@ -40,7 +40,7 @@ export declare class DataCaptureView {
     removeListener(listener: DataCaptureViewListener): void;
     viewPointForFramePoint(point: Point): Promise<Point>;
     viewQuadrilateralForFrameQuadrilateral(quadrilateral: Quadrilateral): Promise<Quadrilateral>;
-    addControl(control: Control): Promise<void>;
+    addControl(control: Control): void;
     addControlWithAnchorAndOffset(control: Control, anchor: Anchor, offset: PointWithUnit): void;
     removeControl(control: Control): void;
     private subscribeToChangesOnHTMLElement;

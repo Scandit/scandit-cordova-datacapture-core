@@ -1,6 +1,6 @@
 extension CDVInvokedUrlCommand {
     var defaultArgument: Any? {
-        argument(at: 0)
+        return argument(at: 0)
     }
 
     var defaultArgumentAsString: String? {
@@ -9,8 +9,7 @@ extension CDVInvokedUrlCommand {
         }
 
         guard let defaultArgument = defaultArgument,
-            let data = try? JSONSerialization.data(withJSONObject: defaultArgument)
-        else {
+            let data = try? JSONSerialization.data(withJSONObject: defaultArgument) else {
             return nil
         }
 
@@ -34,13 +33,6 @@ extension CommandJSONArgument {
     }
 
     static func fromCommand(_ command: CDVInvokedUrlCommand) throws -> Self {
-        guard let defaultArgument = command.defaultArgument else {
-            throw NSError(
-                domain: "CommandJSONArgument",
-                code: -1,
-                userInfo: [NSLocalizedDescriptionKey: "Missing required command argument"]
-            )
-        }
-        return try fromJSONObject(defaultArgument)
+        return try fromJSONObject(command.defaultArgument!)
     }
 }
