@@ -1,4 +1,4 @@
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="scandit-cordova-datacapture-core" version="8.0.1">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="scandit-cordova-datacapture-core" version="7.6.6">
     <name>ScanditCaptureCore</name>
     <js-module name="Scandit" src="dist/index.js">
         <runs />
@@ -32,11 +32,11 @@
         <source-file src="src/ios/Extensions/CDVPluginResult+Extensions.swift" />
         <podspec>
             <pods use-frameworks="true">
-                <pod name="scandit-datacapture-frameworks-core" spec="= 8.0.1" />
+                <pod name="scandit-datacapture-frameworks-core" spec="= 7.6.6" />
             </pods>
         </podspec>
     </platform>
-    <platform name="android" kotlin="1.9.25">
+    <platform name="android" kotlin="1.8.20">
         <config-file parent="/*" target="config.xml">
             <feature name="ScanditCaptureCore">
                 <param name="android-package" value="com.scandit.datacapture.cordova.core.ScanditCaptureCore" />

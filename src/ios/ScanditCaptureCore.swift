@@ -250,7 +250,7 @@ public class ScanditCaptureCore: CDVPlugin {
             commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
             return
         }
-
+        
         coreModule.getCameraState(cameraPosition: position,
             result: CordovaResult(commandDelegate, command.callbackId)
         )
@@ -352,13 +352,11 @@ public class ScanditCaptureCore: CDVPlugin {
             commandDelegate.send(.failure(with: .invalidJSON), callbackId: command.callbackId)
             return
         }
-        self.coreModule.createDataCaptureView(
-            viewJson: viewJson,
-            result: CordovaResult(self.commandDelegate, command.callbackId)
-        ) { [weak self] dcView in
-            dispatchMain {
-                self?.captureView = dcView
-            }
+        dispatchMain {
+            self.captureView = self.coreModule.createDataCaptureView(
+                viewJson: viewJson,
+                result: CordovaResult(self.commandDelegate, command.callbackId)
+            )
         }
     }
 

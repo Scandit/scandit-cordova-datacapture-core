@@ -34,8 +34,8 @@ export declare class DataCaptureView {
     setFrame(frame: Rect, isUnderContent?: boolean): Promise<void>;
     show(): Promise<void>;
     hide(): Promise<void>;
-    addOverlay(overlay: DataCaptureOverlay): Promise<void>;
-    removeOverlay(overlay: DataCaptureOverlay): Promise<void>;
+    addOverlay(overlay: DataCaptureOverlay): void;
+    removeOverlay(overlay: DataCaptureOverlay): void;
     addListener(listener: DataCaptureViewListener): void;
     removeListener(listener: DataCaptureViewListener): void;
     viewPointForFramePoint(point: Point): Promise<Point>;

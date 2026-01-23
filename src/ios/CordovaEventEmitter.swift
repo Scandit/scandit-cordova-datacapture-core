@@ -55,17 +55,6 @@ public class CordovaEventEmitter: Emitter {
         }
         return false
     }
-    
-    public func hasModeSpecificListenersForEvent(_ modeId: Int, for event: String) -> Bool {
-        self.lock.wait()
-        defer { self.lock.signal() }
-
-        if let callbacksForView = specificCallbacks[modeId], callbacksForView.keys.contains(event)  {
-            return true
-        }
-        return false
-    }
-
 
     public func registerCallback(with name: String, call: CDVInvokedUrlCommand) {
         self.lock.wait()

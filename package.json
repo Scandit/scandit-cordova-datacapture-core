@@ -1,6 +1,6 @@
 {
   "name": "scandit-cordova-datacapture-core",
-  "version": "8.0.1",
+  "version": "7.6.6",
   "description": "Scandit Data Capture SDK for Cordova",
   "license": "Apache-2.0",
   "private": false,
@@ -22,7 +22,7 @@
     "clean-all": "npm run clean && rimraf node_modules"
   },
   "dependencies": {
-    "scandit-datacapture-frameworks-core": "8.0.1"
+    "scandit-datacapture-frameworks-core": "7.6.6"
   },
   "peerDependencies": {
     "cordova": ">=10.0.0"
