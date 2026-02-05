@@ -1,24 +1,7 @@
 export declare enum CordovaFunction {
     GetDefaults = "getDefaults",
-    SubscribeFrameSourceListener = "subscribeFrameSourceListener",
-    UnsubscribeFrameSourceListener = "unsubscribeFrameSourceListener",
-    SetViewPositionAndSize = "setViewPositionAndSize",
-    ShowView = "showView",
-    HideView = "hideView",
-    ViewPointForFramePoint = "viewPointForFramePoint",
-    ViewQuadrilateralForFrameQuadrilateral = "viewQuadrilateralForFrameQuadrilateral",
-    SubscribeViewListener = "subscribeViewListener",
-    UnsubscribeViewListener = "unsubscribeViewListener",
-    GetCurrentCameraState = "getCurrentCameraState",
-    GetIsTorchAvailable = "getIsTorchAvailable",
-    SwitchCameraToDesiredState = "switchCameraToDesiredState",
-    GetFrame = "getFrame",
-    EmitFeedback = "emitFeedback",
     SubscribeVolumeButtonObserver = "subscribeVolumeButtonObserver",
-    UnsubscribeVolumeButtonObserver = "unsubscribeVolumeButtonObserver",
-    CreateDataCaptureView = "createDataCaptureView",
-    UpdateDataCaptureView = "updateDataCaptureView",
-    RemoveDataCaptureView = "removeDataCaptureView"
+    UnsubscribeVolumeButtonObserver = "unsubscribeVolumeButtonObserver"
 }
 export declare const Cordova: {
     pluginName: string;
