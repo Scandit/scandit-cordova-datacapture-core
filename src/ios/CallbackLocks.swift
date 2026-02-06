@@ -4,7 +4,7 @@ protocol BlockingListenerCallbackResult: Decodable {
 
 extension BlockingListenerCallbackResult {
     func isForListenerEvent(_ listenerEventName: ListenerEvent.Name) -> Bool {
-        finishCallbackID == listenerEventName
+        return finishCallbackID == listenerEventName
     }
 
     static func from(_ command: CDVInvokedUrlCommand) -> Self? {
@@ -45,7 +45,7 @@ class CallbackLocks {
 
     /// Dictionary holding the callback locks.
     /// You need to acquire `locksUnfairLock` before reading/writing the dictionary.
-    var locks: [ListenerEvent.Name: CallbackLock] = [:]
+    var locks: [ListenerEvent.Name: CallbackLock] = [ListenerEvent.Name: CallbackLock]()
 
     func wait(for eventName: ListenerEvent.Name, afterDoing block: () -> Void) {
         getLock(for: eventName).wait(afterDoing: block)
@@ -64,7 +64,7 @@ class CallbackLocks {
     }
 
     func getResult(for eventName: ListenerEvent.Name) -> BlockingListenerCallbackResult? {
-        getLock(for: eventName).result
+        return getLock(for: eventName).result
     }
 
     func releaseAll() {
@@ -76,11 +76,9 @@ class CallbackLocks {
     private func getLock(for eventName: ListenerEvent.Name) -> CallbackLock {
         os_unfair_lock_lock(&locksUnfairLock)
         defer { os_unfair_lock_unlock(&locksUnfairLock) }
-        if let existingLock = locks[eventName] {
-            return existingLock
+        if locks[eventName] == nil {
+            locks[eventName] = CallbackLock()
         }
-        let newLock = CallbackLock()
-        locks[eventName] = newLock
-        return newLock
+        return locks[eventName]!
     }
 }
