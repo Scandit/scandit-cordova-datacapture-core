@@ -16,16 +16,18 @@ export declare function initializePlugin(pluginName: string, customInitializatio
 export declare class CordovaNativeCaller implements NativeCaller {
     private cordovaExec;
     private pluginName;
-    private eventRegisterFnName;
     private eventHandlers;
     private eventRegisteredCheckList;
-    private get areEventsRegistered();
-    constructor(cordovaExec: any, pluginName: string, eventRegisterFnName: string[]);
-    callFn(fnName: string, args: object | undefined | null): Promise<any>;
+    constructor(cordovaExec: any, pluginName: string);
+    get framework(): string;
+    get frameworkVersion(): string;
+    callFn(fnName: string, args: object | undefined | null, meta?: {
+        isEventRegistration?: boolean;
+    }): Promise<any>;
     eventHook(args: any): any;
     registerEvent(evName: string, handler: (args: any) => Promise<void>): Promise<any>;
     unregisterEvent(evName: string, _subscription: any): Promise<void>;
     private setUpEventListener;
     private notifyListeners;
 }
-export declare function createCordovaNativeCaller(cordovaExec: any, pluginName: string, eventRegisterFnName: string[]): CordovaNativeCaller;
+export declare function createCordovaNativeCaller(cordovaExec: any, pluginName: string): CordovaNativeCaller;
