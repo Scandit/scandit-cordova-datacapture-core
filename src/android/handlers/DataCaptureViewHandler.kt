@@ -19,7 +19,7 @@ import com.scandit.datacapture.core.ui.DataCaptureView
 import java.lang.ref.WeakReference
 
 class DataCaptureViewHandler {
-    private var latestInfo: ResizeAndMoveInfo = ResizeAndMoveInfo(0f, 0f, 0f, 0f, false)
+    private var latestInfo: ResizeAndMoveInfo = ResizeAndMoveInfo(0, 0, 0, 0, false)
     private var isVisible: Boolean = false
     private var dataCaptureViewReference: WeakReference<DataCaptureView>? = null
     private var webViewReference: WeakReference<View>? = null
@@ -102,11 +102,9 @@ class DataCaptureViewHandler {
     }
 
     fun removeDataCaptureView(dataCaptureView: DataCaptureView) {
-        if (dataCaptureView == dataCaptureViewReference?.get()) {
-            dataCaptureViewReference = null
-            disposeCurrentBackgroundView()
-        }
+        dataCaptureViewReference = null
         removeView(dataCaptureView)
+        disposeCurrentBackgroundView()
     }
 
     private fun removeView(view: View) {
