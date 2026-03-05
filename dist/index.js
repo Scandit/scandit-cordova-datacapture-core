@@ -1,4 +1,4408 @@
-var core = require('scandit-cordova-datacapture-core.Core');
+'use strict';
+
+function getDefaultExportFromCjs (x) {
+	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
+}
+
+var eventemitter3 = {exports: {}};
+
+var hasRequiredEventemitter3;
+
+function requireEventemitter3 () {
+	if (hasRequiredEventemitter3) return eventemitter3.exports;
+	hasRequiredEventemitter3 = 1;
+	(function (module) {
+
+		var has = Object.prototype.hasOwnProperty
+		  , prefix = '~';
+
+		/**
+		 * Constructor to create a storage for our `EE` objects.
+		 * An `Events` instance is a plain object whose properties are event names.
+		 *
+		 * @constructor
+		 * @private
+		 */
+		function Events() {}
+
+		//
+		// We try to not inherit from `Object.prototype`. In some engines creating an
+		// instance in this way is faster than calling `Object.create(null)` directly.
+		// If `Object.create(null)` is not supported we prefix the event names with a
+		// character to make sure that the built-in object properties are not
+		// overridden or used as an attack vector.
+		//
+		if (Object.create) {
+		  Events.prototype = Object.create(null);
+
+		  //
+		  // This hack is needed because the `__proto__` property is still inherited in
+		  // some old browsers like Android 4, iPhone 5.1, Opera 11 and Safari 5.
+		  //
+		  if (!new Events().__proto__) prefix = false;
+		}
+
+		/**
+		 * Representation of a single event listener.
+		 *
+		 * @param {Function} fn The listener function.
+		 * @param {*} context The context to invoke the listener with.
+		 * @param {Boolean} [once=false] Specify if the listener is a one-time listener.
+		 * @constructor
+		 * @private
+		 */
+		function EE(fn, context, once) {
+		  this.fn = fn;
+		  this.context = context;
+		  this.once = once || false;
+		}
+
+		/**
+		 * Add a listener for a given event.
+		 *
+		 * @param {EventEmitter} emitter Reference to the `EventEmitter` instance.
+		 * @param {(String|Symbol)} event The event name.
+		 * @param {Function} fn The listener function.
+		 * @param {*} context The context to invoke the listener with.
+		 * @param {Boolean} once Specify if the listener is a one-time listener.
+		 * @returns {EventEmitter}
+		 * @private
+		 */
+		function addListener(emitter, event, fn, context, once) {
+		  if (typeof fn !== 'function') {
+		    throw new TypeError('The listener must be a function');
+		  }
+
+		  var listener = new EE(fn, context || emitter, once)
+		    , evt = prefix ? prefix + event : event;
+
+		  if (!emitter._events[evt]) emitter._events[evt] = listener, emitter._eventsCount++;
+		  else if (!emitter._events[evt].fn) emitter._events[evt].push(listener);
+		  else emitter._events[evt] = [emitter._events[evt], listener];
+
+		  return emitter;
+		}
+
+		/**
+		 * Clear event by name.
+		 *
+		 * @param {EventEmitter} emitter Reference to the `EventEmitter` instance.
+		 * @param {(String|Symbol)} evt The Event name.
+		 * @private
+		 */
+		function clearEvent(emitter, evt) {
+		  if (--emitter._eventsCount === 0) emitter._events = new Events();
+		  else delete emitter._events[evt];
+		}
+
+		/**
+		 * Minimal `EventEmitter` interface that is molded against the Node.js
+		 * `EventEmitter` interface.
+		 *
+		 * @constructor
+		 * @public
+		 */
+		function EventEmitter() {
+		  this._events = new Events();
+		  this._eventsCount = 0;
+		}
+
+		/**
+		 * Return an array listing the events for which the emitter has registered
+		 * listeners.
+		 *
+		 * @returns {Array}
+		 * @public
+		 */
+		EventEmitter.prototype.eventNames = function eventNames() {
+		  var names = []
+		    , events
+		    , name;
+
+		  if (this._eventsCount === 0) return names;
+
+		  for (name in (events = this._events)) {
+		    if (has.call(events, name)) names.push(prefix ? name.slice(1) : name);
+		  }
+
+		  if (Object.getOwnPropertySymbols) {
+		    return names.concat(Object.getOwnPropertySymbols(events));
+		  }
+
+		  return names;
+		};
+
+		/**
+		 * Return the listeners registered for a given event.
+		 *
+		 * @param {(String|Symbol)} event The event name.
+		 * @returns {Array} The registered listeners.
+		 * @public
+		 */
+		EventEmitter.prototype.listeners = function listeners(event) {
+		  var evt = prefix ? prefix + event : event
+		    , handlers = this._events[evt];
+
+		  if (!handlers) return [];
+		  if (handlers.fn) return [handlers.fn];
+
+		  for (var i = 0, l = handlers.length, ee = new Array(l); i < l; i++) {
+		    ee[i] = handlers[i].fn;
+		  }
+
+		  return ee;
+		};
+
+		/**
+		 * Return the number of listeners listening to a given event.
+		 *
+		 * @param {(String|Symbol)} event The event name.
+		 * @returns {Number} The number of listeners.
+		 * @public
+		 */
+		EventEmitter.prototype.listenerCount = function listenerCount(event) {
+		  var evt = prefix ? prefix + event : event
+		    , listeners = this._events[evt];
+
+		  if (!listeners) return 0;
+		  if (listeners.fn) return 1;
+		  return listeners.length;
+		};
+
+		/**
+		 * Calls each of the listeners registered for a given event.
+		 *
+		 * @param {(String|Symbol)} event The event name.
+		 * @returns {Boolean} `true` if the event had listeners, else `false`.
+		 * @public
+		 */
+		EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
+		  var evt = prefix ? prefix + event : event;
+
+		  if (!this._events[evt]) return false;
+
+		  var listeners = this._events[evt]
+		    , len = arguments.length
+		    , args
+		    , i;
+
+		  if (listeners.fn) {
+		    if (listeners.once) this.removeListener(event, listeners.fn, undefined, true);
+
+		    switch (len) {
+		      case 1: return listeners.fn.call(listeners.context), true;
+		      case 2: return listeners.fn.call(listeners.context, a1), true;
+		      case 3: return listeners.fn.call(listeners.context, a1, a2), true;
+		      case 4: return listeners.fn.call(listeners.context, a1, a2, a3), true;
+		      case 5: return listeners.fn.call(listeners.context, a1, a2, a3, a4), true;
+		      case 6: return listeners.fn.call(listeners.context, a1, a2, a3, a4, a5), true;
+		    }
+
+		    for (i = 1, args = new Array(len -1); i < len; i++) {
+		      args[i - 1] = arguments[i];
+		    }
+
+		    listeners.fn.apply(listeners.context, args);
+		  } else {
+		    var length = listeners.length
+		      , j;
+
+		    for (i = 0; i < length; i++) {
+		      if (listeners[i].once) this.removeListener(event, listeners[i].fn, undefined, true);
+
+		      switch (len) {
+		        case 1: listeners[i].fn.call(listeners[i].context); break;
+		        case 2: listeners[i].fn.call(listeners[i].context, a1); break;
+		        case 3: listeners[i].fn.call(listeners[i].context, a1, a2); break;
+		        case 4: listeners[i].fn.call(listeners[i].context, a1, a2, a3); break;
+		        default:
+		          if (!args) for (j = 1, args = new Array(len -1); j < len; j++) {
+		            args[j - 1] = arguments[j];
+		          }
+
+		          listeners[i].fn.apply(listeners[i].context, args);
+		      }
+		    }
+		  }
+
+		  return true;
+		};
+
+		/**
+		 * Add a listener for a given event.
+		 *
+		 * @param {(String|Symbol)} event The event name.
+		 * @param {Function} fn The listener function.
+		 * @param {*} [context=this] The context to invoke the listener with.
+		 * @returns {EventEmitter} `this`.
+		 * @public
+		 */
+		EventEmitter.prototype.on = function on(event, fn, context) {
+		  return addListener(this, event, fn, context, false);
+		};
+
+		/**
+		 * Add a one-time listener for a given event.
+		 *
+		 * @param {(String|Symbol)} event The event name.
+		 * @param {Function} fn The listener function.
+		 * @param {*} [context=this] The context to invoke the listener with.
+		 * @returns {EventEmitter} `this`.
+		 * @public
+		 */
+		EventEmitter.prototype.once = function once(event, fn, context) {
+		  return addListener(this, event, fn, context, true);
+		};
+
+		/**
+		 * Remove the listeners of a given event.
+		 *
+		 * @param {(String|Symbol)} event The event name.
+		 * @param {Function} fn Only remove the listeners that match this function.
+		 * @param {*} context Only remove the listeners that have this context.
+		 * @param {Boolean} once Only remove one-time listeners.
+		 * @returns {EventEmitter} `this`.
+		 * @public
+		 */
+		EventEmitter.prototype.removeListener = function removeListener(event, fn, context, once) {
+		  var evt = prefix ? prefix + event : event;
+
+		  if (!this._events[evt]) return this;
+		  if (!fn) {
+		    clearEvent(this, evt);
+		    return this;
+		  }
+
+		  var listeners = this._events[evt];
+
+		  if (listeners.fn) {
+		    if (
+		      listeners.fn === fn &&
+		      (!once || listeners.once) &&
+		      (!context || listeners.context === context)
+		    ) {
+		      clearEvent(this, evt);
+		    }
+		  } else {
+		    for (var i = 0, events = [], length = listeners.length; i < length; i++) {
+		      if (
+		        listeners[i].fn !== fn ||
+		        (once && !listeners[i].once) ||
+		        (context && listeners[i].context !== context)
+		      ) {
+		        events.push(listeners[i]);
+		      }
+		    }
+
+		    //
+		    // Reset the array, or remove it completely if we have no more listeners.
+		    //
+		    if (events.length) this._events[evt] = events.length === 1 ? events[0] : events;
+		    else clearEvent(this, evt);
+		  }
+
+		  return this;
+		};
+
+		/**
+		 * Remove all listeners, or those of the specified event.
+		 *
+		 * @param {(String|Symbol)} [event] The event name.
+		 * @returns {EventEmitter} `this`.
+		 * @public
+		 */
+		EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
+		  var evt;
+
+		  if (event) {
+		    evt = prefix ? prefix + event : event;
+		    if (this._events[evt]) clearEvent(this, evt);
+		  } else {
+		    this._events = new Events();
+		    this._eventsCount = 0;
+		  }
+
+		  return this;
+		};
+
+		//
+		// Alias methods names because people roll like that.
+		//
+		EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
+		EventEmitter.prototype.addListener = EventEmitter.prototype.on;
+
+		//
+		// Expose the prefix.
+		//
+		EventEmitter.prefixed = prefix;
+
+		//
+		// Allow `EventEmitter` to be imported as module namespace.
+		//
+		EventEmitter.EventEmitter = EventEmitter;
+
+		//
+		// Expose the module.
+		//
+		{
+		  module.exports = EventEmitter;
+		} 
+	} (eventemitter3));
+	return eventemitter3.exports;
+}
+
+var eventemitter3Exports = requireEventemitter3();
+var EventEmitter = /*@__PURE__*/getDefaultExportFromCjs(eventemitter3Exports);
+
+class FactoryMaker {
+    static bindInstance(clsName, instance) {
+        FactoryMaker.instances.set(clsName, { instance });
+    }
+    static bindLazyInstance(clsName, builder) {
+        FactoryMaker.instances.set(clsName, { builder });
+    }
+    static bindInstanceIfNotExists(clsName, instance) {
+        if (FactoryMaker.instances.has(clsName)) {
+            return;
+        }
+        FactoryMaker.instances.set(clsName, { instance });
+    }
+    static getInstance(clsName) {
+        var _a;
+        const item = FactoryMaker.instances.get(clsName);
+        if (item === null || item === undefined) {
+            throw new Error(`Trying to get a non existing instance for ${clsName}`);
+        }
+        if (!item.instance && item.builder) {
+            item.instance = (_a = item.builder) === null || _a === void 0 ? void 0 : _a.call(item);
+        }
+        return item.instance;
+    }
+    static createInstance(clsName) {
+        var _a;
+        const item = FactoryMaker.instances.get(clsName);
+        if (item === null || item === undefined) {
+            throw new Error(`Trying to get a non existing instance for ${clsName}`);
+        }
+        const proxyInstance = (_a = item.builder) === null || _a === void 0 ? void 0 : _a.call(item);
+        if (proxyInstance === undefined) {
+            throw new Error(`item.builder?.() returned undefined for ${clsName}`);
+        }
+        return proxyInstance;
+    }
+}
+FactoryMaker.instances = new Map();
+
+function ignoreFromSerialization(target, propertyName) {
+    target.ignoredProperties = target.ignoredProperties || [];
+    target.ignoredProperties.push(propertyName);
+}
+
+function nameForSerialization(customName) {
+    return (target, propertyName) => {
+        target.customPropertyNames = target.customPropertyNames || {};
+        target.customPropertyNames[propertyName] = customName;
+    };
+}
+
+function ignoreFromSerializationIfNull(target, propertyName) {
+    target.ignoredIfNullProperties = target.ignoredIfNullProperties || [];
+    target.ignoredIfNullProperties.push(propertyName);
+}
+
+function serializationDefault(defaultValue) {
+    return (target, propertyName) => {
+        target.customPropertyDefaults = target.customPropertyDefaults || {};
+        target.customPropertyDefaults[propertyName] = defaultValue;
+    };
+}
+
+class DefaultSerializeable {
+    toJSON() {
+        const properties = Object.keys(this);
+        // use @ignoreFromSerialization to ignore properties
+        const ignoredProperties = this.ignoredProperties || [];
+        // use @ignoreFromSerializationIfNull to ignore properties if they're null
+        const ignoredIfNullProperties = this.ignoredIfNullProperties || [];
+        // use @nameForSerialization('customName') to rename properties in the JSON output
+        const customPropertyNames = this.customPropertyNames || {};
+        // use @serializationDefault({}) to use a different value in the JSON output if they're null
+        const customPropertyDefaults = this.customPropertyDefaults || {};
+        return properties.reduce((json, property) => {
+            if (ignoredProperties.includes(property)) {
+                return json;
+            }
+            let value = this[property];
+            if (value === undefined) {
+                return json;
+            }
+            // Ignore if it's null and should be ignored.
+            // This is basically responsible for not including optional properties in the JSON if they're null,
+            // as that's not always deserialized to mean the same as not present.
+            if (value === null && ignoredIfNullProperties.includes(property)) {
+                return json;
+            }
+            if (value === null && customPropertyDefaults[property] !== undefined) {
+                value = customPropertyDefaults[property];
+            }
+            // Serialize if serializeable
+            if (value != null && value.toJSON) {
+                value = value.toJSON();
+            }
+            // Serialize the array if the elements are serializeable
+            if (Array.isArray(value)) {
+                value = value.map(e => e.toJSON ? e.toJSON() : e);
+            }
+            const propertyName = customPropertyNames[property] || property;
+            json[propertyName] = value;
+            return json;
+        }, {});
+    }
+}
+
+class TapToFocus extends DefaultSerializeable {
+    constructor() {
+        super();
+        this.type = 'tapToFocus';
+    }
+}
+
+class PrivateFocusGestureDeserializer {
+    static fromJSON(json) {
+        if (json && json.type === new TapToFocus()['type']) {
+            return new TapToFocus();
+        }
+        else {
+            return null;
+        }
+    }
+}
+
+class SwipeToZoom extends DefaultSerializeable {
+    constructor() {
+        super();
+        this.type = 'swipeToZoom';
+    }
+}
+
+class PrivateZoomGestureDeserializer {
+    static fromJSON(json) {
+        if (json && json.type === new SwipeToZoom()['type']) {
+            return new SwipeToZoom();
+        }
+        else {
+            return null;
+        }
+    }
+}
+
+/******************************************************************************
+Copyright (c) Microsoft Corporation.
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+***************************************************************************** */
+/* global Reflect, Promise, SuppressedError, Symbol, Iterator */
+
+
+function __decorate$1(decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+}
+
+function __awaiter$1(thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+}
+
+typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
+    var e = new Error(message);
+    return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
+};
+
+exports.CameraPosition = void 0;
+(function (CameraPosition) {
+    CameraPosition["WorldFacing"] = "worldFacing";
+    CameraPosition["UserFacing"] = "userFacing";
+    CameraPosition["Unspecified"] = "unspecified";
+})(exports.CameraPosition || (exports.CameraPosition = {}));
+
+var FrameSourceListenerEvents;
+(function (FrameSourceListenerEvents) {
+    FrameSourceListenerEvents["didChangeState"] = "FrameSourceListener.onStateChanged";
+})(FrameSourceListenerEvents || (FrameSourceListenerEvents = {}));
+
+exports.FrameSourceState = void 0;
+(function (FrameSourceState) {
+    FrameSourceState["On"] = "on";
+    FrameSourceState["Off"] = "off";
+    FrameSourceState["Starting"] = "starting";
+    FrameSourceState["Stopping"] = "stopping";
+    FrameSourceState["Standby"] = "standby";
+    FrameSourceState["BootingUp"] = "bootingUp";
+    FrameSourceState["WakingUp"] = "wakingUp";
+    FrameSourceState["GoingToSleep"] = "goingToSleep";
+    FrameSourceState["ShuttingDown"] = "shuttingDown";
+})(exports.FrameSourceState || (exports.FrameSourceState = {}));
+
+class ImageBuffer {
+    get width() {
+        return this._width;
+    }
+    get height() {
+        return this._height;
+    }
+    get data() {
+        return this._data;
+    }
+}
+
+class FrameDataSettings extends DefaultSerializeable {
+    constructor() {
+        super();
+        // Enables the file system cache for the frame.
+        this._isFileSystemCacheEnabled = false;
+        // The quality of the image. 0-100.
+        this._imageQuality = 100;
+        // Enables the auto-rotation of the frame.
+        this._isAutoRotateEnabled = false;
+    }
+    get isFileSystemCacheEnabled() {
+        return this._isFileSystemCacheEnabled;
+    }
+    set isFileSystemCacheEnabled(enabled) {
+        this._isFileSystemCacheEnabled = enabled;
+    }
+    get imageQuality() {
+        return this._imageQuality;
+    }
+    set imageQuality(quality) {
+        if (quality < 0 || quality > 100) {
+            throw new Error('Image quality must be between 0 and 100');
+        }
+        this._imageQuality = quality;
+    }
+    get isAutoRotateEnabled() {
+        return this._isAutoRotateEnabled;
+    }
+    set isAutoRotateEnabled(enabled) {
+        this._isAutoRotateEnabled = enabled;
+    }
+}
+__decorate$1([
+    nameForSerialization('sc_frame_isFileSystemCacheEnabled')
+], FrameDataSettings.prototype, "_isFileSystemCacheEnabled", void 0);
+__decorate$1([
+    nameForSerialization('sc_frame_imageQuality')
+], FrameDataSettings.prototype, "_imageQuality", void 0);
+__decorate$1([
+    nameForSerialization('sc_frame_autoRotate')
+], FrameDataSettings.prototype, "_isAutoRotateEnabled", void 0);
+
+class FrameDataSettingsBuilder {
+    constructor(settings) {
+        this.settings = settings;
+    }
+    enableFileSystemCache(enabled) {
+        this.settings.isFileSystemCacheEnabled = enabled;
+        return this;
+    }
+    setImageQuality(quality) {
+        this.settings.imageQuality = quality;
+        return this;
+    }
+    enableAutoRotate(enabled) {
+        this.settings.isAutoRotateEnabled = enabled;
+        return this;
+    }
+}
+
+exports.FontFamily = void 0;
+(function (FontFamily) {
+    FontFamily["SystemDefault"] = "systemDefault";
+    FontFamily["ModernMono"] = "modernMono";
+    FontFamily["SystemSans"] = "systemSans";
+})(exports.FontFamily || (exports.FontFamily = {}));
+
+exports.TextAlignment = void 0;
+(function (TextAlignment) {
+    TextAlignment["Left"] = "left";
+    TextAlignment["Right"] = "right";
+    TextAlignment["Center"] = "center";
+    TextAlignment["Start"] = "start";
+    TextAlignment["End"] = "end";
+})(exports.TextAlignment || (exports.TextAlignment = {}));
+
+class Point extends DefaultSerializeable {
+    get x() {
+        return this._x;
+    }
+    get y() {
+        return this._y;
+    }
+    static fromJSON(json) {
+        return new Point(json.x, json.y);
+    }
+    constructor(x, y) {
+        super();
+        this._x = x;
+        this._y = y;
+    }
+}
+__decorate$1([
+    nameForSerialization('x')
+], Point.prototype, "_x", void 0);
+__decorate$1([
+    nameForSerialization('y')
+], Point.prototype, "_y", void 0);
+
+class Quadrilateral extends DefaultSerializeable {
+    get topLeft() {
+        return this._topLeft;
+    }
+    get topRight() {
+        return this._topRight;
+    }
+    get bottomRight() {
+        return this._bottomRight;
+    }
+    get bottomLeft() {
+        return this._bottomLeft;
+    }
+    static fromJSON(json) {
+        return new Quadrilateral(Point.fromJSON(json.topLeft), Point.fromJSON(json.topRight), Point.fromJSON(json.bottomRight), Point.fromJSON(json.bottomLeft));
+    }
+    constructor(topLeft, topRight, bottomRight, bottomLeft) {
+        super();
+        this._topLeft = topLeft;
+        this._topRight = topRight;
+        this._bottomRight = bottomRight;
+        this._bottomLeft = bottomLeft;
+    }
+}
+__decorate$1([
+    nameForSerialization('topLeft')
+], Quadrilateral.prototype, "_topLeft", void 0);
+__decorate$1([
+    nameForSerialization('topRight')
+], Quadrilateral.prototype, "_topRight", void 0);
+__decorate$1([
+    nameForSerialization('bottomRight')
+], Quadrilateral.prototype, "_bottomRight", void 0);
+__decorate$1([
+    nameForSerialization('bottomLeft')
+], Quadrilateral.prototype, "_bottomLeft", void 0);
+
+class NumberWithUnit extends DefaultSerializeable {
+    get value() {
+        return this._value;
+    }
+    get unit() {
+        return this._unit;
+    }
+    static fromJSON(json) {
+        return new NumberWithUnit(json.value, json.unit);
+    }
+    constructor(value, unit) {
+        super();
+        this._value = value;
+        this._unit = unit;
+    }
+}
+__decorate$1([
+    nameForSerialization('value')
+], NumberWithUnit.prototype, "_value", void 0);
+__decorate$1([
+    nameForSerialization('unit')
+], NumberWithUnit.prototype, "_unit", void 0);
+
+exports.MeasureUnit = void 0;
+(function (MeasureUnit) {
+    MeasureUnit["DIP"] = "dip";
+    MeasureUnit["Pixel"] = "pixel";
+    MeasureUnit["Fraction"] = "fraction";
+})(exports.MeasureUnit || (exports.MeasureUnit = {}));
+
+class PointWithUnit extends DefaultSerializeable {
+    get x() {
+        return this._x;
+    }
+    get y() {
+        return this._y;
+    }
+    static fromJSON(json) {
+        return new PointWithUnit(NumberWithUnit.fromJSON(json.x), NumberWithUnit.fromJSON(json.y));
+    }
+    static get zero() {
+        return new PointWithUnit(new NumberWithUnit(0, exports.MeasureUnit.Pixel), new NumberWithUnit(0, exports.MeasureUnit.Pixel));
+    }
+    constructor(x, y) {
+        super();
+        this._x = x;
+        this._y = y;
+    }
+}
+__decorate$1([
+    nameForSerialization('x')
+], PointWithUnit.prototype, "_x", void 0);
+__decorate$1([
+    nameForSerialization('y')
+], PointWithUnit.prototype, "_y", void 0);
+
+class Rect extends DefaultSerializeable {
+    get origin() {
+        return this._origin;
+    }
+    get size() {
+        return this._size;
+    }
+    constructor(origin, size) {
+        super();
+        this._origin = origin;
+        this._size = size;
+    }
+}
+__decorate$1([
+    nameForSerialization('origin')
+], Rect.prototype, "_origin", void 0);
+__decorate$1([
+    nameForSerialization('size')
+], Rect.prototype, "_size", void 0);
+
+class RectWithUnit extends DefaultSerializeable {
+    get origin() {
+        return this._origin;
+    }
+    get size() {
+        return this._size;
+    }
+    constructor(origin, size) {
+        super();
+        this._origin = origin;
+        this._size = size;
+    }
+}
+__decorate$1([
+    nameForSerialization('origin')
+], RectWithUnit.prototype, "_origin", void 0);
+__decorate$1([
+    nameForSerialization('size')
+], RectWithUnit.prototype, "_size", void 0);
+
+class ScanditIcon extends DefaultSerializeable {
+    static fromJSON(json) {
+        if (!json) {
+            return null;
+        }
+        const scanditIcon = new ScanditIcon(json.iconColor || null, json.backgroundColor || null, json.backgroundShape || null, json.icon || null, json.backgroundStrokeColor || null, json.backgroundStrokeWidth);
+        return scanditIcon;
+    }
+    constructor(iconColor, backgroundColor, backgroundShape, icon, backgroundStrokeColor, backgroundStrokeWidth) {
+        super();
+        this._backgroundStrokeWidth = 3.0;
+        this._iconColor = iconColor;
+        this._backgroundColor = backgroundColor;
+        this._backgroundShape = backgroundShape;
+        this._icon = icon;
+        this._backgroundStrokeColor = backgroundStrokeColor;
+        this._backgroundStrokeWidth = backgroundStrokeWidth;
+    }
+    get backgroundColor() {
+        return this._backgroundColor;
+    }
+    get backgroundShape() {
+        return this._backgroundShape;
+    }
+    get icon() {
+        return this._icon;
+    }
+    get iconColor() {
+        return this._iconColor;
+    }
+    get backgroundStrokeColor() {
+        return this._backgroundStrokeColor;
+    }
+    get backgroundStrokeWidth() {
+        return this._backgroundStrokeWidth;
+    }
+}
+__decorate$1([
+    nameForSerialization('backgroundColor'),
+    ignoreFromSerializationIfNull
+], ScanditIcon.prototype, "_backgroundColor", void 0);
+__decorate$1([
+    nameForSerialization('backgroundShape'),
+    ignoreFromSerializationIfNull
+], ScanditIcon.prototype, "_backgroundShape", void 0);
+__decorate$1([
+    nameForSerialization('icon'),
+    ignoreFromSerializationIfNull
+], ScanditIcon.prototype, "_icon", void 0);
+__decorate$1([
+    nameForSerialization('iconColor'),
+    ignoreFromSerializationIfNull
+], ScanditIcon.prototype, "_iconColor", void 0);
+__decorate$1([
+    nameForSerialization('backgroundStrokeColor'),
+    ignoreFromSerializationIfNull
+], ScanditIcon.prototype, "_backgroundStrokeColor", void 0);
+__decorate$1([
+    nameForSerialization('backgroundStrokeWidth')
+], ScanditIcon.prototype, "_backgroundStrokeWidth", void 0);
+
+class ScanditIconBuilder {
+    constructor() {
+        this._iconColor = null;
+        this._backgroundColor = null;
+        this._backgroundShape = null;
+        this._icon = null;
+        this._backgroundStrokeColor = null;
+        this._backgroundStrokeWidth = 3.0;
+    }
+    withIconColor(iconColor) {
+        this._iconColor = iconColor;
+        return this;
+    }
+    withBackgroundColor(backgroundColor) {
+        this._backgroundColor = backgroundColor;
+        return this;
+    }
+    withBackgroundShape(backgroundShape) {
+        this._backgroundShape = backgroundShape;
+        return this;
+    }
+    withIcon(iconType) {
+        this._icon = iconType;
+        return this;
+    }
+    withBackgroundStrokeColor(backgroundStrokeColor) {
+        this._backgroundStrokeColor = backgroundStrokeColor;
+        return this;
+    }
+    withBackgroundStrokeWidth(backgroundStrokeWidth) {
+        this._backgroundStrokeWidth = backgroundStrokeWidth;
+        return this;
+    }
+    build() {
+        return new ScanditIcon(this._iconColor, this._backgroundColor, this._backgroundShape, this._icon, this._backgroundStrokeColor, this._backgroundStrokeWidth);
+    }
+}
+
+exports.ScanditIconShape = void 0;
+(function (ScanditIconShape) {
+    ScanditIconShape["Circle"] = "circle";
+    ScanditIconShape["Square"] = "square";
+})(exports.ScanditIconShape || (exports.ScanditIconShape = {}));
+
+exports.ScanditIconType = void 0;
+(function (ScanditIconType) {
+    ScanditIconType["ArrowRight"] = "arrowRight";
+    ScanditIconType["ArrowLeft"] = "arrowLeft";
+    ScanditIconType["ArrowUp"] = "arrowUp";
+    ScanditIconType["ArrowDown"] = "arrowDown";
+    ScanditIconType["ToPick"] = "toPick";
+    ScanditIconType["Checkmark"] = "checkmark";
+    ScanditIconType["XMark"] = "xMark";
+    ScanditIconType["QuestionMark"] = "questionMark";
+    ScanditIconType["ExclamationMark"] = "exclamationMark";
+    ScanditIconType["LowStock"] = "lowStock";
+    ScanditIconType["ExpiredItem"] = "expiredItem";
+    ScanditIconType["WrongItem"] = "wrongItem";
+    ScanditIconType["FragileItem"] = "fragileItem";
+    ScanditIconType["StarFilled"] = "starFilled";
+    ScanditIconType["StarHalfFilled"] = "starHalfFilled";
+    ScanditIconType["ChevronUp"] = "chevronUp";
+    ScanditIconType["ChevronDown"] = "chevronDown";
+    ScanditIconType["ChevronLeft"] = "chevronLeft";
+    ScanditIconType["ChevronRight"] = "chevronRight";
+    ScanditIconType["InspectItem"] = "inspectItem";
+    ScanditIconType["StarOutlined"] = "starOutlined";
+    ScanditIconType["Print"] = "print";
+})(exports.ScanditIconType || (exports.ScanditIconType = {}));
+
+class Size extends DefaultSerializeable {
+    get width() {
+        return this._width;
+    }
+    get height() {
+        return this._height;
+    }
+    static fromJSON(json) {
+        return new Size(json.width, json.height);
+    }
+    constructor(width, height) {
+        super();
+        this._width = width;
+        this._height = height;
+    }
+}
+__decorate$1([
+    nameForSerialization('width')
+], Size.prototype, "_width", void 0);
+__decorate$1([
+    nameForSerialization('height')
+], Size.prototype, "_height", void 0);
+
+class SizeWithAspect extends DefaultSerializeable {
+    get size() {
+        return this._size;
+    }
+    get aspect() {
+        return this._aspect;
+    }
+    constructor(size, aspect) {
+        super();
+        this._size = size;
+        this._aspect = aspect;
+    }
+}
+__decorate$1([
+    nameForSerialization('size')
+], SizeWithAspect.prototype, "_size", void 0);
+__decorate$1([
+    nameForSerialization('aspect')
+], SizeWithAspect.prototype, "_aspect", void 0);
+
+class SizeWithUnit extends DefaultSerializeable {
+    get width() {
+        return this._width;
+    }
+    get height() {
+        return this._height;
+    }
+    constructor(width, height) {
+        super();
+        this._width = width;
+        this._height = height;
+    }
+}
+__decorate$1([
+    nameForSerialization('width')
+], SizeWithUnit.prototype, "_width", void 0);
+__decorate$1([
+    nameForSerialization('height')
+], SizeWithUnit.prototype, "_height", void 0);
+
+exports.SizingMode = void 0;
+(function (SizingMode) {
+    SizingMode["WidthAndHeight"] = "widthAndHeight";
+    SizingMode["WidthAndAspectRatio"] = "widthAndAspectRatio";
+    SizingMode["HeightAndAspectRatio"] = "heightAndAspectRatio";
+    SizingMode["ShorterDimensionAndAspectRatio"] = "shorterDimensionAndAspectRatio";
+})(exports.SizingMode || (exports.SizingMode = {}));
+
+class SizeWithUnitAndAspect {
+    constructor() {
+        this._widthAndHeight = null;
+        this._widthAndAspectRatio = null;
+        this._heightAndAspectRatio = null;
+        this._shorterDimensionAndAspectRatio = null;
+    }
+    get widthAndHeight() {
+        return this._widthAndHeight;
+    }
+    get widthAndAspectRatio() {
+        return this._widthAndAspectRatio;
+    }
+    get heightAndAspectRatio() {
+        return this._heightAndAspectRatio;
+    }
+    get shorterDimensionAndAspectRatio() {
+        return this._shorterDimensionAndAspectRatio;
+    }
+    get sizingMode() {
+        if (this.widthAndAspectRatio) {
+            return exports.SizingMode.WidthAndAspectRatio;
+        }
+        if (this.heightAndAspectRatio) {
+            return exports.SizingMode.HeightAndAspectRatio;
+        }
+        if (this.shorterDimensionAndAspectRatio) {
+            return exports.SizingMode.ShorterDimensionAndAspectRatio;
+        }
+        return exports.SizingMode.WidthAndHeight;
+    }
+    static sizeWithWidthAndHeight(widthAndHeight) {
+        const sizeWithUnitAndAspect = new SizeWithUnitAndAspect();
+        sizeWithUnitAndAspect._widthAndHeight = widthAndHeight;
+        return sizeWithUnitAndAspect;
+    }
+    static sizeWithWidthAndAspectRatio(width, aspectRatio) {
+        const sizeWithUnitAndAspect = new SizeWithUnitAndAspect();
+        sizeWithUnitAndAspect._widthAndAspectRatio = new SizeWithAspect(width, aspectRatio);
+        return sizeWithUnitAndAspect;
+    }
+    static sizeWithHeightAndAspectRatio(height, aspectRatio) {
+        const sizeWithUnitAndAspect = new SizeWithUnitAndAspect();
+        sizeWithUnitAndAspect._heightAndAspectRatio = new SizeWithAspect(height, aspectRatio);
+        return sizeWithUnitAndAspect;
+    }
+    static sizeWithShorterDimensionAndAspectRatio(shorterDimension, aspectRatio) {
+        const sizeWithUnitAndAspect = new SizeWithUnitAndAspect();
+        sizeWithUnitAndAspect._shorterDimensionAndAspectRatio = new SizeWithAspect(shorterDimension, aspectRatio);
+        return sizeWithUnitAndAspect;
+    }
+    static fromJSON(json) {
+        if (json.width && json.height) {
+            return this.sizeWithWidthAndHeight(new SizeWithUnit(NumberWithUnit.fromJSON(json.width), NumberWithUnit.fromJSON(json.height)));
+        }
+        else if (json.width && json.aspect) {
+            return this.sizeWithWidthAndAspectRatio(NumberWithUnit.fromJSON(json.width), json.aspect);
+        }
+        else if (json.height && json.aspect) {
+            return this.sizeWithHeightAndAspectRatio(NumberWithUnit.fromJSON(json.height), json.aspect);
+        }
+        else if (json.shorterDimension && json.aspect) {
+            return this.sizeWithShorterDimensionAndAspectRatio(NumberWithUnit.fromJSON(json.shorterDimension), json.aspect);
+        }
+        else {
+            throw new Error(`SizeWithUnitAndAspectJSON is malformed: ${JSON.stringify(json)}`);
+        }
+    }
+    toJSON() {
+        switch (this.sizingMode) {
+            case exports.SizingMode.WidthAndAspectRatio:
+                return {
+                    width: this.widthAndAspectRatio.size.toJSON(),
+                    aspect: this.widthAndAspectRatio.aspect,
+                };
+            case exports.SizingMode.HeightAndAspectRatio:
+                return {
+                    height: this.heightAndAspectRatio.size.toJSON(),
+                    aspect: this.heightAndAspectRatio.aspect,
+                };
+            case exports.SizingMode.ShorterDimensionAndAspectRatio:
+                return {
+                    shorterDimension: this.shorterDimensionAndAspectRatio.size.toJSON(),
+                    aspect: this.shorterDimensionAndAspectRatio.aspect,
+                };
+            default:
+                return {
+                    width: this.widthAndHeight.width.toJSON(),
+                    height: this.widthAndHeight.height.toJSON(),
+                };
+        }
+    }
+}
+__decorate$1([
+    nameForSerialization('widthAndHeight')
+], SizeWithUnitAndAspect.prototype, "_widthAndHeight", void 0);
+__decorate$1([
+    nameForSerialization('widthAndAspectRatio')
+], SizeWithUnitAndAspect.prototype, "_widthAndAspectRatio", void 0);
+__decorate$1([
+    nameForSerialization('heightAndAspectRatio')
+], SizeWithUnitAndAspect.prototype, "_heightAndAspectRatio", void 0);
+__decorate$1([
+    nameForSerialization('shorterDimensionAndAspectRatio')
+], SizeWithUnitAndAspect.prototype, "_shorterDimensionAndAspectRatio", void 0);
+
+class MarginsWithUnit extends DefaultSerializeable {
+    get left() {
+        return this._left;
+    }
+    get right() {
+        return this._right;
+    }
+    get top() {
+        return this._top;
+    }
+    get bottom() {
+        return this._bottom;
+    }
+    static fromJSON(json) {
+        return new MarginsWithUnit(NumberWithUnit.fromJSON(json.left), NumberWithUnit.fromJSON(json.right), NumberWithUnit.fromJSON(json.top), NumberWithUnit.fromJSON(json.bottom));
+    }
+    static get zero() {
+        return new MarginsWithUnit(new NumberWithUnit(0, exports.MeasureUnit.Pixel), new NumberWithUnit(0, exports.MeasureUnit.Pixel), new NumberWithUnit(0, exports.MeasureUnit.Pixel), new NumberWithUnit(0, exports.MeasureUnit.Pixel));
+    }
+    constructor(left, right, top, bottom) {
+        super();
+        this._left = left;
+        this._right = right;
+        this._top = top;
+        this._bottom = bottom;
+    }
+}
+__decorate$1([
+    nameForSerialization('left')
+], MarginsWithUnit.prototype, "_left", void 0);
+__decorate$1([
+    nameForSerialization('right')
+], MarginsWithUnit.prototype, "_right", void 0);
+__decorate$1([
+    nameForSerialization('top')
+], MarginsWithUnit.prototype, "_top", void 0);
+__decorate$1([
+    nameForSerialization('bottom')
+], MarginsWithUnit.prototype, "_bottom", void 0);
+
+class Color {
+    get redComponent() {
+        return this.hexadecimalString.slice(0, 2);
+    }
+    get greenComponent() {
+        return this.hexadecimalString.slice(2, 4);
+    }
+    get blueComponent() {
+        return this.hexadecimalString.slice(4, 6);
+    }
+    get alphaComponent() {
+        return this.hexadecimalString.slice(6, 8);
+    }
+    get red() {
+        return Color.hexToNumber(this.redComponent);
+    }
+    get green() {
+        return Color.hexToNumber(this.greenComponent);
+    }
+    get blue() {
+        return Color.hexToNumber(this.blueComponent);
+    }
+    get alpha() {
+        return Color.hexToNumber(this.alphaComponent);
+    }
+    static fromHex(hex) {
+        return new Color(Color.normalizeHex(hex));
+    }
+    static fromRGBA(red, green, blue, alpha = 1) {
+        const hexString = [red, green, blue, this.normalizeAlpha(alpha)]
+            .reduce((hex, colorComponent) => hex + this.numberToHex(colorComponent), '');
+        return new Color(hexString);
+    }
+    static hexToNumber(hex) {
+        return parseInt(hex, 16);
+    }
+    static fromJSON(json) {
+        return Color.fromHex(json);
+    }
+    static numberToHex(x) {
+        x = Math.round(x);
+        let hex = x.toString(16);
+        if (hex.length === 1) {
+            hex = '0' + hex;
+        }
+        return hex.toUpperCase();
+    }
+    static normalizeHex(hex) {
+        // remove leading #
+        if (hex[0] === '#') {
+            hex = hex.slice(1);
+        }
+        // double digits if single digit
+        if (hex.length < 6) {
+            hex = hex.split('').map(s => s + s).join('');
+        }
+        // add alpha if missing
+        if (hex.length === 6) {
+            hex = hex + 'FF';
+        }
+        return '#' + hex.toUpperCase();
+    }
+    static normalizeAlpha(alpha) {
+        if (alpha > 0 && alpha <= 1) {
+            return 255 * alpha;
+        }
+        return alpha;
+    }
+    constructor(hex) {
+        this.hexadecimalString = hex;
+    }
+    withAlpha(alpha) {
+        const newHex = this.hexadecimalString.slice(0, 6) + Color.numberToHex(Color.normalizeAlpha(alpha));
+        return Color.fromHex(newHex);
+    }
+    toJSON() {
+        return this.hexadecimalString;
+    }
+}
+
+class Brush extends DefaultSerializeable {
+    static get transparent() {
+        const transparentBlack = Color.fromRGBA(255, 255, 255, 0);
+        return new Brush(transparentBlack, transparentBlack, 0);
+    }
+    get fillColor() {
+        return this.fill.color;
+    }
+    get strokeColor() {
+        return this.stroke.color;
+    }
+    get strokeWidth() {
+        return this.stroke.width;
+    }
+    get copy() {
+        return new Brush(this.fillColor, this.strokeColor, this.strokeWidth);
+    }
+    static fromJSON(brushJson) {
+        return new Brush(Color.fromHex(brushJson.fillColor), Color.fromHex(brushJson.strokeColor), brushJson.strokeWidth);
+    }
+    constructor(fillColor = Brush.defaults.fillColor, strokeColor = Brush.defaults.strokeColor, strokeWidth = Brush.defaults.strokeWidth) {
+        super();
+        this.fill = { color: fillColor };
+        this.stroke = { color: strokeColor, width: strokeWidth };
+    }
+}
+
+exports.Anchor = void 0;
+(function (Anchor) {
+    Anchor["TopLeft"] = "topLeft";
+    Anchor["TopCenter"] = "topCenter";
+    Anchor["TopRight"] = "topRight";
+    Anchor["CenterLeft"] = "centerLeft";
+    Anchor["Center"] = "center";
+    Anchor["CenterRight"] = "centerRight";
+    Anchor["BottomLeft"] = "bottomLeft";
+    Anchor["BottomCenter"] = "bottomCenter";
+    Anchor["BottomRight"] = "bottomRight";
+})(exports.Anchor || (exports.Anchor = {}));
+
+exports.Orientation = void 0;
+(function (Orientation) {
+    Orientation["Unknown"] = "unknown";
+    Orientation["Portrait"] = "portrait";
+    Orientation["PortraitUpsideDown"] = "portraitUpsideDown";
+    Orientation["LandscapeRight"] = "landscapeRight";
+    Orientation["LandscapeLeft"] = "landscapeLeft";
+})(exports.Orientation || (exports.Orientation = {}));
+
+exports.Direction = void 0;
+(function (Direction) {
+    Direction["None"] = "none";
+    Direction["Horizontal"] = "horizontal";
+    Direction["LeftToRight"] = "leftToRight";
+    Direction["RightToLeft"] = "rightToLeft";
+    Direction["Vertical"] = "vertical";
+    Direction["TopToBottom"] = "topToBottom";
+    Direction["BottomToTop"] = "bottomToTop";
+})(exports.Direction || (exports.Direction = {}));
+
+exports.ScanIntention = void 0;
+(function (ScanIntention) {
+    ScanIntention["Manual"] = "manual";
+    ScanIntention["Smart"] = "smart";
+    ScanIntention["SmartSelection"] = "smartSelection";
+})(exports.ScanIntention || (exports.ScanIntention = {}));
+
+class EventDataParser {
+    static parse(data) {
+        if (data == null) {
+            return null;
+        }
+        return JSON.parse(data);
+    }
+}
+
+class Observable extends DefaultSerializeable {
+    constructor() {
+        super(...arguments);
+        this.listeners = [];
+    }
+    addListener(listener) {
+        if (!this.listeners.includes(listener)) {
+            this.listeners.push(listener);
+        }
+    }
+    removeListener(listener) {
+        this.listeners = this.listeners.filter(l => l !== listener);
+    }
+    notifyListeners(property, value) {
+        this.listeners.forEach(listener => listener(property, value));
+    }
+}
+__decorate$1([
+    ignoreFromSerialization
+], Observable.prototype, "listeners", void 0);
+
+class HtmlElementPosition {
+    constructor(top, left) {
+        this.top = 0;
+        this.left = 0;
+        this.top = top;
+        this.left = left;
+    }
+    didChangeComparedTo(other) {
+        if (!other)
+            return true;
+        return this.top !== other.top || this.left !== other.left;
+    }
+}
+class HtmlElementSize {
+    constructor(width, height) {
+        this.width = width;
+        this.height = height;
+    }
+    didChangeComparedTo(other) {
+        if (!other)
+            return true;
+        return this.width !== other.width || this.height !== other.height;
+    }
+}
+class HTMLElementState {
+    constructor() {
+        this.isShown = false;
+        this.position = null;
+        this.size = null;
+        this.shouldBeUnderContent = false;
+    }
+    get isValid() {
+        return this.isShown !== undefined && this.isShown !== null
+            && this.position !== undefined && this.position !== null
+            && this.size !== undefined && this.size !== null
+            && this.shouldBeUnderContent !== undefined && this.shouldBeUnderContent !== null;
+    }
+    didChangeComparedTo(other) {
+        var _a, _b, _c, _d;
+        if (!other)
+            return true;
+        const positionChanged = (_b = (_a = this.position) === null || _a === void 0 ? void 0 : _a.didChangeComparedTo(other.position)) !== null && _b !== void 0 ? _b : (this.position !== other.position);
+        const sizeChanged = (_d = (_c = this.size) === null || _c === void 0 ? void 0 : _c.didChangeComparedTo(other.size)) !== null && _d !== void 0 ? _d : (this.size !== other.size);
+        return positionChanged || sizeChanged || this.shouldBeUnderContent !== other.shouldBeUnderContent;
+    }
+}
+
+class BaseController {
+    get _proxy() {
+        return this._cachedProxy;
+    }
+    constructor(proxyName) {
+        this._cachedProxy = FactoryMaker.createInstance(proxyName);
+    }
+}
+
+/*
+ * This file is part of the Scandit Data Capture SDK
+ *
+ * Copyright (C) 2025- Scandit AG. All rights reserved.
+ */
+/**
+ * Adapter class for Core operations.
+ * Provides typed methods that internally call $executeCore.
+ * Generated from schema definition to ensure parameter and method name consistency.
+ */
+class CoreProxyAdapter {
+    constructor(proxy) {
+        this.proxy = proxy;
+    }
+    /**
+     * Gets the camera state for a given position
+     * @param cameraPosition Camera position as JSON string
+     */
+    getCameraState(_a) {
+        return __awaiter$1(this, arguments, void 0, function* ({ cameraPosition }) {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'getCameraState',
+                isEventRegistration: false,
+                cameraPosition,
+            });
+            return JSON.parse(result.data);
+        });
+    }
+    /**
+     * Switches the camera to the desired state
+     * @param stateJson Desired camera state as JSON string
+     */
+    switchCameraToDesiredState(_a) {
+        return __awaiter$1(this, arguments, void 0, function* ({ stateJson }) {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'switchCameraToDesiredState',
+                isEventRegistration: false,
+                stateJson,
+            });
+            return result;
+        });
+    }
+    /**
+     * Checks if torch is available for the given camera position
+     * @param cameraPosition Camera position as JSON string
+     */
+    isTorchAvailable(_a) {
+        return __awaiter$1(this, arguments, void 0, function* ({ cameraPosition }) {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'isTorchAvailable',
+                isEventRegistration: false,
+                cameraPosition,
+            });
+            return result.data === 'true';
+        });
+    }
+    /**
+     * Registers a persistent listener for frame source state change events
+     */
+    registerFrameSourceListener() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'registerFrameSourceListener',
+                isEventRegistration: true,
+            });
+            return result;
+        });
+    }
+    /**
+     * Unregisters the frame source event listener
+     */
+    unregisterFrameSourceListener() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'unregisterFrameSourceListener',
+                isEventRegistration: false,
+            });
+            return result;
+        });
+    }
+    /**
+     * Gets the last frame data by frame ID as JSON
+     * @param frameId Unique frame identifier
+     */
+    getLastFrameAsJson(_a) {
+        return __awaiter$1(this, arguments, void 0, function* ({ frameId }) {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'getLastFrameAsJson',
+                isEventRegistration: false,
+                frameId,
+            });
+            return result.data;
+        });
+    }
+    /**
+     * Gets the last frame data by frame ID as JSON, or null if not found
+     * @param frameId Unique frame identifier
+     */
+    getLastFrameOrNullAsJson(_a) {
+        return __awaiter$1(this, arguments, void 0, function* ({ frameId }) {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'getLastFrameOrNullAsJson',
+                isEventRegistration: false,
+                frameId,
+            });
+            if (result === null)
+                return null;
+            return result.data;
+        });
+    }
+    /**
+     * Creates a DataCaptureContext from JSON
+     * @param contextJson DataCaptureContext configuration as JSON string
+     */
+    createContextFromJson(_a) {
+        return __awaiter$1(this, arguments, void 0, function* ({ contextJson }) {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'createContextFromJson',
+                isEventRegistration: false,
+                contextJson,
+            });
+            return result;
+        });
+    }
+    /**
+     * Updates a DataCaptureContext from JSON
+     * @param contextJson Updated DataCaptureContext configuration as JSON string
+     */
+    updateContextFromJson(_a) {
+        return __awaiter$1(this, arguments, void 0, function* ({ contextJson }) {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'updateContextFromJson',
+                isEventRegistration: false,
+                contextJson,
+            });
+            return result;
+        });
+    }
+    /**
+     * Subscribes to context events with persistent listener
+     */
+    subscribeContextListener() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'subscribeContextListener',
+                isEventRegistration: true,
+            });
+            return result;
+        });
+    }
+    /**
+     * Unsubscribes from context events
+     */
+    unsubscribeContextListener() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'unsubscribeContextListener',
+                isEventRegistration: false,
+            });
+            return result;
+        });
+    }
+    /**
+     * Adds a mode to the DataCaptureContext
+     * @param modeJson Mode configuration as JSON string
+     */
+    addModeToContext(_a) {
+        return __awaiter$1(this, arguments, void 0, function* ({ modeJson }) {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'addModeToContext',
+                isEventRegistration: false,
+                modeJson,
+            });
+            return result;
+        });
+    }
+    /**
+     * Removes a mode from the DataCaptureContext
+     * @param modeJson Mode configuration as JSON string
+     */
+    removeModeFromContext(_a) {
+        return __awaiter$1(this, arguments, void 0, function* ({ modeJson }) {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'removeModeFromContext',
+                isEventRegistration: false,
+                modeJson,
+            });
+            return result;
+        });
+    }
+    /**
+     * Removes all modes from the DataCaptureContext
+     */
+    removeAllModes() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'removeAllModes',
+                isEventRegistration: false,
+            });
+            return result;
+        });
+    }
+    /**
+     * Gets open source software license information
+     */
+    getOpenSourceSoftwareLicenseInfo() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'getOpenSourceSoftwareLicenseInfo',
+                isEventRegistration: false,
+            });
+            return result.data;
+        });
+    }
+    /**
+     * Disposes the DataCaptureContext and releases resources
+     */
+    disposeContext() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'disposeContext',
+                isEventRegistration: false,
+            });
+            return result;
+        });
+    }
+    /**
+     * Converts a point from frame coordinates to view coordinates
+     * @param viewId View identifier
+     * @param pointJson Point in frame coordinates as JSON string
+     */
+    viewPointForFramePoint(_a) {
+        return __awaiter$1(this, arguments, void 0, function* ({ viewId, pointJson }) {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'viewPointForFramePoint',
+                isEventRegistration: false,
+                viewId,
+                pointJson,
+            });
+            return result.data;
+        });
+    }
+    /**
+     * Converts a quadrilateral from frame coordinates to view coordinates
+     * @param viewId View identifier
+     * @param quadrilateralJson Quadrilateral in frame coordinates as JSON string
+     */
+    viewQuadrilateralForFrameQuadrilateral(_a) {
+        return __awaiter$1(this, arguments, void 0, function* ({ viewId, quadrilateralJson, }) {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'viewQuadrilateralForFrameQuadrilateral',
+                isEventRegistration: false,
+                viewId,
+                quadrilateralJson,
+            });
+            return result.data;
+        });
+    }
+    /**
+     * Registers persistent event listener for view events
+     * @param viewId View identifier
+     */
+    registerListenerForViewEvents(_a) {
+        return __awaiter$1(this, arguments, void 0, function* ({ viewId }) {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'registerListenerForViewEvents',
+                isEventRegistration: true,
+                viewId,
+            });
+            return result;
+        });
+    }
+    /**
+     * Unregisters the view event listener
+     * @param viewId View identifier
+     */
+    unregisterListenerForViewEvents(_a) {
+        return __awaiter$1(this, arguments, void 0, function* ({ viewId }) {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'unregisterListenerForViewEvents',
+                isEventRegistration: false,
+                viewId,
+            });
+            return result;
+        });
+    }
+    /**
+     * Updates the DataCaptureView configuration
+     * @param viewJson Updated view configuration as JSON string
+     */
+    updateDataCaptureView(_a) {
+        return __awaiter$1(this, arguments, void 0, function* ({ viewJson }) {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'updateDataCaptureView',
+                isEventRegistration: false,
+                viewJson,
+            });
+            return result;
+        });
+    }
+    /**
+     * Emits haptic/audio feedback
+     * @param feedbackJson Feedback configuration as JSON string
+     */
+    emitFeedback(_a) {
+        return __awaiter$1(this, arguments, void 0, function* ({ feedbackJson }) {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'emitFeedback',
+                isEventRegistration: false,
+                feedbackJson,
+            });
+            return result;
+        });
+    }
+}
+
+class ImageFrameSourceController extends BaseController {
+    constructor(imageFrameSource) {
+        super('CoreProxy');
+        this.handleDidChangeStateEventWrapper = (ev) => {
+            return this.handleDidChangeStateEvent(ev);
+        };
+        this.imageFrameSource = imageFrameSource;
+        this.adapter = new CoreProxyAdapter(this._proxy);
+        void this.subscribeListener();
+    }
+    get privateImageFrameSource() {
+        return this.imageFrameSource;
+    }
+    getCurrentState() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            return yield this.adapter.getCameraState({
+                cameraPosition: JSON.stringify(this.privateImageFrameSource.position),
+            });
+        });
+    }
+    switchCameraToDesiredState(desiredStateJson) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            yield this.adapter.switchCameraToDesiredState({
+                stateJson: desiredStateJson,
+            });
+        });
+    }
+    subscribeListener() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            yield this.adapter.registerFrameSourceListener();
+            this._proxy.subscribeForEvents([FrameSourceListenerEvents.didChangeState]);
+            this._proxy.eventEmitter.on(FrameSourceListenerEvents.didChangeState, this.handleDidChangeStateEventWrapper);
+        });
+    }
+    unsubscribeListener() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            yield this.adapter.unregisterFrameSourceListener();
+            this._proxy.unsubscribeFromEvents([FrameSourceListenerEvents.didChangeState]);
+            this._proxy.eventEmitter.off(FrameSourceListenerEvents.didChangeState, this.handleDidChangeStateEventWrapper);
+        });
+    }
+    dispose() {
+        void this.unsubscribeListener();
+        this._proxy.dispose();
+    }
+    handleDidChangeStateEvent(ev) {
+        const event = EventDataParser.parse(ev.data);
+        if (event === null) {
+            console.error('ImageFrameSourceController didChangeState payload is null');
+            return;
+        }
+        const newState = event.state;
+        this.privateImageFrameSource.listeners.forEach(listener => {
+            if (listener.didChangeState) {
+                listener.didChangeState(this.imageFrameSource, newState);
+            }
+        });
+    }
+}
+
+class ImageFrameSource extends DefaultSerializeable {
+    set context(newContext) {
+        if (newContext == null) {
+            void this.controller.unsubscribeListener();
+        }
+        else if (this._context == null) {
+            void this.controller.subscribeListener();
+        }
+        this._context = newContext;
+    }
+    get context() {
+        return this._context;
+    }
+    get desiredState() {
+        return this._desiredState;
+    }
+    static create(image) {
+        const imageFrameSource = new ImageFrameSource();
+        imageFrameSource.image = image;
+        return imageFrameSource;
+    }
+    static fromJSON(json) {
+        return ImageFrameSource.create(json.image);
+    }
+    constructor() {
+        super();
+        this.type = 'image';
+        this.image = '';
+        this._id = `${Date.now()}`;
+        this._desiredState = exports.FrameSourceState.Off;
+        this.listeners = [];
+        this._context = null;
+        this.controller = new ImageFrameSourceController(this);
+    }
+    switchToDesiredState(state) {
+        this._desiredState = state;
+        return this.controller.switchCameraToDesiredState(state);
+    }
+    addListener(listener) {
+        if (listener == null) {
+            return;
+        }
+        if (this.listeners.includes(listener)) {
+            return;
+        }
+        this.listeners.push(listener);
+    }
+    removeListener(listener) {
+        if (listener == null) {
+            return;
+        }
+        if (!this.listeners.includes(listener)) {
+            return;
+        }
+        this.listeners.splice(this.listeners.indexOf(listener), 1);
+    }
+    getCurrentState() {
+        return this.controller.getCurrentState();
+    }
+    didChange() {
+        if (this.context) {
+            return this.context.update();
+        }
+        else {
+            return Promise.resolve();
+        }
+    }
+}
+__decorate$1([
+    nameForSerialization('id')
+], ImageFrameSource.prototype, "_id", void 0);
+__decorate$1([
+    nameForSerialization('desiredState')
+], ImageFrameSource.prototype, "_desiredState", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], ImageFrameSource.prototype, "listeners", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], ImageFrameSource.prototype, "_context", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], ImageFrameSource.prototype, "controller", void 0);
+
+class PrivateFrameData {
+    get imageBuffers() {
+        return this._imageBuffers;
+    }
+    get orientation() {
+        return this._orientation;
+    }
+    static fromJSON(json) {
+        const frameData = new PrivateFrameData();
+        frameData._imageBuffers = json.imageBuffers.map((imageBufferJSON) => {
+            const imageBuffer = new ImageBuffer();
+            imageBuffer._width = imageBufferJSON.width;
+            imageBuffer._height = imageBufferJSON.height;
+            imageBuffer._data = imageBufferJSON.data;
+            return imageBuffer;
+        });
+        frameData._orientation = json.orientation;
+        return frameData;
+    }
+    static empty() {
+        const frameData = new PrivateFrameData();
+        frameData._imageBuffers = [];
+        frameData._orientation = 90;
+        return frameData;
+    }
+}
+
+exports.TorchState = void 0;
+(function (TorchState) {
+    TorchState["On"] = "on";
+    TorchState["Off"] = "off";
+    TorchState["Auto"] = "auto";
+})(exports.TorchState || (exports.TorchState = {}));
+
+/**
+ * Camera lifecycle and operation handling:
+ *
+ * Phase 1 - Initial State (before native creation starts):
+ *   - Camera object exists in TypeScript but not yet being created on native side
+ *   - State changes (torch, desired state, settings) only update TypeScript properties
+ *   - No native calls are triggered
+ *
+ * Phase 2 - Native Creation In Progress (after setFrameSource, before context set):
+ *   - setFrameSource() called on DataCaptureContext, triggering setNativeFrameSourceIsBeingCreated()
+ *   - A promise is created that will resolve when the native camera is ready
+ *   - State changes during this phase await the native ready promise before executing
+ *   - Native camera is created asynchronously
+ *
+ * Phase 3 - Active State (after context set):
+ *   - Native camera is ready and available
+ *   - The native ready promise is resolved
+ *   - All state changes execute immediately on native side
+ */
+class Camera extends DefaultSerializeable {
+    static get coreDefaults() {
+        return getCoreDefaults();
+    }
+    static create(position, settings, desiredTorchState, desiredState) {
+        const cameraPosition = position || Camera.coreDefaults.Camera.defaultPosition;
+        if (!cameraPosition) {
+            return null;
+        }
+        const existingCamera = Camera._cameraInstances.get(cameraPosition);
+        if (existingCamera) {
+            existingCamera.resetPhaseState();
+            if (settings !== undefined) {
+                existingCamera.settings = settings;
+            }
+            if (desiredTorchState !== undefined) {
+                existingCamera._desiredTorchState = desiredTorchState;
+                void existingCamera.didChange();
+            }
+            if (desiredState !== undefined) {
+                existingCamera._desiredState = desiredState;
+                void existingCamera.controller.switchCameraToDesiredState(desiredState);
+            }
+            return existingCamera;
+        }
+        if (!Camera.coreDefaults.Camera.availablePositions.includes(cameraPosition)) {
+            return null;
+        }
+        const camera = new Camera(cameraPosition, settings, desiredTorchState, desiredState);
+        Camera._cameraInstances.set(cameraPosition, camera);
+        return camera;
+    }
+    static withSettings(settings) {
+        return Camera.create(undefined, settings);
+    }
+    static asPositionWithSettings(cameraPosition, settings) {
+        return Camera.create(cameraPosition, settings);
+    }
+    static atPosition(cameraPosition) {
+        if (!Camera.coreDefaults.Camera.availablePositions.includes(cameraPosition)) {
+            return null;
+        }
+        const existingCamera = Camera._cameraInstances.get(cameraPosition);
+        if (existingCamera) {
+            return existingCamera;
+        }
+        return Camera.create(cameraPosition);
+    }
+    constructor(position, settings, desiredTorchState, desiredState) {
+        super();
+        this.type = 'camera';
+        this.settings = null;
+        this._desiredTorchState = exports.TorchState.Off;
+        this._desiredState = exports.FrameSourceState.Off;
+        this.currentCameraState = exports.FrameSourceState.Off;
+        this.listeners = [];
+        this._context = null;
+        this.nativeReadyResolver = null;
+        this.nativeReadyRejecter = null;
+        this.nativeReadyPromise = null;
+        this.nativeReadyTimeout = null;
+        this.position = position || Camera.coreDefaults.Camera.defaultPosition;
+        this.settings = settings || null;
+        this._desiredTorchState = desiredTorchState || exports.TorchState.Off;
+        this._desiredState = desiredState || exports.FrameSourceState.Off;
+        this.controller = new CameraController(this);
+    }
+    switchToDesiredState(state) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            this._desiredState = state;
+            if (this.nativeReadyPromise) {
+                // Phase 2: Wait for native camera to be ready, then switch state
+                yield this.nativeReadyPromise;
+                yield this.controller.switchCameraToDesiredState(state);
+                return;
+            }
+            if (!this.isActiveCamera) {
+                // Phase 1: Not yet added to context
+                console.warn('The current camera is not added to the DataCaptureContext. Add camera to the DataCaptureContext first.');
+                return;
+            }
+            // Phase 3: Execute immediately
+            yield this.controller.switchCameraToDesiredState(state);
+        });
+    }
+    getCurrentState() {
+        return Promise.resolve(this.currentCameraState);
+    }
+    getIsTorchAvailable() {
+        return this.controller.getIsTorchAvailable();
+    }
+    addListener(listener) {
+        if (listener == null) {
+            return;
+        }
+        if (this.listeners.includes(listener)) {
+            return;
+        }
+        this.listeners.push(listener);
+    }
+    removeListener(listener) {
+        if (listener == null) {
+            return;
+        }
+        if (!this.listeners.includes(listener)) {
+            return;
+        }
+        this.listeners.splice(this.listeners.indexOf(listener), 1);
+    }
+    applySettings(settings) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            this.settings = settings;
+            if (this.nativeReadyPromise) {
+                // Phase 2: Wait for native camera to be ready, then apply settings
+                yield this.nativeReadyPromise;
+                yield this.didChange();
+            }
+            else if (this.isActiveCamera) {
+                // Phase 3: Execute immediately
+                yield this.didChange();
+            }
+            // Phase 1: Just update the property, no action needed
+        });
+    }
+    set context(newContext) {
+        this._context = newContext;
+        if (newContext) {
+            // Phase 3: Native camera is ready, resolve the promise so waiting operations can proceed
+            if (this.nativeReadyTimeout) {
+                clearTimeout(this.nativeReadyTimeout);
+                this.nativeReadyTimeout = null;
+            }
+            if (this.nativeReadyResolver) {
+                this.nativeReadyResolver();
+                this.nativeReadyResolver = null;
+                this.nativeReadyRejecter = null;
+                this.nativeReadyPromise = null;
+            }
+        }
+        else {
+            // When context is removed, reset everything
+            if (this.nativeReadyTimeout) {
+                clearTimeout(this.nativeReadyTimeout);
+                this.nativeReadyTimeout = null;
+            }
+            this.nativeReadyResolver = null;
+            this.nativeReadyRejecter = null;
+            this.nativeReadyPromise = null;
+        }
+    }
+    get context() {
+        return this._context;
+    }
+    setNativeFrameSourceIsBeingCreated() {
+        this.nativeReadyPromise = new Promise((resolve, reject) => {
+            this.nativeReadyResolver = resolve;
+            this.nativeReadyRejecter = reject;
+            this.nativeReadyTimeout = setTimeout(() => {
+                this.nativeReadyTimeout = null;
+                if (this.nativeReadyRejecter) {
+                    this.nativeReadyRejecter(new Error('Camera native initialization timed out after 5 seconds'));
+                    this.nativeReadyResolver = null;
+                    this.nativeReadyRejecter = null;
+                    this.nativeReadyPromise = null;
+                }
+            }, 5000);
+        });
+    }
+    get isActiveCamera() {
+        return this._context !== null;
+    }
+    static get default() {
+        const defaultPosition = Camera.coreDefaults.Camera.defaultPosition;
+        if (!defaultPosition) {
+            return null;
+        }
+        return Camera.atPosition(defaultPosition);
+    }
+    get desiredState() {
+        return this._desiredState;
+    }
+    set desiredTorchState(desiredTorchState) {
+        this._desiredTorchState = desiredTorchState;
+        if (this.nativeReadyPromise) {
+            // Phase 2: Wait for native camera to be ready, then update
+            void this.nativeReadyPromise.then(() => this.didChange());
+        }
+        else if (this.isActiveCamera) {
+            // Phase 3: Execute immediately
+            void this.didChange();
+        }
+        // Phase 1: Just update the property, no action needed
+    }
+    get desiredTorchState() {
+        return this._desiredTorchState;
+    }
+    didChange() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            if (this.context) {
+                yield this.context.update();
+            }
+        });
+    }
+    resetPhaseState() {
+        if (this.nativeReadyTimeout) {
+            clearTimeout(this.nativeReadyTimeout);
+            this.nativeReadyTimeout = null;
+        }
+        this.nativeReadyResolver = null;
+        this.nativeReadyRejecter = null;
+        this.nativeReadyPromise = null;
+    }
+}
+Camera._cameraInstances = new Map();
+__decorate$1([
+    ignoreFromSerialization
+], Camera.prototype, "controller", void 0);
+__decorate$1([
+    serializationDefault({})
+], Camera.prototype, "settings", void 0);
+__decorate$1([
+    nameForSerialization('desiredTorchState')
+], Camera.prototype, "_desiredTorchState", void 0);
+__decorate$1([
+    nameForSerialization('desiredState')
+], Camera.prototype, "_desiredState", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], Camera.prototype, "currentCameraState", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], Camera.prototype, "listeners", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], Camera.prototype, "_context", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], Camera.prototype, "nativeReadyResolver", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], Camera.prototype, "nativeReadyRejecter", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], Camera.prototype, "nativeReadyPromise", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], Camera.prototype, "nativeReadyTimeout", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], Camera, "_cameraInstances", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], Camera, "coreDefaults", null);
+
+class CameraOwnershipManager {
+    static getInstance() {
+        if (!CameraOwnershipManager.instance) {
+            CameraOwnershipManager.instance = new CameraOwnershipManager();
+        }
+        return CameraOwnershipManager.instance;
+    }
+    constructor() {
+        this.owners = new Map();
+        this.waitingQueue = new Map();
+        this.protectedCameras = new Set();
+    }
+    requestOwnership(position, owner) {
+        const currentOwner = this.owners.get(position);
+        if (currentOwner && currentOwner.id !== owner.id) {
+            return false; // Already owned by someone else
+        }
+        this.owners.set(position, owner);
+        this.enableProtectionForOwner(position, owner);
+        return true;
+    }
+    requestOwnershipAsync(position, owner, timeoutMs) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            // Try immediate acquisition first
+            if (this.requestOwnership(position, owner)) {
+                return true;
+            }
+            // If not available, wait in queue
+            return new Promise((resolve) => {
+                const request = { owner, resolve };
+                if (!this.waitingQueue.has(position)) {
+                    this.waitingQueue.set(position, []);
+                }
+                this.waitingQueue.get(position).push(request);
+                // Optional timeout
+                if (timeoutMs && timeoutMs > 0) {
+                    setTimeout(() => {
+                        this.removeFromQueue(position, request);
+                        resolve(false); // Timeout - ownership not acquired
+                    }, timeoutMs);
+                }
+            });
+        });
+    }
+    releaseOwnership(position, owner) {
+        const currentOwner = this.owners.get(position);
+        if (!currentOwner || currentOwner.id !== owner.id) {
+            return false; // Not the owner
+        }
+        this.owners.delete(position);
+        this.disableProtectionForPosition(position);
+        this.processWaitingQueue(position);
+        return true;
+    }
+    isOwner(position, owner) {
+        const currentOwner = this.owners.get(position);
+        return (currentOwner === null || currentOwner === void 0 ? void 0 : currentOwner.id) === owner.id;
+    }
+    getCurrentOwner(position) {
+        return this.owners.get(position) || null;
+    }
+    checkOwnership(position, owner) {
+        return this.isOwner(position, owner);
+    }
+    getOwnedPosition(owner) {
+        for (const [position, currentOwner] of this.owners.entries()) {
+            if (currentOwner.id === owner.id) {
+                return position;
+            }
+        }
+        return null;
+    }
+    getAllOwnedPositions(owner) {
+        const positions = [];
+        for (const [position, currentOwner] of this.owners.entries()) {
+            if (currentOwner.id === owner.id) {
+                positions.push(position);
+            }
+        }
+        return positions;
+    }
+    enableProtectionForOwner(position, owner) {
+        const camera = Camera.atPosition(position);
+        if (!camera || this.protectedCameras.has(camera)) {
+            return; // Camera not available or already protected
+        }
+        this.protectCameraForOwner(camera, position, owner);
+        this.protectedCameras.add(camera);
+    }
+    disableProtectionForPosition(position) {
+        const camera = Camera.atPosition(position);
+        if (!camera || !this.protectedCameras.has(camera)) {
+            return;
+        }
+        this.unprotectCamera(camera);
+        this.protectedCameras.delete(camera);
+    }
+    processWaitingQueue(position) {
+        const queue = this.waitingQueue.get(position);
+        if (!queue || queue.length === 0) {
+            return;
+        }
+        // Give ownership to the first in queue
+        const nextRequest = queue.shift();
+        this.owners.set(position, nextRequest.owner);
+        this.enableProtectionForOwner(position, nextRequest.owner);
+        nextRequest.resolve(true);
+        // Clean up empty queue
+        if (queue.length === 0) {
+            this.waitingQueue.delete(position);
+        }
+    }
+    removeFromQueue(position, requestToRemove) {
+        const queue = this.waitingQueue.get(position);
+        if (!queue)
+            return;
+        const index = queue.indexOf(requestToRemove);
+        if (index > -1) {
+            queue.splice(index, 1);
+        }
+        if (queue.length === 0) {
+            this.waitingQueue.delete(position);
+        }
+    }
+    protectCameraForOwner(camera, position, _owner) {
+        var _a, _b, _c, _d;
+        const originalSwitchToDesiredState = camera.switchToDesiredState.bind(camera);
+        const originalApplySettings = camera.applySettings.bind(camera);
+        const originalSetDesiredTorchState = (_b = (_a = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(camera), 'desiredTorchState')) === null || _a === void 0 ? void 0 : _a.set) === null || _b === void 0 ? void 0 : _b.bind(camera);
+        // Protect switchToDesiredState - only owner can call it
+        camera.switchToDesiredState = (state) => __awaiter$1(this, void 0, void 0, function* () {
+            const currentOwner = this.getCurrentOwner(position);
+            if (!currentOwner) {
+                throw new Error(`Camera operation denied: No owner for camera at ${position}`);
+            }
+            // Allow operation - the owner is the only one who should have access to this camera instance
+            return originalSwitchToDesiredState(state);
+        });
+        // Protect applySettings - only owner can call it
+        camera.applySettings = (settings) => __awaiter$1(this, void 0, void 0, function* () {
+            const currentOwner = this.getCurrentOwner(position);
+            if (!currentOwner) {
+                throw new Error(`Camera operation denied: No owner for camera at ${position}`);
+            }
+            return originalApplySettings(settings);
+        });
+        // Protect desiredTorchState setter - only owner can set it
+        if (originalSetDesiredTorchState) {
+            Object.defineProperty(camera, 'desiredTorchState', {
+                set: (value) => {
+                    const currentOwner = this.getCurrentOwner(position);
+                    if (!currentOwner) {
+                        throw new Error(`Camera operation denied: No owner for camera at ${position}`);
+                    }
+                    originalSetDesiredTorchState(value);
+                },
+                get: (_d = (_c = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(camera), 'desiredTorchState')) === null || _c === void 0 ? void 0 : _c.get) === null || _d === void 0 ? void 0 : _d.bind(camera),
+                configurable: true
+            });
+        }
+        // Store originals for restoration
+        camera.__originalMethods = {
+            switchToDesiredState: originalSwitchToDesiredState,
+            applySettings: originalApplySettings,
+            setDesiredTorchState: originalSetDesiredTorchState
+        };
+    }
+    unprotectCamera(camera) {
+        var _a, _b;
+        const originals = camera.__originalMethods;
+        if (!originals)
+            return;
+        // Restore original methods
+        camera.switchToDesiredState = originals.switchToDesiredState;
+        camera.applySettings = originals.applySettings;
+        if (originals.setDesiredTorchState) {
+            Object.defineProperty(camera, 'desiredTorchState', {
+                set: originals.setDesiredTorchState,
+                get: (_b = (_a = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(camera), 'desiredTorchState')) === null || _a === void 0 ? void 0 : _a.get) === null || _b === void 0 ? void 0 : _b.bind(camera),
+                configurable: true
+            });
+        }
+        delete camera.__originalMethods;
+    }
+}
+
+class CameraOwnershipHelper {
+    /**
+     * Get camera instance for the owner (only works if you own it)
+     */
+    static getCamera(position, owner) {
+        // Check ownership
+        if (!this.ownershipManager.checkOwnership(position, owner)) {
+            console.warn(`Camera access denied: ${owner.id} does not own camera at ${position}`);
+            return null;
+        }
+        return Camera.atPosition(position);
+    }
+    /**
+     * Safely execute camera operations (only works if you own the camera)
+     */
+    static withCamera(position, owner, operation) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            const camera = this.getCamera(position, owner);
+            if (!camera) {
+                return null;
+            }
+            try {
+                const result = yield operation(camera);
+                return result;
+            }
+            catch (error) {
+                console.error(`Camera operation failed for ${owner.id}:`, error);
+                throw error;
+            }
+        });
+    }
+    /**
+     * Execute camera operations, waiting for ownership if necessary
+     */
+    static withCameraWhenAvailable(position, owner, operation, timeoutMs) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            // Try to get ownership, wait if necessary
+            const acquired = yield this.requestOwnership(position, owner, timeoutMs);
+            if (!acquired) {
+                console.warn(`Could not acquire camera ownership for ${owner.id} within timeout`);
+                return null;
+            }
+            const camera = Camera.atPosition(position);
+            if (!camera) {
+                console.warn(`Camera not available at position ${position}`);
+                return null;
+            }
+            try {
+                const result = yield operation(camera);
+                return result;
+            }
+            catch (error) {
+                console.error(`Camera operation failed for ${owner.id}:`, error);
+                throw error;
+            }
+        });
+    }
+    /**
+     * Request ownership and wait if necessary
+     */
+    static requestOwnership(position, owner, timeoutMs) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            return this.ownershipManager.requestOwnershipAsync(position, owner, timeoutMs);
+        });
+    }
+    /**
+     * Release ownership
+     */
+    static releaseOwnership(position, owner) {
+        return this.ownershipManager.releaseOwnership(position, owner);
+    }
+    /**
+     * Check if owner has ownership
+     */
+    static hasOwnership(position, owner) {
+        return this.ownershipManager.checkOwnership(position, owner);
+    }
+    /**
+     * Get the camera position currently owned by the owner (if unknown)
+     */
+    static getOwnedPosition(owner) {
+        return this.ownershipManager.getOwnedPosition(owner);
+    }
+    /**
+     * Get all camera positions currently owned by the owner
+     */
+    static getAllOwnedPositions(owner) {
+        return this.ownershipManager.getAllOwnedPositions(owner);
+    }
+    /**
+     * Release ownership of all cameras owned by the owner
+     */
+    static releaseAllOwnerships(owner) {
+        const ownedPositions = this.getAllOwnedPositions(owner);
+        for (const position of ownedPositions) {
+            this.releaseOwnership(position, owner);
+        }
+    }
+}
+CameraOwnershipHelper.ownershipManager = CameraOwnershipManager.getInstance();
+
+class CameraController extends BaseController {
+    constructor(camera) {
+        super('CoreProxy');
+        // Arrow function wrapper to avoid .bind(this) and always use current class state
+        this.handleDidChangeStateEventWrapper = (ev) => {
+            return this.handleDidChangeStateEvent(ev);
+        };
+        this.camera = camera;
+        this.adapter = new CoreProxyAdapter(this._proxy);
+        void this.subscribeListener();
+    }
+    get privateCamera() {
+        return this.camera;
+    }
+    getCurrentState() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            return yield this.adapter.getCameraState({
+                cameraPosition: JSON.stringify(this.privateCamera.position)
+            });
+        });
+    }
+    getIsTorchAvailable() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            return yield this.adapter.isTorchAvailable({
+                cameraPosition: JSON.stringify(this.privateCamera.position)
+            });
+        });
+    }
+    switchCameraToDesiredState(desiredState) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            yield this.adapter.switchCameraToDesiredState({
+                stateJson: desiredState.toString()
+            });
+        });
+    }
+    subscribeListener() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            yield this.adapter.registerFrameSourceListener();
+            this._proxy.subscribeForEvents([FrameSourceListenerEvents.didChangeState]);
+            this._proxy.eventEmitter.on(FrameSourceListenerEvents.didChangeState, this.handleDidChangeStateEventWrapper);
+        });
+    }
+    unsubscribeListener() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            yield this.adapter.unregisterFrameSourceListener();
+            this._proxy.unsubscribeFromEvents([FrameSourceListenerEvents.didChangeState]);
+            this._proxy.eventEmitter.off(FrameSourceListenerEvents.didChangeState, this.handleDidChangeStateEventWrapper);
+        });
+    }
+    dispose() {
+        void this.unsubscribeListener();
+        this._proxy.dispose();
+    }
+    handleDidChangeStateEvent(ev) {
+        const event = EventDataParser.parse(ev.data);
+        if (event) {
+            if (event.cameraPosition !== this.privateCamera.position || !this.privateCamera.isActiveCamera) {
+                return;
+            }
+            this.privateCamera.currentCameraState = event.state;
+            this.privateCamera.listeners.forEach(listener => {
+                var _a;
+                (_a = listener === null || listener === void 0 ? void 0 : listener.didChangeState) === null || _a === void 0 ? void 0 : _a.call(listener, this.camera, this.privateCamera._desiredState);
+            });
+        }
+    }
+}
+
+class FrameDataController extends BaseController {
+    constructor() {
+        super('CoreProxy');
+        this.adapter = new CoreProxyAdapter(this._proxy);
+    }
+    getFrame(frameId) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            const result = yield this.adapter.getLastFrameAsJson({ frameId });
+            if (result == null) {
+                return PrivateFrameData.empty();
+            }
+            const frameDataJSON = JSON.parse(result);
+            return PrivateFrameData.fromJSON(frameDataJSON);
+        });
+    }
+    getFrameOrNull(frameId) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            const result = yield this.adapter.getLastFrameAsJson({ frameId });
+            if (result == null) {
+                return null;
+            }
+            const frameDataJSON = JSON.parse(result);
+            return PrivateFrameData.fromJSON(frameDataJSON);
+        });
+    }
+}
+
+class ControlImage extends DefaultSerializeable {
+    static fromBase64EncodedImage(data) {
+        if (data === null)
+            return null;
+        return new ControlImage("base64", data, null);
+    }
+    static fromResourceName(resource) {
+        return new ControlImage("resource", null, resource);
+    }
+    constructor(type, data, name) {
+        super();
+        this.type = type;
+        this._data = data;
+        this._name = name;
+    }
+    isBase64EncodedImage() {
+        return this.type === "base64";
+    }
+    get data() {
+        return this._data;
+    }
+}
+__decorate$1([
+    ignoreFromSerializationIfNull,
+    nameForSerialization('data')
+], ControlImage.prototype, "_data", void 0);
+__decorate$1([
+    ignoreFromSerializationIfNull,
+    nameForSerialization('name')
+], ControlImage.prototype, "_name", void 0);
+
+class ContextStatus {
+    static fromJSON(json) {
+        const status = new ContextStatus();
+        status._code = json.code;
+        status._message = json.message;
+        status._isValid = json.isValid;
+        return status;
+    }
+    get message() {
+        return this._message;
+    }
+    get code() {
+        return this._code;
+    }
+    get isValid() {
+        return this._isValid;
+    }
+}
+
+class DataCaptureContextSettings extends DefaultSerializeable {
+    constructor() {
+        super();
+        this._frameSettings = new FrameDataSettings();
+    }
+    get frameDataSettings() {
+        return this._frameSettings;
+    }
+    set frameDataSettings(settings) {
+        this._frameSettings = settings;
+    }
+    frameDataSettingsBuilder() {
+        return new FrameDataSettingsBuilder(this._frameSettings);
+    }
+    setProperty(name, value) {
+        this[name] = value;
+    }
+    getProperty(name) {
+        return this[name];
+    }
+}
+__decorate$1([
+    nameForSerialization('frameDataSettings')
+], DataCaptureContextSettings.prototype, "_frameSettings", void 0);
+
+class OpenSourceSoftwareLicenseInfo {
+    constructor(licenseText) {
+        this._licenseText = licenseText;
+    }
+    get licenseText() {
+        return this._licenseText;
+    }
+}
+
+var DataCaptureContextEvents;
+(function (DataCaptureContextEvents) {
+    DataCaptureContextEvents["didChangeStatus"] = "DataCaptureContextListener.onStatusChanged";
+    DataCaptureContextEvents["didStartObservingContext"] = "DataCaptureContextListener.onObservationStarted";
+})(DataCaptureContextEvents || (DataCaptureContextEvents = {}));
+class DataCaptureContextController extends BaseController {
+    get framework() {
+        return this._proxy.framework;
+    }
+    get frameworkVersion() {
+        return this._proxy.frameworkVersion;
+    }
+    get privateContext() {
+        return this.context;
+    }
+    static forDataCaptureContext(context) {
+        return new DataCaptureContextController(context);
+    }
+    static getOpenSourceSoftwareLicenseInfo() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            const proxy = FactoryMaker.getInstance('CoreProxy');
+            if (!proxy) {
+                return new OpenSourceSoftwareLicenseInfo('Unable to load the open source software license info.');
+            }
+            const adapter = new CoreProxyAdapter(proxy);
+            const result = yield adapter.getOpenSourceSoftwareLicenseInfo();
+            return new OpenSourceSoftwareLicenseInfo(result);
+        });
+    }
+    constructor(context) {
+        super('DataCaptureContextProxy');
+        this._listenerRegistered = false;
+        this.adapter = new CoreProxyAdapter(this._proxy);
+        this.context = context;
+    }
+    subscribeListener() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            if (this._listenerRegistered) {
+                return;
+            }
+            yield this.adapter.subscribeContextListener();
+            this._proxy.subscribeForEvents(Object.values(DataCaptureContextEvents));
+            this._proxy.eventEmitter.on(DataCaptureContextEvents.didChangeStatus, this.handleDidChangeStatusEvent.bind(this));
+            this._proxy.eventEmitter.on(DataCaptureContextEvents.didStartObservingContext, this.handleDidStartObservingContextEvent.bind(this));
+            this._listenerRegistered = true;
+        });
+    }
+    updateContextFromJSON() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            try {
+                yield this.adapter.updateContextFromJson({ contextJson: JSON.stringify(this.context.toJSON()) });
+            }
+            catch (error) {
+                this.notifyListenersOfDeserializationError(error);
+                throw error;
+            }
+        });
+    }
+    addModeToContext(mode) {
+        return this.adapter.addModeToContext({ modeJson: JSON.stringify(mode.toJSON()) });
+    }
+    removeModeFromContext(mode) {
+        return this.adapter.removeModeFromContext({ modeJson: JSON.stringify(mode.toJSON()) });
+    }
+    removeAllModesFromContext() {
+        return this.adapter.removeAllModes();
+    }
+    dispose() {
+        void this.unsubscribeListener();
+        void this.adapter.disposeContext();
+        this._proxy.dispose();
+    }
+    unsubscribeListener() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            if (!this._listenerRegistered) {
+                return;
+            }
+            yield this.adapter.unsubscribeContextListener();
+            this._proxy.unsubscribeFromEvents(Object.values(DataCaptureContextEvents));
+            this._proxy.eventEmitter.off(DataCaptureContextEvents.didChangeStatus, this.handleDidChangeStatusEvent.bind(this));
+            this._proxy.eventEmitter.off(DataCaptureContextEvents.didStartObservingContext, this.handleDidStartObservingContextEvent.bind(this));
+            this._listenerRegistered = false;
+        });
+    }
+    initialize() {
+        return this.initializeContextFromJSON();
+    }
+    initializeContextFromJSON() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            try {
+                yield this.adapter.createContextFromJson({ contextJson: JSON.stringify(this.context.toJSON()) });
+            }
+            catch (error) {
+                this.notifyListenersOfDeserializationError(error);
+                throw error;
+            }
+        });
+    }
+    handleDidChangeStatusEvent(eventPayload) {
+        const event = EventDataParser.parse(eventPayload.data);
+        if (event === null) {
+            console.error('DataCaptureContextController didChangeStatus payload is null');
+            return;
+        }
+        const contextStatus = ContextStatus['fromJSON'](JSON.parse(event.status));
+        this.notifyListenersOfDidChangeStatus(contextStatus);
+    }
+    handleDidStartObservingContextEvent() {
+        this.privateContext.listeners.forEach(listener => {
+            var _a;
+            (_a = listener.didStartObservingContext) === null || _a === void 0 ? void 0 : _a.call(listener, this.context);
+        });
+    }
+    notifyListenersOfDeserializationError(error) {
+        const contextStatus = ContextStatus['fromJSON']({
+            message: error,
+            code: -1,
+            isValid: true,
+        });
+        this.notifyListenersOfDidChangeStatus(contextStatus);
+    }
+    notifyListenersOfDidChangeStatus(contextStatus) {
+        this.privateContext.listeners.forEach(listener => {
+            if (listener.didChangeStatus) {
+                listener.didChangeStatus(this.context, contextStatus);
+            }
+        });
+    }
+}
+
+class DataCaptureContext extends DefaultSerializeable {
+    static get sharedInstance() {
+        if (DataCaptureContext._instance == null) {
+            DataCaptureContext._instance = new DataCaptureContext('', '', null);
+        }
+        return DataCaptureContext._instance;
+    }
+    static getOpenSourceSoftwareLicenseInfo() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            return DataCaptureContextController.getOpenSourceSoftwareLicenseInfo();
+        });
+    }
+    static get coreDefaults() {
+        return getCoreDefaults();
+    }
+    get frameSource() {
+        return this._frameSource;
+    }
+    static get deviceID() {
+        return DataCaptureContext.coreDefaults.deviceID;
+    }
+    static forLicenseKey(licenseKey) {
+        const instance = DataCaptureContext.create(licenseKey, null, null);
+        // Call initialize to ensure the shared instance is updated.
+        void instance.controller.initialize();
+        return instance;
+    }
+    static forLicenseKeyWithSettings(licenseKey, settings) {
+        const instance = DataCaptureContext.create(licenseKey, null, settings);
+        // Call initialize to ensure the shared instance is updated.
+        void instance.controller.initialize();
+        return instance;
+    }
+    static forLicenseKeyWithOptions(licenseKey, options) {
+        const instance = DataCaptureContext.create(licenseKey, options, null);
+        // Call initialize to ensure the shared instance is updated.
+        void instance.controller.initialize();
+        return instance;
+    }
+    static initialize(licenseKey, options = null, settings = null) {
+        DataCaptureContext.create(licenseKey, options, settings);
+        void DataCaptureContext.sharedInstance.controller.initialize();
+        return DataCaptureContext.sharedInstance;
+    }
+    static create(licenseKey, options, settings) {
+        DataCaptureContext.sharedInstance.licenseKey = licenseKey;
+        DataCaptureContext.sharedInstance.deviceName = (options === null || options === void 0 ? void 0 : options.deviceName) || '';
+        DataCaptureContext.sharedInstance.settings = settings || new DataCaptureContextSettings();
+        return DataCaptureContext.sharedInstance;
+    }
+    constructor(licenseKey, deviceName, settings) {
+        super();
+        this.licenseKey = licenseKey;
+        this.deviceName = deviceName;
+        this._framework = 'unknown';
+        this._frameworkVersion = 'unknown';
+        this.settings = new DataCaptureContextSettings();
+        this._frameSource = null;
+        this.view = null;
+        this.modes = [];
+        this.listeners = [];
+        this.licenseKey = licenseKey;
+        this.deviceName = deviceName;
+        if (settings) {
+            this.settings = settings;
+        }
+        if (this.controller == null) {
+            this.controller = DataCaptureContextController.forDataCaptureContext(this);
+            this._framework = this.controller.framework;
+            this._frameworkVersion = this.controller.frameworkVersion;
+        }
+    }
+    setFrameSource(frameSource) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            if (this._frameSource) {
+                this._frameSource.context = null;
+            }
+            this._frameSource = frameSource;
+            if (frameSource) {
+                // Set the flag to indicate that the native frame source is being created
+                frameSource.setNativeFrameSourceIsBeingCreated();
+            }
+            yield this.update();
+            // Make camera active once the set on native side is complete
+            if (frameSource) {
+                frameSource.context = this;
+            }
+        });
+    }
+    addListener(listener) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            if (this.listeners.length === 0) {
+                yield this.controller.subscribeListener();
+            }
+            if (this.listeners.includes(listener)) {
+                return;
+            }
+            this.listeners.push(listener);
+        });
+    }
+    removeListener(listener) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            if (!this.listeners.includes(listener)) {
+                return;
+            }
+            this.listeners.splice(this.listeners.indexOf(listener), 1);
+            if (this.listeners.length === 0) {
+                return this.controller.unsubscribeListener();
+            }
+        });
+    }
+    addMode(mode) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            yield this.addModeInternal(mode);
+        });
+    }
+    setMode(mode) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            yield this.removeAllModes();
+            yield this.addModeInternal(mode);
+        });
+    }
+    removeCurrentMode() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            if (this.modes.length === 0) {
+                return;
+            }
+            if (this.modes.length > 1) {
+                console.warn('removeCurrentMode() called with multiple modes active. Consider using removeMode() for specific mode removal. Only the first mode will be removed.');
+            }
+            yield this.removeModeInternal(this.modes[0]);
+        });
+    }
+    removeMode(mode) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            yield this.removeModeInternal(mode);
+        });
+    }
+    removeAllModes() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            if (this.modes.length === 0) {
+                return;
+            }
+            this.modes.forEach(mode => {
+                mode._context = null;
+            });
+            this.modes = [];
+            yield this.controller.removeAllModesFromContext();
+        });
+    }
+    dispose() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            var _a;
+            if (!this.controller) {
+                return;
+            }
+            (_a = this.view) === null || _a === void 0 ? void 0 : _a.dispose();
+            yield this.removeAllModes();
+            this.controller.dispose();
+        });
+    }
+    applySettings(settings) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            this.settings = settings;
+            yield this.update();
+        });
+    }
+    update() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            if (!this.controller) {
+                return;
+            }
+            yield this.controller.updateContextFromJSON();
+        });
+    }
+    addModeInternal(mode) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            if (!this.modes.includes(mode)) {
+                this.modes.push(mode);
+                yield this.controller.addModeToContext(mode);
+                mode._context = this;
+            }
+        });
+    }
+    removeModeInternal(mode) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            const index = this.modes.indexOf(mode);
+            if (index !== -1) {
+                this.modes.splice(index, 1);
+            }
+            mode._context = null;
+            yield this.controller.removeModeFromContext(mode);
+        });
+    }
+}
+__decorate$1([
+    ignoreFromSerialization
+], DataCaptureContext.prototype, "controller", void 0);
+__decorate$1([
+    nameForSerialization('framework')
+], DataCaptureContext.prototype, "_framework", void 0);
+__decorate$1([
+    nameForSerialization('frameworkVersion')
+], DataCaptureContext.prototype, "_frameworkVersion", void 0);
+__decorate$1([
+    nameForSerialization('frameSource')
+], DataCaptureContext.prototype, "_frameSource", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], DataCaptureContext.prototype, "view", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], DataCaptureContext.prototype, "modes", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], DataCaptureContext.prototype, "listeners", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], DataCaptureContext, "_instance", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], DataCaptureContext, "coreDefaults", null);
+
+var DataCaptureViewEvents;
+(function (DataCaptureViewEvents) {
+    DataCaptureViewEvents["didChangeSize"] = "DataCaptureViewListener.onSizeChanged";
+})(DataCaptureViewEvents || (DataCaptureViewEvents = {}));
+class DataCaptureViewController extends BaseController {
+    constructor(view) {
+        super('DataCaptureViewProxy');
+        this._listenerRegistered = false;
+        // Arrow function wrapper to avoid .bind(this) and always use current class state
+        this.handleDidChangeSizeEventWrapper = (eventPayload) => {
+            return this.handleDidChangeSizeEvent(eventPayload);
+        };
+        this.view = view;
+        this.adapter = new CoreProxyAdapter(this._proxy);
+    }
+    viewPointForFramePoint(point) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            const result = yield this.adapter.viewPointForFramePoint({ viewId: this.view.viewId, pointJson: JSON.stringify(point.toJSON()) });
+            return Point['fromJSON'](JSON.parse(result));
+        });
+    }
+    viewQuadrilateralForFrameQuadrilateral(quadrilateral) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            const result = yield this.adapter.viewQuadrilateralForFrameQuadrilateral({ viewId: this.view.viewId, quadrilateralJson: JSON.stringify(quadrilateral.toJSON()) });
+            return Quadrilateral['fromJSON'](JSON.parse(result));
+        });
+    }
+    setPositionAndSize(top, left, width, height, shouldBeUnderWebView) {
+        return this._proxy.$setDataCaptureViewPositionAndSize({ top, left, width, height, shouldBeUnderWebView });
+    }
+    show() {
+        if (!this.isViewCreated())
+            return Promise.resolve();
+        return this._proxy.$showDataCaptureView({ viewId: this.view.viewId });
+    }
+    hide() {
+        if (!this.isViewCreated())
+            return Promise.resolve();
+        return this._proxy.$hideDataCaptureView({ viewId: this.view.viewId });
+    }
+    createNativeView() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            yield this.createView();
+            yield this.subscribeListener();
+        });
+    }
+    removeNativeView() {
+        return this._proxy.$removeDataCaptureView({ viewId: this.view.viewId });
+    }
+    updateView() {
+        if (!this.isViewCreated())
+            return Promise.resolve();
+        return this.adapter.updateDataCaptureView({ viewJson: JSON.stringify(this.view.toJSON()) });
+    }
+    dispose() {
+        void this.unsubscribeListener();
+        this._proxy.dispose();
+    }
+    subscribeListener() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            if (this._listenerRegistered) {
+                return;
+            }
+            yield this.adapter.registerListenerForViewEvents({ viewId: this.view.viewId });
+            this._proxy.subscribeForEvents(Object.values(DataCaptureViewEvents));
+            this._proxy.eventEmitter.on(DataCaptureViewEvents.didChangeSize, this.handleDidChangeSizeEventWrapper);
+            this._listenerRegistered = true;
+        });
+    }
+    unsubscribeListener() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            if (!this._listenerRegistered) {
+                return;
+            }
+            yield this.adapter.unregisterListenerForViewEvents({ viewId: this.view.viewId });
+            this._proxy.unsubscribeFromEvents(Object.values(DataCaptureViewEvents));
+            this._proxy.eventEmitter.off(DataCaptureViewEvents.didChangeSize, this.handleDidChangeSizeEventWrapper);
+            this._listenerRegistered = false;
+        });
+    }
+    createView() {
+        return this._proxy.$createDataCaptureView({ viewJson: JSON.stringify(this.view.toJSON()) });
+    }
+    handleDidChangeSizeEvent(eventPayload) {
+        const event = EventDataParser.parse(eventPayload.data);
+        if (event === null) {
+            console.error('DataCaptureViewController didChangeSize payload is null');
+            return;
+        }
+        if (event.viewId !== this.view.viewId) {
+            return;
+        }
+        const size = Size['fromJSON'](event.size);
+        const orientation = event.orientation;
+        this.view.listeners.forEach(listener => {
+            if (listener.didChangeSize) {
+                listener.didChangeSize(this.view.viewComponent, size, orientation);
+            }
+        });
+    }
+    isViewCreated() {
+        return this.view.viewId > 0;
+    }
+}
+
+class BaseDataCaptureView extends DefaultSerializeable {
+    get context() {
+        return this._context;
+    }
+    set context(context) {
+        if (!(context instanceof DataCaptureContext || context == null)) {
+            // This should never happen, but let's just be sure
+            throw new Error('The context for a capture view must be a DataCaptureContext');
+        }
+        this._context = context;
+        if (this._context) {
+            this._context.view = this;
+        }
+    }
+    get coreDefaults() {
+        return getCoreDefaults();
+    }
+    get scanAreaMargins() {
+        return this._scanAreaMargins;
+    }
+    get viewId() {
+        var _a;
+        return (_a = this._viewId) !== null && _a !== void 0 ? _a : -1;
+    }
+    set viewId(newValue) {
+        this._viewId = newValue;
+    }
+    set scanAreaMargins(newValue) {
+        this._scanAreaMargins = newValue;
+        void this.controller.updateView();
+    }
+    get pointOfInterest() {
+        return this._pointOfInterest;
+    }
+    set pointOfInterest(newValue) {
+        this._pointOfInterest = newValue;
+        void this.controller.updateView();
+    }
+    get logoAnchor() {
+        return this._logoAnchor;
+    }
+    set logoAnchor(newValue) {
+        this._logoAnchor = newValue;
+        void this.controller.updateView();
+    }
+    get logoOffset() {
+        return this._logoOffset;
+    }
+    set logoOffset(newValue) {
+        this._logoOffset = newValue;
+        void this.controller.updateView();
+    }
+    get focusGesture() {
+        return this._focusGesture;
+    }
+    set focusGesture(newValue) {
+        this._focusGesture = newValue;
+        void this.controller.updateView();
+    }
+    get zoomGesture() {
+        return this._zoomGesture;
+    }
+    set zoomGesture(newValue) {
+        this._zoomGesture = newValue;
+        void this.controller.updateView();
+    }
+    get logoStyle() {
+        return this._logoStyle;
+    }
+    set logoStyle(newValue) {
+        this._logoStyle = newValue;
+        void this.controller.updateView();
+    }
+    get privateContext() {
+        return this.context;
+    }
+    static forContext(context) {
+        const view = new BaseDataCaptureView(context);
+        view.context = context;
+        return view;
+    }
+    constructor(context) {
+        super();
+        this.parentId = null;
+        this.overlays = [];
+        this.listeners = [];
+        this._context = null;
+        this._viewId = -1;
+        this.controls = [];
+        this.isViewCreated = false;
+        this.context = context;
+        this._scanAreaMargins = this.coreDefaults.DataCaptureView.scanAreaMargins;
+        this._pointOfInterest = this.coreDefaults.DataCaptureView.pointOfInterest;
+        this._logoAnchor = this.coreDefaults.DataCaptureView.logoAnchor;
+        this._logoOffset = this.coreDefaults.DataCaptureView.logoOffset;
+        this._focusGesture = this.coreDefaults.DataCaptureView.focusGesture;
+        this._zoomGesture = this.coreDefaults.DataCaptureView.zoomGesture;
+        this._logoStyle = this.coreDefaults.DataCaptureView.logoStyle;
+        this.controller = new DataCaptureViewController(this);
+    }
+    addOverlay(overlay) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            if (this.overlays.includes(overlay)) {
+                return;
+            }
+            overlay.view = this;
+            this.overlays.push(overlay);
+            yield this.controller.updateView();
+        });
+    }
+    removeOverlay(overlay) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            if (!this.overlays.includes(overlay)) {
+                return;
+            }
+            overlay.view = null;
+            this.overlays.splice(this.overlays.indexOf(overlay), 1);
+            yield this.controller.updateView();
+        });
+    }
+    removeAllOverlays() {
+        if (this.overlays.length === 0) {
+            return;
+        }
+        const overlaysCopy = [...this.overlays];
+        for (const overlay of overlaysCopy) {
+            overlay.view = null;
+            this.overlays.splice(this.overlays.indexOf(overlay), 1);
+        }
+        void this.controller.updateView();
+    }
+    addListener(listener) {
+        if (!this.listeners.includes(listener)) {
+            this.listeners.push(listener);
+        }
+    }
+    removeListener(listener) {
+        if (this.listeners.includes(listener)) {
+            this.listeners.splice(this.listeners.indexOf(listener), 1);
+        }
+    }
+    viewPointForFramePoint(point) {
+        return this.controller.viewPointForFramePoint(point);
+    }
+    viewQuadrilateralForFrameQuadrilateral(quadrilateral) {
+        return this.controller.viewQuadrilateralForFrameQuadrilateral(quadrilateral);
+    }
+    addControl(control) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            if (!this.controls.includes(control)) {
+                control.view = this;
+                this.controls.push(control);
+                yield this.controller.updateView();
+            }
+        });
+    }
+    addControlWithAnchorAndOffset(control, anchor, offset) {
+        if (!this.controls.includes(control)) {
+            control.view = this;
+            control.anchor = anchor;
+            control.offset = offset;
+            this.controls.push(control);
+            void this.controller.updateView();
+        }
+    }
+    removeControl(control) {
+        if (this.controls.includes(control)) {
+            control.view = null;
+            this.controls.splice(this.controls.indexOf(control), 1);
+            void this.controller.updateView();
+        }
+    }
+    controlUpdated() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            yield this.controller.updateView();
+        });
+    }
+    createNativeView(viewId) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            if (this.isViewCreated) {
+                return Promise.resolve();
+            }
+            this.viewId = viewId;
+            yield this.controller.createNativeView();
+            this.isViewCreated = true;
+            this.notifyOverlaysOfViewIdChange();
+        });
+    }
+    notifyOverlaysOfViewIdChange() {
+        this.overlays.forEach(overlay => {
+            if (typeof overlay.onViewIdChanged === 'function') {
+                overlay.onViewIdChanged();
+            }
+        });
+    }
+    removeNativeView() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            if (!this.isViewCreated) {
+                return Promise.resolve();
+            }
+            yield this.controller.removeNativeView();
+            this.isViewCreated = false;
+        });
+    }
+    dispose() {
+        this.removeAllOverlays();
+        this.listeners.forEach(listener => this.removeListener(listener));
+        this.controller.dispose();
+        this.viewId = -1;
+        this.isViewCreated = false;
+    }
+    // HTML Views only
+    setFrame(frame, isUnderContent = false) {
+        return this.setPositionAndSize(frame.origin.y, frame.origin.x, frame.size.width, frame.size.height, isUnderContent);
+    }
+    setPositionAndSize(top, left, width, height, shouldBeUnderWebView) {
+        return this.controller.setPositionAndSize(top, left, width, height, shouldBeUnderWebView);
+    }
+    show() {
+        if (!this.context) {
+            throw new Error('There should be a context attached to a view that should be shown');
+        }
+        return this.controller.show();
+    }
+    hide() {
+        if (!this.context) {
+            throw new Error('There should be a context attached to a view that should be shown');
+        }
+        return this.controller.hide();
+    }
+}
+__decorate$1([
+    ignoreFromSerialization
+], BaseDataCaptureView.prototype, "viewComponent", void 0);
+__decorate$1([
+    nameForSerialization('parentId'),
+    ignoreFromSerializationIfNull
+], BaseDataCaptureView.prototype, "parentId", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], BaseDataCaptureView.prototype, "listeners", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], BaseDataCaptureView.prototype, "_context", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], BaseDataCaptureView.prototype, "coreDefaults", null);
+__decorate$1([
+    nameForSerialization('scanAreaMargins')
+], BaseDataCaptureView.prototype, "_scanAreaMargins", void 0);
+__decorate$1([
+    nameForSerialization('viewId')
+], BaseDataCaptureView.prototype, "_viewId", void 0);
+__decorate$1([
+    nameForSerialization('pointOfInterest')
+], BaseDataCaptureView.prototype, "_pointOfInterest", void 0);
+__decorate$1([
+    nameForSerialization('logoAnchor')
+], BaseDataCaptureView.prototype, "_logoAnchor", void 0);
+__decorate$1([
+    nameForSerialization('logoOffset')
+], BaseDataCaptureView.prototype, "_logoOffset", void 0);
+__decorate$1([
+    nameForSerialization('focusGesture')
+], BaseDataCaptureView.prototype, "_focusGesture", void 0);
+__decorate$1([
+    nameForSerialization('zoomGesture')
+], BaseDataCaptureView.prototype, "_zoomGesture", void 0);
+__decorate$1([
+    nameForSerialization('logoStyle')
+], BaseDataCaptureView.prototype, "_logoStyle", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], BaseDataCaptureView.prototype, "controller", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], BaseDataCaptureView.prototype, "isViewCreated", void 0);
+
+class ZoomSwitchControl extends DefaultSerializeable {
+    constructor() {
+        super(...arguments);
+        this.type = 'zoom';
+        this.icon = {
+            zoomedOut: { default: null, pressed: null },
+            zoomedIn: { default: null, pressed: null },
+        };
+        this.view = null;
+        this.anchor = null;
+        this.offset = null;
+    }
+    get zoomedOutImage() {
+        var _a, _b;
+        if (((_a = this.icon.zoomedOut.default) === null || _a === void 0 ? void 0 : _a.isBase64EncodedImage()) == true) {
+            return (_b = this.icon.zoomedOut.default) === null || _b === void 0 ? void 0 : _b.data;
+        }
+        return null;
+    }
+    set zoomedOutImage(zoomedOutImage) {
+        var _a;
+        this.icon.zoomedOut.default = ControlImage.fromBase64EncodedImage(zoomedOutImage);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+    get zoomedInImage() {
+        var _a, _b;
+        if (((_a = this.icon.zoomedIn.default) === null || _a === void 0 ? void 0 : _a.isBase64EncodedImage()) == true) {
+            return (_b = this.icon.zoomedIn.default) === null || _b === void 0 ? void 0 : _b.data;
+        }
+        return null;
+    }
+    set zoomedInImage(zoomedInImage) {
+        var _a;
+        this.icon.zoomedIn.default = ControlImage.fromBase64EncodedImage(zoomedInImage);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+    get zoomedInPressedImage() {
+        var _a, _b;
+        if (((_a = this.icon.zoomedIn.pressed) === null || _a === void 0 ? void 0 : _a.isBase64EncodedImage()) == true) {
+            return (_b = this.icon.zoomedIn.pressed) === null || _b === void 0 ? void 0 : _b.data;
+        }
+        return null;
+    }
+    set zoomedInPressedImage(zoomedInPressedImage) {
+        var _a;
+        this.icon.zoomedIn.pressed = ControlImage.fromBase64EncodedImage(zoomedInPressedImage);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+    get zoomedOutPressedImage() {
+        var _a, _b;
+        if (((_a = this.icon.zoomedOut.pressed) === null || _a === void 0 ? void 0 : _a.isBase64EncodedImage()) == true) {
+            return (_b = this.icon.zoomedOut.pressed) === null || _b === void 0 ? void 0 : _b.data;
+        }
+        return null;
+    }
+    set zoomedOutPressedImage(zoomedOutPressedImage) {
+        var _a;
+        this.icon.zoomedOut.pressed = ControlImage.fromBase64EncodedImage(zoomedOutPressedImage);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+    setZoomedInImage(resource) {
+        var _a;
+        this.icon.zoomedIn.default = ControlImage.fromResourceName(resource);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+    setZoomedInPressedImage(resource) {
+        var _a;
+        this.icon.zoomedIn.pressed = ControlImage.fromResourceName(resource);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+    setZoomedOutImage(resource) {
+        var _a;
+        this.icon.zoomedOut.default = ControlImage.fromResourceName(resource);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+    setZoomedOutPressedImage(resource) {
+        var _a;
+        this.icon.zoomedOut.pressed = ControlImage.fromResourceName(resource);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+}
+__decorate$1([
+    ignoreFromSerialization
+], ZoomSwitchControl.prototype, "view", void 0);
+
+class TorchSwitchControl extends DefaultSerializeable {
+    constructor() {
+        super(...arguments);
+        this.type = 'torch';
+        this.icon = {
+            on: { default: null, pressed: null },
+            off: { default: null, pressed: null },
+        };
+        this.view = null;
+        this.anchor = null;
+        this.offset = null;
+    }
+    get torchOffImage() {
+        var _a, _b;
+        if (((_a = this.icon.off.default) === null || _a === void 0 ? void 0 : _a.isBase64EncodedImage()) == true) {
+            return (_b = this.icon.off.default) === null || _b === void 0 ? void 0 : _b.data;
+        }
+        return null;
+    }
+    set torchOffImage(torchOffImage) {
+        var _a;
+        this.icon.off.default = ControlImage.fromBase64EncodedImage(torchOffImage);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+    get torchOffPressedImage() {
+        var _a, _b;
+        if (((_a = this.icon.off.pressed) === null || _a === void 0 ? void 0 : _a.isBase64EncodedImage()) == true) {
+            return (_b = this.icon.off.pressed) === null || _b === void 0 ? void 0 : _b.data;
+        }
+        return null;
+    }
+    set torchOffPressedImage(torchOffPressedImage) {
+        var _a;
+        this.icon.off.pressed = ControlImage.fromBase64EncodedImage(torchOffPressedImage);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+    get torchOnImage() {
+        var _a, _b;
+        if (((_a = this.icon.on.default) === null || _a === void 0 ? void 0 : _a.isBase64EncodedImage()) == true) {
+            return (_b = this.icon.on.default) === null || _b === void 0 ? void 0 : _b.data;
+        }
+        return null;
+    }
+    set torchOnImage(torchOnImage) {
+        var _a;
+        this.icon.on.default = ControlImage.fromBase64EncodedImage(torchOnImage);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+    get torchOnPressedImage() {
+        var _a, _b;
+        if (((_a = this.icon.on.pressed) === null || _a === void 0 ? void 0 : _a.isBase64EncodedImage()) == true) {
+            return (_b = this.icon.on.pressed) === null || _b === void 0 ? void 0 : _b.data;
+        }
+        return null;
+    }
+    setTorchOffImage(resource) {
+        var _a;
+        this.icon.off.default = ControlImage.fromResourceName(resource);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+    setTorchOffPressedImage(resource) {
+        var _a;
+        this.icon.off.pressed = ControlImage.fromResourceName(resource);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+    setTorchOnImage(resource) {
+        var _a;
+        this.icon.on.default = ControlImage.fromResourceName(resource);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+    setTorchOnPressedImage(resource) {
+        var _a;
+        this.icon.on.pressed = ControlImage.fromResourceName(resource);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+    setImageResource(resource) {
+        var _a;
+        this.icon.off.default = ControlImage.fromResourceName(resource);
+        this.icon.off.pressed = ControlImage.fromResourceName(resource);
+        this.icon.on.default = ControlImage.fromResourceName(resource);
+        this.icon.on.pressed = ControlImage.fromResourceName(resource);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+    set torchOnPressedImage(torchOnPressedImage) {
+        var _a;
+        this.icon.on.pressed = ControlImage.fromBase64EncodedImage(torchOnPressedImage);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+}
+__decorate$1([
+    ignoreFromSerialization
+], TorchSwitchControl.prototype, "view", void 0);
+
+exports.VideoResolution = void 0;
+(function (VideoResolution) {
+    /** @deprecated Auto is deprecated. Please use the capture mode's recommendedCameraSettings for the best results. */
+    VideoResolution["Auto"] = "auto";
+    VideoResolution["HD"] = "hd";
+    VideoResolution["FullHD"] = "fullHd";
+    VideoResolution["UHD4K"] = "uhd4k";
+})(exports.VideoResolution || (exports.VideoResolution = {}));
+
+exports.FocusRange = void 0;
+(function (FocusRange) {
+    FocusRange["Full"] = "full";
+    FocusRange["Near"] = "near";
+    FocusRange["Far"] = "far";
+})(exports.FocusRange || (exports.FocusRange = {}));
+
+exports.FocusGestureStrategy = void 0;
+(function (FocusGestureStrategy) {
+    FocusGestureStrategy["None"] = "none";
+    FocusGestureStrategy["Manual"] = "manual";
+    FocusGestureStrategy["ManualUntilCapture"] = "manualUntilCapture";
+    FocusGestureStrategy["AutoOnLocation"] = "autoOnLocation";
+})(exports.FocusGestureStrategy || (exports.FocusGestureStrategy = {}));
+
+exports.LogoStyle = void 0;
+(function (LogoStyle) {
+    LogoStyle["Minimal"] = "minimal";
+    LogoStyle["Extended"] = "extended";
+})(exports.LogoStyle || (exports.LogoStyle = {}));
+
+class CameraSettings extends DefaultSerializeable {
+    static get coreDefaults() {
+        return getCoreDefaults();
+    }
+    get focusRange() {
+        return this.focus.range;
+    }
+    set focusRange(newRange) {
+        this.focus.range = newRange;
+    }
+    get focusGestureStrategy() {
+        return this.focus.focusGestureStrategy;
+    }
+    set focusGestureStrategy(newStrategy) {
+        this.focus.focusGestureStrategy = newStrategy;
+    }
+    get shouldPreferSmoothAutoFocus() {
+        return this.focus.shouldPreferSmoothAutoFocus;
+    }
+    set shouldPreferSmoothAutoFocus(newShouldPreferSmoothAutoFocus) {
+        this.focus.shouldPreferSmoothAutoFocus = newShouldPreferSmoothAutoFocus;
+    }
+    static fromJSON(json) {
+        const settings = new CameraSettings();
+        settings.preferredResolution = json.preferredResolution;
+        settings.zoomFactor = json.zoomFactor;
+        settings.focusRange = json.focusRange;
+        settings.zoomGestureZoomFactor = json.zoomGestureZoomFactor;
+        settings.focusGestureStrategy = json.focusGestureStrategy;
+        settings.shouldPreferSmoothAutoFocus = json.shouldPreferSmoothAutoFocus;
+        if (json.properties !== undefined) {
+            for (const key of Object.keys(json.properties)) {
+                settings.setProperty(key, json.properties[key]);
+            }
+        }
+        return settings;
+    }
+    constructor(settings) {
+        var _a, _b, _c, _d, _e, _f;
+        super();
+        this.preferredResolution = CameraSettings.coreDefaults.Camera.Settings.preferredResolution;
+        this.zoomFactor = CameraSettings.coreDefaults.Camera.Settings.zoomFactor;
+        this.zoomGestureZoomFactor = CameraSettings.coreDefaults.Camera.Settings.zoomGestureZoomFactor;
+        this.focusHiddenProperties = [
+            'range',
+            'manualLensPosition',
+            'shouldPreferSmoothAutoFocus',
+            'focusStrategy',
+            'focusGestureStrategy'
+        ];
+        this.focus = {
+            range: CameraSettings.coreDefaults.Camera.Settings.focusRange,
+            focusGestureStrategy: CameraSettings.coreDefaults.Camera.Settings.focusGestureStrategy,
+            shouldPreferSmoothAutoFocus: CameraSettings.coreDefaults.Camera.Settings.shouldPreferSmoothAutoFocus
+        };
+        this.preferredResolution = (_a = settings === null || settings === void 0 ? void 0 : settings.preferredResolution) !== null && _a !== void 0 ? _a : CameraSettings.coreDefaults.Camera.Settings.preferredResolution;
+        this.zoomFactor = (_b = settings === null || settings === void 0 ? void 0 : settings.zoomFactor) !== null && _b !== void 0 ? _b : CameraSettings.coreDefaults.Camera.Settings.zoomFactor;
+        this.zoomGestureZoomFactor = (_c = settings === null || settings === void 0 ? void 0 : settings.zoomGestureZoomFactor) !== null && _c !== void 0 ? _c : CameraSettings.coreDefaults.Camera.Settings.zoomGestureZoomFactor;
+        this.focus = {
+            range: (_d = settings === null || settings === void 0 ? void 0 : settings.focusRange) !== null && _d !== void 0 ? _d : CameraSettings.coreDefaults.Camera.Settings.focusRange,
+            focusGestureStrategy: (_e = settings === null || settings === void 0 ? void 0 : settings.focusGestureStrategy) !== null && _e !== void 0 ? _e : CameraSettings.coreDefaults.Camera.Settings.focusGestureStrategy,
+            shouldPreferSmoothAutoFocus: (_f = settings === null || settings === void 0 ? void 0 : settings.shouldPreferSmoothAutoFocus) !== null && _f !== void 0 ? _f : CameraSettings.coreDefaults.Camera.Settings.shouldPreferSmoothAutoFocus,
+        };
+        if (settings !== undefined && settings !== null) {
+            Object.getOwnPropertyNames(settings).forEach(propertyName => {
+                this[propertyName] = settings[propertyName];
+            });
+        }
+    }
+    setProperty(name, value) {
+        if (this.focusHiddenProperties.includes(name)) {
+            this.focus[name] = value;
+            return;
+        }
+        this[name] = value;
+    }
+    getProperty(name) {
+        if (this.focusHiddenProperties.includes(name)) {
+            return this.focus[name];
+        }
+        return this[name];
+    }
+}
+__decorate$1([
+    ignoreFromSerialization
+], CameraSettings.prototype, "focusHiddenProperties", void 0);
+
+const NoViewfinder = { type: 'none' };
+
+class RectangularViewfinderAnimation extends DefaultSerializeable {
+    static fromJSON(json) {
+        if (json === null) {
+            return null;
+        }
+        return new RectangularViewfinderAnimation(json.looping);
+    }
+    get isLooping() {
+        return this._isLooping;
+    }
+    constructor(isLooping) {
+        super();
+        this._isLooping = false;
+        this._isLooping = isLooping;
+    }
+}
+__decorate$1([
+    nameForSerialization('isLooping')
+], RectangularViewfinderAnimation.prototype, "_isLooping", void 0);
+
+class RectangularViewfinder extends DefaultSerializeable {
+    get sizeWithUnitAndAspect() {
+        return this._sizeWithUnitAndAspect;
+    }
+    set sizeWithUnitAndAspect(value) {
+        this._sizeWithUnitAndAspect = value;
+        this.update();
+    }
+    get coreDefaults() {
+        return getCoreDefaults();
+    }
+    constructor(style, lineStyle) {
+        super();
+        this.type = 'rectangular';
+        const viewfinderStyle = style || this.coreDefaults.RectangularViewfinder.defaultStyle;
+        this._style = this.coreDefaults.RectangularViewfinder.styles[viewfinderStyle].style;
+        this._lineStyle = this.coreDefaults.RectangularViewfinder.styles[viewfinderStyle].lineStyle;
+        this._dimming = parseFloat(this.coreDefaults.RectangularViewfinder.styles[viewfinderStyle].dimming);
+        this._disabledDimming = parseFloat(this.coreDefaults.RectangularViewfinder.styles[viewfinderStyle].disabledDimming);
+        this._animation = this.coreDefaults.RectangularViewfinder.styles[viewfinderStyle].animation;
+        this.color = this.coreDefaults.RectangularViewfinder.styles[viewfinderStyle].color;
+        this._sizeWithUnitAndAspect = this.coreDefaults.RectangularViewfinder.styles[viewfinderStyle].size;
+        this._disabledColor = this.coreDefaults.RectangularViewfinder.styles[viewfinderStyle].disabledColor;
+        if (lineStyle !== undefined) {
+            this._lineStyle = lineStyle;
+        }
+    }
+    get style() {
+        return this._style;
+    }
+    get lineStyle() {
+        return this._lineStyle;
+    }
+    get dimming() {
+        return this._dimming;
+    }
+    set dimming(value) {
+        this._dimming = value;
+        this.update();
+    }
+    get disabledDimming() {
+        return this._disabledDimming;
+    }
+    set disabledDimming(value) {
+        this._disabledDimming = value;
+        this.update();
+    }
+    get animation() {
+        return this._animation;
+    }
+    set animation(animation) {
+        this._animation = animation;
+        this.update();
+    }
+    setSize(size) {
+        this.sizeWithUnitAndAspect = SizeWithUnitAndAspect.sizeWithWidthAndHeight(size);
+    }
+    setWidthAndAspectRatio(width, heightToWidthAspectRatio) {
+        this.sizeWithUnitAndAspect = SizeWithUnitAndAspect.sizeWithWidthAndAspectRatio(width, heightToWidthAspectRatio);
+    }
+    setHeightAndAspectRatio(height, widthToHeightAspectRatio) {
+        this.sizeWithUnitAndAspect = SizeWithUnitAndAspect.sizeWithHeightAndAspectRatio(height, widthToHeightAspectRatio);
+    }
+    setShorterDimensionAndAspectRatio(fraction, aspectRatio) {
+        this.sizeWithUnitAndAspect = SizeWithUnitAndAspect.sizeWithShorterDimensionAndAspectRatio(new NumberWithUnit(fraction, exports.MeasureUnit.Fraction), aspectRatio);
+    }
+    get disabledColor() {
+        return this._disabledColor;
+    }
+    set disabledColor(value) {
+        this._disabledColor = value;
+        this.update();
+    }
+    update() {
+        var _a;
+        (_a = this._onChange) === null || _a === void 0 ? void 0 : _a.call(this);
+    }
+}
+__decorate$1([
+    ignoreFromSerialization
+], RectangularViewfinder.prototype, "_onChange", void 0);
+__decorate$1([
+    nameForSerialization('style')
+], RectangularViewfinder.prototype, "_style", void 0);
+__decorate$1([
+    nameForSerialization('lineStyle')
+], RectangularViewfinder.prototype, "_lineStyle", void 0);
+__decorate$1([
+    nameForSerialization('dimming')
+], RectangularViewfinder.prototype, "_dimming", void 0);
+__decorate$1([
+    nameForSerialization('disabledDimming')
+], RectangularViewfinder.prototype, "_disabledDimming", void 0);
+__decorate$1([
+    nameForSerialization('animation'),
+    ignoreFromSerialization
+], RectangularViewfinder.prototype, "_animation", void 0);
+__decorate$1([
+    nameForSerialization('size')
+], RectangularViewfinder.prototype, "_sizeWithUnitAndAspect", void 0);
+__decorate$1([
+    nameForSerialization('disabledColor')
+], RectangularViewfinder.prototype, "_disabledColor", void 0);
+
+exports.RectangularViewfinderStyle = void 0;
+(function (RectangularViewfinderStyle) {
+    RectangularViewfinderStyle["Rounded"] = "rounded";
+    RectangularViewfinderStyle["Square"] = "square";
+})(exports.RectangularViewfinderStyle || (exports.RectangularViewfinderStyle = {}));
+
+exports.RectangularViewfinderLineStyle = void 0;
+(function (RectangularViewfinderLineStyle) {
+    RectangularViewfinderLineStyle["Light"] = "light";
+    RectangularViewfinderLineStyle["Bold"] = "bold";
+})(exports.RectangularViewfinderLineStyle || (exports.RectangularViewfinderLineStyle = {}));
+
+class AimerViewfinder extends DefaultSerializeable {
+    get coreDefaults() {
+        return getCoreDefaults();
+    }
+    constructor() {
+        super();
+        this.type = 'aimer';
+        this.frameColor = this.coreDefaults.AimerViewfinder.frameColor;
+        this.dotColor = this.coreDefaults.AimerViewfinder.dotColor;
+    }
+}
+
+class LaserlineViewfinder extends DefaultSerializeable {
+    get coreDefaults() {
+        return getCoreDefaults();
+    }
+    constructor() {
+        super();
+        this.type = 'laserline';
+        this.width = this.coreDefaults.LaserlineViewfinder.width;
+        this.enabledColor = this.coreDefaults.LaserlineViewfinder.enabledColor;
+        this.disabledColor = this.coreDefaults.LaserlineViewfinder.disabledColor;
+    }
+}
+
+function parseDefaults(jsonDefaults) {
+    const coreDefaults = {
+        Camera: {
+            Settings: {
+                preferredResolution: jsonDefaults.Camera.Settings.preferredResolution,
+                zoomFactor: jsonDefaults.Camera.Settings.zoomFactor,
+                focusRange: jsonDefaults.Camera.Settings.focusRange,
+                zoomGestureZoomFactor: jsonDefaults.Camera.Settings.zoomGestureZoomFactor,
+                focusGestureStrategy: jsonDefaults.Camera.Settings.focusGestureStrategy,
+                shouldPreferSmoothAutoFocus: jsonDefaults.Camera.Settings.shouldPreferSmoothAutoFocus,
+                properties: jsonDefaults.Camera.Settings.properties,
+            },
+            defaultPosition: (jsonDefaults.Camera.defaultPosition || null),
+            availablePositions: jsonDefaults.Camera.availablePositions,
+        },
+        DataCaptureView: {
+            scanAreaMargins: MarginsWithUnit['fromJSON'](JSON.parse(jsonDefaults.DataCaptureView.scanAreaMargins)),
+            pointOfInterest: PointWithUnit['fromJSON'](JSON.parse(jsonDefaults.DataCaptureView.pointOfInterest)),
+            logoAnchor: jsonDefaults.DataCaptureView.logoAnchor,
+            logoOffset: PointWithUnit['fromJSON'](JSON.parse(jsonDefaults.DataCaptureView.logoOffset)),
+            focusGesture: PrivateFocusGestureDeserializer['fromJSON'](JSON.parse(jsonDefaults.DataCaptureView.focusGesture)),
+            zoomGesture: PrivateZoomGestureDeserializer['fromJSON'](JSON.parse(jsonDefaults.DataCaptureView.zoomGesture)),
+            logoStyle: jsonDefaults.DataCaptureView.logoStyle,
+        },
+        RectangularViewfinder: Object
+            .keys(jsonDefaults.RectangularViewfinder.styles)
+            .reduce((acc, key) => {
+            const viewfinder = jsonDefaults.RectangularViewfinder.styles[key];
+            acc.styles[key] = {
+                size: SizeWithUnitAndAspect['fromJSON'](JSON.parse(viewfinder.size)),
+                color: Color['fromJSON'](viewfinder.color),
+                disabledColor: Color['fromJSON'](viewfinder.disabledColor),
+                style: viewfinder.style,
+                lineStyle: viewfinder.lineStyle,
+                dimming: viewfinder.dimming,
+                disabledDimming: viewfinder.disabledDimming,
+                animation: RectangularViewfinderAnimation['fromJSON'](JSON.parse(viewfinder.animation)),
+            };
+            return acc;
+        }, { defaultStyle: jsonDefaults.RectangularViewfinder.defaultStyle, styles: {} }),
+        AimerViewfinder: {
+            frameColor: Color['fromJSON'](jsonDefaults.AimerViewfinder.frameColor),
+            dotColor: Color['fromJSON'](jsonDefaults.AimerViewfinder.dotColor),
+        },
+        Brush: new Brush(Color['fromJSON'](jsonDefaults.Brush.fillColor), Color['fromJSON'](jsonDefaults.Brush.strokeColor), jsonDefaults.Brush.strokeWidth),
+        LaserlineViewfinder: {
+            width: NumberWithUnit['fromJSON'](JSON.parse(jsonDefaults.LaserlineViewfinder.width)),
+            enabledColor: Color['fromJSON'](jsonDefaults.LaserlineViewfinder.enabledColor),
+            disabledColor: Color['fromJSON'](jsonDefaults.LaserlineViewfinder.disabledColor),
+        },
+        deviceID: jsonDefaults.deviceID,
+    };
+    // Inject defaults to avoid a circular dependency between these classes and the defaults
+    Brush['defaults'] = coreDefaults.Brush;
+    return coreDefaults;
+}
+
+let coreDefaultsLoader;
+function setCoreDefaultsLoader(loader) {
+    coreDefaultsLoader = loader;
+}
+function ensureCoreDefaults() {
+    var _a, _b;
+    const existing = (_a = FactoryMaker.instances.get('CoreDefaults')) === null || _a === void 0 ? void 0 : _a.instance;
+    if (existing) {
+        return existing;
+    }
+    coreDefaultsLoader === null || coreDefaultsLoader === void 0 ? void 0 : coreDefaultsLoader();
+    const reloaded = (_b = FactoryMaker.instances.get('CoreDefaults')) === null || _b === void 0 ? void 0 : _b.instance;
+    if (reloaded) {
+        return reloaded;
+    }
+    throw new Error('CoreDefaults missing and re-init failed');
+}
+function loadCoreDefaults(jsonDefaults) {
+    const coreDefaults = parseDefaults(jsonDefaults);
+    FactoryMaker.bindInstanceIfNotExists('CoreDefaults', coreDefaults);
+}
+
+function getCoreDefaults() {
+    return ensureCoreDefaults();
+}
+
+var VibrationType;
+(function (VibrationType) {
+    VibrationType["default"] = "default";
+    VibrationType["selectionHaptic"] = "selectionHaptic";
+    VibrationType["successHaptic"] = "successHaptic";
+    VibrationType["waveForm"] = "waveForm";
+    VibrationType["impactHaptic"] = "impactHaptic";
+})(VibrationType || (VibrationType = {}));
+
+class Vibration extends DefaultSerializeable {
+    static get defaultVibration() {
+        return new Vibration(VibrationType.default);
+    }
+    static get selectionHapticFeedback() {
+        return new Vibration(VibrationType.selectionHaptic);
+    }
+    static get successHapticFeedback() {
+        return new Vibration(VibrationType.successHaptic);
+    }
+    static get impactHapticFeedback() {
+        return new Vibration(VibrationType.impactHaptic);
+    }
+    static fromJSON(json) {
+        if (json.type === 'waveForm') {
+            return new WaveFormVibration(json.timings, json.amplitudes);
+        }
+        return new Vibration(json.type);
+    }
+    constructor(type) {
+        super();
+        this.type = type;
+    }
+}
+class WaveFormVibration extends Vibration {
+    get timings() {
+        return this._timings;
+    }
+    get amplitudes() {
+        return this._amplitudes;
+    }
+    constructor(timings, amplitudes = null) {
+        super(VibrationType.waveForm);
+        this._timings = timings;
+        this._amplitudes = amplitudes;
+    }
+}
+__decorate$1([
+    nameForSerialization('timings')
+], WaveFormVibration.prototype, "_timings", void 0);
+__decorate$1([
+    ignoreFromSerializationIfNull,
+    nameForSerialization('amplitudes')
+], WaveFormVibration.prototype, "_amplitudes", void 0);
+
+class Sound extends DefaultSerializeable {
+    static get defaultSound() {
+        return new Sound(null);
+    }
+    static fromJSON(json) {
+        return new Sound(json.resource);
+    }
+    constructor(resource) {
+        super();
+        this.resource = null;
+        this.resource = resource;
+    }
+}
+__decorate$1([
+    ignoreFromSerializationIfNull
+], Sound.prototype, "resource", void 0);
+
+class FeedbackController extends BaseController {
+    static forFeedback(feedback) {
+        const controller = new FeedbackController(feedback);
+        return controller;
+    }
+    constructor(feedback) {
+        super('CoreProxy');
+        this.feedback = feedback;
+        this.adapter = new CoreProxyAdapter(this._proxy);
+    }
+    emit() {
+        void this.adapter.emitFeedback({ feedbackJson: JSON.stringify(this.feedback.toJSON()) });
+    }
+    dispose() {
+        this._proxy.dispose();
+    }
+}
+
+class Feedback extends DefaultSerializeable {
+    static get defaultFeedback() {
+        return new Feedback(Vibration.defaultVibration, Sound.defaultSound);
+    }
+    get vibration() {
+        return this._vibration;
+    }
+    get sound() {
+        return this._sound;
+    }
+    static fromJSON(json) {
+        return new Feedback((json === null || json === void 0 ? void 0 : json.vibration) ? Vibration.fromJSON(json.vibration) : null, (json === null || json === void 0 ? void 0 : json.sound) ? Sound.fromJSON(json.sound) : null);
+    }
+    constructor(vibration, sound) {
+        super();
+        this._vibration = null;
+        this._sound = null;
+        this._vibration = vibration;
+        this._sound = sound;
+        this.controller = new FeedbackController(this);
+    }
+    emit() {
+        this.controller.emit();
+    }
+    toJSON() {
+        return super.toJSON();
+    }
+}
+__decorate$1([
+    ignoreFromSerializationIfNull,
+    nameForSerialization('vibration')
+], Feedback.prototype, "_vibration", void 0);
+__decorate$1([
+    ignoreFromSerializationIfNull,
+    nameForSerialization('sound')
+], Feedback.prototype, "_sound", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], Feedback.prototype, "controller", void 0);
+
+const NoneLocationSelection = { type: 'none' };
+
+class RadiusLocationSelection extends DefaultSerializeable {
+    get radius() {
+        return this._radius;
+    }
+    static fromJSON(locationSelectionJson) {
+        const radius = NumberWithUnit.fromJSON(locationSelectionJson.radius);
+        return new RadiusLocationSelection(radius);
+    }
+    constructor(radius) {
+        super();
+        this.type = 'radius';
+        this._radius = radius;
+    }
+}
+__decorate$1([
+    nameForSerialization('radius')
+], RadiusLocationSelection.prototype, "_radius", void 0);
+
+class RectangularLocationSelection extends DefaultSerializeable {
+    constructor() {
+        super(...arguments);
+        this.type = 'rectangular';
+    }
+    get sizeWithUnitAndAspect() {
+        return this._sizeWithUnitAndAspect;
+    }
+    static withSize(size) {
+        const locationSelection = new RectangularLocationSelection();
+        locationSelection._sizeWithUnitAndAspect = SizeWithUnitAndAspect['sizeWithWidthAndHeight'](size);
+        return locationSelection;
+    }
+    static withWidthAndAspectRatio(width, heightToWidthAspectRatio) {
+        const locationSelection = new RectangularLocationSelection();
+        locationSelection._sizeWithUnitAndAspect = SizeWithUnitAndAspect['sizeWithWidthAndAspectRatio'](width, heightToWidthAspectRatio);
+        return locationSelection;
+    }
+    static withHeightAndAspectRatio(height, widthToHeightAspectRatio) {
+        const locationSelection = new RectangularLocationSelection();
+        locationSelection._sizeWithUnitAndAspect = SizeWithUnitAndAspect['sizeWithHeightAndAspectRatio'](height, widthToHeightAspectRatio);
+        return locationSelection;
+    }
+    static fromJSON(rectangularLocationSelectionJSON) {
+        if (rectangularLocationSelectionJSON.aspect.width && rectangularLocationSelectionJSON.aspect.height) {
+            const width = NumberWithUnit['fromJSON'](rectangularLocationSelectionJSON.aspect.width);
+            const height = NumberWithUnit['fromJSON'](rectangularLocationSelectionJSON.aspect.height);
+            const size = new SizeWithUnit(width, height);
+            return this.withSize(size);
+        }
+        else if (rectangularLocationSelectionJSON.aspect.width && rectangularLocationSelectionJSON.aspect.aspect) {
+            const width = NumberWithUnit['fromJSON'](rectangularLocationSelectionJSON.aspect.width);
+            return this.withWidthAndAspectRatio(width, rectangularLocationSelectionJSON.aspect.aspect);
+        }
+        else if (rectangularLocationSelectionJSON.aspect.height && rectangularLocationSelectionJSON.aspect.aspect) {
+            const height = NumberWithUnit['fromJSON'](rectangularLocationSelectionJSON.aspect.height);
+            return this.withHeightAndAspectRatio(height, rectangularLocationSelectionJSON.aspect.aspect);
+        }
+        else if (rectangularLocationSelectionJSON.aspect.shorterDimension && rectangularLocationSelectionJSON.aspect.aspect) {
+            const shorterDimension = NumberWithUnit['fromJSON'](rectangularLocationSelectionJSON.aspect.shorterDimension);
+            const sizeWithUnitAndAspect = SizeWithUnitAndAspect['sizeWithShorterDimensionAndAspectRatio'](shorterDimension, rectangularLocationSelectionJSON.aspect.aspect);
+            const locationSelection = new RectangularLocationSelection();
+            locationSelection._sizeWithUnitAndAspect = sizeWithUnitAndAspect;
+            return locationSelection;
+        }
+        else {
+            throw new Error(`RectangularLocationSelectionJSON is malformed: ${JSON.stringify(rectangularLocationSelectionJSON)}`);
+        }
+    }
+}
+__decorate$1([
+    nameForSerialization('size')
+], RectangularLocationSelection.prototype, "_sizeWithUnitAndAspect", void 0);
+
+class LicenseInfo extends DefaultSerializeable {
+    get expiration() {
+        return this._expiration;
+    }
+}
+__decorate$1([
+    nameForSerialization('expiration')
+], LicenseInfo.prototype, "_expiration", void 0);
+
+var Expiration;
+(function (Expiration) {
+    Expiration["Available"] = "available";
+    Expiration["Perpetual"] = "perpetual";
+    Expiration["NotAvailable"] = "notAvailable";
+})(Expiration || (Expiration = {}));
+
+/**
+ * JS Proxy hook to act as middleware to all the calls performed by an AdvancedNativeProxy instance
+ * This will allow AdvancedNativeProxy to call dynamically the methods defined in the interface defined
+ * as parameter in createNativeProxy function
+ */
+const nativeProxyHook = {
+    /**
+     * Dynamic property getter for the AdvancedNativeProxy
+     *
+     * Prefix Conventions:
+     * - `$methodName` - Regular native method calls (one-time execution)
+     * - `$$methodName` - Event registration methods (persistent listeners)
+     * - `on$eventName` - Event handler registration
+     *
+     * The `$$` prefix is used for methods that establish persistent event listeners on the native side
+     * (using callbackContext.successAndKeepCallback() in Cordova). This enables automatic detection
+     * in Cordova without requiring manual event configuration lists.
+     *
+     * Examples:
+     * - `$$registerListenerForCameraEvents()` - Sets up persistent camera event listener
+     * - `$unregisterListenerForCameraEvents()` - Regular call to cleanup (not persistent)
+     * - `$getCurrentCameraState()` - Regular one-time native method call
+     *
+     * @param advancedNativeProxy
+     * @param prop
+     */
+    get(nativeProxy, prop) {
+        // Early return if prop is not a string
+        if (typeof prop !== 'string') {
+            return undefined;
+        }
+        // Important: $, and $$ are required since if they are not added all
+        // properties present on AdvancedNativeProxy will be redirected to the
+        // advancedNativeProxy._call, which will call native even for the own
+        // properties of the class
+        // Event registration methods with $$ prefix
+        // These establish persistent event listeners (callbackContext.successAndKeepCallback())
+        // and get special handling in Cordova to set up continuous event callbacks
+        if (prop.startsWith("$$")) {
+            return (args) => {
+                const methodName = prop.substring(2);
+                return nativeProxy._callEventRegistration(methodName, args);
+            };
+        }
+        // All the methods with the following structure
+        // $methodName will be redirected to the special _call
+        // method on AdvancedNativeProxy
+        if (prop.startsWith("$")) {
+            if (prop in nativeProxy) {
+                return nativeProxy[prop];
+            }
+            return (args) => {
+                return nativeProxy._call(prop.substring(1), args);
+            };
+        }
+        else {
+            return nativeProxy[prop];
+        }
+    }
+};
+class NativeProxy {
+    constructor(nativeCaller) {
+        this.eventEmitter = new EventEmitter();
+        this.nativeCaller = nativeCaller;
+        this.eventSubscriptions = new Map();
+        this.eventHandlers = new Map();
+        // Create the cached handler once
+        this.cachedEventHandler = (eventName) => (args) => __awaiter$1(this, void 0, void 0, function* () {
+            this.eventEmitter.emit(eventName, args);
+            return Promise.resolve();
+        });
+        // Wrapping the NativeProxy instance with the JS proxy hook
+        return new Proxy(this, nativeProxyHook);
+    }
+    get framework() {
+        if ('framework' in this.nativeCaller) {
+            return this.nativeCaller.framework;
+        }
+        return 'unknown';
+    }
+    get frameworkVersion() {
+        if ('frameworkVersion' in this.nativeCaller) {
+            return this.nativeCaller.frameworkVersion;
+        }
+        return 'unknown';
+    }
+    subscribeForEvents(events) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            for (const event of events) {
+                yield this._registerEvent(event);
+            }
+        });
+    }
+    unsubscribeFromEvents(events) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            for (const event of events) {
+                yield this._unregisterEvent(event);
+            }
+        });
+    }
+    dispose() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            for (const nativeEventName of this.eventSubscriptions.keys()) {
+                yield this._unregisterEvent(nativeEventName);
+            }
+            this.eventSubscriptions.clear();
+        });
+    }
+    _call(fnName, args) {
+        return this.nativeCaller.callFn(fnName, args);
+    }
+    _callEventRegistration(fnName, args) {
+        return this.nativeCaller.callFn(fnName, args, { isEventRegistration: true });
+    }
+    _registerEvent(event) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            const handler = this.cachedEventHandler(event);
+            const subscription = yield this.nativeCaller.registerEvent(event, handler);
+            this.eventSubscriptions.set(event, subscription);
+        });
+    }
+    _unregisterEvent(event) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            const subscription = this.eventSubscriptions.get(event);
+            if (!subscription) {
+                // Event was never registered or already unregistered, skip
+                return;
+            }
+            yield this.nativeCaller.unregisterEvent(event, subscription);
+            this.eventSubscriptions.delete(event);
+        });
+    }
+}
+function createNativeProxy(nativeCaller) {
+    return new NativeProxy(nativeCaller);
+}
+
+function registerProxies(proxyTypeNames, provider) {
+    proxyTypeNames.forEach(proxyType => {
+        FactoryMaker.bindLazyInstance(proxyType, () => {
+            const caller = provider.getNativeCaller(proxyType);
+            return createNativeProxy(caller);
+        });
+    });
+}
+
+const CORE_PROXY_TYPE_NAMES = [
+    'CoreProxy',
+    'DataCaptureViewProxy',
+    'DataCaptureContextProxy'
+];
+
+function registerCoreProxies(provider) {
+    registerProxies(CORE_PROXY_TYPE_NAMES, provider);
+}
+
+function generateIdentifier() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+        const r = (Math.random() * 16) | 0;
+        const v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+    });
+}
+
+var index = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    AimerViewfinder: AimerViewfinder,
+    get Anchor () { return exports.Anchor; },
+    BaseController: BaseController,
+    BaseDataCaptureView: BaseDataCaptureView,
+    Brush: Brush,
+    CORE_PROXY_TYPE_NAMES: CORE_PROXY_TYPE_NAMES,
+    Camera: Camera,
+    CameraController: CameraController,
+    CameraOwnershipHelper: CameraOwnershipHelper,
+    CameraOwnershipManager: CameraOwnershipManager,
+    get CameraPosition () { return exports.CameraPosition; },
+    CameraSettings: CameraSettings,
+    Color: Color,
+    ContextStatus: ContextStatus,
+    ControlImage: ControlImage,
+    CoreProxyAdapter: CoreProxyAdapter,
+    DataCaptureContext: DataCaptureContext,
+    get DataCaptureContextEvents () { return DataCaptureContextEvents; },
+    DataCaptureContextSettings: DataCaptureContextSettings,
+    DataCaptureViewController: DataCaptureViewController,
+    get DataCaptureViewEvents () { return DataCaptureViewEvents; },
+    DefaultSerializeable: DefaultSerializeable,
+    get Direction () { return exports.Direction; },
+    EventDataParser: EventDataParser,
+    EventEmitter: EventEmitter,
+    get Expiration () { return Expiration; },
+    FactoryMaker: FactoryMaker,
+    Feedback: Feedback,
+    get FocusGestureStrategy () { return exports.FocusGestureStrategy; },
+    get FocusRange () { return exports.FocusRange; },
+    get FontFamily () { return exports.FontFamily; },
+    FrameDataController: FrameDataController,
+    FrameDataSettings: FrameDataSettings,
+    FrameDataSettingsBuilder: FrameDataSettingsBuilder,
+    get FrameSourceListenerEvents () { return FrameSourceListenerEvents; },
+    get FrameSourceState () { return exports.FrameSourceState; },
+    HTMLElementState: HTMLElementState,
+    HtmlElementPosition: HtmlElementPosition,
+    HtmlElementSize: HtmlElementSize,
+    ImageBuffer: ImageBuffer,
+    ImageFrameSource: ImageFrameSource,
+    LaserlineViewfinder: LaserlineViewfinder,
+    LicenseInfo: LicenseInfo,
+    get LogoStyle () { return exports.LogoStyle; },
+    MarginsWithUnit: MarginsWithUnit,
+    get MeasureUnit () { return exports.MeasureUnit; },
+    NativeProxy: NativeProxy,
+    NoViewfinder: NoViewfinder,
+    NoneLocationSelection: NoneLocationSelection,
+    NumberWithUnit: NumberWithUnit,
+    Observable: Observable,
+    OpenSourceSoftwareLicenseInfo: OpenSourceSoftwareLicenseInfo,
+    get Orientation () { return exports.Orientation; },
+    Point: Point,
+    PointWithUnit: PointWithUnit,
+    PrivateFocusGestureDeserializer: PrivateFocusGestureDeserializer,
+    PrivateFrameData: PrivateFrameData,
+    PrivateZoomGestureDeserializer: PrivateZoomGestureDeserializer,
+    Quadrilateral: Quadrilateral,
+    RadiusLocationSelection: RadiusLocationSelection,
+    Rect: Rect,
+    RectWithUnit: RectWithUnit,
+    RectangularLocationSelection: RectangularLocationSelection,
+    RectangularViewfinder: RectangularViewfinder,
+    RectangularViewfinderAnimation: RectangularViewfinderAnimation,
+    get RectangularViewfinderLineStyle () { return exports.RectangularViewfinderLineStyle; },
+    get RectangularViewfinderStyle () { return exports.RectangularViewfinderStyle; },
+    get ScanIntention () { return exports.ScanIntention; },
+    ScanditIcon: ScanditIcon,
+    ScanditIconBuilder: ScanditIconBuilder,
+    get ScanditIconShape () { return exports.ScanditIconShape; },
+    get ScanditIconType () { return exports.ScanditIconType; },
+    Size: Size,
+    SizeWithAspect: SizeWithAspect,
+    SizeWithUnit: SizeWithUnit,
+    SizeWithUnitAndAspect: SizeWithUnitAndAspect,
+    get SizingMode () { return exports.SizingMode; },
+    Sound: Sound,
+    SwipeToZoom: SwipeToZoom,
+    TapToFocus: TapToFocus,
+    get TextAlignment () { return exports.TextAlignment; },
+    get TorchState () { return exports.TorchState; },
+    TorchSwitchControl: TorchSwitchControl,
+    Vibration: Vibration,
+    get VibrationType () { return VibrationType; },
+    get VideoResolution () { return exports.VideoResolution; },
+    WaveFormVibration: WaveFormVibration,
+    ZoomSwitchControl: ZoomSwitchControl,
+    createNativeProxy: createNativeProxy,
+    ensureCoreDefaults: ensureCoreDefaults,
+    generateIdentifier: generateIdentifier,
+    getCoreDefaults: getCoreDefaults,
+    ignoreFromSerialization: ignoreFromSerialization,
+    ignoreFromSerializationIfNull: ignoreFromSerializationIfNull,
+    loadCoreDefaults: loadCoreDefaults,
+    nameForSerialization: nameForSerialization,
+    registerCoreProxies: registerCoreProxies,
+    registerProxies: registerProxies,
+    serializationDefault: serializationDefault,
+    setCoreDefaultsLoader: setCoreDefaultsLoader
+});
 
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -40,9 +4444,9 @@ typeof SuppressedError === "function" ? SuppressedError : function (error, suppr
 };
 
 /* eslint-disable @typescript-eslint/no-var-requires */
-const exec = require('cordova/exec');
-const channel = require('cordova/channel');
-const cordovaPluginsData = require('cordova/plugin_list');
+const exec = cordova.require('cordova/exec');
+const channel = cordova.require('cordova/channel');
+const cordovaPluginsData = cordova.require('cordova/plugin_list');
 /* eslint-enable @typescript-eslint/no-var-requires */
 const pluginMap = new Map();
 let didCoreFire = false;
@@ -125,64 +4529,12 @@ function initializePlugin(pluginName, customInitialization) {
         }
     });
 }
-
-class NativeCameraProxy extends core.BaseNativeProxy {
-    static get cordovaExec() {
-        return Cordova.exec;
-    }
-    getLastFrame() {
-        return new Promise((resolve, reject) => {
-            NativeCameraProxy.cordovaExec((frameDataJSONString) => resolve(frameDataJSONString), reject, CordovaFunction.GetLastFrame, null);
-        });
-    }
-    getLastFrameOrNull() {
-        return new Promise((resolve, reject) => {
-            NativeCameraProxy.cordovaExec((frameDataJSONString) => {
-                resolve(frameDataJSONString);
-            }, reject, CordovaFunction.GetLastFrameOrNull, null);
-        });
-    }
-    getCurrentCameraState(_position) {
-        return new Promise((resolve, reject) => {
-            NativeCameraProxy.cordovaExec(resolve, reject, CordovaFunction.GetCurrentCameraState, null);
-        });
-    }
-    isTorchAvailable(position) {
-        return new Promise((resolve, reject) => {
-            NativeCameraProxy.cordovaExec(resolve, reject, CordovaFunction.GetIsTorchAvailable, [position]);
-        });
-    }
-    switchCameraToDesiredState(desiredStateJson) {
-        return new Promise((resolve, reject) => {
-            NativeCameraProxy.cordovaExec(resolve, reject, CordovaFunction.SwitchCameraToDesiredState, [desiredStateJson]);
-        });
-    }
-    registerListenerForCameraEvents() {
-        NativeCameraProxy.cordovaExec(this.notifyListeners.bind(this), null, CordovaFunction.SubscribeFrameSourceListener, null);
-    }
-    unregisterListenerForCameraEvents() {
-        return new Promise((resolve, reject) => {
-            NativeCameraProxy.cordovaExec(resolve, reject, CordovaFunction.UnsubscribeFrameSourceListener, null);
-        });
-    }
-    notifyListeners(event) {
-        if (!event) {
-            // The event could be undefined/null in case the plugin result did not pass a "message",
-            // which could happen e.g. in case of "ok" results, which could signal e.g. successful
-            // listener subscriptions.
-            return;
-        }
-        switch (event.name) {
-            case core.FrameSourceListenerEvents.didChangeState:
-                this.eventEmitter.emit(core.FrameSourceListenerEvents.didChangeState, event.state);
-                break;
-        }
-    }
-}
-
-class NativeDataCaptureContextProxy extends core.BaseNativeProxy {
-    static get cordovaExec() {
-        return Cordova.exec;
+class CordovaNativeCaller {
+    constructor(cordovaExec, pluginName) {
+        this.cordovaExec = cordovaExec;
+        this.pluginName = pluginName;
+        this.eventRegisteredCheckList = new Set();
+        this.eventHandlers = new Map();
     }
     get framework() {
         return 'cordova';
@@ -190,213 +4542,100 @@ class NativeDataCaptureContextProxy extends core.BaseNativeProxy {
     get frameworkVersion() {
         return (window.cordova && window.cordova.version) || undefined;
     }
-    contextFromJSON(context) {
+    callFn(fnName, args, meta) {
+        // Check if this is an event registration call:
+        // 1. From metadata (legacy $$ prefix support)
+        // 2. OR from args.isEventRegistration parameter (new generated code)
+        const argsObj = args;
+        const isEventRegistration = (meta === null || meta === void 0 ? void 0 : meta.isEventRegistration) || (argsObj === null || argsObj === void 0 ? void 0 : argsObj.isEventRegistration) === true;
+        if (isEventRegistration) {
+            this.setUpEventListener(fnName, args);
+            return Promise.resolve();
+        }
         return new Promise((resolve, reject) => {
-            NativeDataCaptureContextProxy.cordovaExec(resolve.bind(this), reject.bind(this), CordovaFunction.ContextFromJSON, [context.toJSON()]);
+            exec(resolve, reject, this.pluginName, fnName, [args]);
         });
     }
-    updateContextFromJSON(context) {
-        return new Promise((resolve, reject) => {
-            NativeDataCaptureContextProxy.cordovaExec(resolve.bind(this), reject.bind(this), CordovaFunction.UpdateContextFromJSON, [context.toJSON()]);
+    eventHook(args) {
+        return args;
+    }
+    registerEvent(evName, handler) {
+        this.eventHandlers.set(evName, handler);
+        return Promise.resolve();
+    }
+    unregisterEvent(evName, _subscription) {
+        this.eventHandlers.delete(evName);
+        // Remove all registered check entries that match this event name
+        // (handles both simple keys and composite keys like "executeBarcode:methodName")
+        const keysToRemove = [];
+        this.eventRegisteredCheckList.forEach(key => {
+            if (key === evName || key.startsWith(`${evName}:`)) {
+                keysToRemove.push(key);
+            }
         });
+        keysToRemove.forEach(key => this.eventRegisteredCheckList.delete(key));
+        return Promise.resolve(undefined);
     }
-    dispose() {
-        NativeDataCaptureContextProxy.cordovaExec(null, null, CordovaFunction.DisposeContext, null);
-    }
-    registerListenerForDataCaptureContext() {
-        NativeDataCaptureContextProxy.cordovaExec(this.notifyListeners.bind(this), null, CordovaFunction.SubscribeContextListener, null);
-    }
-    addModeToContext(modeJson) {
-        return new Promise((resolve, reject) => {
-            NativeDataCaptureContextProxy.cordovaExec(resolve, reject, CordovaFunction.AddModeToContext, [modeJson]);
-        });
-    }
-    removeModeFromContext(modeJson) {
-        return new Promise((resolve, reject) => {
-            NativeDataCaptureContextProxy.cordovaExec(resolve, reject, CordovaFunction.RemoveModeFromContext, [modeJson]);
-        });
-    }
-    removeAllModesFromContext() {
-        return new Promise((resolve, reject) => {
-            NativeDataCaptureContextProxy.cordovaExec(resolve, reject, CordovaFunction.RemoveAllModesFromContext, null);
-        });
-    }
-    unregisterListenerForDataCaptureContext() {
-        return new Promise((resolve, reject) => {
-            NativeDataCaptureContextProxy.cordovaExec(resolve, reject, CordovaFunction.UnsubscribeContextListener, null);
-        });
-    }
-    notifyListeners(event) {
-        if (!event) {
-            // The event could be undefined/null in case the plugin result did not pass a "message",
-            // which could happen e.g. in case of "ok" results, which could signal e.g. successful
-            // listener subscriptions.
+    setUpEventListener(subscriptionFnName, args) {
+        // Create a unique key that includes the actual method name to support multiple registrations
+        // through the same execute function (e.g., executeBarcode with different methodNames)
+        const argsObj = args;
+        const uniqueKey = (argsObj === null || argsObj === void 0 ? void 0 : argsObj.methodName)
+            ? `${subscriptionFnName}:${argsObj.methodName}`
+            : subscriptionFnName;
+        if (this.eventRegisteredCheckList.has(uniqueKey)) {
             return;
         }
-        switch (event.name) {
-            case core.DataCaptureContextEvents.didChangeStatus:
-                const contextStatus = core.ContextStatus.fromJSON(event.argument);
-                this.eventEmitter.emit(core.DataCaptureContextEvents.didChangeStatus, contextStatus);
-                break;
-            case core.DataCaptureContextEvents.didStartObservingContext:
-                this.eventEmitter.emit(core.DataCaptureContextEvents.didStartObservingContext);
-                break;
-        }
+        this.cordovaExec(this.notifyListeners.bind(this), null, subscriptionFnName, [args]);
+        this.eventRegisteredCheckList.add(uniqueKey);
     }
-}
-
-class NativeFeedbackProxy extends core.BaseNativeProxy {
-    static get cordovaExec() {
-        return Cordova.exec;
-    }
-    emitFeedback(feedback) {
-        return new Promise((resolve, reject) => {
-            NativeFeedbackProxy.cordovaExec(resolve, reject, CordovaFunction.EmitFeedback, [feedback.toJSON()]);
-        });
-    }
-}
-
-class NativeDataCaptureViewProxy extends core.BaseNativeProxy {
-    viewPointForFramePoint(pointJson) {
-        return new Promise((resolve, reject) => {
-            NativeDataCaptureViewProxy.cordovaExec((convertedPoint) => resolve(convertedPoint), reject, CordovaFunction.ViewPointForFramePoint, [pointJson]);
-        });
-    }
-    viewQuadrilateralForFrameQuadrilateral(quadrilateralJson) {
-        return new Promise((resolve, reject) => {
-            NativeDataCaptureViewProxy.cordovaExec((convertedQuadrilateral) => resolve(convertedQuadrilateral), reject, CordovaFunction.ViewQuadrilateralForFrameQuadrilateral, [quadrilateralJson]);
-        });
-    }
-    registerListenerForViewEvents() {
-        NativeDataCaptureViewProxy.cordovaExec(this.notifyListeners.bind(this), null, CordovaFunction.SubscribeViewListener, null);
-    }
-    unregisterListenerForViewEvents() {
-        NativeDataCaptureViewProxy.cordovaExec(null, null, CordovaFunction.UnsubscribeViewListener, null);
-    }
-    setPositionAndSize(top, left, width, height, shouldBeUnderWebView) {
-        return new Promise((resolve, reject) => {
-            NativeDataCaptureViewProxy.cordovaExec(resolve, reject, CordovaFunction.SetViewPositionAndSize, [{ top, left, width, height, shouldBeUnderWebView }]);
-        });
-    }
-    show() {
-        return new Promise((resolve, reject) => {
-            NativeDataCaptureViewProxy.cordovaExec(resolve, reject, CordovaFunction.ShowView, null);
-        });
-    }
-    hide() {
-        return new Promise((resolve, reject) => {
-            NativeDataCaptureViewProxy.cordovaExec(resolve, reject, CordovaFunction.HideView, null);
-        });
-    }
-    createView(viewJson) {
-        return new Promise((resolve, reject) => {
-            NativeDataCaptureViewProxy.cordovaExec(resolve, reject, CordovaFunction.CreateDataCaptureView, [viewJson]);
-        });
-    }
-    updateView(viewJson) {
-        return new Promise((resolve, reject) => {
-            NativeDataCaptureViewProxy.cordovaExec(resolve, reject, CordovaFunction.UpdateDataCaptureView, [viewJson]);
-        });
-    }
-    removeView() {
-        return new Promise((resolve, reject) => {
-            NativeDataCaptureViewProxy.cordovaExec(resolve, reject, CordovaFunction.RemoveDataCaptureView, null);
-        });
-    }
-    static get cordovaExec() {
-        return Cordova.exec;
-    }
-    notifyListeners(event) {
-        if (!event) {
-            // The event could be undefined/null in case the plugin result did not pass a "message",
-            // which could happen e.g. in case of "ok" results, which could signal e.g. successful
-            // listener subscriptions.
+    notifyListeners(ev) {
+        if (ev == null) {
+            console.warn(`[Scandit] Received null/undefined event in notifyListeners`);
             return;
         }
-        switch (event.name) {
-            case core.DataCaptureViewEvents.didChangeSize:
-                this.eventEmitter.emit(core.DataCaptureViewEvents.didChangeSize, JSON.stringify(event.argument));
-                break;
-        }
-    }
-}
-
-class NativeImageFrameSourceProxy extends core.BaseNativeProxy {
-    static get cordovaExec() {
-        return Cordova.exec;
-    }
-    getCurrentCameraState(_position) {
-        return new Promise((resolve, reject) => {
-            NativeImageFrameSourceProxy.cordovaExec(resolve, reject, CordovaFunction.GetCurrentCameraState, null);
-        });
-    }
-    switchCameraToDesiredState(desiredStateJson) {
-        return new Promise((resolve, reject) => {
-            NativeImageFrameSourceProxy.cordovaExec(resolve, reject, CordovaFunction.SwitchCameraToDesiredState, [desiredStateJson]);
-        });
-    }
-    registerListenerForEvents() {
-        NativeImageFrameSourceProxy.cordovaExec(this.notifyListeners.bind(this), null, CordovaFunction.SubscribeFrameSourceListener, null);
-    }
-    unregisterListenerForEvents() {
-        return new Promise((resolve, reject) => {
-            NativeImageFrameSourceProxy.cordovaExec(resolve, reject, CordovaFunction.UnsubscribeFrameSourceListener, null);
-        });
-    }
-    notifyListeners(event) {
-        if (!event) {
-            // The event could be undefined/null in case the plugin result did not pass a "message",
-            // which could happen e.g. in case of "ok" results, which could signal e.g. successful
-            // listener subscriptions.
+        // Ignore success callback strings like "OK" that are not actual events
+        if (typeof ev === 'string') {
             return;
         }
-        switch (event.name) {
-            case core.FrameSourceListenerEvents.didChangeState:
-                this.eventEmitter.emit(core.FrameSourceListenerEvents.didChangeState, event.argument.state);
-                break;
+        const event = Object.assign(Object.assign(Object.assign({}, ev), ev.argument), { argument: undefined });
+        // Provide detailed diagnostics when event name is missing or handler not found
+        if (event.name == null || event.name === undefined) {
+            console.error(`[Scandit] Received event with undefined name. Event data:`, {
+                originalEvent: ev,
+                processedEvent: event,
+                availableHandlers: Array.from(this.eventHandlers.keys()),
+                pluginName: this.pluginName,
+            });
+            return;
         }
+        const handler = this.eventHandlers.get(event.name);
+        if (handler == null) {
+            console.warn(`[Scandit] Handler for event "${event.name}" not found. Available handlers:`, Array.from(this.eventHandlers.keys()));
+            return;
+        }
+        handler(event);
+    }
+}
+function createCordovaNativeCaller(cordovaExec, pluginName) {
+    return new CordovaNativeCaller(cordovaExec, pluginName);
+}
+
+class CordovaCoreNativeCallerProvider {
+    getNativeCaller(_proxyType) {
+        return createCordovaNativeCaller(Cordova.exec, Cordova.pluginName);
     }
 }
 
 function initCoreProxy() {
-    core.FactoryMaker.bindInstance('DataCaptureContextProxy', new NativeDataCaptureContextProxy());
-    core.FactoryMaker.bindInstance('FeedbackProxy', new NativeFeedbackProxy());
-    core.FactoryMaker.bindInstance('ImageFrameSourceProxy', new NativeImageFrameSourceProxy());
-    core.FactoryMaker.bindInstance('DataCaptureViewProxy', new NativeDataCaptureViewProxy());
-    core.FactoryMaker.bindInstance('CameraProxy', new NativeCameraProxy());
+    registerCoreProxies(new CordovaCoreNativeCallerProvider());
 }
 
 var CordovaFunction;
 (function (CordovaFunction) {
     CordovaFunction["GetDefaults"] = "getDefaults";
-    CordovaFunction["ContextFromJSON"] = "contextFromJSON";
-    CordovaFunction["DisposeContext"] = "disposeContext";
-    CordovaFunction["UpdateContextFromJSON"] = "updateContextFromJSON";
-    CordovaFunction["SubscribeContextListener"] = "subscribeContextListener";
-    CordovaFunction["UnsubscribeContextListener"] = "unsubscribeContextListener";
-    CordovaFunction["SubscribeFrameSourceListener"] = "subscribeFrameSourceListener";
-    CordovaFunction["UnsubscribeFrameSourceListener"] = "unsubscribeFrameSourceListener";
-    CordovaFunction["SetViewPositionAndSize"] = "setViewPositionAndSize";
-    CordovaFunction["ShowView"] = "showView";
-    CordovaFunction["HideView"] = "hideView";
-    CordovaFunction["ViewPointForFramePoint"] = "viewPointForFramePoint";
-    CordovaFunction["ViewQuadrilateralForFrameQuadrilateral"] = "viewQuadrilateralForFrameQuadrilateral";
-    CordovaFunction["SubscribeViewListener"] = "subscribeViewListener";
-    CordovaFunction["UnsubscribeViewListener"] = "unsubscribeViewListener";
-    CordovaFunction["GetCurrentCameraState"] = "getCurrentCameraState";
-    CordovaFunction["GetIsTorchAvailable"] = "getIsTorchAvailable";
-    CordovaFunction["SwitchCameraToDesiredState"] = "switchCameraToDesiredState";
-    CordovaFunction["GetLastFrame"] = "getLastFrame";
-    CordovaFunction["GetLastFrameOrNull"] = "getLastFrameOrNull";
-    CordovaFunction["EmitFeedback"] = "emitFeedback";
     CordovaFunction["SubscribeVolumeButtonObserver"] = "subscribeVolumeButtonObserver";
     CordovaFunction["UnsubscribeVolumeButtonObserver"] = "unsubscribeVolumeButtonObserver";
-    CordovaFunction["AddModeToContext"] = "addModeToContext";
-    CordovaFunction["RemoveModeFromContext"] = "removeModeFromContext";
-    CordovaFunction["RemoveAllModesFromContext"] = "removeAllModesFromContext";
-    CordovaFunction["CreateDataCaptureView"] = "createDataCaptureView";
-    CordovaFunction["UpdateDataCaptureView"] = "updateDataCaptureView";
-    CordovaFunction["RemoveDataCaptureView"] = "removeDataCaptureView";
 })(CordovaFunction || (CordovaFunction = {}));
 // tslint:disable-next-line:variable-name
 const Cordova = {
@@ -408,7 +4647,7 @@ function getDefaults() {
     initCoreProxy();
     return new Promise((resolve, reject) => {
         Cordova.exec((defaultsJSON) => {
-            core.loadCoreDefaults(defaultsJSON);
+            loadCoreDefaults(defaultsJSON);
             resolve();
         }, reject, CordovaFunction.GetDefaults, null);
     });
@@ -513,7 +4752,7 @@ class DataCaptureView {
     }
     constructor() {
         this.htmlElement = null;
-        this._htmlElementState = new core.HTMLElementState();
+        this._htmlElementState = new HTMLElementState();
         this.scrollListener = this.elementDidChange.bind(this);
         this.domObserver = new MutationObserver(this.elementDidChange.bind(this));
         this.orientationChangeListener = (() => {
@@ -523,13 +4762,14 @@ class DataCaptureView {
             setTimeout(this.elementDidChange.bind(this), 300);
             setTimeout(this.elementDidChange.bind(this), 1000);
         });
-        this.baseDataCaptureView = new core.BaseDataCaptureView(false);
+        this.baseDataCaptureView = new BaseDataCaptureView(null);
     }
     connectToElement(element) {
+        const viewId = (Date.now() / 1000) | 0;
         // add view to native hierarchy
-        this.baseDataCaptureView.createNativeView().then(() => {
+        this.baseDataCaptureView.createNativeView(viewId).then(() => {
             this.htmlElement = element;
-            this.htmlElementState = new core.HTMLElementState();
+            this.htmlElementState = new HTMLElementState();
             // Initial update
             this.elementDidChange();
             this.subscribeToChangesOnHTMLElement();
@@ -544,7 +4784,8 @@ class DataCaptureView {
     }
     setFrame(frame_1) {
         return __awaiter(this, arguments, void 0, function* (frame, isUnderContent = false) {
-            yield this.baseDataCaptureView.createNativeView();
+            const viewId = (Date.now() / 1000) | 0;
+            yield this.baseDataCaptureView.createNativeView(viewId);
             return this.baseDataCaptureView.setFrame(frame, isUnderContent);
         });
     }
@@ -561,10 +4802,10 @@ class DataCaptureView {
         return this._hide();
     }
     addOverlay(overlay) {
-        this.baseDataCaptureView.addOverlay(overlay);
+        return this.baseDataCaptureView.addOverlay(overlay);
     }
     removeOverlay(overlay) {
-        this.baseDataCaptureView.removeOverlay(overlay);
+        return this.baseDataCaptureView.removeOverlay(overlay);
     }
     addListener(listener) {
         this.baseDataCaptureView.addListener(listener);
@@ -579,10 +4820,12 @@ class DataCaptureView {
         return this.baseDataCaptureView.viewQuadrilateralForFrameQuadrilateral(quadrilateral);
     }
     addControl(control) {
-        this.baseDataCaptureView.addControl(control);
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.baseDataCaptureView.addControl(control);
+        });
     }
     addControlWithAnchorAndOffset(control, anchor, offset) {
-        return this.baseDataCaptureView.addControlWithAnchorAndOffset(control, anchor, offset);
+        this.baseDataCaptureView.addControlWithAnchorAndOffset(control, anchor, offset);
     }
     removeControl(control) {
         this.baseDataCaptureView.removeControl(control);
@@ -599,13 +4842,13 @@ class DataCaptureView {
     }
     elementDidChange() {
         if (!this.htmlElement) {
-            this.htmlElementState = new core.HTMLElementState();
+            this.htmlElementState = new HTMLElementState();
             return;
         }
-        const newState = new core.HTMLElementState();
+        const newState = new HTMLElementState();
         const boundingRect = this.htmlElement.getBoundingClientRect();
-        newState.position = new core.HtmlElementPosition(boundingRect.top, boundingRect.left);
-        newState.size = new core.HtmlElementSize(boundingRect.width, boundingRect.height);
+        newState.position = new HtmlElementPosition(boundingRect.top, boundingRect.left);
+        newState.size = new HtmlElementSize(boundingRect.width, boundingRect.height);
         newState.shouldBeUnderContent = parseInt(this.htmlElement.style.zIndex || '1', 10) < 0
             || parseInt(getComputedStyle(this.htmlElement).zIndex || '1', 10) < 0;
         const isDisplayed = getComputedStyle(this.htmlElement).display !== 'none'
@@ -631,129 +4874,124 @@ class DataCaptureView {
     }
 }
 __decorate([
-    core.ignoreFromSerialization
+    ignoreFromSerialization
 ], DataCaptureView.prototype, "baseDataCaptureView", void 0);
 __decorate([
-    core.ignoreFromSerialization
+    ignoreFromSerialization
 ], DataCaptureView.prototype, "htmlElement", void 0);
 __decorate([
-    core.ignoreFromSerialization
+    ignoreFromSerialization
 ], DataCaptureView.prototype, "_htmlElementState", void 0);
 __decorate([
-    core.ignoreFromSerialization
+    ignoreFromSerialization
 ], DataCaptureView.prototype, "scrollListener", void 0);
 __decorate([
-    core.ignoreFromSerialization
+    ignoreFromSerialization
 ], DataCaptureView.prototype, "domObserver", void 0);
 __decorate([
-    core.ignoreFromSerialization
+    ignoreFromSerialization
 ], DataCaptureView.prototype, "orientationChangeListener", void 0);
+
+class VolumeButtonObserverProxy {
+    static forVolumeButtonObserver(volumeButtonObserver) {
+        const proxy = new VolumeButtonObserverProxy();
+        proxy.volumeButtonObserver = volumeButtonObserver;
+        proxy.subscribe();
+        return proxy;
+    }
+    dispose() {
+        this.unsubscribe();
+    }
+    subscribe() {
+        VolumeButtonObserverProxy.cordovaExec(this.notifyListeners.bind(this), null, CordovaFunction.SubscribeVolumeButtonObserver, null);
+    }
+    unsubscribe() {
+        VolumeButtonObserverProxy.cordovaExec(null, null, CordovaFunction.UnsubscribeVolumeButtonObserver, null);
+    }
+    notifyListeners(event) {
+        if (!event) {
+            // The event could be undefined/null in case the plugin result did not pass a "message",
+            // which could happen e.g. in case of "ok" results, which could signal e.g. successful
+            // listener subscriptions.
+            return;
+        }
+        if (this.volumeButtonObserver.didChangeVolume && event.name === 'didChangeVolume') {
+            this.volumeButtonObserver.didChangeVolume();
+        }
+    }
+}
+VolumeButtonObserverProxy.cordovaExec = Cordova.exec;
+
+// Note: the class is made private by being excluded from the docs through `coverage_cordova_javascript_name_ignore`
+class VolumeButtonObserver {
+    constructor(didChangeVolume) {
+        this.didChangeVolume = didChangeVolume;
+        this.initialize();
+    }
+    dispose() {
+        if (this.proxy) {
+            this.proxy.dispose();
+            this.proxy = null;
+            this.didChangeVolume = null;
+        }
+    }
+    initialize() {
+        if (!this.proxy) {
+            this.proxy = VolumeButtonObserverProxy.forVolumeButtonObserver(this);
+        }
+    }
+}
 
 initializeCordovaCore();
 
-exports.AimerViewfinder = core.AimerViewfinder;
-Object.defineProperty(exports, "Anchor", {
-    enumerable: true,
-    get: function () { return core.Anchor; }
-});
-exports.Brush = core.Brush;
-exports.Camera = core.Camera;
-Object.defineProperty(exports, "CameraPosition", {
-    enumerable: true,
-    get: function () { return core.CameraPosition; }
-});
-exports.CameraSettings = core.CameraSettings;
-exports.Color = core.Color;
-exports.ContextStatus = core.ContextStatus;
-exports.DataCaptureContext = core.DataCaptureContext;
-exports.DataCaptureContextSettings = core.DataCaptureContextSettings;
-Object.defineProperty(exports, "Direction", {
-    enumerable: true,
-    get: function () { return core.Direction; }
-});
-exports.Feedback = core.Feedback;
-Object.defineProperty(exports, "FocusGestureStrategy", {
-    enumerable: true,
-    get: function () { return core.FocusGestureStrategy; }
-});
-Object.defineProperty(exports, "FocusRange", {
-    enumerable: true,
-    get: function () { return core.FocusRange; }
-});
-Object.defineProperty(exports, "FrameSourceState", {
-    enumerable: true,
-    get: function () { return core.FrameSourceState; }
-});
-exports.ImageBuffer = core.ImageBuffer;
-exports.ImageFrameSource = core.ImageFrameSource;
-exports.LaserlineViewfinder = core.LaserlineViewfinder;
-Object.defineProperty(exports, "LaserlineViewfinderStyle", {
-    enumerable: true,
-    get: function () { return core.LaserlineViewfinderStyle; }
-});
-Object.defineProperty(exports, "LogoStyle", {
-    enumerable: true,
-    get: function () { return core.LogoStyle; }
-});
-exports.MarginsWithUnit = core.MarginsWithUnit;
-Object.defineProperty(exports, "MeasureUnit", {
-    enumerable: true,
-    get: function () { return core.MeasureUnit; }
-});
-exports.NoViewfinder = core.NoViewfinder;
-exports.NoneLocationSelection = core.NoneLocationSelection;
-exports.NumberWithUnit = core.NumberWithUnit;
-Object.defineProperty(exports, "Orientation", {
-    enumerable: true,
-    get: function () { return core.Orientation; }
-});
-exports.Point = core.Point;
-exports.PointWithUnit = core.PointWithUnit;
-exports.Quadrilateral = core.Quadrilateral;
-exports.RadiusLocationSelection = core.RadiusLocationSelection;
-exports.Rect = core.Rect;
-exports.RectWithUnit = core.RectWithUnit;
-exports.RectangularLocationSelection = core.RectangularLocationSelection;
-exports.RectangularViewfinder = core.RectangularViewfinder;
-exports.RectangularViewfinderAnimation = core.RectangularViewfinderAnimation;
-Object.defineProperty(exports, "RectangularViewfinderLineStyle", {
-    enumerable: true,
-    get: function () { return core.RectangularViewfinderLineStyle; }
-});
-Object.defineProperty(exports, "RectangularViewfinderStyle", {
-    enumerable: true,
-    get: function () { return core.RectangularViewfinderStyle; }
-});
-Object.defineProperty(exports, "ScanIntention", {
-    enumerable: true,
-    get: function () { return core.ScanIntention; }
-});
-exports.Size = core.Size;
-exports.SizeWithAspect = core.SizeWithAspect;
-exports.SizeWithUnit = core.SizeWithUnit;
-exports.SizeWithUnitAndAspect = core.SizeWithUnitAndAspect;
-Object.defineProperty(exports, "SizingMode", {
-    enumerable: true,
-    get: function () { return core.SizingMode; }
-});
-exports.Sound = core.Sound;
-exports.SpotlightViewfinder = core.SpotlightViewfinder;
-exports.SwipeToZoom = core.SwipeToZoom;
-exports.TapToFocus = core.TapToFocus;
-Object.defineProperty(exports, "TorchState", {
-    enumerable: true,
-    get: function () { return core.TorchState; }
-});
-exports.TorchSwitchControl = core.TorchSwitchControl;
-exports.Vibration = core.Vibration;
-Object.defineProperty(exports, "VideoResolution", {
-    enumerable: true,
-    get: function () { return core.VideoResolution; }
-});
-exports.ZoomSwitchControl = core.ZoomSwitchControl;
+exports.AimerViewfinder = AimerViewfinder;
+exports.Brush = Brush;
+exports.Camera = Camera;
+exports.CameraSettings = CameraSettings;
+exports.Color = Color;
+exports.ContextStatus = ContextStatus;
 exports.CordovaError = CordovaError;
+exports.CordovaNativeCaller = CordovaNativeCaller;
+exports.DataCaptureContext = DataCaptureContext;
+exports.DataCaptureContextSettings = DataCaptureContextSettings;
 exports.DataCaptureVersion = DataCaptureVersion;
 exports.DataCaptureView = DataCaptureView;
+exports.Feedback = Feedback;
+exports.FrameDataSettings = FrameDataSettings;
+exports.FrameDataSettingsBuilder = FrameDataSettingsBuilder;
+exports.ImageBuffer = ImageBuffer;
+exports.ImageFrameSource = ImageFrameSource;
+exports.LaserlineViewfinder = LaserlineViewfinder;
+exports.MarginsWithUnit = MarginsWithUnit;
+exports.NoViewfinder = NoViewfinder;
+exports.NoneLocationSelection = NoneLocationSelection;
+exports.NumberWithUnit = NumberWithUnit;
+exports.OpenSourceSoftwareLicenseInfo = OpenSourceSoftwareLicenseInfo;
+exports.Point = Point;
+exports.PointWithUnit = PointWithUnit;
+exports.Quadrilateral = Quadrilateral;
+exports.RadiusLocationSelection = RadiusLocationSelection;
+exports.Rect = Rect;
+exports.RectWithUnit = RectWithUnit;
+exports.RectangularLocationSelection = RectangularLocationSelection;
+exports.RectangularViewfinder = RectangularViewfinder;
+exports.RectangularViewfinderAnimation = RectangularViewfinderAnimation;
+exports.ScanditIcon = ScanditIcon;
+exports.ScanditIconBuilder = ScanditIconBuilder;
+exports.Size = Size;
+exports.SizeWithAspect = SizeWithAspect;
+exports.SizeWithUnit = SizeWithUnit;
+exports.SizeWithUnitAndAspect = SizeWithUnitAndAspect;
+exports.Sound = Sound;
+exports.SwipeToZoom = SwipeToZoom;
+exports.TapToFocus = TapToFocus;
+exports.TorchSwitchControl = TorchSwitchControl;
+exports.Vibration = Vibration;
+exports.VolumeButtonObserver = VolumeButtonObserver;
+exports.ZoomSwitchControl = ZoomSwitchControl;
+exports.__ScanditCore = index;
 exports.cordovaExec = cordovaExec;
+exports.createCordovaNativeCaller = createCordovaNativeCaller;
 exports.initializePlugin = initializePlugin;
 exports.pluginsMetadata = pluginsMetadata;
+//# sourceMappingURL=index.js.map
