@@ -14,7 +14,6 @@ import com.scandit.datacapture.cordova.core.utils.CordovaEventEmitter
 import com.scandit.datacapture.cordova.core.utils.CordovaResult
 import com.scandit.datacapture.cordova.core.utils.PermissionRequest
 import com.scandit.datacapture.cordova.core.utils.PluginMethod
-import com.scandit.datacapture.cordova.core.utils.defaultArgumentAsString
 import com.scandit.datacapture.cordova.core.utils.successAndKeepCallback
 import com.scandit.datacapture.core.common.feedback.Feedback
 import com.scandit.datacapture.core.source.FrameSourceState
@@ -164,7 +163,7 @@ class ScanditCaptureCore :
     }
 
     @PluginMethod
-    fun showView(
+    fun showDataCaptureView(
         @Suppress("UNUSED_PARAMETER") args: JSONArray,
         callbackContext: CallbackContext
     ) {
@@ -173,7 +172,7 @@ class ScanditCaptureCore :
     }
 
     @PluginMethod
-    fun hideView(
+    fun hideDataCaptureView(
         @Suppress("UNUSED_PARAMETER") args: JSONArray,
         callbackContext: CallbackContext
     ) {
@@ -182,10 +181,9 @@ class ScanditCaptureCore :
     }
 
     @PluginMethod
-    fun setViewPositionAndSize(args: JSONArray, callbackContext: CallbackContext) {
+    fun setDataCaptureViewPositionAndSize(args: JSONArray, callbackContext: CallbackContext) {
         try {
             val infoJsonObject = args.getJSONObject(0)
-
             captureViewHandler.setResizeAndMoveInfo(ResizeAndMoveInfo(infoJsonObject))
             callbackContext.success()
         } catch (e: JSONException) {
@@ -235,7 +233,7 @@ class ScanditCaptureCore :
     }
 
     @PluginMethod
-    fun subscribeViewListener(
+    fun registerListenerForViewEvents(
         args: JSONArray,
         callbackContext: CallbackContext
     ) {
@@ -243,20 +241,22 @@ class ScanditCaptureCore :
             FrameworksDataCaptureViewListener.ON_SIZE_CHANGED_EVENT_NAME,
             callbackContext
         )
-        val viewId = args.getInt(0)
+        val argsJson = args.getJSONObject(0)
+        val viewId = argsJson.getInt("viewId")
         coreModule.registerDataCaptureViewListener(viewId)
         callbackContext.successAndKeepCallback()
     }
 
     @PluginMethod
-    fun unsubscribeViewListener(
+    fun unregisterListenerForViewEvents(
         args: JSONArray,
         callbackContext: CallbackContext
     ) {
         eventEmitter.unregisterCallback(
             FrameworksDataCaptureViewListener.ON_SIZE_CHANGED_EVENT_NAME
         )
-        val viewId = args.getInt(0)
+        val argsJson = args.getJSONObject(0)
+        val viewId = argsJson.getInt("viewId")
         coreModule.unregisterDataCaptureViewListener(viewId)
         callbackContext.success()
     }
@@ -267,7 +267,7 @@ class ScanditCaptureCore :
 
         coreModule.viewPointForFramePoint(
             argsJson.getInt("viewId"),
-            argsJson.getString("point"),
+            argsJson.getString("pointJson"),
             CordovaResult(callbackContext)
         )
     }
@@ -277,7 +277,7 @@ class ScanditCaptureCore :
         val argsJson = args.getJSONObject(0)
         coreModule.viewQuadrilateralForFrameQuadrilateral(
             argsJson.getInt("viewId"),
-            argsJson.getString("quadrilateral"),
+            argsJson.getString("quadrilateralJson"),
             CordovaResult(callbackContext)
         )
     }
@@ -297,7 +297,8 @@ class ScanditCaptureCore :
     @PluginMethod
     fun emitFeedback(args: JSONArray, callbackContext: CallbackContext) {
         val jsonObject = args.getJSONObject(0)
-        coreModule.emitFeedback(jsonObject.toString(), CordovaResult(callbackContext))
+        val feedbackJson = jsonObject.getString("feedbackJson")
+        coreModule.emitFeedback(feedbackJson, CordovaResult(callbackContext))
     }
 
     @PluginMethod
@@ -395,8 +396,10 @@ class ScanditCaptureCore :
     @PluginMethod
     fun createDataCaptureView(args: JSONArray, callbackContext: CallbackContext) {
         captureViewHandler.attachWebView(webView.view)
+        val argsJson = args.getJSONObject(0)
+        val viewJson = argsJson.getString("viewJson")
         val view = coreModule.createDataCaptureView(
-            args.defaultArgumentAsString,
+            viewJson,
             CordovaResult(callbackContext)
         )
         if (view != null) {
@@ -414,8 +417,10 @@ class ScanditCaptureCore :
 
     @PluginMethod
     fun updateDataCaptureView(args: JSONArray, callbackContext: CallbackContext) {
+        val argsJson = args.getJSONObject(0)
+        val viewJson = argsJson.getString("viewJson")
         coreModule.updateDataCaptureView(
-            args.defaultArgumentAsString,
+            viewJson,
             CordovaResult(callbackContext)
         )
     }
@@ -425,7 +430,8 @@ class ScanditCaptureCore :
         args: JSONArray,
         callbackContext: CallbackContext
     ) {
-        val viewId = args.getInt(0)
+        val argsJson = args.getJSONObject(0)
+        val viewId = argsJson.getInt("viewId")
 
         val dcViewToRemove = coreModule.getDataCaptureViewById(viewId)
         if (dcViewToRemove != null) {
