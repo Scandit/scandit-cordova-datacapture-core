@@ -20,23 +20,21 @@ public struct CordovaResult: FrameworksResult {
                 reject(code: "JSON_ERROR", message: "Failed to convert to JSON", details: error)
             }
         } else if let unwrappedResult = result {
-            commandDelegate.send(
-                .success(message: ["data": String(describing: unwrappedResult)]),
-                callbackId: callbackId
-            )
+            commandDelegate.send(.success(message: ["data": String(describing: unwrappedResult)]), callbackId: callbackId)
         } else {
             commandDelegate.send(.success, callbackId: callbackId)
         }
     }
-
+    
     public func reject(code: String, message: String?, details: Any?) {
         commandDelegate.send(.failure(with: code), callbackId: callbackId)
     }
-
+    
     public func reject(error: Error) {
         commandDelegate.send(.failure(with: error), callbackId: callbackId)
     }
 }
+
 
 public struct CordovaResultKeepCallback: FrameworksResult {
     private let commandDelegate: CDVCommandDelegate
@@ -50,11 +48,11 @@ public struct CordovaResultKeepCallback: FrameworksResult {
     public func success(result: Any?) {
         commandDelegate.send(.keepCallback, callbackId: callbackId)
     }
-
+    
     public func reject(code: String, message: String?, details: Any?) {
         commandDelegate.send(.failure(with: code), callbackId: callbackId)
     }
-
+    
     public func reject(error: Error) {
         commandDelegate.send(.failure(with: error), callbackId: callbackId)
     }
