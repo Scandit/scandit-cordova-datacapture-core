@@ -71,6 +71,9 @@ class CordovaEventEmitter : Emitter {
     override fun hasViewSpecificListenersForEvent(viewId: Int, eventName: String): Boolean =
         specificCallbacks[viewId]?.containsKey(eventName) == true
 
+    override fun hasModeSpecificListenersForEvent(modeId: Int, eventName: String): Boolean =
+        specificCallbacks[modeId]?.containsKey(eventName) == true
+
     private fun getCallback(
         eventName: String,
         payload: MutableMap<String, Any?>
