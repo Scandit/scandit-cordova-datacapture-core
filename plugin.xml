@@ -1,4 +1,4 @@
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="scandit-cordova-datacapture-core" version="8.1.3">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="scandit-cordova-datacapture-core" version="8.3.0">
     <name>ScanditCaptureCore</name>
     <js-module name="Scandit" src="dist/index.js">
         <runs />
@@ -18,11 +18,14 @@
         <config-file parent="NSCameraUsageDescription" target="*-Info.plist">
             <string>To scan barcodes.</string>
         </config-file>
+        <header-file src="src/ios/ScanditCaptureCore-Bridging-Header.h" type="BridgingHeader" />
+        <header-file src="src/ios/SDCVolumeButtonObserver.h" />
         <source-file src="src/ios/CallbackLocks.swift" />
         <source-file src="src/ios/Callbacks.swift" />
         <source-file src="src/ios/CordovaEventEmitter.swift" />
         <source-file src="src/ios/CordovaMethodCall.swift" />
         <source-file src="src/ios/CordovaResult.swift" />
+        <source-file src="src/ios/JSONArgs.swift" />
         <source-file src="src/ios/NativeViewConstraints.swift" />
         <source-file src="src/ios/ScanditCaptureCore.swift" />
         <source-file src="src/ios/ScanditCaptureCoreDefaults.swift" />
@@ -33,7 +36,7 @@
         <source-file src="src/ios/Extensions/CDVPluginResult+Extensions.swift" />
         <podspec>
             <pods use-frameworks="true">
-                <pod name="scandit-datacapture-frameworks-core" spec="= 8.1.3" />
+                <pod name="scandit-datacapture-frameworks-core" spec="= 8.3.0" />
             </pods>
         </podspec>
     </platform>

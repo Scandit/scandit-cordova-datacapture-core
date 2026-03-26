@@ -120,18 +120,14 @@ public class CordovaEventEmitter: Emitter {
         self.lock.wait()
         defer { self.lock.signal() }
 
-        if var callbacksForView = specificCallbacks[viewId] {
-            callbacksForView.removeValue(forKey: name)
-        }
+        specificCallbacks[viewId]?.removeValue(forKey: name)
     }
 
     public func unregisterModeSpecificCallback(_ modeId: Int, with name: String) {
         self.lock.wait()
         defer { self.lock.signal() }
 
-        if var callbacksForView = specificCallbacks[modeId] {
-            callbacksForView.removeValue(forKey: name)
-        }
+        specificCallbacks[modeId]?.removeValue(forKey: name)
     }
 
     public func removeCallbacks() {
