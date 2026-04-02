@@ -9,6 +9,7 @@ package com.scandit.datacapture.cordova.core
 import android.content.pm.PackageManager
 import com.scandit.datacapture.cordova.core.data.ResizeAndMoveInfo
 import com.scandit.datacapture.cordova.core.errors.JsonParseError
+import com.scandit.datacapture.cordova.core.errors.NoLastFrameError
 import com.scandit.datacapture.cordova.core.handlers.DataCaptureViewHandler
 import com.scandit.datacapture.cordova.core.utils.CordovaEventEmitter
 import com.scandit.datacapture.cordova.core.utils.CordovaResult
@@ -20,13 +21,13 @@ import com.scandit.datacapture.core.common.feedback.Feedback
 import com.scandit.datacapture.core.source.FrameSourceState
 import com.scandit.datacapture.core.source.FrameSourceStateDeserializer
 import com.scandit.datacapture.frameworks.core.CoreModule
-import com.scandit.datacapture.frameworks.core.lifecycle.ActivityLifecycleDispatcher
-import com.scandit.datacapture.frameworks.core.lifecycle.DefaultActivityLifecycle
 import com.scandit.datacapture.frameworks.core.listeners.FrameworksDataCaptureContextListener
 import com.scandit.datacapture.frameworks.core.listeners.FrameworksDataCaptureViewListener
+import com.scandit.datacapture.frameworks.core.listeners.FrameworksFrameSourceDeserializer
 import com.scandit.datacapture.frameworks.core.listeners.FrameworksFrameSourceListener
-import com.scandit.datacapture.frameworks.core.observers.VolumeButtonObserver
+import com.scandit.datacapture.frameworks.core.utils.DefaultLastFrameData
 import com.scandit.datacapture.frameworks.core.utils.DefaultMainThread
+import com.scandit.datacapture.frameworks.core.utils.LastFrameData
 import com.scandit.datacapture.frameworks.core.utils.MainThread
 import org.apache.cordova.CallbackContext
 import org.apache.cordova.CordovaPlugin
@@ -40,8 +41,6 @@ class ScanditCaptureCore :
 
     companion object {
 
-        private const val VOLUME_CHANGE_EVENT = "didChangeVolume"
-
         private val PLUGIN_NAMES: MutableSet<String> = mutableSetOf()
 
         fun addPlugin(name: String) {
@@ -51,10 +50,9 @@ class ScanditCaptureCore :
         }
     }
 
-    private val lifecycleDispatcher: ActivityLifecycleDispatcher =
-        DefaultActivityLifecycle.getInstance()
-
     private val mainThread: MainThread = DefaultMainThread.getInstance()
+
+    private val lastFrameData: LastFrameData = DefaultLastFrameData.getInstance()
 
     private val permissionRequest = PermissionRequest.getInstance()
 
@@ -68,9 +66,13 @@ class ScanditCaptureCore :
 
     private val eventEmitter = CordovaEventEmitter()
 
-    private var volumeButtonObserver: VolumeButtonObserver? = null
-
-    private val coreModule = CoreModule.create(eventEmitter)
+    private val frameSourceListener = FrameworksFrameSourceListener(eventEmitter)
+    private val coreModule = CoreModule(
+        frameSourceListener,
+        FrameworksDataCaptureContextListener(eventEmitter),
+        FrameworksDataCaptureViewListener(eventEmitter),
+        FrameworksFrameSourceDeserializer(frameSourceListener)
+    )
 
     private lateinit var exposedFunctionsToJs: Map<String, Method>
 
@@ -80,14 +82,9 @@ class ScanditCaptureCore :
         exposedFunctionsToJs =
             this.javaClass.methods.filter { it.getAnnotation(PluginMethod::class.java) != null }
                 .associateBy { it.name }
-
-        // Dispatch initial lifecycle events since the activity may already be resumed
-        // when the plugin initializes on first run
-        lifecycleDispatcher.dispatchOnResume()
     }
 
     override fun onStop() {
-        lifecycleDispatcher.dispatchOnStop()
         frameSourceStateBeforeStopping =
             coreModule.getCurrentCameraDesiredState() ?: FrameSourceState.OFF
         coreModule.switchToDesiredCameraState(FrameSourceState.OFF)
@@ -95,7 +92,6 @@ class ScanditCaptureCore :
     }
 
     override fun onStart() {
-        lifecycleDispatcher.dispatchOnStart()
         if (permissionRequest.checkCameraPermission(this)) {
             coreModule.switchToDesiredCameraState(frameSourceStateBeforeStopping)
         }
@@ -107,24 +103,12 @@ class ScanditCaptureCore :
     }
 
     override fun onDestroy() {
-        lifecycleDispatcher.dispatchOnDestroy()
         destroy()
-    }
-
-    override fun onPause(multitasking: Boolean) {
-        lifecycleDispatcher.dispatchOnPause()
-        // Need to stop observer when app goes in background
-        volumeButtonObserver?.unsubscribe()
-    }
-
-    override fun onResume(multitasking: Boolean) {
-        lifecycleDispatcher.dispatchOnResume()
-        // Resume observer when app comes from background
-        volumeButtonObserver?.subscribe()
+        super.onDestroy()
     }
 
     private fun destroy() {
-        captureViewHandler.disposeCurrentWebView()
+        captureViewHandler.disposeCurrent()
         coreModule.onDestroy()
         eventEmitter.removeAllCallbacks()
     }
@@ -153,14 +137,16 @@ class ScanditCaptureCore :
 
     @PluginMethod
     fun contextFromJSON(args: JSONArray, callbackContext: CallbackContext) {
-        val contextJson = args.getJSONObject(0).getString("contextJson")
-        coreModule.createContextFromJson(contextJson, CordovaResult(callbackContext))
+        val jsonString = args.getJSONObject(0).toString()
+        coreModule.createContextFromJson(jsonString, CordovaResult(callbackContext))
     }
 
     @PluginMethod
     fun updateContextFromJSON(args: JSONArray, callbackContext: CallbackContext) {
-        val contextJson = args.getJSONObject(0).getString("contextJson")
-        coreModule.updateContextFromJson(contextJson, CordovaResult(callbackContext))
+        val jsonString = args.getJSONObject(0).toString()
+        mainThread.runOnMainThread {
+            coreModule.updateContextFromJson(jsonString, CordovaResult(callbackContext))
+        }
     }
 
     @PluginMethod
@@ -236,62 +222,50 @@ class ScanditCaptureCore :
 
     @PluginMethod
     fun subscribeViewListener(
-        args: JSONArray,
+        @Suppress("UNUSED_PARAMETER") args: JSONArray,
         callbackContext: CallbackContext
     ) {
         eventEmitter.registerCallback(
             FrameworksDataCaptureViewListener.ON_SIZE_CHANGED_EVENT_NAME,
             callbackContext
         )
-        val viewId = args.getInt(0)
-        coreModule.registerDataCaptureViewListener(viewId)
+        coreModule.registerDataCaptureViewListener()
         callbackContext.successAndKeepCallback()
     }
 
     @PluginMethod
     fun unsubscribeViewListener(
-        args: JSONArray,
+        @Suppress("UNUSED_PARAMETER") args: JSONArray,
         callbackContext: CallbackContext
     ) {
         eventEmitter.unregisterCallback(
             FrameworksDataCaptureViewListener.ON_SIZE_CHANGED_EVENT_NAME
         )
-        val viewId = args.getInt(0)
-        coreModule.unregisterDataCaptureViewListener(viewId)
+        coreModule.unregisterDataCaptureViewListener()
         callbackContext.success()
     }
 
     @PluginMethod
     fun viewPointForFramePoint(args: JSONArray, callbackContext: CallbackContext) {
-        val argsJson = args.getJSONObject(0)
-
         coreModule.viewPointForFramePoint(
-            argsJson.getInt("viewId"),
-            argsJson.getString("point"),
+            args.defaultArgumentAsString,
             CordovaResult(callbackContext)
         )
     }
 
     @PluginMethod
     fun viewQuadrilateralForFrameQuadrilateral(args: JSONArray, callbackContext: CallbackContext) {
-        val argsJson = args.getJSONObject(0)
         coreModule.viewQuadrilateralForFrameQuadrilateral(
-            argsJson.getInt("viewId"),
-            argsJson.getString("quadrilateral"),
-            CordovaResult(callbackContext)
+            args.defaultArgumentAsString, CordovaResult(callbackContext)
         )
     }
 
     @PluginMethod
     fun getCurrentCameraState(
-        args: JSONArray,
+        @Suppress("UNUSED_PARAMETER") args: JSONArray,
         callbackContext: CallbackContext
     ) {
-        val argsJson = args.getJSONObject(0)
-        coreModule.getCameraState(
-            argsJson.getString("position"),
-            CordovaResult(callbackContext)
-        )
+        coreModule.getCurrentCameraState(CordovaResult(callbackContext))
     }
 
     @PluginMethod
@@ -301,16 +275,13 @@ class ScanditCaptureCore :
     }
 
     @PluginMethod
-    fun isTorchAvailable(args: JSONArray, callbackContext: CallbackContext) {
-        val argsJson = args.getJSONObject(0)
-        coreModule.isTorchAvailable(
-            argsJson.getString("position"),
-            CordovaResult(callbackContext)
-        )
+    fun getIsTorchAvailable(args: JSONArray, callbackContext: CallbackContext) {
+        val cameraPositionJson = args[0].toString()
+        coreModule.isTorchAvailable(cameraPositionJson, CordovaResult(callbackContext))
     }
 
     @PluginMethod
-    fun registerListenerForCameraEvents(
+    fun subscribeFrameSourceListener(
         @Suppress("UNUSED_PARAMETER") args: JSONArray,
         callbackContext: CallbackContext
     ) {
@@ -327,7 +298,7 @@ class ScanditCaptureCore :
     }
 
     @PluginMethod
-    fun unregisterListenerForCameraEvents(
+    fun unsubscribeFrameSourceListener(
         @Suppress("UNUSED_PARAMETER") args: JSONArray,
         callbackContext: CallbackContext
     ) {
@@ -342,20 +313,25 @@ class ScanditCaptureCore :
     }
 
     @PluginMethod
-    fun getFrame(args: JSONArray, callbackContext: CallbackContext) {
-        val argsJson = args.getJSONObject(0)
-        coreModule.getLastFrameAsJson(
-            argsJson.getString("frameId"),
-            CordovaResult(callbackContext)
-        )
+    fun getLastFrame(
+        @Suppress("UNUSED_PARAMETER") args: JSONArray,
+        callbackContext: CallbackContext
+    ) {
+        lastFrameData.getLastFrameDataJson { frameAsJson ->
+            if (frameAsJson == null) {
+                NoLastFrameError().sendResult(callbackContext)
+                return@getLastFrameDataJson
+            }
+
+            callbackContext.success(frameAsJson)
+        }
     }
 
     @PluginMethod
     fun switchCameraToDesiredState(args: JSONArray, callbackContext: CallbackContext) {
-        val argsJson = args.getJSONObject(0)
         if (!permissionRequest.checkCameraPermission(this)) {
             latestDesiredFrameSource =
-                FrameSourceStateDeserializer.fromJson(argsJson.getString("desiredStateJson"))
+                FrameSourceStateDeserializer.fromJson(args.defaultArgumentAsString)
 
             permissionRequest.checkOrRequestCameraPermission(this)
             callbackContext.success()
@@ -363,7 +339,7 @@ class ScanditCaptureCore :
         }
 
         coreModule.switchCameraToDesiredState(
-            argsJson.getString("desiredStateJson"),
+            args.defaultArgumentAsString,
             CordovaResult(callbackContext)
         )
         latestDesiredFrameSource = coreModule.getCurrentCameraDesiredState() ?: FrameSourceState.OFF
@@ -371,21 +347,19 @@ class ScanditCaptureCore :
 
     @PluginMethod
     fun addModeToContext(args: JSONArray, callbackContext: CallbackContext) {
-        val modeJson = args.getJSONObject(0).getString("modeJson")
-        coreModule.addModeToContext(modeJson, CordovaResult(callbackContext))
+        coreModule.addModeToContext(args.defaultArgumentAsString, CordovaResult(callbackContext))
     }
 
     @PluginMethod
     fun removeModeFromContext(args: JSONArray, callbackContext: CallbackContext) {
-        val modeJson = args.getJSONObject(0).getString("modeJson")
         coreModule.removeModeFromContext(
-            modeJson,
+            args.defaultArgumentAsString,
             CordovaResult(callbackContext)
         )
     }
 
     @PluginMethod
-    fun removeAllModes(
+    fun removeAllModesFromContext(
         @Suppress("UNUSED_PARAMETER") args: JSONArray,
         callbackContext: CallbackContext
     ) {
@@ -394,22 +368,14 @@ class ScanditCaptureCore :
 
     @PluginMethod
     fun createDataCaptureView(args: JSONArray, callbackContext: CallbackContext) {
-        captureViewHandler.attachWebView(webView.view)
+        captureViewHandler.attachWebView(webView.view, cordova.activity)
         val view = coreModule.createDataCaptureView(
             args.defaultArgumentAsString,
             CordovaResult(callbackContext)
         )
         if (view != null) {
-            val existingView = captureViewHandler.dataCaptureView
-            if (existingView != null) {
-                coreModule.dataCaptureViewDisposed(existingView)
-                captureViewHandler.removeDataCaptureView(existingView)
-            }
-            mainThread.runOnMainThread {
-                captureViewHandler.attachDataCaptureView(view, cordova.activity)
-            }
+            captureViewHandler.attachDataCaptureView(view, cordova.activity)
         }
-        callbackContext.success()
     }
 
     @PluginMethod
@@ -422,53 +388,14 @@ class ScanditCaptureCore :
 
     @PluginMethod
     fun removeDataCaptureView(
-        args: JSONArray,
+        @Suppress("UNUSED_PARAMETER") args: JSONArray,
         callbackContext: CallbackContext
     ) {
-        val viewId = args.getInt(0)
-
-        val dcViewToRemove = coreModule.getDataCaptureViewById(viewId)
+        val dcViewToRemove = captureViewHandler.dataCaptureView
+        captureViewHandler.disposeCurrentDataCaptureView()
         if (dcViewToRemove != null) {
             coreModule.dataCaptureViewDisposed(dcViewToRemove)
-            captureViewHandler.removeDataCaptureView(dcViewToRemove)
         }
-        callbackContext.success()
-    }
-
-    @PluginMethod
-    fun getOpenSourceSoftwareLicenseInfo(
-        @Suppress("UNUSED_PARAMETER") args: JSONArray,
-        callbackContext: CallbackContext
-    ) {
-        coreModule.getOpenSourceSoftwareLicenseInfo(CordovaResult(callbackContext))
-    }
-
-    @PluginMethod
-    fun subscribeVolumeButtonObserver(
-        @Suppress("UNUSED_PARAMETER") args: JSONArray,
-        callbackContext: CallbackContext
-    ) {
-        eventEmitter.registerCallback(VOLUME_CHANGE_EVENT, callbackContext)
-        volumeButtonObserver = VolumeButtonObserver(
-            cordova.context,
-            object : VolumeButtonObserver.VolumeButtonCallback {
-                override fun onVolumeButtonPressed() {
-                    eventEmitter.emit(VOLUME_CHANGE_EVENT, mutableMapOf())
-                }
-            }
-        )
-        volumeButtonObserver?.subscribe()
-        callbackContext.successAndKeepCallback()
-    }
-
-    @PluginMethod
-    fun unsubscribeVolumeButtonObserver(
-        @Suppress("UNUSED_PARAMETER") args: JSONArray,
-        callbackContext: CallbackContext
-    ) {
-        eventEmitter.unregisterCallback(VOLUME_CHANGE_EVENT)
-        volumeButtonObserver?.unsubscribe()
-        volumeButtonObserver = null
         callbackContext.success()
     }
 
@@ -483,9 +410,20 @@ class ScanditCaptureCore :
                 // Switch camera state once the permission has been granted
                 coreModule.switchToDesiredCameraState(latestDesiredFrameSource)
             } else {
-                coreModule.notifyCameraPermissionDenied()
+                notifyCameraPermissionDenied()
             }
         }
+    }
+
+    private fun notifyCameraPermissionDenied() {
+        eventEmitter.emit(
+            FrameworksDataCaptureContextListener.DID_CHANGE_STATUS_EVENT_NAME,
+            mutableMapOf(
+                "code" to 1032,
+                "isValid" to true,
+                "message" to "Camera Authorization Required"
+            )
+        )
     }
 
     private fun onJsonParseError(error: Throwable, callbackContext: CallbackContext) {

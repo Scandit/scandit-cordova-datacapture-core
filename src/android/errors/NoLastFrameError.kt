@@ -7,8 +7,7 @@
 package com.scandit.datacapture.cordova.core.errors
 
 class NoLastFrameError : ActionError(
-    ERROR_CODE,
-    "Last frame not available"
+    ERROR_CODE, "Last frame not available"
 ) {
     companion object {
         private const val ERROR_CODE = 10050
