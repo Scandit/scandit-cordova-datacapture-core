@@ -38,14 +38,14 @@ class CordovaEventEmitter : Emitter {
     }
 
     fun registerModeSpecificCallback(
-        modeId: Int,
+        mdeId: Int,
         eventName: String,
         callbackContext: CallbackContext
     ) {
-        if (specificCallbacks[modeId] == null) {
-            specificCallbacks[modeId] = mutableMapOf()
+        if (specificCallbacks[mdeId] == null) {
+            specificCallbacks[mdeId] = mutableMapOf()
         }
-        specificCallbacks[modeId]?.put(eventName, callbackContext)
+        specificCallbacks[mdeId]?.put(eventName, callbackContext)
     }
 
     fun unregisterCallback(eventName: String) {
@@ -71,31 +71,16 @@ class CordovaEventEmitter : Emitter {
     override fun hasViewSpecificListenersForEvent(viewId: Int, eventName: String): Boolean =
         specificCallbacks[viewId]?.containsKey(eventName) == true
 
-    override fun hasModeSpecificListenersForEvent(modeId: Int, eventName: String): Boolean =
-        specificCallbacks[modeId]?.containsKey(eventName) == true
-
     private fun getCallback(
         eventName: String,
         payload: MutableMap<String, Any?>
     ): CallbackContext? {
-        return when {
-            payload.containsKey("viewId") -> {
-                val viewId = when (val id = payload["viewId"]) {
-                    is Int -> id
-                    is Number -> id.toInt()
-                    else -> null
-                }
-                viewId?.let { specificCallbacks[it]?.get(eventName) }
-            }
-            payload.containsKey("modeId") -> {
-                val modeId = when (val id = payload["modeId"]) {
-                    is Int -> id
-                    is Number -> id.toInt()
-                    else -> null
-                }
-                modeId?.let { specificCallbacks[it]?.get(eventName) }
-            }
-            else -> callbacks[eventName]
+        return if (payload.containsKey("viewId")) {
+            specificCallbacks[payload["viewId"] as Int]?.get(eventName)
+        } else if (payload.containsKey("modeId")) {
+            specificCallbacks[payload["modeId"] as Int]?.get(eventName)
+        } else {
+            callbacks[eventName]
         }
     }
 }
