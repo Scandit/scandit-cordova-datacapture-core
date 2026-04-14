@@ -6,10 +6,10 @@ struct ViewPositionAndSizeJSON: CommandJSONArgument {
     let shouldBeUnderWebView: Bool
 
     var position: CGPoint {
-        return CGPoint(x: left, y: top)
+        CGPoint(x: left, y: top)
     }
 
     var size: CGSize {
-        return CGSize(width: width, height: height)
+        CGSize(width: width, height: height)
     }
 }

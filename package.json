@@ -1,6 +1,6 @@
 {
   "name": "scandit-cordova-datacapture-core",
-  "version": "6.28.9",
+  "version": "8.3.1",
   "description": "Scandit Data Capture SDK for Cordova",
   "license": "Apache-2.0",
   "private": false,
@@ -12,26 +12,23 @@
     "cordova-android"
   ],
   "scripts": {
-    "build": "rollup -c rollup.config.js --bundleConfigAsCjs",
-    "test": "npm run lint",
+    "build": "rollup -c ../../rollup.config.js --bundleConfigAsCjs",
     "lint": "eslint ./www/ts",
     "jest": "jest",
-    "coverage": "jest --coverage --maxWorkers=12",
     "clear-jest-cache": "jest --clearCache || true",
-    "clean": "npm run clear-jest-cache && rimraf dist coverage",
-    "clean-all": "npm run clean && rimraf node_modules"
+    "clean": "pnpm run clear-jest-cache && rimraf dist coverage",
+    "clean-all": "pnpm run clean && rimraf node_modules"
+  },
+  "peerDependencies": {
+    "cordova": ">=10.0.0"
   },
   "dependencies": {
-    "scandit-datacapture-frameworks-core": "6.28.9"
+    "scandit-datacapture-frameworks-core": "file:../../shared/jsmobile/scandit-datacapture-frameworks-core"
   },
   "devDependencies": {
-    "@babel/plugin-proposal-class-properties": "^7.18.6",
-    "@babel/plugin-proposal-decorators": "^7.24.0",
-    "@babel/preset-env": "^7.24.0",
-    "@babel/preset-typescript": "^7.23.3",
     "@types/jest": "^29.5.12",
-    "babel-jest": "^29.7.0",
-    "ts-jest": "^29.1.2"
+    "ts-jest": "^29.1.2",
+    "wait-for-expect": "3.0.2"
   },
   "cordova": {
     "id": "scandit-cordova-datacapture-core",
