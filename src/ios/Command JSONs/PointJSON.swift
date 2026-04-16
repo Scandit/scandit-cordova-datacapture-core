@@ -1,18 +1,13 @@
 extension CGPoint {
     var json: CDVPluginResult.JSONMessage {
-        [
+        return [
             "x": x,
-            "y": y,
+            "y": y
         ]
     }
 
     var jsonString: String {
-        guard let data = try? JSONSerialization.data(withJSONObject: json),
-            let string = String(data: data, encoding: .utf8)
-        else {
-            return "{}"
-        }
-        return string
+        return String(data: try! JSONSerialization.data(withJSONObject: json), encoding: .utf8)!
     }
 }
 
@@ -21,6 +16,6 @@ struct PointJSON: CommandJSONArgument {
     let y: Double
 
     var cgPoint: CGPoint {
-        CGPoint(x: x, y: y)
+        return CGPoint(x: x, y: y)
     }
 }
