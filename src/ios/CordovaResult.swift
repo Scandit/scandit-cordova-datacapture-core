@@ -10,17 +10,10 @@ public struct CordovaResult: FrameworksResult {
     }
 
     public func success(result: Any?) {
-        if let resultDict = result as? [String: Any] {
-            do {
-                let jsonData = try JSONSerialization.data(withJSONObject: resultDict, options: [])
-                if let jsonString = String(data: jsonData, encoding: .utf8) {
-                    commandDelegate.send(.success(message: ["data": jsonString]), callbackId: callbackId)
-                }
-            } catch {
-                reject(code: "JSON_ERROR", message: "Failed to convert to JSON", details: error)
-            }
-        } else if let unwrappedResult = result {
-            commandDelegate.send(.success(message: ["data": String(describing: unwrappedResult)]), callbackId: callbackId)
+        if let res = result as? CDVPluginResult.JSONMessage {
+            commandDelegate.send(.success(message: res), callbackId: callbackId)
+        } else if let res = result as? String {
+            commandDelegate.send(.success(message: res), callbackId: callbackId)
         } else {
             commandDelegate.send(.success, callbackId: callbackId)
         }
@@ -35,7 +28,6 @@ public struct CordovaResult: FrameworksResult {
     }
 }
 
-
 public struct CordovaResultKeepCallback: FrameworksResult {
     private let commandDelegate: CDVCommandDelegate
     private let callbackId: String
@@ -46,13 +38,17 @@ public struct CordovaResultKeepCallback: FrameworksResult {
     }
 
     public func success(result: Any?) {
-        commandDelegate.send(.keepCallback, callbackId: callbackId)
+        if let res = result as? CDVPluginResult.JSONMessage {
+            commandDelegate.send(.listenerCallback(res), callbackId: callbackId)
+        } else {
+            commandDelegate.send(.keepCallback, callbackId: callbackId)
+        }
     }
-    
+
     public func reject(code: String, message: String?, details: Any?) {
         commandDelegate.send(.failure(with: code), callbackId: callbackId)
     }
-    
+
     public func reject(error: Error) {
         commandDelegate.send(.failure(with: error), callbackId: callbackId)
     }

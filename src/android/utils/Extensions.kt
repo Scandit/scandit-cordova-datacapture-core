@@ -67,7 +67,9 @@ fun CallbackContext.successAndKeepCallback(message: String) {
 }
 
 val JSONArray.defaultArgumentAsString: String
-    get() = this[0].toString()
+    get() {
+        return this[0].toString()
+    }
 
 fun JSONArray.optBoolean(key: String, defaultValue: Boolean): Boolean =
     this.getJSONObject(0).optBoolean(key, defaultValue)
