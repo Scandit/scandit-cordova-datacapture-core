@@ -4,18 +4,25 @@
  * Copyright (C) 2019- Scandit AG. All rights reserved.
  */
 
-def sdk_version = "6.28.10"
+// sdk_version resolves `com.scandit.datacapture.frameworks:*` shared-framework
+// coords (MR-ID-isolated on every MR because release-shared-modules-internally
+// re-publishes frameworks per-MR to avoid clashes between concurrent MRs).
+// native_sdk_version resolves `com.scandit.datacapture:*` native coords,
+// gated on whether android-archive actually published (non-MR push or
+// dep-update MR — see .gitlab/native/native.yml ~line 1571).
+def sdk_version = "8.4.0"
+def native_sdk_version = sdk_version
 
-if (System.getenv("SDC_FETCH_LIBS_SOURCE") != null) {
-    def fetch = System.getenv("SDC_FETCH_LIBS_SOURCE")
+def ciMrId = System.getenv("CI_MERGE_REQUEST_ID")
+def ciMrLabels = System.getenv("CI_MERGE_REQUEST_LABELS") ?: ""
+def dryRunEnv = System.getenv("DRYRUN") ?: ""
+def archivePublished = dryRunEnv.isEmpty() && (ciMrId == null || ciMrLabels.contains("dependency-update"))
 
-    if (fetch == "local" && System.getenv("CI_MERGE_REQUEST_ID") != null) {
-        if (sdk_version.contains("SNAPSHOT")) {
-            sdk_version = sdk_version.replace("SNAPSHOT", System.getenv("CI_MERGE_REQUEST_ID") + "-SNAPSHOT")
-        } else if (System.getenv("CI_MERGE_REQUEST_ID") != null) {
-            sdk_version = sdk_version + "-" +  System.getenv("CI_MERGE_REQUEST_ID") + "-SNAPSHOT"
-        }
-    }
+if (ciMrId != null) {
+    sdk_version = sdk_version.contains("-SNAPSHOT") ? sdk_version.replace("-SNAPSHOT", "-" + ciMrId + "-SNAPSHOT") : sdk_version + "-" + ciMrId + "-SNAPSHOT"
+}
+if (ciMrId != null && archivePublished) {
+    native_sdk_version = native_sdk_version.contains("-SNAPSHOT") ? native_sdk_version.replace("-SNAPSHOT", "-" + ciMrId + "-SNAPSHOT") : native_sdk_version + "-" + ciMrId + "-SNAPSHOT"
 }
 
 android {

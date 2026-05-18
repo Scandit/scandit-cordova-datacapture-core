@@ -1,6 +1,5 @@
 const fs = require('fs')
 
-const mainGradlePath = './platforms/android/build.gradle'
 const gradlePath = './platforms/android/app/build.gradle'
 
 const tagPlatform = 'platform'
@@ -52,17 +51,6 @@ const addKotlinSupport = (context) => {
         gradleFileContent = append(pluginString, kotlinPluginPositionRegex, gradleFileContent)
     }
     fs.writeFileSync(gradlePath, gradleFileContent)
-    
-    if (kotlinVersion) {
-        // Hack needed due to a bug in the Cordova-Android library: https://github.com/apache/cordova-android/issues/1235
-        let mainGradleFileContent = fs.readFileSync(mainGradlePath).toString()
-
-        const versionToReplace = 'ext.kotlin_version = \'1.3.50\''
-        const newVersion = `ext.kotlin_version = '${kotlinVersion}'`
-
-        mainGradleFileContent = mainGradleFileContent.replace(versionToReplace, newVersion)
-        fs.writeFileSync(mainGradlePath, mainGradleFileContent)
-    }
 }
 
 const append = (edit, reg, fullText) => {
