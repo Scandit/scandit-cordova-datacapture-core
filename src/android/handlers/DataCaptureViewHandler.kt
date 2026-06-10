@@ -13,7 +13,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import com.scandit.datacapture.cordova.core.data.ResizeAndMoveInfo
-import com.scandit.datacapture.cordova.core.utils.bringContainerToFront
 import com.scandit.datacapture.cordova.core.utils.pxFromDp
 import com.scandit.datacapture.cordova.core.utils.removeFromParent
 import com.scandit.datacapture.core.ui.DataCaptureView
@@ -85,11 +84,7 @@ class DataCaptureViewHandler {
                 backgroundView,
                 ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
             )
-            // Bring the WebView's content-frame container to the front so backgroundView
-            // (added via addContentView) doesn't end up covering the whole WebView on
-            // cordova-android 15+, where the WebView is wrapped in an intermediate
-            // rootLayout.
-            webView?.bringContainerToFront()
+            webView?.bringToFront()
             webView?.setBackgroundColor(Color.TRANSPARENT)
 
             dataCaptureView.parent?.let {

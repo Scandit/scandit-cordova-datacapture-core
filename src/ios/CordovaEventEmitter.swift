@@ -1,9 +1,5 @@
 import ScanditFrameworksCore
 
-#if SWIFT_PACKAGE
-import Cordova
-#endif
-
 public class CordovaEventEmitter: Emitter {
     private let commandDelegate: CDVCommandDelegate
     private var callbacks: [String: String] = [:]
@@ -124,14 +120,18 @@ public class CordovaEventEmitter: Emitter {
         self.lock.wait()
         defer { self.lock.signal() }
 
-        specificCallbacks[viewId]?.removeValue(forKey: name)
+        if var callbacksForView = specificCallbacks[viewId] {
+            callbacksForView.removeValue(forKey: name)
+        }
     }
 
     public func unregisterModeSpecificCallback(_ modeId: Int, with name: String) {
         self.lock.wait()
         defer { self.lock.signal() }
 
-        specificCallbacks[modeId]?.removeValue(forKey: name)
+        if var callbacksForView = specificCallbacks[modeId] {
+            callbacksForView.removeValue(forKey: name)
+        }
     }
 
     public func removeCallbacks() {
