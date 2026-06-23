@@ -1,3 +1,7 @@
+#if SWIFT_PACKAGE
+import Cordova
+#endif
+
 protocol BlockingListenerCallbackResult: Decodable {
     var finishCallbackID: ListenerEvent.Name { get }
 }

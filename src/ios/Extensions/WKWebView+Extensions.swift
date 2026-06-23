@@ -1,11 +1,15 @@
 import WebKit
 
+#if SWIFT_PACKAGE
+import Cordova
+#endif
+
 extension WKWebView {
-    var adjustedContentInset: UIEdgeInsets {
+    public var adjustedContentInset: UIEdgeInsets {
         scrollView.contentInset
     }
 
-    func clearScrollViewBackgroundColor() {
+    public func clearScrollViewBackgroundColor() {
         var scroller: UIScrollView?
         let scrollViewSelector = NSSelectorFromString("scrollView")
         if self.responds(to: scrollViewSelector) {
@@ -14,7 +18,7 @@ extension WKWebView {
         }
     }
 
-    func restoreDefaultBackgroundColor() {
+    public func restoreDefaultBackgroundColor() {
         var scroller: UIScrollView?
         let scrollViewSelector = NSSelectorFromString("scrollView")
         if self.responds(to: scrollViewSelector) {

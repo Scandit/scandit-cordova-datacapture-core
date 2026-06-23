@@ -1,4 +1,4 @@
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="scandit-cordova-datacapture-core" version="8.1.5">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android" id="scandit-cordova-datacapture-core" version="8.4.1">
     <name>ScanditCaptureCore</name>
     <js-module name="Scandit" src="dist/index.js">
         <runs />
@@ -8,7 +8,7 @@
         <engine name="cordova-ios" version=">=5.0.0" />
         <engine name="cordova-android" version=">=7.0.0" />
     </engines>
-    <platform name="ios">
+    <platform name="ios" package="swift">
         <config-file parent="/*" target="config.xml">
             <feature name="ScanditCaptureCore">
                 <param name="ios-package" value="ScanditCaptureCore" />
@@ -18,11 +18,14 @@
         <config-file parent="NSCameraUsageDescription" target="*-Info.plist">
             <string>To scan barcodes.</string>
         </config-file>
+        <header-file src="src/ios/ScanditCaptureCore-Bridging-Header.h" type="BridgingHeader" />
+        <header-file src="src/ios/SDCVolumeButtonObserver.h" />
         <source-file src="src/ios/CallbackLocks.swift" />
         <source-file src="src/ios/Callbacks.swift" />
         <source-file src="src/ios/CordovaEventEmitter.swift" />
         <source-file src="src/ios/CordovaMethodCall.swift" />
         <source-file src="src/ios/CordovaResult.swift" />
+        <source-file src="src/ios/JSONArgs.swift" />
         <source-file src="src/ios/NativeViewConstraints.swift" />
         <source-file src="src/ios/ScanditCaptureCore.swift" />
         <source-file src="src/ios/ScanditCaptureCoreDefaults.swift" />
@@ -33,9 +36,10 @@
         <source-file src="src/ios/Extensions/CDVPluginResult+Extensions.swift" />
         <podspec>
             <pods use-frameworks="true">
-                <pod name="scandit-datacapture-frameworks-core" spec="= 8.1.5" />
+                <pod name="scandit-datacapture-frameworks-core" nospm="true" spec="= 8.4.1" />
             </pods>
         </podspec>
+        <hook src="src/hooks/patch-spm-deployment-target.js" type="after_plugin_install" />
     </platform>
     <platform name="android" kotlin="1.9.25">
         <config-file parent="/*" target="config.xml">
