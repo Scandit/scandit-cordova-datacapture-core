@@ -19,6 +19,7 @@ export { SizeWithUnitAndAspect } from 'scandit-datacapture-frameworks-core';
 export { SizingMode } from 'scandit-datacapture-frameworks-core';
 export { Anchor } from 'scandit-datacapture-frameworks-core';
 export { ScanIntention } from 'scandit-datacapture-frameworks-core';
+export { SelectionMode } from 'scandit-datacapture-frameworks-core';
 export { ClusteringMode } from 'scandit-datacapture-frameworks-core';
 export { LogoStyle } from 'scandit-datacapture-frameworks-core';
 export { TorchSwitchControl } from 'scandit-datacapture-frameworks-core';
