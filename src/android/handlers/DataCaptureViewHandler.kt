@@ -13,14 +13,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import com.scandit.datacapture.cordova.core.data.ResizeAndMoveInfo
-import com.scandit.datacapture.cordova.core.utils.bringContainerToFront
 import com.scandit.datacapture.cordova.core.utils.pxFromDp
 import com.scandit.datacapture.cordova.core.utils.removeFromParent
 import com.scandit.datacapture.core.ui.DataCaptureView
+import com.scandit.datacapture.frameworks.core.utils.DefaultMainThread
+import com.scandit.datacapture.frameworks.core.utils.MainThread
 import java.lang.ref.WeakReference
 
-class DataCaptureViewHandler {
-    private var latestInfo: ResizeAndMoveInfo = ResizeAndMoveInfo(0f, 0f, 0f, 0f, false)
+class DataCaptureViewHandler(
+    private val mainThread: MainThread = DefaultMainThread.getInstance()
+) {
+    private var latestInfo: ResizeAndMoveInfo = ResizeAndMoveInfo(0, 0, 0, 0, false)
     private var isVisible: Boolean = false
     private var dataCaptureViewReference: WeakReference<DataCaptureView>? = null
     private var webViewReference: WeakReference<View>? = null
@@ -28,20 +31,31 @@ class DataCaptureViewHandler {
 
     val dataCaptureView: DataCaptureView?
         get() = dataCaptureViewReference?.get()
-
     private val webView: View?
         get() = webViewReference?.get()
-
     private val backgroundView: View?
         get() = backgroundViewReference?.get()
 
     fun attachDataCaptureView(dataCaptureView: DataCaptureView, activity: Activity) {
-        addDataCaptureView(dataCaptureView, activity)
+        if (this.dataCaptureView != dataCaptureView) {
+            disposeCurrentDataCaptureView()
+            addDataCaptureView(dataCaptureView, activity)
+        }
     }
 
-    fun attachWebView(webView: View) {
+    fun attachWebView(webView: View, activity: Activity) {
         if (this.webView != webView) {
             webViewReference = WeakReference(webView)
+            mainThread.runOnMainThread {
+                val backgroundView = createBackgroundView(activity)
+                backgroundViewReference = WeakReference(backgroundView)
+                activity.addContentView(
+                    backgroundView,
+                    ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+                )
+                webView.bringToFront()
+                webView.setBackgroundColor(Color.TRANSPARENT)
+            }
         }
     }
 
@@ -60,10 +74,20 @@ class DataCaptureViewHandler {
         render()
     }
 
-    fun disposeCurrentWebView() {
+    // Remove current dataCaptureView and backgroundView from hierarchy, and clear all references.
+    fun disposeCurrent() {
+        disposeCurrentDataCaptureView()
+        disposeCurrentWebView()
+        disposeCurrentBackgroundView()
+    }
+
+    fun disposeCurrentDataCaptureView() {
+        val dataCaptureView = dataCaptureView ?: return
+        removeDataCaptureView(dataCaptureView)
+    }
+
+    private fun disposeCurrentWebView() {
         webViewReference = null
-        val dcView = dataCaptureView ?: return
-        removeDataCaptureView(dcView)
     }
 
     private fun disposeCurrentBackgroundView() {
@@ -78,56 +102,31 @@ class DataCaptureViewHandler {
 
     private fun addDataCaptureView(dataCaptureView: DataCaptureView, activity: Activity) {
         dataCaptureViewReference = WeakReference(dataCaptureView)
-        activity.runOnUiThread {
-            val backgroundView = createBackgroundView(activity)
-            backgroundViewReference = WeakReference(backgroundView)
-            activity.addContentView(
-                backgroundView,
-                ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
-            )
-            // Bring the WebView's content-frame container to the front so backgroundView
-            // (added via addContentView) doesn't end up covering the whole WebView on
-            // cordova-android 15+, where the WebView is wrapped in an intermediate
-            // rootLayout.
-            webView?.bringContainerToFront()
-            webView?.setBackgroundColor(Color.TRANSPARENT)
 
+        mainThread.runOnMainThread {
             dataCaptureView.parent?.let {
                 (it as ViewGroup).removeView(dataCaptureView)
             }
-            // Add the DataCaptureView into the WebView's own parent so the two views
-            // share a single coordinate frame. latestInfo positions come from the JS
-            // getBoundingClientRect() and are therefore WebView-relative; placing the
-            // overlay as a sibling of the WebView means those coordinates map directly
-            // (offset only by the WebView's own position within that shared parent)
-            // with no screen-space translation, and the overlay is clipped to the same
-            // bounds as the WebView. Falls back to the activity content frame if the
-            // WebView isn't attached yet.
-            val layoutParams = ViewGroup.LayoutParams(
-                latestInfo.width.pxFromDp().toInt(),
-                latestInfo.height.pxFromDp().toInt()
+            activity.addContentView(
+                dataCaptureView,
+                ViewGroup.LayoutParams(
+                    latestInfo.width.pxFromDp().toInt(),
+                    latestInfo.height.pxFromDp().toInt()
+                )
             )
-            val container = webView?.parent as? ViewGroup
-            if (container != null) {
-                container.addView(dataCaptureView, layoutParams)
-            } else {
-                activity.addContentView(dataCaptureView, layoutParams)
-            }
             render()
         }
     }
 
-    fun removeDataCaptureView(dataCaptureView: DataCaptureView) {
-        if (dataCaptureView == dataCaptureViewReference?.get()) {
-            dataCaptureViewReference = null
-            disposeCurrentBackgroundView()
-        }
+    private fun removeDataCaptureView(dataCaptureView: DataCaptureView) {
+        dataCaptureViewReference = null
         removeView(dataCaptureView)
     }
 
-    private fun removeView(view: View) {
-        view.post {
+    private fun removeView(view: View, uiBlock: (() -> Unit)? = null) {
+        mainThread.runOnMainThread {
             view.removeFromParent()
+            uiBlock?.invoke()
         }
     }
 
@@ -140,13 +139,8 @@ class DataCaptureViewHandler {
     private fun renderNoAnimate(dataCaptureView: DataCaptureView) {
         dataCaptureView.post {
             dataCaptureView.visibility = if (isVisible) View.VISIBLE else View.GONE
-            // DataCaptureView shares the WebView's parent, so latestInfo (WebView-relative,
-            // from getBoundingClientRect()) maps directly, offset only by the WebView's own
-            // position within that shared parent. No screen-space translation needed, and
-            // this stays correct regardless of any edge-to-edge inset applied to the WebView.
-            val webView = webView
-            dataCaptureView.x = latestInfo.left.pxFromDp() + (webView?.x ?: 0f)
-            dataCaptureView.y = latestInfo.top.pxFromDp() + (webView?.y ?: 0f)
+            dataCaptureView.x = latestInfo.left.pxFromDp()
+            dataCaptureView.y = latestInfo.top.pxFromDp()
             dataCaptureView.layoutParams.apply {
                 width = latestInfo.width.pxFromDp().toInt()
                 height = latestInfo.height.pxFromDp().toInt()
