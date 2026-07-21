@@ -6,9 +6,9 @@
 
 package com.scandit.datacapture.cordova.core.utils
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.util.Base64
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.view.View
 import android.view.ViewGroup
 import com.scandit.datacapture.core.internal.sdk.AppAndroidEnvironment
@@ -17,7 +17,7 @@ import org.apache.cordova.PluginResult
 import org.json.JSONArray
 import org.json.JSONObject
 
-fun Int.pxFromDp(): Float {
+fun Float.pxFromDp(): Float {
     val context = AppAndroidEnvironment.applicationContext
     val displayDensity = context.resources.displayMetrics.density
     return (this * displayDensity + 0.5f)
@@ -28,18 +28,42 @@ fun View.removeFromParent() {
     parent.removeView(this)
 }
 
-fun bitmapFromBase64String(string: String?): Bitmap? {
-    string ?: return null
+private tailrec fun Context?.findActivity(): Activity? = when (this) {
+    null -> null
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
 
-    val index = string.indexOf(",")
-    return try {
-        val trimmedString = string.removeRange(0, index)
-        val bytes = Base64.decode(trimmedString, Base64.DEFAULT)
-        BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-    } catch (e: Exception) {
-        println(e)
-        null
+/**
+ * Walks up from this View to the direct child of the activity's content frame
+ * (`android.R.id.content`) and calls `bringToFront()` on that ancestor.
+ *
+ * On cordova-android ≤14 the WebView is a direct child of the content frame, so
+ * the loop exits immediately and this is equivalent to a plain `bringToFront()`.
+ * On cordova-android 15+ the WebView is wrapped in an intermediate `rootLayout`,
+ * so a plain `bringToFront()` only reorders within that wrapper and is
+ * ineffective against siblings added via `addContentView` — the loop walks up
+ * to the rootLayout and brings *that* to front.
+ *
+ * Falls back to a plain `bringToFront()` if the activity can't be resolved
+ * (e.g. the View's context is something other than an Activity / ContextWrapper
+ * chain ending in one), preserving pre-existing behaviour.
+ */
+fun View.bringContainerToFront() {
+    val activity = context.findActivity() ?: run {
+        bringToFront()
+        return
     }
+    val contentFrame = activity.findViewById<View>(android.R.id.content) ?: run {
+        bringToFront()
+        return
+    }
+    var node: View = this
+    while (node.parent !== contentFrame && node.parent is View) {
+        node = node.parent as View
+    }
+    node.bringToFront()
 }
 
 fun CallbackContext.successAndKeepCallback() {
@@ -67,9 +91,7 @@ fun CallbackContext.successAndKeepCallback(message: String) {
 }
 
 val JSONArray.defaultArgumentAsString: String
-    get() {
-        return this[0].toString()
-    }
+    get() = this[0].toString()
 
 fun JSONArray.optBoolean(key: String, defaultValue: Boolean): Boolean =
     this.getJSONObject(0).optBoolean(key, defaultValue)

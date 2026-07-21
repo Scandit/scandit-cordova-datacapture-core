@@ -1,5 +1,9 @@
 import WebKit
 
+#if SWIFT_PACKAGE
+import Cordova
+#endif
+
 class NativeViewConstraints {
     let webView: WKWebView
 
@@ -20,7 +24,7 @@ class NativeViewConstraints {
     private var shouldBeUnderWebView: Bool = false
 
     private var constraints: [NSLayoutConstraint] {
-        return [top, left, width, height].compactMap({ $0 })
+        [top, left, width, height].compactMap({ $0 })
     }
 
     init(relativeTo webView: WKWebView) {
@@ -102,17 +106,9 @@ class NativeViewConstraints {
         }
 
         if shouldBeUnderWebView {
-            #if swift(>=4.2)
             captureView.superview?.sendSubviewToBack(captureView)
-            #else
-            captureView.superview?.sendSubview(toBack: captureView)
-            #endif
         } else {
-            #if swift(>=4.2)
             captureView.superview?.bringSubviewToFront(captureView)
-            #else
-            captureView.superview?.bringSubview(toFront: captureView)
-            #endif
         }
     }
 }

@@ -1,5 +1,55 @@
-struct ListenerEvent {
-    enum Name: String, Decodable {
+#if SWIFT_PACKAGE
+import Cordova
+#endif
+
+private func unwrapPluginResult(_ potentialResult: Any) -> CDVPluginResult {
+    if let result = potentialResult as? CDVPluginResult {
+        return result
+    }
+    if let optionalResult = potentialResult as? CDVPluginResult? {
+        if let unwrapped = optionalResult {
+            return unwrapped
+        }
+        fatalError("CDVPluginResult initializer returned nil")
+    }
+    fatalError("Unexpected CDVPluginResult initializer return type")
+}
+
+private func createPluginResult(status: CDVCommandStatus) -> CDVPluginResult {
+    let result = CDVPluginResult(status: status)
+    return unwrapPluginResult(result as Any)
+}
+
+private func createPluginResult(status: CDVCommandStatus, messageAs message: Any) -> CDVPluginResult {
+    if let dictionary = message as? [AnyHashable: Any] {
+        let result = CDVPluginResult(status: status, messageAs: dictionary)
+        return unwrapPluginResult(result as Any)
+    }
+    if let array = message as? [Any] {
+        let result = CDVPluginResult(status: status, messageAs: array)
+        return unwrapPluginResult(result as Any)
+    }
+    if let string = message as? String {
+        let result = CDVPluginResult(status: status, messageAs: string)
+        return unwrapPluginResult(result as Any)
+    }
+    if let boolValue = message as? Bool {
+        let result = CDVPluginResult(status: status, messageAs: boolValue)
+        return unwrapPluginResult(result as Any)
+    }
+    if let intValue = message as? Int {
+        let result = CDVPluginResult(status: status, messageAs: intValue)
+        return unwrapPluginResult(result as Any)
+    }
+    if let doubleValue = message as? Double {
+        let result = CDVPluginResult(status: status, messageAs: doubleValue)
+        return unwrapPluginResult(result as Any)
+    }
+    fatalError("Unsupported CDVPluginResult message type: \(type(of: message))")
+}
+
+public struct ListenerEvent {
+    public enum Name: String, Decodable {
         // Context listener
         case didChangeContextStatus = "DataCaptureContextListener.onStatusChanged"
         case didStartObservingContext = "DataCaptureContextListener.onObservationStarted"
@@ -14,20 +64,20 @@ struct ListenerEvent {
         case didScanInBarcodeCapture = "BarcodeCaptureListener.didScan"
         case didUpdateSessionInBarcodeCapture = "BarcodeCaptureListener.didUpdateSession"
 
-        // Barcode Tracking listener
-        case didUpdateSessionInBarcodeTracking = "BarcodeTrackingListener.didUpdateSession"
+        // Barcode Batch listener
+        case didUpdateSessionInBarcodeBatch = "BarcodeBatchListener.didUpdateSession"
 
-        // Barcode Tracking Basic Overlay listener
-        case brushForTrackedBarcode = "BarcodeTrackingBasicOverlayListener.brushForTrackedBarcode"
-        case didTapTrackedBarcode = "BarcodeTrackingBasicOverlayListener.didTapTrackedBarcode"
+        // Barcode Batch Basic Overlay listener
+        case brushForTrackedBarcode = "BarcodeBatchBasicOverlayListener.brushForTrackedBarcode"
+        case didTapTrackedBarcode = "BarcodeBatchBasicOverlayListener.didTapTrackedBarcode"
 
-        // Barcode Tracking Advanced Overlay listener
-        case viewForTrackedBarcode = "BarcodeTrackingAdvancedOverlayListener.viewForTrackedBarcode"
-        case anchorForTrackedBarcode = "BarcodeTrackingAdvancedOverlayListener.anchorForTrackedBarcode"
-        case offsetForTrackedBarcode = "BarcodeTrackingAdvancedOverlayListener.offsetForTrackedBarcode"
-        case didTapViewForTrackedBarcode = "BarcodeTrackingAdvancedOverlayListener.didTapViewForTrackedBarcode"
+        // Barcode Batch Advanced Overlay listener
+        case viewForTrackedBarcode = "BarcodeBatchAdvancedOverlayListener.viewForTrackedBarcode"
+        case anchorForTrackedBarcode = "BarcodeBatchAdvancedOverlayListener.anchorForTrackedBarcode"
+        case offsetForTrackedBarcode = "BarcodeBatchAdvancedOverlayListener.offsetForTrackedBarcode"
+        case didTapViewForTrackedBarcode = "BarcodeBatchAdvancedOverlayListener.didTapViewForTrackedBarcode"
 
-        // Barcode Tracking listener
+        // Barcode Batch listener
         case didUpdateSelectionInBarcodeSelection = "BarcodeSelectionListener.didUpdateSelection"
         case didUpdateSessionInBarcodeSelection = "BarcodeSelectionListener.didUpdateSession"
 
@@ -44,29 +94,30 @@ struct ListenerEvent {
         case didChangeVolume = "didChangeVolume"
     }
 
-    let name: Name
-    let argument: CDVPluginResult.JSONMessage
-    let shouldNotifyWhenFinished: Bool
+    public let name: Name
+    public let argument: CDVPluginResult.JSONMessage
+    public let shouldNotifyWhenFinished: Bool
 
-    init(name: Name, argument: CDVPluginResult.JSONMessage = [:], shouldNotifyWhenFinished: Bool = false) {
+    public init(name: Name, argument: CDVPluginResult.JSONMessage = [:], shouldNotifyWhenFinished: Bool = false) {
         self.name = name
         self.argument = argument
         self.shouldNotifyWhenFinished = shouldNotifyWhenFinished
     }
 
-    var resultMessage: CDVPluginResult.JSONMessage {
-        return [
+    public var resultMessage: CDVPluginResult.JSONMessage {
+        [
             "name": name.rawValue,
             "finishCallbackID": name.rawValue,
             "argument": argument,
-            "shouldNotifyWhenFinished": shouldNotifyWhenFinished
+            "shouldNotifyWhenFinished": shouldNotifyWhenFinished,
         ]
     }
 }
 
-struct CommandError {
-    enum Code: Int, CaseIterable {
+public struct CommandError {
+    public enum Code: Int, CaseIterable {
         case invalidJSON = 10001
+        case noViewIdParam = 10002
 
         case couldNotDeserializeContext = 10011
 
@@ -91,165 +142,223 @@ struct CommandError {
         case noBarcodeSelectionSession = 10073
         case noBarcodeSelectionOverlay = 10074
         case noBarcodeCaptureSession = 10075
-        case noBarcodeTrackingSession = 10076
+        case noBarcodeBatchSession = 10076
 
         case noFrameData = 10077
         case noBarcodeSelectionIdentifier = 10078
-        
+
         case noFeedbackJsonPassed = 10079
+        case wrongOrNoArgumentPassed = 10080
+
     }
 
-    public static let invalidJSON = CommandError(code: .invalidJSON,
-                                                 message: "Invalid or no JSON passed for command")
+    public static let invalidJSON = CommandError(
+        code: .invalidJSON,
+        message: "Invalid or no JSON passed for command"
+    )
+    public static let noViewIdParam = CommandError(
+        code: .noViewIdParam,
+        message: "viewId param is missing in the call."
+    )
 
     public static func couldNotDeserializeContext(reason additionalInformation: String) -> CommandError {
-        return CommandError(code: .couldNotDeserializeContext,
-                            message: "Could not deserialize context: \(additionalInformation)")
+        CommandError(
+            code: .couldNotDeserializeContext,
+            message: "Could not deserialize context: \(additionalInformation)"
+        )
     }
 
-    public static let noViewToBeShown = CommandError(code: .noViewToBeShown,
-                                                     message: "There was no capture view to be shown")
-    public static let noViewToBeHidden = CommandError(code: .noViewToBeHidden,
-                                                      message: "There was no capture view to be hidden")
+    public static let noViewToBeShown = CommandError(
+        code: .noViewToBeShown,
+        message: "There was no capture view to be shown"
+    )
+    public static let noViewToBeHidden = CommandError(
+        code: .noViewToBeHidden,
+        message: "There was no capture view to be hidden"
+    )
 
-    public static let cantConvertPointWithoutView = CommandError(code: .cantConvertPointWithoutView,
-                                                                 message: """
-        There is no view shown, so the point can not be converted into its coordinate space
-        """)
-    public static let cantConvertQuadrilateralWithoutView = CommandError(code: .cantConvertQuadrilateralWithoutView,
-                                                                         message: """
-        There is no view shown, so the quadrilateral can not be converted into its coordinate space
-        """)
+    public static let cantConvertPointWithoutView = CommandError(
+        code: .cantConvertPointWithoutView,
+        message: """
+            There is no view shown, so the point can not be converted into its coordinate space
+            """
+    )
+    public static let cantConvertQuadrilateralWithoutView = CommandError(
+        code: .cantConvertQuadrilateralWithoutView,
+        message: """
+            There is no view shown, so the quadrilateral can not be converted into its coordinate space
+            """
+    )
 
-    public static let noCamera = CommandError(code: .noCamera,
-                                              message: "No camera available or not yet initialized")
-    public static let couldNotSwitchCamera = CommandError(code: .couldNotSwitchCamera,
-                                                          message: "Could not switch camera to desired state")
+    public static let noCamera = CommandError(
+        code: .noCamera,
+        message: "No camera available or not yet initialized"
+    )
+    public static let couldNotSwitchCamera = CommandError(
+        code: .couldNotSwitchCamera,
+        message: "Could not switch camera to desired state"
+    )
     public static func noCamera(withPosition position: String) -> CommandError {
-        return CommandError(code: .noCameraWithPosition,
-                            message: "No camera available with position \(position)")
+        CommandError(
+            code: .noCameraWithPosition,
+            message: "No camera available with position \(position)"
+        )
     }
 
-    public static let trackedBarcodeNotFound = CommandError(code: .trackedBarcodeNotFound,
-                                                            message: """
-        Passed tracked barcode not found in current session
-        """)
+    public static let trackedBarcodeNotFound = CommandError(
+        code: .trackedBarcodeNotFound,
+        message: """
+            Passed tracked barcode not found in current session
+            """
+    )
 
-    public static let parserNotFound = CommandError(code: .parserNotFound,
-                                                    message: """
-        A parser with the passed component identifier was not found
-        """)
+    public static let parserNotFound = CommandError(
+        code: .parserNotFound,
+        message: """
+            A parser with the passed component identifier was not found
+            """
+    )
 
     public static func couldNotParseString(reason additionalInformation: String) -> CommandError {
-        return CommandError(code: .couldNotParseString,
-                            message: "Could not parse string: \(additionalInformation)")
+        CommandError(
+            code: .couldNotParseString,
+            message: "Could not parse string: \(additionalInformation)"
+        )
     }
 
     public static func couldNotParseRawData(reason additionalInformation: String) -> CommandError {
-        return CommandError(code: .couldNotParseRawString,
-                            message: "Could not parse raw string: \(additionalInformation)")
+        CommandError(
+            code: .couldNotParseRawString,
+            message: "Could not parse raw string: \(additionalInformation)"
+        )
     }
 
-    public static let noOverlay = CommandError(code: .noOverlay,
-                                               message: "There was no overlay to execute the command on")
+    public static let noOverlay = CommandError(
+        code: .noOverlay,
+        message: "There was no overlay to execute the command on"
+    )
 
-    public static let noBarcodeSelection = CommandError(code: .noBarcodeSelection,
-                                               message: """
-                                                There was no BarcodeSelection mode to execute the command on
-                                                """)
+    public static let noBarcodeSelection = CommandError(
+        code: .noBarcodeSelection,
+        message: """
+            There was no BarcodeSelection mode to execute the command on
+            """
+    )
 
-    public static let noBarcodeCaptureSession = CommandError(code: .noBarcodeCaptureSession,
-                                               message: """
-                                                There was no BarcodeCapture session to execute the command on
-                                                """)
+    public static let noBarcodeCaptureSession = CommandError(
+        code: .noBarcodeCaptureSession,
+        message: """
+            There was no BarcodeCapture session to execute the command on
+            """
+    )
 
-    public static let noBarcodeTrackingSession = CommandError(code: .noBarcodeTrackingSession,
-                                               message: """
-                                                There was no BarcodeTracking session to execute the command on
-                                                """)
+    public static let noBarcodeBatchSession = CommandError(
+        code: .noBarcodeBatchSession,
+        message: """
+            There was no BarcodeBatch session to execute the command on
+            """
+    )
 
-    public static let noBarcodeSelectionSession = CommandError(code: .noBarcodeSelectionSession,
-                                               message: """
-                                                There was no BarcodeSelection session to execute the command on
-                                                """)
+    public static let noBarcodeSelectionSession = CommandError(
+        code: .noBarcodeSelectionSession,
+        message: """
+            There was no BarcodeSelection session to execute the command on
+            """
+    )
 
-    public static let missingBarcodeSelectionIdentifier = CommandError(code: .noBarcodeSelectionIdentifier,
-                                                                       message: """
-                                               There was no BarcodeSelection identifier passed.
-                                               """)
+    public static let missingBarcodeSelectionIdentifier = CommandError(
+        code: .noBarcodeSelectionIdentifier,
+        message: """
+            There was no BarcodeSelection identifier passed.
+            """
+    )
 
-    public static let noBarcodeSelectionOverlay = CommandError(code: .noBarcodeSelectionOverlay,
-                                               message: """
-                                                There was no BarcodeSelection overlay to execute the command on
-                                                """)
+    public static let noBarcodeSelectionOverlay = CommandError(
+        code: .noBarcodeSelectionOverlay,
+        message: """
+            There was no BarcodeSelection overlay to execute the command on
+            """
+    )
 
-    public static let noFrameData = CommandError(code: .noFrameData,
-                                                     message: """
-                                                      There was no FrameData to execute the command on
-                                                      """)
-    
-    public static let noFeedbackJsonPassed = CommandError(code: .invalidJSON,
-                                                 message: "No feedbackJson was provided for the function.")
+    public static let noFrameData = CommandError(
+        code: .noFrameData,
+        message: """
+            There was no FrameData to execute the command on
+            """
+    )
+
+    public static let noFeedbackJsonPassed = CommandError(
+        code: .noFeedbackJsonPassed,
+        message: "No feedbackJson was provided for the function."
+    )
+
+    public static let wrongOrNoArgumentPassed = CommandError(
+        code: .wrongOrNoArgumentPassed,
+        message: "Wrong or no argument was provided for the function."
+    )
 
     public let code: Code
     public let message: String
 
     public func toJSON() -> CDVPluginResult.JSONMessage {
-        return [
+        [
             "code": code.rawValue,
-            "message": message
+            "message": message,
         ]
     }
 }
 
 extension CDVPluginResult {
-    typealias JSONMessage = [AnyHashable: Any]
+    public typealias JSONMessage = [AnyHashable: Any]
 
     // MARK: - Success results
 
     /// Simple success result.
-    static let success = CDVPluginResult(status: CDVCommandStatus_OK)!
+    public static let success: CDVPluginResult = {
+        createPluginResult(status: CDVCommandStatus.ok)
+    }()
 
     /// Success result with some additional information.
-    static func success(message: JSONMessage) -> CDVPluginResult {
-        return CDVPluginResult(status: CDVCommandStatus_OK, messageAs: message)
+    public static func success(message: JSONMessage) -> CDVPluginResult {
+        createPluginResult(status: CDVCommandStatus.ok, messageAs: message)
     }
 
     /// Success result with an encodable object as JSON.
-    static func success<T: Encodable>(message: T) -> CDVPluginResult {
+    public static func success<T: Encodable>(message: T) -> CDVPluginResult {
         guard let data = try? JSONEncoder().encode(message),
-              let object = try? JSONSerialization.jsonObject(with: data) as? JSONMessage else {
+            let object = try? JSONSerialization.jsonObject(with: data) as? JSONMessage
+        else {
             return .failure(with: "Could not serialize message")
         }
-        return CDVPluginResult(status: CDVCommandStatus_OK, messageAs: object)
+        return createPluginResult(status: CDVCommandStatus.ok, messageAs: object)
     }
 
     /// Success result with some additional information.
-    static func success(message: String) -> CDVPluginResult {
-        return CDVPluginResult(status: CDVCommandStatus_OK, messageAs: message)
+    public static func success(message: String) -> CDVPluginResult {
+        createPluginResult(status: CDVCommandStatus.ok, messageAs: message)
     }
 
     /// Success result with some additional information.
-    static func success(message: Bool) -> CDVPluginResult {
-        return CDVPluginResult(status: CDVCommandStatus_OK, messageAs: message)
+    public static func success(message: Bool) -> CDVPluginResult {
+        createPluginResult(status: CDVCommandStatus.ok, messageAs: message)
     }
 
     /// Success result with some additional information.
-    static func success(message: Int) -> CDVPluginResult {
-        return CDVPluginResult(status: CDVCommandStatus_OK, messageAs: message)
+    public static func success(message: Int) -> CDVPluginResult {
+        createPluginResult(status: CDVCommandStatus.ok, messageAs: message)
     }
 
     /// Listener callback result, with attached additional information sent as the message.
     ///
     /// Used with stored callback IDs from listeners when their callbacks are called.
-    static func listenerCallback(_ event: ListenerEvent) -> CDVPluginResult {
-        let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: event.resultMessage)!
+    public static func listenerCallback(_ event: ListenerEvent) -> CDVPluginResult {
+        let result = createPluginResult(status: CDVCommandStatus.ok, messageAs: event.resultMessage)
         result.setKeepCallbackAs(true)
         return result
     }
 
-    static func listenerCallback(_ message: JSONMessage) -> CDVPluginResult {
-        let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAs: message)!
+    public static func listenerCallback(_ message: [String: Any?]) -> CDVPluginResult {
+        let result = createPluginResult(status: CDVCommandStatus.ok, messageAs: message as [AnyHashable: Any])
         result.setKeepCallbackAs(true)
         return result
     }
@@ -259,8 +368,8 @@ extension CDVPluginResult {
     /// Used for sending a result for listener subscriptions.
     ///
     /// - Note: Strictly speaking sending this is not required, as if there is no result, the callback is kept.
-    static let keepCallback: CDVPluginResult = {
-        let result = CDVPluginResult(status: CDVCommandStatus_OK)!
+    public static let keepCallback: CDVPluginResult = {
+        let result = createPluginResult(status: CDVCommandStatus.ok)
         result.setKeepCallbackAs(true)
         return result
     }()
@@ -269,8 +378,8 @@ extension CDVPluginResult {
     ///
     /// Used when listeners are not needed anymore and their associated callbacks can be safely removed, as they
     /// will not be used anymore.
-    static let disposeCallback: CDVPluginResult = {
-        let result = CDVPluginResult(status: CDVCommandStatus_NO_RESULT)!
+    public static let disposeCallback: CDVPluginResult = {
+        let result = createPluginResult(status: CDVCommandStatus.noResult)
         result.setKeepCallbackAs(false)
         return result
     }()
@@ -278,31 +387,31 @@ extension CDVPluginResult {
     // MARK: - Failure results
 
     /// Failure result with some additional information.
-    static func failure(with message: JSONMessage) -> CDVPluginResult {
-        return CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: message)
+    public static func failure(with message: JSONMessage) -> CDVPluginResult {
+        createPluginResult(status: CDVCommandStatus.error, messageAs: message)
     }
 
     /// Failure with a specific message.
-    static func failure(with message: String) -> CDVPluginResult {
-        return CDVPluginResult(status: CDVCommandStatus_ERROR, messageAs: message)
+    public static func failure(with message: String) -> CDVPluginResult {
+        createPluginResult(status: CDVCommandStatus.error, messageAs: message)
     }
 
     /// Failure with an arbitrary error.
-    static func failure(with error: Error) -> CDVPluginResult {
-        return .failure(with: error.localizedDescription)
+    public static func failure(with error: Error) -> CDVPluginResult {
+        .failure(with: error.localizedDescription)
     }
 
     /// Failure with a "known" error.
-    static func failure(with error: CommandError) -> CDVPluginResult {
-        return .failure(with: error.toJSON())
+    public static func failure(with error: CommandError) -> CDVPluginResult {
+        .failure(with: error.toJSON())
     }
 }
 
 extension NSError {
     var jsonMessage: CDVPluginResult.JSONMessage {
-        return [
+        [
             "code": code,
-            "message": description
+            "message": description,
         ]
     }
 }
