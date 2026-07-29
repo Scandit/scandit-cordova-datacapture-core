@@ -3,12 +3,6 @@ import { DataCaptureContext } from 'scandit-datacapture-frameworks-core';
 import { FocusGesture, LogoStyle, ZoomGesture } from 'scandit-datacapture-frameworks-core';
 export declare class DataCaptureView {
     private baseDataCaptureView;
-    private htmlElement;
-    private _htmlElementState;
-    private scrollListener;
-    private domObserver;
-    static forContext(context: DataCaptureContext | null): DataCaptureView;
-    constructor();
     get context(): DataCaptureContext | null;
     set context(context: DataCaptureContext | null);
     private get overlays();
@@ -24,17 +18,16 @@ export declare class DataCaptureView {
     set logoOffset(newValue: PointWithUnit);
     get focusGesture(): FocusGesture | null;
     set focusGesture(newValue: FocusGesture | null);
-    get zoomGestures(): ZoomGesture[];
-    set zoomGestures(newValue: ZoomGesture[]);
-    /** @deprecated Use zoomGestures instead. Will be removed in a future version. */
     get zoomGesture(): ZoomGesture | null;
-    /** @deprecated Use zoomGestures instead. Will be removed in a future version. */
     set zoomGesture(newValue: ZoomGesture | null);
-    get shouldShowZoomNotification(): boolean;
-    set shouldShowZoomNotification(newValue: boolean);
-    setProperty<T>(name: string, value: T): void;
+    private htmlElement;
+    private _htmlElementState;
     private set htmlElementState(value);
     private get htmlElementState();
+    private scrollListener;
+    private domObserver;
+    static forContext(context: DataCaptureContext | null): DataCaptureView;
+    constructor();
     private orientationChangeListener;
     connectToElement(element: HTMLElement): void;
     detachFromElement(): void;

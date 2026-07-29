@@ -1,9 +1,5 @@
 import ScanditCaptureCore
 
-#if SWIFT_PACKAGE
-import Cordova
-#endif
-
 public struct CameraSettingsDefaults: Encodable {
     let preferredResolution: String
     let zoomFactor: Float
