@@ -13,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import com.scandit.datacapture.cordova.core.data.ResizeAndMoveInfo
+import com.scandit.datacapture.cordova.core.utils.bringContainerToFront
 import com.scandit.datacapture.cordova.core.utils.pxFromDp
 import com.scandit.datacapture.cordova.core.utils.removeFromParent
 import com.scandit.datacapture.core.ui.DataCaptureView
@@ -84,19 +85,34 @@ class DataCaptureViewHandler {
                 backgroundView,
                 ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
             )
-            webView?.bringToFront()
+            // Bring the WebView's content-frame container to the front so backgroundView
+            // (added via addContentView) doesn't end up covering the whole WebView on
+            // cordova-android 15+, where the WebView is wrapped in an intermediate
+            // rootLayout.
+            webView?.bringContainerToFront()
             webView?.setBackgroundColor(Color.TRANSPARENT)
 
             dataCaptureView.parent?.let {
                 (it as ViewGroup).removeView(dataCaptureView)
             }
-            activity.addContentView(
-                dataCaptureView,
-                ViewGroup.LayoutParams(
-                    latestInfo.width.pxFromDp().toInt(),
-                    latestInfo.height.pxFromDp().toInt()
-                )
+            // Add the DataCaptureView into the WebView's own parent so the two views
+            // share a single coordinate frame. latestInfo positions come from the JS
+            // getBoundingClientRect() and are therefore WebView-relative; placing the
+            // overlay as a sibling of the WebView means those coordinates map directly
+            // (offset only by the WebView's own position within that shared parent)
+            // with no screen-space translation, and the overlay is clipped to the same
+            // bounds as the WebView. Falls back to the activity content frame if the
+            // WebView isn't attached yet.
+            val layoutParams = ViewGroup.LayoutParams(
+                latestInfo.width.pxFromDp().toInt(),
+                latestInfo.height.pxFromDp().toInt()
             )
+            val container = webView?.parent as? ViewGroup
+            if (container != null) {
+                container.addView(dataCaptureView, layoutParams)
+            } else {
+                activity.addContentView(dataCaptureView, layoutParams)
+            }
             render()
         }
     }
@@ -124,8 +140,13 @@ class DataCaptureViewHandler {
     private fun renderNoAnimate(dataCaptureView: DataCaptureView) {
         dataCaptureView.post {
             dataCaptureView.visibility = if (isVisible) View.VISIBLE else View.GONE
-            dataCaptureView.x = latestInfo.left.pxFromDp()
-            dataCaptureView.y = latestInfo.top.pxFromDp()
+            // DataCaptureView shares the WebView's parent, so latestInfo (WebView-relative,
+            // from getBoundingClientRect()) maps directly, offset only by the WebView's own
+            // position within that shared parent. No screen-space translation needed, and
+            // this stays correct regardless of any edge-to-edge inset applied to the WebView.
+            val webView = webView
+            dataCaptureView.x = latestInfo.left.pxFromDp() + (webView?.x ?: 0f)
+            dataCaptureView.y = latestInfo.top.pxFromDp() + (webView?.y ?: 0f)
             dataCaptureView.layoutParams.apply {
                 width = latestInfo.width.pxFromDp().toInt()
                 height = latestInfo.height.pxFromDp().toInt()

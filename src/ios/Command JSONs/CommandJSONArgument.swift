@@ -1,9 +1,13 @@
+#if SWIFT_PACKAGE
+import Cordova
+#endif
+
 extension CDVInvokedUrlCommand {
-    var defaultArgument: Any? {
+    public var defaultArgument: Any? {
         argument(at: 0)
     }
 
-    var defaultArgumentAsString: String? {
+    public var defaultArgumentAsString: String? {
         if let defaultArgument = defaultArgument as? String {
             return defaultArgument
         }
@@ -17,23 +21,23 @@ extension CDVInvokedUrlCommand {
         return String(data: data, encoding: .utf8)
     }
 
-    var defaultArgumentAsDictionary: [String: Any?]? {
+    public var defaultArgumentAsDictionary: [String: Any?]? {
         defaultArgument as? [String: Any?]
     }
 }
 
-protocol CommandJSONArgument: Decodable {
+public protocol CommandJSONArgument: Decodable {
     static func fromJSONObject(_ jsonObject: Any) throws -> Self
     static func fromCommand(_ command: CDVInvokedUrlCommand) throws -> Self
 }
 
 extension CommandJSONArgument {
-    static func fromJSONObject(_ jsonObject: Any) throws -> Self {
+    public static func fromJSONObject(_ jsonObject: Any) throws -> Self {
         let data = try JSONSerialization.data(withJSONObject: jsonObject)
         return try JSONDecoder().decode(Self.self, from: data)
     }
 
-    static func fromCommand(_ command: CDVInvokedUrlCommand) throws -> Self {
+    public static func fromCommand(_ command: CDVInvokedUrlCommand) throws -> Self {
         guard let defaultArgument = command.defaultArgument else {
             throw NSError(
                 domain: "CommandJSONArgument",
