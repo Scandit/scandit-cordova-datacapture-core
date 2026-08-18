@@ -1,6 +1,6 @@
 {
   "name": "scandit-cordova-datacapture-core",
-  "version": "8.5.2",
+  "version": "8.5.3",
   "description": "Scandit Data Capture SDK for Cordova",
   "license": "Apache-2.0",
   "private": false,
@@ -23,7 +23,7 @@
     "cordova": ">=10.0.0"
   },
   "dependencies": {
-    "scandit-datacapture-frameworks-core": "8.5.2"
+    "scandit-datacapture-frameworks-core": "8.5.3"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
