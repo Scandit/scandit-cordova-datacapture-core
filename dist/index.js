@@ -1837,6 +1837,42 @@ class CoreProxyAdapter {
         });
     }
     /**
+     * Adds an NV21 frame to the tracked sequence frame source with the given id
+     * @param frameSourceId The id of the sequence frame source the frame is added to
+     * @param width Frame width in pixels
+     * @param height Frame height in pixels
+     * @param frameData Base64-encoded NV21 frame bytes
+     */
+    addFrameToSequenceFrameSource(_a) {
+        return __awaiter$1(this, arguments, void 0, function* ({ frameSourceId, width, height, frameData, }) {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'addFrameToSequenceFrameSource',
+                isEventRegistration: false,
+                frameSourceId,
+                width,
+                height,
+                frameData,
+            });
+            return result;
+        });
+    }
+    /**
+     * Returns the current state of the tracked sequence frame source with the given id
+     * @param frameSourceId The id of the sequence frame source to get the state of
+     */
+    getSequenceFrameSourceState(_a) {
+        return __awaiter$1(this, arguments, void 0, function* ({ frameSourceId }) {
+            const result = yield this.proxy.$executeCore({
+                moduleName: 'CoreModule',
+                methodName: 'getSequenceFrameSourceState',
+                isEventRegistration: false,
+                frameSourceId,
+            });
+            return JSON.parse(result.data);
+        });
+    }
+    /**
      * Registers a persistent listener for torch state change events
      */
     registerTorchStateListener() {
@@ -2513,6 +2549,26 @@ class DataCaptureContext extends DefaultSerializeable {
             }
         });
     }
+    /**
+     * Mirror a frame-source change that already occurred on the native side (e.g. a
+     * CameraSwitchControl tap handled by the native camera switcher, which swaps the context's
+     * active camera on its own). Repoints the TS-side frame source and active-context pointers
+     * WITHOUT re-serializing to native — native is already in this state, so calling
+     * setFrameSource() would trigger a redundant, and failing, swap.
+     *
+     * Private on purpose: framework-internal callers (CameraSwitchControlController) reach it
+     * through the PrivateDataCaptureContext cast, keeping it off the public SDK surface.
+     */
+    adoptActiveFrameSource(frameSource) {
+        if (this._frameSource === frameSource) {
+            return;
+        }
+        if (this._frameSource) {
+            this._frameSource.context = null;
+        }
+        this._frameSource = frameSource;
+        frameSource.context = this;
+    }
     addListener(listener) {
         return __awaiter$1(this, void 0, void 0, function* () {
             if (this.listeners.length === 0) {
@@ -3154,6 +3210,191 @@ __decorate$1([
     ignoreFromSerialization
 ], ImageFrameSource.prototype, "controller", void 0);
 
+class SequenceFrameSourceController extends BaseController {
+    constructor(sequenceFrameSource) {
+        super('CoreProxy');
+        this.handleDidChangeStateEventWrapper = (ev) => {
+            return this.handleDidChangeStateEvent(ev);
+        };
+        this.sequenceFrameSource = sequenceFrameSource;
+        this.adapter = new CoreProxyAdapter(this._proxy);
+        void this.subscribeListener();
+    }
+    get privateSequenceFrameSource() {
+        return this.sequenceFrameSource;
+    }
+    getCurrentState() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            return yield this.adapter.getSequenceFrameSourceState({
+                frameSourceId: this.privateSequenceFrameSource._id,
+            });
+        });
+    }
+    switchToDesiredState(desiredState) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            yield this.adapter.switchCameraToDesiredState({
+                stateJson: desiredState.toString(),
+            });
+        });
+    }
+    addFrame(width, height, frameData) {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            yield this.adapter.addFrameToSequenceFrameSource({
+                frameSourceId: this.privateSequenceFrameSource._id,
+                width,
+                height,
+                frameData,
+            });
+        });
+    }
+    subscribeListener() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            yield this.adapter.registerFrameSourceListener();
+            this._proxy.subscribeForEvents([FrameSourceListenerEvents.didChangeState]);
+            this._proxy.eventEmitter.on(FrameSourceListenerEvents.didChangeState, this.handleDidChangeStateEventWrapper);
+        });
+    }
+    unsubscribeListener() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            yield this.adapter.unregisterFrameSourceListener();
+            this._proxy.unsubscribeFromEvents([FrameSourceListenerEvents.didChangeState]);
+            this._proxy.eventEmitter.off(FrameSourceListenerEvents.didChangeState, this.handleDidChangeStateEventWrapper);
+        });
+    }
+    dispose() {
+        void this.unsubscribeListener();
+        this._proxy.dispose();
+    }
+    handleDidChangeStateEvent(ev) {
+        const event = EventDataParser.parseIfShouldHandle(ev, {});
+        if (event === SKIP) {
+            return;
+        }
+        if (event === null) {
+            console.error('SequenceFrameSourceController didChangeState payload is null');
+            return;
+        }
+        const newState = event.state;
+        this.privateSequenceFrameSource.listeners.forEach(listener => {
+            if (listener.didChangeState) {
+                listener.didChangeState(this.sequenceFrameSource, newState);
+            }
+        });
+    }
+}
+
+/**
+ * A frame source that processes frames fed to it via {@link SequenceFrameSource.addFrame},
+ * in the order they are added. Use it when the camera is not handled by the SDK (e.g. when
+ * another framework owns the camera).
+ */
+class SequenceFrameSource extends DefaultSerializeable {
+    set context(newContext) {
+        if (newContext == null) {
+            void this.controller.unsubscribeListener();
+        }
+        else if (this._context == null) {
+            void this.controller.subscribeListener();
+        }
+        this._context = newContext;
+    }
+    get context() {
+        return this._context;
+    }
+    get desiredState() {
+        return this._desiredState;
+    }
+    /**
+     * Creates a sequence frame source for the given camera position. On iOS the lens position
+     * (0.0-1.0) sets the capture device lens position; on Android it is ignored.
+     */
+    static create(position, lensPosition) {
+        const sequenceFrameSource = new SequenceFrameSource();
+        sequenceFrameSource.position = position;
+        sequenceFrameSource._lensPosition = lensPosition !== null && lensPosition !== void 0 ? lensPosition : 1;
+        return sequenceFrameSource;
+    }
+    static fromJSON(json) {
+        return SequenceFrameSource.create(json.position, json.lensPosition);
+    }
+    constructor() {
+        super();
+        this.type = 'sequence';
+        this._lensPosition = 1;
+        this._id = `${Date.now()}-${SequenceFrameSource.nextInstanceId++}`;
+        this._desiredState = exports.FrameSourceState.Off;
+        this.listeners = [];
+        this._context = null;
+        this.controller = new SequenceFrameSourceController(this);
+    }
+    switchToDesiredState(state) {
+        this._desiredState = state;
+        return this.controller.switchToDesiredState(state);
+    }
+    /**
+     * Adds a frame with the given width and height. The frame data must be the Base64 encoding
+     * of the raw NV21 bytes of the frame. If this frame source is on and connected to a
+     * data capture context, this is the next frame that will be processed.
+     */
+    addFrame(width, height, frameData) {
+        return this.controller.addFrame(width, height, frameData);
+    }
+    addListener(listener) {
+        if (listener == null) {
+            return;
+        }
+        if (this.listeners.includes(listener)) {
+            return;
+        }
+        this.listeners.push(listener);
+    }
+    removeListener(listener) {
+        if (listener == null) {
+            return;
+        }
+        if (!this.listeners.includes(listener)) {
+            return;
+        }
+        this.listeners.splice(this.listeners.indexOf(listener), 1);
+    }
+    getCurrentState() {
+        return this.controller.getCurrentState();
+    }
+    didChange() {
+        if (this.context) {
+            return this.context.update();
+        }
+        return Promise.resolve();
+    }
+    setNativeFrameSourceIsBeingCreated() {
+        // SequenceFrameSource has no asynchronous native initialization step, so
+        // there is nothing to track here. The method exists only to satisfy the
+        // PrivateFrameSource contract that DataCaptureContext.setFrameSource()
+        // invokes on every frame source.
+    }
+}
+// The native handlers key their instance-reuse and addFrame routing on this id, so it must
+// be unique across instances — a timestamp alone can collide within the same millisecond.
+SequenceFrameSource.nextInstanceId = 0;
+__decorate$1([
+    nameForSerialization('lensPosition')
+], SequenceFrameSource.prototype, "_lensPosition", void 0);
+__decorate$1([
+    nameForSerialization('id')
+], SequenceFrameSource.prototype, "_id", void 0);
+__decorate$1([
+    nameForSerialization('desiredState')
+], SequenceFrameSource.prototype, "_desiredState", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], SequenceFrameSource.prototype, "listeners", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], SequenceFrameSource.prototype, "_context", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], SequenceFrameSource.prototype, "controller", void 0);
+
 class PrivateFrameData {
     get imageBuffers() {
         return this._imageBuffers;
@@ -3187,6 +3428,86 @@ class PrivateFrameData {
         frameData._orientation = 90;
         frameData._timestamp = -1;
         return frameData;
+    }
+}
+
+/**
+ * Keeps the TS-side camera state in sync with the native camera switcher.
+ *
+ * The native `CameraSwitchControl` swaps the DataCaptureContext's active camera on its own when
+ * tapped; the TS layer is never told, so `DataCaptureContext.frameSource` and the two cameras'
+ * `_desiredState` drift out of sync (leading to "Unable to switch the camera" rejections when the
+ * app later acts on a camera native no longer treats as active). This controller listens to the
+ * frame-source state events (which carry the camera position) and repoints the TS state to mirror
+ * the native switch — without issuing any native call, since native is already in that state.
+ */
+class CameraSwitchControlController extends BaseController {
+    constructor(control) {
+        super('CoreProxy');
+        this.subscribed = false;
+        // Arrow-function wrapper (matches CameraController) so `this` stays bound and always current.
+        this.handleDidChangeStateWrapper = (ev) => {
+            return this.handleDidChangeState(ev);
+        };
+        this.control = control;
+        this.adapter = new CoreProxyAdapter(this._proxy);
+    }
+    subscribe() {
+        return __awaiter$1(this, void 0, void 0, function* () {
+            if (this.subscribed) {
+                return;
+            }
+            this.subscribed = true;
+            yield this.adapter.registerFrameSourceListener();
+            this._proxy.subscribeForEvents([FrameSourceListenerEvents.didChangeState]);
+            this._proxy.eventEmitter.on(FrameSourceListenerEvents.didChangeState, this.handleDidChangeStateWrapper);
+        });
+    }
+    unsubscribe() {
+        if (!this.subscribed) {
+            return;
+        }
+        this.subscribed = false;
+        // Only detach our JS handler. We intentionally do NOT unregister the native frame-source
+        // listener — the active camera's own CameraController may still depend on it.
+        this._proxy.eventEmitter.off(FrameSourceListenerEvents.didChangeState, this.handleDidChangeStateWrapper);
+    }
+    handleDidChangeState(ev) {
+        var _a;
+        const event = EventDataParser.parseIfShouldHandle(ev, {});
+        if (event === SKIP || event === null) {
+            return;
+        }
+        // Only react when a camera reaches a STABLE up state (on/standby). Transition states
+        // (starting, bootingUp, …) must never be written into `desiredState`: that field serializes
+        // to native, whose state machine rejects transition values as a desired state
+        // (BAR_REQUIRES(!isTransition(state)) in async_start_stop_state_machine.cc → abort).
+        // The paired "off" event for the outgoing camera is likewise ignored.
+        if (event.state !== exports.FrameSourceState.On && event.state !== exports.FrameSourceState.Standby) {
+            return;
+        }
+        const context = (_a = this.control.attachedView) === null || _a === void 0 ? void 0 : _a.context;
+        if (!context) {
+            return;
+        }
+        const primary = this.control.primaryCamera;
+        const secondary = this.control.secondaryCamera;
+        const next = event.cameraPosition === primary.position
+            ? primary
+            : event.cameraPosition === secondary.position
+                ? secondary
+                : null;
+        if (!next || context.frameSource === next) {
+            return;
+        }
+        const previous = context.frameSource;
+        context.adoptActiveFrameSource(next);
+        next._desiredState = event.state;
+        next.currentCameraState = event.state;
+        if (previous) {
+            previous._desiredState = exports.FrameSourceState.Off;
+            previous.currentCameraState = exports.FrameSourceState.Off;
+        }
     }
 }
 
@@ -4580,6 +4901,155 @@ __decorate$1([
     nameForSerialization('accessibilityHintWhenOn')
 ], TorchSwitchControl.prototype, "accessibilityHintWhenOn", void 0);
 
+class CameraSwitchControl extends DefaultSerializeable {
+    get view() {
+        return this._view;
+    }
+    // Attaching to / detaching from a view is the lifecycle hook for keeping the TS camera state
+    // in sync with the native camera switcher: subscribe while attached, unsubscribe when removed.
+    set view(view) {
+        var _a, _b;
+        this._view = view;
+        if (view) {
+            this.controller = (_a = this.controller) !== null && _a !== void 0 ? _a : new CameraSwitchControlController(this);
+            void this.controller.subscribe();
+        }
+        else {
+            (_b = this.controller) === null || _b === void 0 ? void 0 : _b.unsubscribe();
+        }
+    }
+    /** @internal Read-only view access for the sync controller. */
+    get attachedView() {
+        return this._view;
+    }
+    constructor(primaryCamera, secondaryCamera) {
+        super();
+        this.type = 'camera';
+        this.icon = {
+            primaryCamera: { default: null, pressed: null },
+            secondaryCamera: { default: null, pressed: null },
+        };
+        this._view = null;
+        this.controller = null;
+        this.anchor = null;
+        this.offset = null;
+        this.accessibilityLabelWhenWorldFacing = null;
+        this.accessibilityHintWhenWorldFacing = null;
+        this.accessibilityLabelWhenUserFacing = null;
+        this.accessibilityHintWhenUserFacing = null;
+        this._primaryCamera = primaryCamera;
+        this._secondaryCamera = secondaryCamera;
+    }
+    get primaryCamera() {
+        return this._primaryCamera;
+    }
+    get secondaryCamera() {
+        return this._secondaryCamera;
+    }
+    get primaryCameraImage() {
+        var _a, _b;
+        if (((_a = this.icon.primaryCamera.default) === null || _a === void 0 ? void 0 : _a.isBase64EncodedImage()) == true) {
+            return (_b = this.icon.primaryCamera.default) === null || _b === void 0 ? void 0 : _b.data;
+        }
+        return null;
+    }
+    set primaryCameraImage(primaryCameraImage) {
+        var _a;
+        this.icon.primaryCamera.default = ControlImage.fromBase64EncodedImage(primaryCameraImage);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+    get primaryCameraPressedImage() {
+        var _a, _b;
+        if (((_a = this.icon.primaryCamera.pressed) === null || _a === void 0 ? void 0 : _a.isBase64EncodedImage()) == true) {
+            return (_b = this.icon.primaryCamera.pressed) === null || _b === void 0 ? void 0 : _b.data;
+        }
+        return null;
+    }
+    set primaryCameraPressedImage(primaryCameraPressedImage) {
+        var _a;
+        this.icon.primaryCamera.pressed = ControlImage.fromBase64EncodedImage(primaryCameraPressedImage);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+    get secondaryCameraImage() {
+        var _a, _b;
+        if (((_a = this.icon.secondaryCamera.default) === null || _a === void 0 ? void 0 : _a.isBase64EncodedImage()) == true) {
+            return (_b = this.icon.secondaryCamera.default) === null || _b === void 0 ? void 0 : _b.data;
+        }
+        return null;
+    }
+    set secondaryCameraImage(secondaryCameraImage) {
+        var _a;
+        this.icon.secondaryCamera.default = ControlImage.fromBase64EncodedImage(secondaryCameraImage);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+    get secondaryCameraPressedImage() {
+        var _a, _b;
+        if (((_a = this.icon.secondaryCamera.pressed) === null || _a === void 0 ? void 0 : _a.isBase64EncodedImage()) == true) {
+            return (_b = this.icon.secondaryCamera.pressed) === null || _b === void 0 ? void 0 : _b.data;
+        }
+        return null;
+    }
+    set secondaryCameraPressedImage(secondaryCameraPressedImage) {
+        var _a;
+        this.icon.secondaryCamera.pressed = ControlImage.fromBase64EncodedImage(secondaryCameraPressedImage);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+    setPrimaryCameraImage(resource) {
+        var _a;
+        this.icon.primaryCamera.default = ControlImage.fromResourceName(resource);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+    setPrimaryCameraPressedImage(resource) {
+        var _a;
+        this.icon.primaryCamera.pressed = ControlImage.fromResourceName(resource);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+    setSecondaryCameraImage(resource) {
+        var _a;
+        this.icon.secondaryCamera.default = ControlImage.fromResourceName(resource);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+    setSecondaryCameraPressedImage(resource) {
+        var _a;
+        this.icon.secondaryCamera.pressed = ControlImage.fromResourceName(resource);
+        void ((_a = this.view) === null || _a === void 0 ? void 0 : _a['controlUpdated']());
+    }
+}
+__decorate$1([
+    nameForSerialization('primaryCamera')
+], CameraSwitchControl.prototype, "_primaryCamera", void 0);
+__decorate$1([
+    nameForSerialization('secondaryCamera')
+], CameraSwitchControl.prototype, "_secondaryCamera", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], CameraSwitchControl.prototype, "_view", void 0);
+__decorate$1([
+    ignoreFromSerialization
+], CameraSwitchControl.prototype, "controller", void 0);
+__decorate$1([
+    ignoreFromSerializationIfNull
+], CameraSwitchControl.prototype, "anchor", void 0);
+__decorate$1([
+    ignoreFromSerializationIfNull
+], CameraSwitchControl.prototype, "offset", void 0);
+__decorate$1([
+    ignoreFromSerializationIfNull,
+    nameForSerialization('accessibilityLabelWhenWorldFacing')
+], CameraSwitchControl.prototype, "accessibilityLabelWhenWorldFacing", void 0);
+__decorate$1([
+    ignoreFromSerializationIfNull,
+    nameForSerialization('accessibilityHintWhenWorldFacing')
+], CameraSwitchControl.prototype, "accessibilityHintWhenWorldFacing", void 0);
+__decorate$1([
+    ignoreFromSerializationIfNull,
+    nameForSerialization('accessibilityLabelWhenUserFacing')
+], CameraSwitchControl.prototype, "accessibilityLabelWhenUserFacing", void 0);
+__decorate$1([
+    ignoreFromSerializationIfNull,
+    nameForSerialization('accessibilityHintWhenUserFacing')
+], CameraSwitchControl.prototype, "accessibilityHintWhenUserFacing", void 0);
+
 exports.VideoResolution = void 0;
 (function (VideoResolution) {
     /** @deprecated Auto is deprecated. Please use the capture mode's recommendedCameraSettings for the best results. */
@@ -5451,6 +5921,8 @@ var index = /*#__PURE__*/Object.freeze({
     CameraOwnershipManager: CameraOwnershipManager,
     get CameraPosition () { return exports.CameraPosition; },
     CameraSettings: CameraSettings,
+    CameraSwitchControl: CameraSwitchControl,
+    CameraSwitchControlController: CameraSwitchControlController,
     get ClusteringMode () { return exports.ClusteringMode; },
     Color: Color,
     ContextStatus: ContextStatus,
@@ -5518,6 +5990,7 @@ var index = /*#__PURE__*/Object.freeze({
     get ScanditIconShape () { return exports.ScanditIconShape; },
     get ScanditIconType () { return exports.ScanditIconType; },
     get SelectionMode () { return exports.SelectionMode; },
+    SequenceFrameSource: SequenceFrameSource,
     Size: Size,
     SizeWithAspect: SizeWithAspect,
     SizeWithUnit: SizeWithUnit,
@@ -5917,9 +6390,10 @@ class DataCaptureView {
         return this._htmlElementState;
     }
     connectToElement(element) {
-        const viewId = (Date.now() / 1000) | 0;
-        // add view to native hierarchy
-        this.baseDataCaptureView.createNativeView(viewId).then(() => {
+        return __awaiter(this, void 0, void 0, function* () {
+            const viewId = (Date.now() / 1000) | 0;
+            // add view to native hierarchy
+            yield this.baseDataCaptureView.createNativeView(viewId);
             this.htmlElement = element;
             this.htmlElementState = new HTMLElementState();
             // Initial update
@@ -6100,6 +6574,7 @@ exports.AimerViewfinder = AimerViewfinder;
 exports.Brush = Brush;
 exports.Camera = Camera;
 exports.CameraSettings = CameraSettings;
+exports.CameraSwitchControl = CameraSwitchControl;
 exports.Color = Color;
 exports.ContextStatus = ContextStatus;
 exports.CordovaError = CordovaError;
@@ -6131,6 +6606,7 @@ exports.RectangularViewfinder = RectangularViewfinder;
 exports.RectangularViewfinderAnimation = RectangularViewfinderAnimation;
 exports.ScanditIcon = ScanditIcon;
 exports.ScanditIconBuilder = ScanditIconBuilder;
+exports.SequenceFrameSource = SequenceFrameSource;
 exports.Size = Size;
 exports.SizeWithAspect = SizeWithAspect;
 exports.SizeWithUnit = SizeWithUnit;

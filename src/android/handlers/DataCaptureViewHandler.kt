@@ -104,8 +104,8 @@ class DataCaptureViewHandler {
             // bounds as the WebView. Falls back to the activity content frame if the
             // WebView isn't attached yet.
             val layoutParams = ViewGroup.LayoutParams(
-                latestInfo.width.pxFromDp().toInt(),
-                latestInfo.height.pxFromDp().toInt()
+                latestInfo.width.pxFromDp(activity).toInt(),
+                latestInfo.height.pxFromDp(activity).toInt()
             )
             val container = webView?.parent as? ViewGroup
             if (container != null) {
@@ -145,11 +145,12 @@ class DataCaptureViewHandler {
             // position within that shared parent. No screen-space translation needed, and
             // this stays correct regardless of any edge-to-edge inset applied to the WebView.
             val webView = webView
-            dataCaptureView.x = latestInfo.left.pxFromDp() + (webView?.x ?: 0f)
-            dataCaptureView.y = latestInfo.top.pxFromDp() + (webView?.y ?: 0f)
+            val context = dataCaptureView.context
+            dataCaptureView.x = latestInfo.left.pxFromDp(context) + (webView?.x ?: 0f)
+            dataCaptureView.y = latestInfo.top.pxFromDp(context) + (webView?.y ?: 0f)
             dataCaptureView.layoutParams.apply {
-                width = latestInfo.width.pxFromDp().toInt()
-                height = latestInfo.height.pxFromDp().toInt()
+                width = latestInfo.width.pxFromDp(context).toInt()
+                height = latestInfo.height.pxFromDp(context).toInt()
             }
             if (latestInfo.shouldBeUnderWebView) {
                 webView?.bringToFront()
