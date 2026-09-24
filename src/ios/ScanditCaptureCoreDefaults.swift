@@ -1,8 +1,5 @@
 import ScanditCaptureCore
 
-#if SWIFT_PACKAGE
-import Cordova
-#endif
 
 public struct CameraSettingsDefaults: Encodable {
     let preferredResolution: String
@@ -13,14 +10,12 @@ public struct CameraSettingsDefaults: Encodable {
     let shouldPreferSmoothAutoFocus: Bool
 
     public static func from(_ cameraSettings: CameraSettings) -> CameraSettingsDefaults {
-        CameraSettingsDefaults(
-            preferredResolution: cameraSettings.preferredResolution.jsonString,
-            zoomFactor: Float(cameraSettings.zoomFactor),
-            focusRange: cameraSettings.focusRange.jsonString,
-            zoomGestureZoomFactor: Float(cameraSettings.zoomGestureZoomFactor),
-            focusGestureStrategy: cameraSettings.focusGestureStrategy.jsonString,
-            shouldPreferSmoothAutoFocus: cameraSettings.shouldPreferSmoothAutoFocus
-        )
+        return CameraSettingsDefaults(preferredResolution: cameraSettings.preferredResolution.jsonString,
+                                      zoomFactor: Float(cameraSettings.zoomFactor),
+                                      focusRange: cameraSettings.focusRange.jsonString,
+                                      zoomGestureZoomFactor: Float(cameraSettings.zoomGestureZoomFactor),
+                                      focusGestureStrategy: cameraSettings.focusGestureStrategy.jsonString,
+                                      shouldPreferSmoothAutoFocus: cameraSettings.shouldPreferSmoothAutoFocus)
     }
 }
 
@@ -30,10 +25,8 @@ public struct BrushDefaults: Encodable {
     let strokeWidth: Int
 
     public static func from(_ brush: Brush) -> BrushDefaults {
-        BrushDefaults(
-            fillColor: brush.fillColor.sdcHexString,
-            strokeColor: brush.strokeColor.sdcHexString,
-            strokeWidth: Int(brush.strokeWidth)
-        )
+        return BrushDefaults(fillColor: brush.fillColor.sdcHexString,
+                             strokeColor: brush.strokeColor.sdcHexString,
+                             strokeWidth: Int(brush.strokeWidth))
     }
 }
