@@ -33,7 +33,6 @@ import org.apache.cordova.CordovaPlugin
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
-import java.lang.reflect.Method
 
 class ScanditCaptureCore :
     CordovaPlugin() {
@@ -72,19 +71,12 @@ class ScanditCaptureCore :
 
     private val coreModule = CoreModule.create(emitter)
 
-    private lateinit var exposedFunctionsToJs: Map<String, Method>
-
     private val serviceLocator = DefaultServiceLocator.getInstance()
 
     override fun pluginInitialize() {
         coreModule.onCreate(cordova.context)
 
         serviceLocator.register(coreModule)
-
-        // Init functions exposed to JS
-        exposedFunctionsToJs =
-            this.javaClass.methods.filter { it.getAnnotation(PluginMethod::class.java) != null }
-                .associateBy { it.name }
 
         // Dispatch initial lifecycle events since the activity may already be resumed
         // when the plugin initializes on first run
@@ -139,12 +131,22 @@ class ScanditCaptureCore :
         args: JSONArray,
         callbackContext: CallbackContext
     ): Boolean {
-        return if (exposedFunctionsToJs.contains(action)) {
-            exposedFunctionsToJs[action]?.invoke(this, args, callbackContext)
-            true
-        } else {
-            false
+        when (action) {
+            "getDefaults" -> getDefaults(args, callbackContext)
+            "showDataCaptureView" -> showDataCaptureView(args, callbackContext)
+            "hideDataCaptureView" -> hideDataCaptureView(args, callbackContext)
+            "setDataCaptureViewPositionAndSize" ->
+                setDataCaptureViewPositionAndSize(args, callbackContext)
+            "createDataCaptureView" -> createDataCaptureView(args, callbackContext)
+            "removeDataCaptureView" -> removeDataCaptureView(args, callbackContext)
+            "subscribeVolumeButtonObserver" ->
+                subscribeVolumeButtonObserver(args, callbackContext)
+            "unsubscribeVolumeButtonObserver" ->
+                unsubscribeVolumeButtonObserver(args, callbackContext)
+            "executeCore" -> executeCore(args, callbackContext)
+            else -> return false
         }
+        return true
     }
 
     @PluginMethod
@@ -283,7 +285,15 @@ class ScanditCaptureCore :
             callbackContext.error(ParameterNullError("methodName").message)
         }
 
+        // Only gate switchCameraToDesiredState on the camera permission when the
+        // active frame source is actually a Camera. ImageFrameSource decodes a
+        // base64 image in-memory and needs no camera permission; gating it here
+        // swallows the call (the engine never receives the state change) and
+        // also triggers an unnecessary permission prompt in image-only flows.
+        // currentCameraDesiredState is non-null only when a Camera is currently
+        // the active frame source (see DefaultFrameSourceHandler).
         if (methodName == "switchCameraToDesiredState" &&
+            coreModule.getCurrentCameraDesiredState() != null &&
             !permissionRequest.checkCameraPermission(this)
         ) {
             latestDesiredFrameSource =
