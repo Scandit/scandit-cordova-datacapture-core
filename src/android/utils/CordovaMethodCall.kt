@@ -33,9 +33,6 @@ class CordovaMethodCall(
     @Suppress("UNCHECKED_CAST")
     override fun <T> argument(key: String): T {
         val value = payload.opt(key)
-        if (value == JSONObject.NULL) {
-            return null as T
-        }
         return value as T
     }
 

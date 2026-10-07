@@ -1,7 +1,3 @@
-#if SWIFT_PACKAGE
-import Cordova
-#endif
-
 private func unwrapPluginResult(_ potentialResult: Any) -> CDVPluginResult {
     if let result = potentialResult as? CDVPluginResult {
         return result
@@ -48,8 +44,8 @@ private func createPluginResult(status: CDVCommandStatus, messageAs message: Any
     fatalError("Unsupported CDVPluginResult message type: \(type(of: message))")
 }
 
-public struct ListenerEvent {
-    public enum Name: String, Decodable {
+struct ListenerEvent {
+    enum Name: String, Decodable {
         // Context listener
         case didChangeContextStatus = "DataCaptureContextListener.onStatusChanged"
         case didStartObservingContext = "DataCaptureContextListener.onObservationStarted"
@@ -94,17 +90,17 @@ public struct ListenerEvent {
         case didChangeVolume = "didChangeVolume"
     }
 
-    public let name: Name
-    public let argument: CDVPluginResult.JSONMessage
-    public let shouldNotifyWhenFinished: Bool
+    let name: Name
+    let argument: CDVPluginResult.JSONMessage
+    let shouldNotifyWhenFinished: Bool
 
-    public init(name: Name, argument: CDVPluginResult.JSONMessage = [:], shouldNotifyWhenFinished: Bool = false) {
+    init(name: Name, argument: CDVPluginResult.JSONMessage = [:], shouldNotifyWhenFinished: Bool = false) {
         self.name = name
         self.argument = argument
         self.shouldNotifyWhenFinished = shouldNotifyWhenFinished
     }
 
-    public var resultMessage: CDVPluginResult.JSONMessage {
+    var resultMessage: CDVPluginResult.JSONMessage {
         [
             "name": name.rawValue,
             "finishCallbackID": name.rawValue,
@@ -114,8 +110,8 @@ public struct ListenerEvent {
     }
 }
 
-public struct CommandError {
-    public enum Code: Int, CaseIterable {
+struct CommandError {
+    enum Code: Int, CaseIterable {
         case invalidJSON = 10001
         case noViewIdParam = 10002
 
@@ -309,22 +305,22 @@ public struct CommandError {
 }
 
 extension CDVPluginResult {
-    public typealias JSONMessage = [AnyHashable: Any]
+    typealias JSONMessage = [AnyHashable: Any]
 
     // MARK: - Success results
 
     /// Simple success result.
-    public static let success: CDVPluginResult = {
+    static let success: CDVPluginResult = {
         createPluginResult(status: CDVCommandStatus.ok)
     }()
 
     /// Success result with some additional information.
-    public static func success(message: JSONMessage) -> CDVPluginResult {
+    static func success(message: JSONMessage) -> CDVPluginResult {
         createPluginResult(status: CDVCommandStatus.ok, messageAs: message)
     }
 
     /// Success result with an encodable object as JSON.
-    public static func success<T: Encodable>(message: T) -> CDVPluginResult {
+    static func success<T: Encodable>(message: T) -> CDVPluginResult {
         guard let data = try? JSONEncoder().encode(message),
             let object = try? JSONSerialization.jsonObject(with: data) as? JSONMessage
         else {
@@ -334,30 +330,30 @@ extension CDVPluginResult {
     }
 
     /// Success result with some additional information.
-    public static func success(message: String) -> CDVPluginResult {
+    static func success(message: String) -> CDVPluginResult {
         createPluginResult(status: CDVCommandStatus.ok, messageAs: message)
     }
 
     /// Success result with some additional information.
-    public static func success(message: Bool) -> CDVPluginResult {
+    static func success(message: Bool) -> CDVPluginResult {
         createPluginResult(status: CDVCommandStatus.ok, messageAs: message)
     }
 
     /// Success result with some additional information.
-    public static func success(message: Int) -> CDVPluginResult {
+    static func success(message: Int) -> CDVPluginResult {
         createPluginResult(status: CDVCommandStatus.ok, messageAs: message)
     }
 
     /// Listener callback result, with attached additional information sent as the message.
     ///
     /// Used with stored callback IDs from listeners when their callbacks are called.
-    public static func listenerCallback(_ event: ListenerEvent) -> CDVPluginResult {
+    static func listenerCallback(_ event: ListenerEvent) -> CDVPluginResult {
         let result = createPluginResult(status: CDVCommandStatus.ok, messageAs: event.resultMessage)
         result.setKeepCallbackAs(true)
         return result
     }
 
-    public static func listenerCallback(_ message: [String: Any?]) -> CDVPluginResult {
+    static func listenerCallback(_ message: [String: Any?]) -> CDVPluginResult {
         let result = createPluginResult(status: CDVCommandStatus.ok, messageAs: message as [AnyHashable: Any])
         result.setKeepCallbackAs(true)
         return result
@@ -368,7 +364,7 @@ extension CDVPluginResult {
     /// Used for sending a result for listener subscriptions.
     ///
     /// - Note: Strictly speaking sending this is not required, as if there is no result, the callback is kept.
-    public static let keepCallback: CDVPluginResult = {
+    static let keepCallback: CDVPluginResult = {
         let result = createPluginResult(status: CDVCommandStatus.ok)
         result.setKeepCallbackAs(true)
         return result
@@ -378,7 +374,7 @@ extension CDVPluginResult {
     ///
     /// Used when listeners are not needed anymore and their associated callbacks can be safely removed, as they
     /// will not be used anymore.
-    public static let disposeCallback: CDVPluginResult = {
+    static let disposeCallback: CDVPluginResult = {
         let result = createPluginResult(status: CDVCommandStatus.noResult)
         result.setKeepCallbackAs(false)
         return result
@@ -387,22 +383,22 @@ extension CDVPluginResult {
     // MARK: - Failure results
 
     /// Failure result with some additional information.
-    public static func failure(with message: JSONMessage) -> CDVPluginResult {
+    static func failure(with message: JSONMessage) -> CDVPluginResult {
         createPluginResult(status: CDVCommandStatus.error, messageAs: message)
     }
 
     /// Failure with a specific message.
-    public static func failure(with message: String) -> CDVPluginResult {
+    static func failure(with message: String) -> CDVPluginResult {
         createPluginResult(status: CDVCommandStatus.error, messageAs: message)
     }
 
     /// Failure with an arbitrary error.
-    public static func failure(with error: Error) -> CDVPluginResult {
+    static func failure(with error: Error) -> CDVPluginResult {
         .failure(with: error.localizedDescription)
     }
 
     /// Failure with a "known" error.
-    public static func failure(with error: CommandError) -> CDVPluginResult {
+    static func failure(with error: CommandError) -> CDVPluginResult {
         .failure(with: error.toJSON())
     }
 }
