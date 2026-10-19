@@ -1,3 +1,7 @@
+#if SWIFT_PACKAGE
+import Cordova
+#endif
+
 extension CGPoint {
     var json: CDVPluginResult.JSONMessage {
         [

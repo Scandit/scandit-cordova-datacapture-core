@@ -1,3 +1,7 @@
+#if SWIFT_PACKAGE
+import Cordova
+#endif
+
 struct Callback {
     let id: String
 

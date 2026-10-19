@@ -7,6 +7,10 @@
 import Foundation
 import ScanditFrameworksCore
 
+#if SWIFT_PACKAGE
+import Cordova
+#endif
+
 /// Cordova implementation of `FrameworksMethodCall`.
 ///
 /// Wraps Cordova's `CDVInvokedUrlCommand`-based method call arguments, where the first element

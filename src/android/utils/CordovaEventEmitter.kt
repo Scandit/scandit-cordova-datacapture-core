@@ -38,14 +38,14 @@ class CordovaEventEmitter : Emitter {
     }
 
     fun registerModeSpecificCallback(
-        mdeId: Int,
+        modeId: Int,
         eventName: String,
         callbackContext: CallbackContext
     ) {
-        if (specificCallbacks[mdeId] == null) {
-            specificCallbacks[mdeId] = mutableMapOf()
+        if (specificCallbacks[modeId] == null) {
+            specificCallbacks[modeId] = mutableMapOf()
         }
-        specificCallbacks[mdeId]?.put(eventName, callbackContext)
+        specificCallbacks[modeId]?.put(eventName, callbackContext)
     }
 
     fun unregisterCallback(eventName: String) {
@@ -78,12 +78,24 @@ class CordovaEventEmitter : Emitter {
         eventName: String,
         payload: MutableMap<String, Any?>
     ): CallbackContext? {
-        return if (payload.containsKey("viewId")) {
-            specificCallbacks[payload["viewId"] as Int]?.get(eventName)
-        } else if (payload.containsKey("modeId")) {
-            specificCallbacks[payload["modeId"] as Int]?.get(eventName)
-        } else {
-            callbacks[eventName]
+        return when {
+            payload.containsKey("viewId") -> {
+                val viewId = when (val id = payload["viewId"]) {
+                    is Int -> id
+                    is Number -> id.toInt()
+                    else -> null
+                }
+                viewId?.let { specificCallbacks[it]?.get(eventName) }
+            }
+            payload.containsKey("modeId") -> {
+                val modeId = when (val id = payload["modeId"]) {
+                    is Int -> id
+                    is Number -> id.toInt()
+                    else -> null
+                }
+                modeId?.let { specificCallbacks[it]?.get(eventName) }
+            }
+            else -> callbacks[eventName]
         }
     }
 }
