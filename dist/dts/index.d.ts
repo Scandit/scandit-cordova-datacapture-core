@@ -1,88 +1,108 @@
-export * from './Cordova/CommonCordova';
-export { Direction } from 'scandit-datacapture-frameworks-core';
-export { Color } from 'scandit-datacapture-frameworks-core';
-export { MarginsWithUnit } from 'scandit-datacapture-frameworks-core';
-export { MeasureUnit } from 'scandit-datacapture-frameworks-core';
-export { NumberWithUnit } from 'scandit-datacapture-frameworks-core';
-export { Orientation } from 'scandit-datacapture-frameworks-core';
-export { Point } from 'scandit-datacapture-frameworks-core';
-export { PointWithUnit } from 'scandit-datacapture-frameworks-core';
-export { DataCaptureOverlay } from 'scandit-datacapture-frameworks-core';
-export { DataCaptureViewListener } from 'scandit-datacapture-frameworks-core';
-export { Quadrilateral } from 'scandit-datacapture-frameworks-core';
-export { Rect } from 'scandit-datacapture-frameworks-core';
-export { RectWithUnit } from 'scandit-datacapture-frameworks-core';
-export { Size } from 'scandit-datacapture-frameworks-core';
-export { SizeWithAspect } from 'scandit-datacapture-frameworks-core';
-export { SizeWithUnit } from 'scandit-datacapture-frameworks-core';
-export { SizeWithUnitAndAspect } from 'scandit-datacapture-frameworks-core';
-export { SizingMode } from 'scandit-datacapture-frameworks-core';
-export { Anchor } from 'scandit-datacapture-frameworks-core';
-export { ScanIntention } from 'scandit-datacapture-frameworks-core';
-export { SelectionMode } from 'scandit-datacapture-frameworks-core';
-export { ClusteringMode } from 'scandit-datacapture-frameworks-core';
-export { LogoStyle } from 'scandit-datacapture-frameworks-core';
-export { TorchSwitchControl } from 'scandit-datacapture-frameworks-core';
-export { ZoomSwitchControl } from 'scandit-datacapture-frameworks-core';
-export { ZoomSwitchOrientation } from 'scandit-datacapture-frameworks-core';
-export { ZoomListener } from 'scandit-datacapture-frameworks-core';
-export { NoneLocationSelection } from 'scandit-datacapture-frameworks-core';
-export { RadiusLocationSelection } from 'scandit-datacapture-frameworks-core';
-export { RectangularLocationSelection } from 'scandit-datacapture-frameworks-core';
-export { ScanditIcon } from 'scandit-datacapture-frameworks-core';
-export { ScanditIconShape } from 'scandit-datacapture-frameworks-core';
-export { ScanditIconType } from 'scandit-datacapture-frameworks-core';
-export { ScanditIconBuilder } from 'scandit-datacapture-frameworks-core';
-export { TextAlignment } from 'scandit-datacapture-frameworks-core';
-export { FontFamily } from 'scandit-datacapture-frameworks-core';
-export { LocationSelection } from 'scandit-datacapture-frameworks-core';
-export { AimerViewfinder } from 'scandit-datacapture-frameworks-core';
-export { RectangularViewfinder } from 'scandit-datacapture-frameworks-core';
-export { RectangularViewfinderAnimation } from 'scandit-datacapture-frameworks-core';
-export { RectangularViewfinderLineStyle } from 'scandit-datacapture-frameworks-core';
-export { RectangularViewfinderStyle } from 'scandit-datacapture-frameworks-core';
-export { Viewfinder } from 'scandit-datacapture-frameworks-core';
-export { Brush } from 'scandit-datacapture-frameworks-core';
-export { NoViewfinder } from 'scandit-datacapture-frameworks-core';
-export { Camera } from 'scandit-datacapture-frameworks-core';
-export { CameraSettings } from 'scandit-datacapture-frameworks-core';
-export { CameraPosition } from 'scandit-datacapture-frameworks-core';
-export { LaserlineViewfinder } from 'scandit-datacapture-frameworks-core';
-export { FocusGestureStrategy } from 'scandit-datacapture-frameworks-core';
-export { FocusRange } from 'scandit-datacapture-frameworks-core';
-export { MacroMode } from 'scandit-datacapture-frameworks-core';
-export { FrameData } from 'scandit-datacapture-frameworks-core';
-export { FrameSource } from 'scandit-datacapture-frameworks-core';
-export { FrameDataSettings } from 'scandit-datacapture-frameworks-core';
-export { FrameDataSettingsBuilder } from 'scandit-datacapture-frameworks-core';
-export { FrameSourceState } from 'scandit-datacapture-frameworks-core';
-export { FrameSourceListener } from 'scandit-datacapture-frameworks-core';
-export { TorchListener } from 'scandit-datacapture-frameworks-core';
-export { MacroModeListener } from 'scandit-datacapture-frameworks-core';
-export { ImageFrameSource } from 'scandit-datacapture-frameworks-core';
-export { TorchState } from 'scandit-datacapture-frameworks-core';
-export { VideoResolution } from 'scandit-datacapture-frameworks-core';
-export { FocusGesture } from 'scandit-datacapture-frameworks-core';
-export { ImageBuffer } from 'scandit-datacapture-frameworks-core';
-export { Feedback } from 'scandit-datacapture-frameworks-core';
-export { Sound } from 'scandit-datacapture-frameworks-core';
-export { Vibration } from 'scandit-datacapture-frameworks-core';
-export { DataCaptureContext } from 'scandit-datacapture-frameworks-core';
-export { DataCaptureContextSettings } from 'scandit-datacapture-frameworks-core';
-export { DataCaptureContextCreationOptions } from 'scandit-datacapture-frameworks-core';
-export { OpenSourceSoftwareLicenseInfo } from 'scandit-datacapture-frameworks-core';
-export { DataCaptureMode } from 'scandit-datacapture-frameworks-core';
-export { DataCaptureContextListener } from 'scandit-datacapture-frameworks-core';
-export { ContextStatus } from 'scandit-datacapture-frameworks-core';
-export { DataCaptureComponent } from 'scandit-datacapture-frameworks-core';
-export { ZoomGesture } from 'scandit-datacapture-frameworks-core';
-export { TapToFocus } from 'scandit-datacapture-frameworks-core';
-export { Control } from 'scandit-datacapture-frameworks-core';
-export { SwipeToZoom } from 'scandit-datacapture-frameworks-core';
-export { PinchToZoom } from 'scandit-datacapture-frameworks-core';
-export { ZoomGestureListener } from 'scandit-datacapture-frameworks-core';
-export { FocusGestureListener } from 'scandit-datacapture-frameworks-core';
-export { DataCaptureVersion } from './DataCaptureVersion';
-export { DataCaptureView } from './DataCaptureView';
-export { VolumeButtonObserver } from './VolumeButtonObserver';
-export * as __ScanditCore from 'scandit-datacapture-frameworks-core';
+import { NativeCaller, DataCaptureContext, MarginsWithUnit, PointWithUnit, LogoStyle, Anchor, FocusGesture, ZoomGesture, Rect, DataCaptureOverlay, DataCaptureViewListener, Point, Quadrilateral, Control } from './core';
+import * as scanditDatacaptureFrameworksCore from './core';
+export { scanditDatacaptureFrameworksCore as __ScanditCore };
+export { AimerViewfinder, Anchor, Brush, Camera, CameraPosition, CameraSettings, CameraSwitchControl, ClusteringMode, Color, ContextStatus, Control, DataCaptureComponent, DataCaptureContext, DataCaptureContextCreationOptions, DataCaptureContextListener, DataCaptureContextSettings, DataCaptureMode, DataCaptureOverlay, DataCaptureViewListener, Direction, Feedback, FocusGesture, FocusGestureListener, FocusGestureStrategy, FocusRange, FontFamily, FrameData, FrameDataSettings, FrameDataSettingsBuilder, FrameSource, FrameSourceListener, FrameSourceState, ImageBuffer, ImageFrameSource, LaserlineViewfinder, LocationSelection, LogoStyle, MacroMode, MacroModeListener, MarginsWithUnit, MeasureUnit, NoViewfinder, NoneLocationSelection, NumberWithUnit, OpenSourceSoftwareLicenseInfo, Orientation, PinchToZoom, Point, PointWithUnit, Quadrilateral, RadiusLocationSelection, Rect, RectWithUnit, RectangularLocationSelection, RectangularViewfinder, RectangularViewfinderAnimation, RectangularViewfinderLineStyle, RectangularViewfinderStyle, ScanIntention, ScanditIcon, ScanditIconBuilder, ScanditIconShape, ScanditIconType, SelectionMode, SequenceFrameSource, Size, SizeWithAspect, SizeWithUnit, SizeWithUnitAndAspect, SizingMode, Sound, SwipeToZoom, TapToFocus, TextAlignment, TorchListener, TorchState, TorchSwitchControl, Vibration, VideoResolution, Viewfinder, ZoomGesture, ZoomGestureListener, ZoomListener, ZoomSwitchControl, ZoomSwitchOrientation } from './core';
+
+declare class CordovaError {
+    code: number;
+    message: string;
+    static fromJSON(json: any): CordovaError | null;
+    constructor(code: number, message: string);
+}
+interface BlockingModeListenerResult {
+    enabled: boolean;
+}
+declare const pluginsMetadata: any;
+declare const cordovaExec: (successCallback: Function | null, errorCallback: Function | null, className: string, functionName: string, args: [any] | null) => void;
+declare function initializePlugin(pluginName: string, customInitialization: () => Promise<void>): Promise<void>;
+declare class CordovaNativeCaller implements NativeCaller {
+    private cordovaExec;
+    private pluginName;
+    private eventHandlers;
+    private eventRegisteredCheckList;
+    constructor(cordovaExec: any, pluginName: string);
+    get framework(): string;
+    get frameworkVersion(): string;
+    callFn(fnName: string, args: object | undefined | null, meta?: {
+        isEventRegistration?: boolean;
+    }): Promise<any>;
+    eventHook(args: any): any;
+    registerEvent(evName: string, handler: (args: any) => Promise<void>): Promise<any>;
+    unregisterEvent(evName: string, _subscription: any): Promise<void>;
+    private setUpEventListener;
+    private notifyListeners;
+}
+declare function createCordovaNativeCaller(cordovaExec: any, pluginName: string): CordovaNativeCaller;
+
+declare class DataCaptureVersion {
+    static get pluginVersion(): string;
+}
+
+declare class DataCaptureView {
+    private baseDataCaptureView;
+    private htmlElement;
+    private _htmlElementState;
+    private scrollListener;
+    private domObserver;
+    static forContext(context: DataCaptureContext | null): DataCaptureView;
+    constructor();
+    get context(): DataCaptureContext | null;
+    set context(context: DataCaptureContext | null);
+    private get overlays();
+    get scanAreaMargins(): MarginsWithUnit;
+    set scanAreaMargins(newValue: MarginsWithUnit);
+    get pointOfInterest(): PointWithUnit;
+    set pointOfInterest(newValue: PointWithUnit);
+    get logoStyle(): LogoStyle;
+    set logoStyle(style: LogoStyle);
+    get logoAnchor(): Anchor;
+    set logoAnchor(newValue: Anchor);
+    get logoOffset(): PointWithUnit;
+    set logoOffset(newValue: PointWithUnit);
+    get focusGesture(): FocusGesture | null;
+    set focusGesture(newValue: FocusGesture | null);
+    get zoomGestures(): ZoomGesture[];
+    set zoomGestures(newValue: ZoomGesture[]);
+    /** @deprecated Use zoomGestures instead. Will be removed in a future version. */
+    get zoomGesture(): ZoomGesture | null;
+    /** @deprecated Use zoomGestures instead. Will be removed in a future version. */
+    set zoomGesture(newValue: ZoomGesture | null);
+    get shouldShowZoomNotification(): boolean;
+    set shouldShowZoomNotification(newValue: boolean);
+    setProperty<T>(name: string, value: T): void;
+    private set htmlElementState(value);
+    private get htmlElementState();
+    private orientationChangeListener;
+    connectToElement(element: HTMLElement): Promise<void>;
+    detachFromElement(): void;
+    setFrame(frame: Rect, isUnderContent?: boolean): Promise<void>;
+    show(): Promise<void>;
+    hide(): Promise<void>;
+    addOverlay(overlay: DataCaptureOverlay): Promise<void>;
+    removeOverlay(overlay: DataCaptureOverlay): Promise<void>;
+    addListener(listener: DataCaptureViewListener): void;
+    removeListener(listener: DataCaptureViewListener): void;
+    viewPointForFramePoint(point: Point): Promise<Point>;
+    viewQuadrilateralForFrameQuadrilateral(quadrilateral: Quadrilateral): Promise<Quadrilateral>;
+    addControl(control: Control): Promise<void>;
+    addControlWithAnchorAndOffset(control: Control, anchor: Anchor, offset: PointWithUnit): void;
+    removeControl(control: Control): void;
+    private subscribeToChangesOnHTMLElement;
+    private unsubscribeFromChangesOnHTMLElement;
+    private elementDidChange;
+    private updatePositionAndSize;
+    private _show;
+    private _hide;
+    private toJSON;
+}
+
+declare class VolumeButtonObserver {
+    private didChangeVolume;
+    private proxy;
+    constructor(didChangeVolume: () => void);
+    dispose(): void;
+    private initialize;
+}
+
+export { CordovaError, CordovaNativeCaller, DataCaptureVersion, DataCaptureView, VolumeButtonObserver, cordovaExec, createCordovaNativeCaller, initializePlugin, pluginsMetadata };
+export type { BlockingModeListenerResult };
