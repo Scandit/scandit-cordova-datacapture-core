@@ -11,12 +11,14 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.view.View
 import android.view.ViewGroup
+import com.scandit.datacapture.core.internal.sdk.AppAndroidEnvironment
 import org.apache.cordova.CallbackContext
 import org.apache.cordova.PluginResult
 import org.json.JSONArray
 import org.json.JSONObject
 
-fun Float.pxFromDp(context: Context): Float {
+fun Float.pxFromDp(): Float {
+    val context = AppAndroidEnvironment.applicationContext
     val displayDensity = context.resources.displayMetrics.density
     return (this * displayDensity + 0.5f)
 }
