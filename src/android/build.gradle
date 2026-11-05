@@ -8,13 +8,17 @@
 // coords. MR-ID-isolated only when release-shared-modules-internally actually
 // published this pipeline — it signals that via the FRAMEWORKS_SHARED_PUBLISHED
 // env flag, set only on MRs that touch frameworks/shared/android/**. Otherwise
-// bare -SNAPSHOT (develop's published coord). Keep gating in sync with
-// frameworks/common/frameworks.gradle.
+// bare -SNAPSHOT (develop's published coord).
 // native_sdk_version resolves `com.scandit.datacapture:*` native coords,
 // gated on whether android-archive actually published (non-MR push or
-// dep-update MR — see .gitlab/native/native.yml ~line 1571).
-def sdk_version = "8.5.5"
+// dep-update MR — see .gitlab/native/native.yml ~line 1571), else hash-pinned
+// via scripts/native_hashes.json. This ladder mirrors
+// frameworks/common/frameworks.gradle — Cordova copies this file into the
+// generated platforms/android project, so it cannot `apply from:` that file
+// directly; keep the two in sync by hand.
+def sdk_version = "8.7.0"
 def native_sdk_version = sdk_version
+def nativeHashPinned = false
 
 def ciMrId = System.getenv("CI_MERGE_REQUEST_ID")
 def ciMrLabels = System.getenv("CI_MERGE_REQUEST_LABELS") ?: ""
@@ -26,7 +30,102 @@ if (ciMrId != null && (System.getenv("FRAMEWORKS_SHARED_PUBLISHED") ?: "") == "t
 }
 if (ciMrId != null && archivePublished && native_sdk_version.contains("-SNAPSHOT")) {
     native_sdk_version = native_sdk_version.replace("-SNAPSHOT", "-" + ciMrId + "-SNAPSHOT")
+} else if (native_sdk_version.endsWith("-SNAPSHOT")) {
+    // Hash-pin to the develop commit recorded in scripts/native_hashes.json.
+    // android-archive on develop publishes both plain <ver>-SNAPSHOT and an
+    // immutable <ver>-<CI_COMMIT_SHA> variant; bump_native_hashes.py records
+    // that SHA here. Resolving through the pin guarantees reproducible
+    // builds that don't drift when a later develop commit republishes plain
+    // -SNAPSHOT, mirroring how iOS pins to a numbered S3 archive via the
+    // same hash.
+    //
+    // Locate native_hashes.json at the repo root: prefer CI_PROJECT_DIR when
+    // available (GitLab CI), else walk up from project.projectDir until we
+    // find the file. A released, non-SNAPSHOT plugin never reaches this
+    // branch; a customer project with no native_hashes.json on disk simply
+    // falls through and resolves the bare coord below.
+    def nativeHashesFile = null
+    def ciProjectDir = System.getenv("CI_PROJECT_DIR")
+    if (ciProjectDir) {
+        def candidate = new File("${ciProjectDir}/scripts/native_hashes.json")
+        if (candidate.exists()) {
+            nativeHashesFile = candidate
+        }
+    }
+    if (nativeHashesFile == null) {
+        def searchDir = project.projectDir
+        for (int depth = 0; depth < 10 && searchDir != null; depth++) {
+            def candidate = new File(searchDir, "scripts/native_hashes.json")
+            if (candidate.exists()) {
+                nativeHashesFile = candidate
+                break
+            }
+            searchDir = searchDir.parentFile
+        }
+    }
+    if (nativeHashesFile != null) {
+        def nativeHashes = new groovy.json.JsonSlurper().parseText(nativeHashesFile.text)
+        def androidHash = nativeHashes?.hashes?.android
+        def pinnedVersion = nativeHashes?.version
+        // Only pin when the recorded version matches the current
+        // native_sdk_version. Right after a version bump MR lands on
+        // develop, native_hashes.json still points at <old-version> until
+        // bump_native_hashes.py next runs — using that hash with the new
+        // version would build a coord that doesn't exist yet.
+        if (androidHash && androidHash != "ignored" && pinnedVersion == native_sdk_version) {
+            native_sdk_version = native_sdk_version.replace("-SNAPSHOT", "-${androidHash}")
+            nativeHashPinned = true
+        } else if (androidHash && androidHash != "ignored" && pinnedVersion != native_sdk_version) {
+            logger.warn("[sdc-cordova] native_hashes.json records ${pinnedVersion} but /version is " +
+                "${native_sdk_version} — hash-pin disabled, resolving bare ${native_sdk_version}. That " +
+                "coord only exists once the version-bump follow-up pipeline has published it and the " +
+                "native_hashes.json bump MR has merged (.gitlab/workflows/version-bump.yml). If this " +
+                "build fails with 'Could not find com.scandit.datacapture:*:${native_sdk_version}', " +
+                "wait for that pipeline and retry — do not change code.")
+        }
+    }
 }
+
+if (nativeHashPinned && !gradle.ext.has("sdcNativeHashPin")) {
+    def pinned = native_sdk_version
+    gradle.ext.sdcNativeHashPin = pinned
+    // release/* has no republish-shared-modules arm, so a stale POM only warns there.
+    def ciBranch = System.getenv("CI_MERGE_REQUEST_TARGET_BRANCH_NAME") ?: System.getenv("CI_COMMIT_BRANCH") ?: ""
+    def staleIsFatal = !ciBranch.startsWith("release/")
+    def staleWarned = false
+    // One native hash per APK: force every native coord, and fail on a stale shared-frameworks POM.
+    gradle.allprojects { p ->
+        p.configurations.configureEach { c ->
+            c.resolutionStrategy.eachDependency { d ->
+                if (d.requested.group == "com.scandit.datacapture") {
+                    d.useVersion(pinned)
+                    d.because("native_hashes.json pins one native hash per build")
+                }
+            }
+            c.incoming.afterResolve { rd ->
+                rd.resolutionResult.allDependencies.each { dep ->
+                    def from = dep.from.id
+                    def req = dep.requested
+                    if (from instanceof org.gradle.api.artifacts.component.ModuleComponentIdentifier
+                            && from.group == "com.scandit.datacapture.frameworks" && from.module == "core"
+                            && req instanceof org.gradle.api.artifacts.component.ModuleComponentSelector
+                            && req.group == "com.scandit.datacapture" && req.module == "core"
+                            && req.version != pinned) {
+                        def stale = "shared-frameworks SNAPSHOT is stale (pins ${req.version}, native_hashes.json pins ${pinned}); wait for republish-shared-modules, or rebase and start a new pipeline if this branch is behind develop"
+                        if (staleIsFatal) {
+                            throw new GradleException(stale)
+                        } else if (!staleWarned) {
+                            staleWarned = true
+                            p.logger.warn("${stale} (warning only: ${ciBranch} has no republish-shared-modules arm)")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+logger.lifecycle("[sdc-cordova] resolved native_sdk_version=${native_sdk_version}, sdk_version=${sdk_version} (CI_MERGE_REQUEST_ID=${ciMrId}, CI_MERGE_REQUEST_LABELS=${ciMrLabels}, DRYRUN=${dryRunEnv}, archivePublished=${archivePublished})")
 
 android {
     sourceSets {

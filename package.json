@@ -1,6 +1,6 @@
 {
   "name": "scandit-cordova-datacapture-core",
-  "version": "8.5.5",
+  "version": "8.7.0",
   "description": "Scandit Data Capture SDK for Cordova",
   "license": "Apache-2.0",
   "private": false,
@@ -17,13 +17,12 @@
     "jest": "jest",
     "clear-jest-cache": "jest --clearCache || true",
     "clean": "pnpm run clear-jest-cache && rimraf dist coverage",
-    "clean-all": "pnpm run clean && rimraf node_modules"
+    "clean-all": "pnpm run clean && rimraf node_modules",
+    "test": "jest --coverage --maxWorkers=12 --passWithNoTests",
+    "coverage": "jest --coverage --maxWorkers=12 --passWithNoTests"
   },
   "peerDependencies": {
     "cordova": ">=10.0.0"
-  },
-  "dependencies": {
-    "scandit-datacapture-frameworks-core": "8.5.5"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
@@ -36,5 +35,8 @@
       "ios",
       "android"
     ]
+  },
+  "dependencies": {
+    "eventemitter3": "5.0.1"
   }
 }

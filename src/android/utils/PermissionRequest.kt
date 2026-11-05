@@ -7,14 +7,19 @@ class PermissionRequest {
     fun checkCameraPermission(plugin: CordovaPlugin): Boolean =
         plugin.cordova.hasPermission(Manifest.permission.CAMERA)
 
-    fun checkOrRequestCameraPermission(plugin: CordovaPlugin) {
-        if (checkCameraPermission(plugin).not()) {
-            plugin.cordova.requestPermission(
-                plugin,
-                CODE_CAMERA_PERMISSIONS,
-                Manifest.permission.CAMERA
-            )
-        }
+    /**
+     * Returns true when a permission request was issued, so the caller knows a result is
+     * coming. False means the permission was already granted and nothing will call back.
+     */
+    fun checkOrRequestCameraPermission(plugin: CordovaPlugin): Boolean {
+        if (checkCameraPermission(plugin)) return false
+
+        plugin.cordova.requestPermission(
+            plugin,
+            CODE_CAMERA_PERMISSIONS,
+            Manifest.permission.CAMERA
+        )
+        return true
     }
 
     companion object {
