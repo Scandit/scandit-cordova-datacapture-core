@@ -5818,7 +5818,7 @@ declare class DataCaptureContextSettings extends DefaultSerializeable {
  *
  * Capture modes are restricted to the set of data captures modes provided by the Scandit Data Capture SDK. It is not available for implementing custom data capture modes.
  *
- * Capture modes need to be associated with a {@link DataCaptureContext|data capture context} after they have been created using {@link DataCaptureContext.addMode}. Modes can be removed again using {@link DataCaptureContext.removeMode}.
+ * Capture modes need to be associated with a {@link DataCaptureContext|data capture context} after they have been created using {@link DataCaptureContext.setMode}. Modes can be removed again using {@link DataCaptureContext.removeAllModes}.
  *
  * A data capture context can only be associated with one mode at a time. If multiple modes are associated with the same context, the context will not process any frames and report an error.
  *
@@ -5837,10 +5837,8 @@ declare class DataCaptureContextSettings extends DefaultSerializeable {
  * ```javascript
  * const settings = new Scandit.BarcodeCaptureSettings();
  * settings.setSymbologyEnabled(Scandit.Symbology.QR, true);
- * const barcodeCapture = Scandit.BarcodeCapture.forContext(
- *   window.captureContext,
- *   settings,
- * );
+ * const barcodeCapture = new Scandit.BarcodeCapture(settings);
+ * window.captureContext.setMode(barcodeCapture);
  * // Capture modes are enabled by default. The next line is not strictly necessary and
  * // is only listed to make you aware of the possibility to enable/disable modes.
  * barcodeCapture.isEnabled = true;

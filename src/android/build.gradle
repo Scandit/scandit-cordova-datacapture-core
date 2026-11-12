@@ -16,7 +16,7 @@
 // frameworks/common/frameworks.gradle — Cordova copies this file into the
 // generated platforms/android project, so it cannot `apply from:` that file
 // directly; keep the two in sync by hand.
-def sdk_version = "8.7.0"
+def sdk_version = "8.7.1"
 def native_sdk_version = sdk_version
 def nativeHashPinned = false
 
