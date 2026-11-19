@@ -24,8 +24,6 @@ import com.scandit.datacapture.frameworks.core.errors.ParameterNullError
 import com.scandit.datacapture.frameworks.core.extensions.getOrNull
 import com.scandit.datacapture.frameworks.core.lifecycle.ActivityLifecycleDispatcher
 import com.scandit.datacapture.frameworks.core.lifecycle.DefaultActivityLifecycle
-import com.scandit.datacapture.frameworks.core.listeners.registry.CoreEventEmitter
-import com.scandit.datacapture.frameworks.core.listeners.registry.RegistryEmitter
 import com.scandit.datacapture.frameworks.core.locator.DefaultServiceLocator
 import com.scandit.datacapture.frameworks.core.observers.VolumeButtonObserver
 import com.scandit.datacapture.frameworks.core.utils.DefaultMainThread
@@ -71,12 +69,11 @@ class ScanditCaptureCore :
 
     private var volumeButtonObserver: VolumeButtonObserver? = null
 
-    private val coreModule = CoreModule.create(RegistryEmitter(emitter))
+    private val coreModule = CoreModule.create(emitter)
 
     private val serviceLocator = DefaultServiceLocator.getInstance()
 
     override fun pluginInitialize() {
-        CoreEventEmitter.emitter = emitter
         coreModule.onCreate(cordova.context)
 
         serviceLocator.register(coreModule)
@@ -135,7 +132,7 @@ class ScanditCaptureCore :
         callbackContext: CallbackContext
     ): Boolean {
         when (action) {
-            "getDynamicDefaults" -> getDynamicDefaults(args, callbackContext)
+            "getDefaults" -> getDefaults(args, callbackContext)
             "showDataCaptureView" -> showDataCaptureView(args, callbackContext)
             "hideDataCaptureView" -> hideDataCaptureView(args, callbackContext)
             "setDataCaptureViewPositionAndSize" ->
@@ -153,11 +150,11 @@ class ScanditCaptureCore :
     }
 
     @PluginMethod
-    fun getDynamicDefaults(
+    fun getDefaults(
         @Suppress("UNUSED_PARAMETER") args: JSONArray,
         callbackContext: CallbackContext
     ) {
-        val defaults = coreModule.getDynamicDefaults()
+        val defaults = coreModule.getDefaults()
         callbackContext.success(JSONObject(defaults))
     }
 
@@ -195,8 +192,6 @@ class ScanditCaptureCore :
         captureViewHandler.attachWebView(webView.view)
         val argsJson = args.getJSONObject(0)
         val viewJson = argsJson.getString("viewJson")
-        // `coreModule.createDataCaptureView` resolves `callbackContext` itself via
-        // `CordovaResult` -- no separate resolve call here (SDC-33315).
         val view = coreModule.createDataCaptureView(
             viewJson,
             CordovaResult(callbackContext, emitter)
@@ -211,6 +206,7 @@ class ScanditCaptureCore :
                 captureViewHandler.attachDataCaptureView(view, cordova.activity)
             }
         }
+        callbackContext.success()
     }
 
     @PluginMethod

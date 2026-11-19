@@ -90,7 +90,6 @@ class DataCaptureViewHandler {
             // cordova-android 15+, where the WebView is wrapped in an intermediate
             // rootLayout.
             webView?.bringContainerToFront()
-            (webView?.parent as? View)?.translationZ = 0F
             webView?.setBackgroundColor(Color.TRANSPARENT)
 
             dataCaptureView.parent?.let {
