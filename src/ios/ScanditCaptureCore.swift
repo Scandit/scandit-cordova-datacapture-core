@@ -4,7 +4,7 @@ import WebKit
 
 #if SWIFT_PACKAGE
 import Cordova
-import ScanditCordovaDatacaptureCoreObjC
+import _ScanditFrameworksCorePrivate
 #endif
 
 @objc(ScanditCaptureCore)
@@ -58,7 +58,8 @@ public class ScanditCaptureCore: CDVPlugin {
         }
 
         eventEmitter = CordovaEventEmitter(commandDelegate: commandDelegate)
-        coreModule = CoreModule.create(emitter: eventEmitter)
+        CoreEventEmitter.emitter = eventEmitter
+        coreModule = CoreModule.create(emitter: RegistryEmitter(platformEmitter: eventEmitter))
         DefaultServiceLocator.shared.register(module: coreModule)
         coreModule.didStart()
     }
@@ -158,9 +159,9 @@ public class ScanditCaptureCore: CDVPlugin {
 
     // MARK: - Defaults
 
-    @objc(getDefaults:)
-    func getDefaults(command: CDVInvokedUrlCommand) {
-        let defaults = coreModule.getDefaults() as CDVPluginResult.JSONMessage
+    @objc(getDynamicDefaults:)
+    func getDynamicDefaults(command: CDVInvokedUrlCommand) {
+        let defaults = coreModule.getDynamicDefaults() as CDVPluginResult.JSONMessage
         commandDelegate.send(.success(message: defaults), callbackId: command.callbackId)
     }
 

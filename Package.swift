@@ -75,25 +75,15 @@ let package = Package(
     ],
     dependencies: dependencies,
     targets: [
-        // Objective-C target for VolumeButtonObserver (accesses private SDK class at runtime)
-        .target(
-            name: "ScanditCordovaDatacaptureCoreObjC",
-            dependencies: [
-                .product(name: "ScanditFrameworksCore", package: "scandit-datacapture-frameworks-core")
-            ],
-            path: "src/ios/ObjC",
-            publicHeadersPath: "."
-        ),
         // Swift target containing the Cordova plugin and shared utilities
         .target(
             name: "ScanditCordovaDatacaptureCore",
             dependencies: [
                 .product(name: "Cordova", package: "cordova-ios"),
                 .product(name: "ScanditFrameworksCore", package: "scandit-datacapture-frameworks-core"),
-                "ScanditCordovaDatacaptureCoreObjC",
+                .product(name: "_ScanditFrameworksCorePrivate", package: "scandit-datacapture-frameworks-core"),
             ],
-            path: "src/ios",
-            exclude: ["ObjC"]
-        ),
+            path: "src/ios"
+        )
     ]
 )
